@@ -1,9 +1,10 @@
 ###### Initialize the operating model ###### 
+setwd("./PacificHakeMSE-master/Spatial MSE")
 library(TMB)
 compile("runHakeassessment.cpp")
 dyn.load(dynlib("runHakeassessment"))
 library(r4ss)
-mod <- SS_output(paste(getwd(),'/data/', sep =''), printstats=FALSE, verbose = FALSE) # Read the true selectivity 
+mod <- SS_output(paste(getwd(),'/data/', sep =''), printstats=FALSE, verbose = FALSE, forecast = F) # Read the true selectivity 
 
 # Set the seed
 seedz <- 12345

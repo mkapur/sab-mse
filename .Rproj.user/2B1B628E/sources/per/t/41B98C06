@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1569883514729.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1261676780",
+    "id" : "41B98C06",
+    "lastKnownWriteTime" : 1569884631,
+    "last_content_update" : 1569884631536,
+    "path" : "C:/Users/mkapur/Dropbox/UW/sab-mse/PacifichakeMSE-master/Spatial MSE/run_mse_ALL.R",
+    "project_path" : "PacifichakeMSE-master/Spatial MSE/run_mse_ALL.R",
+    "properties" : {
+        "cursorPosition" : "14,21",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

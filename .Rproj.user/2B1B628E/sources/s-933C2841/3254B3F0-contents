@@ -52,7 +52,7 @@ start.time <- Sys.time()
 df0 <- df # For debugging
 mconverge <- rep(NA, simyears)
 
-for (time in 2:2){
+for (time in 1:simyears){
   
 
   year <- yrinit+(time-1)
@@ -106,7 +106,7 @@ for (time in 2:2){
       
       ### Add movement to the new years
       move.tmp <- array(0, dim = c(df$nspace,df$nage, df$nseason, df$nyear))
-      move.tmp[,,,1:(df$nyear-1)] <- df$movemat[,,,1:(df$nyear-1)]
+      move.tmp[,,,1:(df$nyear-1)] <- df$movemat
       # move.tmp[,,,] <- df$movemat
       
       move.tmp[,,,df$nyear] <- df$movemat[,,,df$nyear-1]

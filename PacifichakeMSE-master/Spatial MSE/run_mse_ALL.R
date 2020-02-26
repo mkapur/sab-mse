@@ -1,11 +1,9 @@
 ###### Initialize the operating model ###### 
-setwd("./PacificHakeMSE-master/Spatial MSE")
 library(TMB)
 compile("runHakeassessment.cpp")
 dyn.load(dynlib("runHakeassessment"))
 library(r4ss)
-mod <- SSgetoutput(paste(getwd(),'/data/', sep =''), 
-              verbose = FALSE, forecast = F) # Read the true selectivity 
+mod <- SS_output(paste(getwd(),'/data/', sep =''), printstats=FALSE, verbose = FALSE) # Read the true selectivity 
 
 # Set the seed
 seedz <- 12345
@@ -13,7 +11,6 @@ set.seed(seedz)
 
 source('load_files.R')
 source('load_files_OM.R')
-source('run_agebased_model_true_catch_move.R')
 
 df <- load_data_seasons(nseason = 4, nspace = 2, bfuture = 0.5) # Prepare data for operating model
 
@@ -154,7 +151,7 @@ save(ls.save,file = 'results/MSErun_move_realized_move2.Rdata')
 
 ls.save <- list()
 ls.converge <- matrix(0, nruns)
-df <- load_data_seasons(nseason = 4, nspace = 2,movemaxinit = 0.7, movefiftyinit = 2) # Prepare data for operating model
+df <- load_data_seasons(nseason = 4, nspace = 2,movemaxinit = 0.6, movefiftyinit = 4) # Prepare data for operating model
 test <- run.agebased.true.catch(df)
 
 for (i in 1:nruns){

@@ -44,7 +44,7 @@ getParameters_ss <- function(trueparms = TRUE, mod = NA){
         logSDsurv = log(pars$Value[which(nms == "Q_extraSD_Acoustic_Survey(2)")]),
         #logSDR = log(1.4),
         logphi_catch = pars$Value[which(nms =="ln(EffN_mult)_1")],
-        # logphi_survey = log(10),
+        #logphi_survey = log(10),
         # logSDF = log(0.1),
         # Selectivity parameters 
         psel_fish = pars$Value[pselidx],
@@ -82,8 +82,9 @@ getParameters_ss <- function(trueparms = TRUE, mod = NA){
       psel_surv = c(0.568618,-0.216172,0.305286 ,0.373829),
       initN = initN,
       Rin = Rdev,
-      F0 = F0,
-      PSEL = PSEL
+      PSEL = PSEL,
+      F0 = F0
+      
     )
     
     

@@ -1,7 +1,10 @@
 ## Load the hake data
 # year and age input 
-load_data_ss <- function(mod){
+load_data_ss <- function(mod,
+                         sum_zero = 0){
   
+  #' @mod SS3 file 
+  #' @sum_zero flag on whether 'main' recruitment deviations should sum to zero
   
   years <- mod$startyr:mod$endyr
   tEnd <- length(years)
@@ -142,6 +145,8 @@ load_data_ss <- function(mod){
   
   ### selyear
   sel.tmp <- mod$SelAgeAdj$Yr[mod$SelAgeAdj$`Change?` == 1 & mod$SelAgeAdj$Yr>years[1]][1]
+  flag_sel <- rep(0,length(years))
+  flag_sel[years %in% unique(mod$SelAgeAdj$Yr[mod$SelAgeAdj$`Change?` == 1 & mod$SelAgeAdj$Yr>years[1]])] <- 1
   
   df <-list(      #### Parameters #####
                   wage_ssb = t(wage_ssb),
@@ -155,6 +160,7 @@ load_data_ss <- function(mod){
                   age = age,
                   year_sel = length(sel.tmp:years[length(years)]), # Years to model time varying sel
                   selYear = which(sel.tmp == years),
+                  flag_sel = flag_sel,
                   tEnd = length(years), # The extra year is to initialize 
                   logQ = mod$parameters$Value[mod$parameters$Label == "LnQ_base_Acoustic_Survey(2)"],   # Analytical solution
                   # Selectivity 
@@ -182,8 +188,9 @@ load_data_ss <- function(mod){
                   #logphi_survey = log(0.91),
                   sigma_psel = mod$parameters$Value[mod$parameters$Label == "AgeSel_P3_Fishery(1)_dev_se"],
                   smul = 0.5,
+                  sum_zero = sum_zero,
                   years = years,
-                  logphi_survey = log(mod$parameters$Value[mod$parameters$Label == "ln(EffN_mult)_2"]),
+                  logphi_survey = mod$parameters$Value[mod$parameters$Label == "ln(EffN_mult)_2"],
                   Bprior= tau*mu,
                   Aprior = tau*(1-mu),
                   b = b#,

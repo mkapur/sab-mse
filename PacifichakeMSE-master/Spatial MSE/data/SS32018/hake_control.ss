@@ -303,5 +303,5 @@
  2 2 -1 15 1 1 1 -1 1 # selex type, len/age, year, N selex bins, Growth pattern, N growth ages, NatAge_area(-1 for all), NatAge_yr, N Natages
  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # vector with selex std bin picks (-1 in first bin to self-generate)
  -1 # vector with growth std bin picks (-1 in first bin to self-generate)
- 20 # vector with NatAge std bin picks (-1 in first bin to self-generate)
+# 20 # vector with NatAge std bin picks (-1 in first bin to self-generate)
 999

@@ -1,5 +1,6 @@
 ## Load MSE's and compare ## 
-plotMSE <- function(results, plotnames = NA, plotexp = FALSE){
+plotMSE <- function(results, plotnames = NA, plotexp = FALSE,
+                     pidx = NA){
 
 source('df_lists.R')
 source('load_files_OM.R')
@@ -19,6 +20,9 @@ fls <- dir(results)
 ls.plots <- list()
 
 fls <- fls[grep('.Rdata', x = fls)]
+fls <- fls[grep('MSE', x = fls)]
+
+print(paste('order = ', fls))
 
 for(i in 1:length(fls)){
  load(paste(results,fls[i], sep= ''))
@@ -48,7 +52,7 @@ sim.data <- run.agebased.true.catch(df)
 
 names(ls.plots) <- plotnames
 
-fn_plot_MSE(ls.plots, sim.data, plotfolder = results,plotexp = plotexp)
+fn_plot_MSE(ls.plots, sim.data, plotfolder = results,plotexp = plotexp, pidx = pidx)
 
 
 # Plot the realized catch vs the quota 

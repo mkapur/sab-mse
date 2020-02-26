@@ -1,30 +1,34 @@
-#V3.30.10.00-safe;_2018_01_09;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_11.6
+#V3.30.14.00-safe;_2019_07_19;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.0
+#Stock Synthesis (SS) is a work of the U.S. Government and is not subject to copyright protection in the United States.
+#Foreign copyrights may apply. See copyright.txt for more information.
 #_user_support_available_at:NMFS.Stock.Synthesis@noaa.gov
 #_user_info_available_at:https://vlab.ncep.noaa.gov/group/stock-synthesis
-#_Start_time: Wed Jan 30 19:34:21 2019
+#_Start_time: Thu Jan 23 11:11:17 2020
 #_Number_of_datafiles: 1
 #C 2019 Hake data file
 #_observed data: 
-#V3.30.10.00-safe;_2018_01_09;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_11.6
+#V3.30.14.00-safe;_2019_07_19;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.0
+#Stock Synthesis (SS) is a work of the U.S. Government and is not subject to copyright protection in the United States.
+#Foreign copyrights may apply. See copyright.txt for more information.
 1966 #_StartYr
 2018 #_EndYr
 1 #_Nseas
  12 #_months/season
 2 #_Nsubseasons (even number, minimum is 2)
 1 #_spawn_month
-1 #_Ngenders
-20 #_Nages=accumulator age
+1 #_Ngenders: 1, 2, -1  (use -1 for 1 sex setup with SSB multiplied by female_frac parameter)
+20 #_Nages=accumulator age, first age is always age 0
 1 #_Nareas
 2 #_Nfleets (including surveys)
 #_fleet_type: 1=catch fleet; 2=bycatch only fleet; 3=survey; 4=ignore 
-#_survey_timing: -1=for use of catch-at-age to override the month value associated with a datum 
+#_sample_timing: -1 for fishing fleet to use season-long catch-at-age for observations, or 1 to use observation month;  (always 1 for surveys)
 #_fleet_area:  area the fleet/survey operates in 
 #_units of catch:  1=bio; 2=num (ignored for surveys; their units read later)
 #_catch_mult: 0=no; 1=yes
 #_rows are fleets
-#_fleet_type timing area units need_catch_mult fleetname
+#_fleet_type fishery_timing area catch_units need_catch_mult fleetname
  1 -1 1 1 0 Fishery  # 1
- 3 0.5 1 2 0 Acoustic_Survey  # 2
+ 3 1 1 2 0 Acoustic_Survey  # 2
 #Bycatch_fleet_input_goes_next
 #a:  fleet index
 #b:  1=include dead bycatch in total dead catch for F0.1 and MSY optimizations and forecast ABC; 2=omit from total catch for these purposes (but still include the mortality)
@@ -100,29 +104,29 @@
 1 1 0 0 # Fishery
 2 1 0 0 # Acoustic_Survey
 #_yr month fleet obs stderr
-1995 7 2 1.31804e+06 0.0893 #_ Acoustic_Survey
+1995 7 2 1.31804e+006 0.0893 #_ Acoustic_Survey
 1996 7 -2 1 1 #_ Acoustic_Survey
 1997 7 -2 1 1 #_ Acoustic_Survey
-1998 7 2 1.5346e+06 0.0526 #_ Acoustic_Survey
+1998 7 2 1.5346e+006 0.0526 #_ Acoustic_Survey
 1999 7 -2 1 1 #_ Acoustic_Survey
 2000 7 -2 1 1 #_ Acoustic_Survey
 2001 7 2 861744 0.1059 #_ Acoustic_Survey
 2002 7 -2 1 1 #_ Acoustic_Survey
-2003 7 2 2.13753e+06 0.0642 #_ Acoustic_Survey
+2003 7 2 2.13753e+006 0.0642 #_ Acoustic_Survey
 2004 7 -2 1 1 #_ Acoustic_Survey
-2005 7 2 1.3761e+06 0.0638 #_ Acoustic_Survey
+2005 7 2 1.3761e+006 0.0638 #_ Acoustic_Survey
 2006 7 -2 1 1 #_ Acoustic_Survey
 2007 7 2 942721 0.0766 #_ Acoustic_Survey
 2008 7 -2 1 1 #_ Acoustic_Survey
-2009 7 2 1.50227e+06 0.0995 #_ Acoustic_Survey
+2009 7 2 1.50227e+006 0.0995 #_ Acoustic_Survey
 2010 7 -2 1 1 #_ Acoustic_Survey
 2011 7 2 674617 0.1177 #_ Acoustic_Survey
-2012 7 2 1.27942e+06 0.0673 #_ Acoustic_Survey
-2013 7 2 1.92924e+06 0.0646 #_ Acoustic_Survey
+2012 7 2 1.27942e+006 0.0673 #_ Acoustic_Survey
+2013 7 2 1.92924e+006 0.0646 #_ Acoustic_Survey
 2014 7 -2 1 1 #_ Acoustic_Survey
-2015 7 2 2.15585e+06 0.0829 #_ Acoustic_Survey
+2015 7 2 2.15585e+006 0.0829 #_ Acoustic_Survey
 2016 7 -2 1 1 #_ Acoustic_Survey
-2017 7 2 1.41781e+06 0.0632 #_ Acoustic_Survey
+2017 7 2 1.41781e+006 0.0632 #_ Acoustic_Survey
 2018 7 -2 1 1 #_ Acoustic_Survey
 -9999 1 1 1 1 # terminator for survey observations 
 #
@@ -135,9 +139,9 @@
 #
 0 #_use meanbodysize_data (0/1)
 #_COND_0 #_DF_for_meanbodysize_T-distribution_like
-# note:  use positive partition value for mean body wt, negative partition for mean body length 
-#_yr month fleet part obs stderr
-#  -9999 0 0 0 0 0 # terminator for mean body size data 
+# note:  type=1 for mean length; type=2 for mean body weight 
+#_yr month fleet part type obs stderr
+#  -9999 0 0 0 0 0 0 # terminator for mean body size data 
 #
 # set up population length bin structure (note - irrelevant if not using size data and using empirical wtatage
 2 # length bin method: 1=use databins; 2=generate from binwidth,min,max below; 3=read vector

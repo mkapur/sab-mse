@@ -2,49 +2,100 @@ require(ggplot2)
 require(dplyr)
 require(patchwork)
 
-cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3", "#0072B2", "#D55E00", "#CC79A7", "navy", "#F0E442" )
-
+cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
+                "#0072B2", "#D55E00", "#CC79A7", "navy", "#F0E442" )
+cbbPalette <- c("grey22", "seagreen2", "goldenrod", "skyblue",
+                "blue", "brown", "brown", "pink" )
 ## Figure 1 map of strata ----
 usa <- map_data("world") 
+load("C:/Users/mkapur/Dropbox/UW/sab-idx/runs/2020-01-23_nx=500_Triennial_WCGBTS_BCs_BCo_AK_DOM_LL_GOA_baseQ=AK_DOM_LL1980_2018/Data_Geostat.Rdata")
 
-p1 <- ggplot() +
-  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = 'grey22') +
-  coord_quickmap() + 
-  kaputils::theme_mk(base_size = 16) +  theme(axis.title =element_blank()) +
+survLims <-  Data_Geostat %>% 
+  group_by(Region) %>% 
+  summarise(ymin = min(Lat),
+            ymax = max(Lat), 
+            xmin = min(Lon),
+            xmax = max(Lon))
+
+Data_Geostat %>% filter(Region == 'BC') %>%
+  group_by(Survey) %>% 
+  summarise(lat_min = min(Lat),
+            lat_max = max(Lat), 
+            lon_min = min(Lon),
+            lon_max = max(Lon))
+
+Data_Geostat %>% filter(Region == 'BC') %>%
+  # group_by(Survey) %>% 
+  filter(Lon > -126) 
+  summarise(round(max(Lon),10))
+
+## load polygons  
+load(paste0("./figures/spdf_fortified_BC.Rdata"))
+load(paste0("./figures/spdf_fortified_US.Rdata"))
+
+## clockwise from A1; two for A2 
+regLims <- data.frame(ymax = c(65,65,65,55,65,50,47,36),
+                      ymin = c(50,50,55,50,50,47,36,30), 
+                      xmax = c(-145,-138, -130, -130, rep(-120,3),-115), 
+                      xmin = c(-180,-145, -138, -138, rep(-130,4)) )
+
+mgmtLims <- data.frame(ymax = c(65, 49),
+                      ymin = c(49, 30), 
+                      xmax = c(-180, -115), 
+                      xmin = c(-132.2, -132.2))
+
+demoLims <- data.frame(ymax = c(65,65,65,50,36),
+                       ymin = c(50,50,50,36,30), 
+                       xmin = c(-180,-145, -130,-130,-130), 
+                       xmax = c(-145,-130, -115, -115, -115))
+
+ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group), 
+                        fill = 'grey22') +
+  kaputils::theme_mk(base_size = 16) + 
+  theme(axis.title =element_blank()) +
   scale_x_continuous(expand = c(0,0), limits = c(-180,-110), breaks = seq(-180,-120,10), labels = paste(seq(-180,-120,10), "°W")) +
-  scale_y_continuous(expand = c(0,0), limits = c(30,71), breaks = seq(30,70,10), 
-                     labels =  paste(seq(30,75,10), "°N"))  +
-  geom_hline(yintercept = 49, lwd = 1.1, col = 'seagreen') +
-  geom_vline(xintercept = -132, lwd = 1.1, col = 'seagreen') +
-  geom_rect(fill = 'white', aes(xmin = -180, xmax = -132.5,
-                                ymin = 30, ymax = 48.5)) +
-  geom_label(aes( x = c(rep(-122,2),-150), 
-                  y = c(40,rep(53,2)),
-                 label = c("California Current (CC)",
-                           "British Columbia (BC)", "Alaska (AK)")),
-             size = 5, fill = 'seagreen') +
-  labs(title = 'Spatial Stratification OM1 & EM1 (Current Management)')
+  scale_y_continuous(expand = c(0,0), limits = c(30,75), breaks = seq(30,60,10), 
+                     labels =  paste(seq(30,60,10), "°N"))  +
+  
+  ## CURRENT MGMT BOUNDARIES
+  # geom_polygon(data = spdf_fortified_US, aes( x = long, y = lat, group = group),
+  #              fill= 'red', color="red") +
+  # geom_polygon(data = spdf_fortified_BC, aes( x = long, y = lat, group = group),
+  #              fill= 'red', color="red")+
+  geom_polygon(data = spdf_fortified_world, aes( x = long, y = lat, group = group),
+               fill= NA, color="red") +
+  # geom_rect(data = mgmtLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+            # fill =NA, size = 1, colour = 'red') +
+  
+  # Complexity: actual survey boundaries
+  geom_rect(data = survLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+  fill = NA , size = 1, colour = 'blue',linetype = 'dotted', alpha = 0.2) +
 
-p2 <- ggplot() +
-  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = 'grey22') +
-  coord_quickmap() + 
-  kaputils::theme_mk(base_size = 16) +  theme(axis.title =element_blank()) +
-  scale_x_continuous(expand = c(0,0), limits = c(-180,-119), breaks = seq(-180,-120,10), labels = paste(seq(-180,-120,10), "°W")) +
-  scale_y_continuous(expand = c(0,0), limits = c(30,71), breaks = seq(30,70,10), 
-                     labels =  paste(seq(30,75,10), "°N"))  +
-  geom_hline(yintercept = c(36,50), lwd = 1.1, col = 'goldenrod') +
-  geom_vline(xintercept = c(-135,-145), lwd = 1.1, col = 'goldenrod') +
-  geom_rect(fill = 'white', aes(xmin = -180, xmax = -135.5,
-                                ymin = 30, ymax = 49.8)) +
-  geom_label(aes( x = c(rep(-125,3),-140,-155), 
-                  y = c(33,40, rep(53,3)),
-                  label =paste0('Region ',1:5)), 
-             size = 5, fill = 'goldenrod') +
-  labs(title = 'Spatial Stratification OM2 & EM2 (demographic breaks)')
+  
+  # DEMOGRAPHIC BOUNDARIES
+  geom_rect(data = demoLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+  fill = NA , size = 1, colour = 'black',linetype = 'dashed', alpha = 0.2) +
 
-ggsave(plot = (p1  | p2),
-       file = paste0("./figures/Fig1_strata_maps.png"),
-       width = 17, height = 11, units = 'in', dpi = 720)
+  # ## OM SUB AREAS
+  geom_rect(data = regLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+            fill = rev(cbbPalette[1:8]), size = 1, colour = NA, alpha = 0.3) +
+  geom_label(aes(
+      x = c(rep(-125, 4), -132, -140, -155),
+      y = c(33, 40, 49.5, rep(53, 4)),
+      label = c("W1", "W2", "B1", "B2", "A3", "A2", "A1")
+    ),
+    size = 5,
+    fill = cbbPalette[c(1:6,8)],
+    color = c("grey88", rep('black', 3), 'grey88', rep('black',2))
+  ) +
+  labs(x = "", y = "") +
+  coord_quickmap()  
+
+
+
+ggsave(plot = last_plot(),
+       file = paste0("./figures/Fig1_strata_mapsC_WithSurvey.png"),
+       width = 10, height = 8, units = 'in', dpi = 420)
 
 
 ## Figure 2 panel of OM Indices (made by me with VAST) ----

@@ -1,0 +1,5 @@
+*.Rproj.*
+*.docx
+*presentations/*
+*figures/*
+*writing/*

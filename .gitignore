@@ -1,6 +1,7 @@
 *.Rproj.*
 *.docx
-*seak*
+*_sablefish*
+*spasm*
 *presentations/*
 *figures/*
 *writing/*

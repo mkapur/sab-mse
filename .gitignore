@@ -1,5 +1,6 @@
 *.Rproj.*
 *.docx
+*seak*
 *presentations/*
 *figures/*
 *writing/*

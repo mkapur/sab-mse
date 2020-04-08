@@ -1,3 +1,7 @@
+## Standalone/Descriptive figures for manuscripts and tech memos
+## This does NOT have functions for ploting OM/EM outputs, just raw input data and maps
+## Kapur M 
+
 require(ggplot2)
 require(dplyr)
 require(patchwork)
@@ -8,6 +12,7 @@ cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
 #                 "blue", "brown", "pink" )
 ## Figure 1 map of strata ----
 usa <- map_data("world") 
+
 load("C:/Users/mkapur/Dropbox/UW/sab-idx/runs/2020-01-23_nx=500_Triennial_WCGBTS_BCs_BCo_AK_DOM_LL_GOA_baseQ=AK_DOM_LL1980_2018/Data_Geostat.Rdata")
 
 survLims <-  Data_Geostat %>% 
@@ -29,8 +34,8 @@ Data_Geostat %>% filter(Region == 'BC') %>%
   summarise(round(max(Lon),10))
 
 ## load polygons  
-load(paste0("./writing/figures/spdf_fortified_BC.Rdata"))
-load(paste0("./writing/figures/spdf_fortified_US.Rdata"))
+load(paste0("./_writing/figures/spdf_fortified_BC.Rdata"))
+load(paste0("./_writing/figures/spdf_fortified_US.Rdata"))
 
 ## clockwise from A1; two for A2 
 regLims <- data.frame(ymax = c(65,65,65,65,50,49,36),
@@ -81,7 +86,7 @@ ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group),
   geom_label(aes(
       x = c(rep(-125, 4), -131.5, -140, -155),
       y = c(33, 40, 49.5, rep(53, 4)),
-      label = c("C1", "C2", "B1", "B2", "A3", "A2", "A1")
+      label = c("C1", "C2", "B1", "B2", "B3", "A2", "A1")
     ),
     size = 5,
     fill = cbbPalette[c(1:7)],
@@ -92,8 +97,8 @@ ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group),
   coord_quickmap()  
 
 ggsave(plot = last_plot(),
-       file = paste0("./writing/figures/Fig1_strata_mapsC.png"),
-       width = 10, height = 8, units = 'in', dpi = 420)
+       file = paste0("./_writing/figures/Fig1_strata_mapsC.png"),
+       width = 10, height = 8, units = 'in', dpi = 720)
 
 
 ## Figure 2 panel of OM Indices (made by me with VAST) ----
@@ -115,7 +120,7 @@ for(i in 1:nrow(vastc)){
 vastc <- vastc %>%
   filter(Fleet != 'Eastern_Bering_Sea' & Fleet != 'AllAreas') 
 
-vastc$SubArea[vastc$Fleet == "British_Columbia"] <- "B1, B2, A3 (BC)"
+vastc$SubArea[vastc$Fleet == "British_Columbia"] <- "B1, B2, B3 (BC)"
 vastc$SubArea[vastc$Fleet == "California_current"] <- "C1, C2 (CC)"
 vastc$SubArea[vastc$Fleet == "Gulf_of_Alaska"] <- "A1, A2 (AK)"
 vastc$SubArea[vastc$Fleet == "Aleutian_Islands"] <- "A1 (AK)"
@@ -135,7 +140,7 @@ genPal <- c('brown','dodgerblue','goldenrod','grey22')
               alpha = 0.2,
               show.legend = TRUE)
   ggsave(plot = last_plot(),
-         file = paste0("./writing/figures/Fig2_OM_indices.png"),
+         file = paste0("./_writing/figures/Fig2_OM_indices.png"),
          width = 10, height = 7, units = 'in', dpi = 720)
 
 p2 <- vastc %>%
@@ -173,7 +178,7 @@ fill = "", color = "") +
 
 
 ggsave(plot = (p1  | p2  | p3),
-       file = paste0("./writing/figures/Fig2_OM_indices.png"),
+       file = paste0("./_writing/figures/Fig2_OM_indices.png"),
        width = 17, height = 10, units = 'in', dpi = 720)
 
 ## Figure X pseudo datplot
@@ -221,7 +226,7 @@ ggplot(Fleets, aes(x = FleetNames, y = Type, fill = Type)) +
   labs(x = "Fleet Names", y = "Data Type")
 
 ggsave(plot = last_plot(),
-       file = paste0("./writing/figures/Data_basic.png"),
+       file = paste0("./_writing/figures/Data_basic.png"),
        width = 10, height = 7, units = 'in', dpi = 720)
 ## expand grid into YEAR and drop rows if not applicable
 
@@ -331,6 +336,6 @@ p3 <- ggplot(readRDS("./OM3_RangewideCurve.Rdata"), aes(x = Age)) +
   
   
   ggsave(plot = (p2  / p3),
-         file = paste0("./writing/figures/FigX_GrowthCurves.png"),
+         file = paste0("./_writing/figures/FigX_GrowthCurves.png"),
          width = 17, height = 10, units = 'in', dpi = 720)
   

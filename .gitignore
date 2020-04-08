@@ -1,4 +1,4 @@
-*.Rproj.*
+*.Rproj*
 *.docx
 *input*
 *_examples*

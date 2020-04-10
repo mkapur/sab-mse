@@ -79,7 +79,7 @@ layout: true
 # Spatial Structure
 + A little more complicated than expected
 
-![](/docs/slides/img/Fig1_strata_panel.png)
+![](img/Fig1_strata_panel.png)
 
 --
 
@@ -90,7 +90,7 @@ layout: true
 # Spatial Structure
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("/docs/slides/img/Fig1_strata_mapsA.png")
+knitr::include_graphics("img/Fig1_strata_mapsA.png")
 ```
 
 ???
@@ -101,7 +101,7 @@ Also -- Space is confusing, so let's abstract these
 # Management Regions
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("/docs/slides/img/Fig1_strata_mapsA2.png")
+knitr::include_graphics("img/Fig1_strata_mapsA2.png")
 ```
 
 ---
@@ -109,7 +109,7 @@ knitr::include_graphics("/docs/slides/img/Fig1_strata_mapsA2.png")
 
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("/docs/slides/img/Fig1_strata_mapsB.png")
+knitr::include_graphics("img/Fig1_strata_mapsB.png")
 ```
 
 ???
@@ -121,7 +121,7 @@ knitr::include_graphics("/docs/slides/img/Fig1_strata_mapsB.png")
 ## Sub-Areas (what's modeled)
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("/docs/slides/img/Fig1_strata_mapsC.png")
+knitr::include_graphics("img/Fig1_strata_mapsC.png")
 ```
 
 ---
@@ -129,7 +129,7 @@ knitr::include_graphics("/docs/slides/img/Fig1_strata_mapsC.png")
 
 ### Putting it all together (fleets + surveys)
 
-![](./docs/slides//img/Fig1_strata_panel.png)
+![](./img/Fig1_strata_panel.png)
 
 ---
 # What happens where

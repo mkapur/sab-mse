@@ -69,7 +69,7 @@ layout: true
 ]
 
 .pull-right[
-![](/_presentations/img/groundfloor.gif)
+![](/docs/slides//img/groundfloor.gif)
 ]
 ---
 
@@ -79,7 +79,7 @@ layout: true
 # Spatial Structure
 + A little more complicated than expected
 
-![](/_presentations/img/Fig1_strata_panel.png)
+![](/docs/slides//img/Fig1_strata_panel.png)
 
 --
 
@@ -129,7 +129,7 @@ knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 
 ### Putting it all together (fleets + surveys)
 
-![](./_presentations/img/Fig1_strata_panel.png)
+![](./docs/slides//img/Fig1_strata_panel.png)
 
 ---
 # What happens where

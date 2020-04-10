@@ -1,18 +1,11 @@
+This site has slides and in-dev code for the transboundary sablefish management strategy evaluation project, a collaboration between the Dept of Fisheries and Oceans (Canada) and researchers from NOAA.
 
-## Hello github page
+Materials here maintained by Maia Sosa Kapur kapurm@uw.edu
 
-### Link
 
-Note the relative link starting with a slash before the html file.
+## Presentations
 
-The index.md is used to customize the github page's home page, 
-The following link directs to the slide.
-
-Code: `[slide link](/xaringan_example.html)`
-
-Result:
-
-[slide link](/xaringan_example.html)
+[PSTAT OM Dev Meeting Apr 2020](./presentations/KAPUR_OM_PSTAT-Apr2020.html)
 
 
 ### Embed

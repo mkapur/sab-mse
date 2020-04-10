@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Sablefish Operating Model Overview</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="M Sosa Kapur kapurm@uw.edu" />
+    <link href="libs/font-awesome-5.3.1/css/fontawesome-all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="rstudioconf-xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Sablefish Operating Model Overview
+## PSTAT ‘in person’ meeting
+### M Sosa Kapur <a href="mailto:kapurm@uw.edu">kapurm@uw.edu</a>
+### 28/29 Apr 2020
+
+---
+
+
+
+
+
+
+
+layout: true
+
+.header[<i class="fab  fa-github "></i> @mkapur.github.io/sab-mse/]
+
+---
+# Objectives
+
++ Provide overview of Operating Model design (beta, obviously)
++ Discuss assumptions, data inputs &amp; treatment
+
+--
+
+##  Outline
++ General model framework
++ Walk-through details from document  &lt;b&gt;  [link me to OM doc on gDrive!] &lt;/b&gt;
++ Discuss as we go (interrupt me  😄)
+
+
+---
+
+# Ground Floor
+
+.pull-left[
++ OM is written in `R`
+
++ Conditioning +/- estimation happens in `TMB`
++ We are &lt;b&gt;not&lt;/b&gt; shooting to replicate Stock Synthesis (etc.) exactly 
+]
+
+.pull-right[
+![](/_presentations/img/groundfloor.gif)
+]
+---
+
+
+
+
+# Spatial Structure
++ A little more complicated than expected
+
+![](/_presentations/img/Fig1_strata_panel.png)
+
+--
+
++ Let's walk through how these came about
+
+---
+
+# Spatial Structure
+
+&lt;img src="./img/Fig1_strata_mapsA.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+???
+
+Also -- Space is confusing, so let's abstract these 
+---
+
+# Management Regions
+
+&lt;img src="./img/Fig1_strata_mapsA2.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+## Stock (demography)
+
+
+&lt;img src="./img/Fig1_strata_mapsB.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+???
+
+
+
+---
+
+## Sub-Areas (what's modeled)
+
+&lt;img src="./img/Fig1_strata_mapsC.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+### Putting it all together (fleets + surveys)
+
+![](./_presentations/img/Fig1_strata_panel.png)
+
+---
+# What happens where
+## Management Regions `\(m\)` 
+
+.pull-left[
+
+Alaska (AK), British Columbia (BC), Cal. Current (CC)
+  + Contain fleets
+  + Accrue catches
+  + Set ABCs (future)
+
+
+]
+
+.pull-right[
+![](img/Fig1_strata_mapsA2.png)
+]
+---
+# What happens where
+## Stocks `\(k\)`
+
+.pull-left[
+
+R1:R5, as in Kapur et al. (2019)
++ Share params for growth, maturity(?), **density-dependence**
++ SRR operates @ `\(k\)` and is partitioned
+]
+
+.pull-right[
+![](img/Fig1_strata_mapsB.png)
+]
+---
+# What happens where
+## Sub-areas `\(i,j\)`
+
+.pull-left[
++ A,B,C = AK-, BC-, CC-nested
++ Strata @ which pops. are modeled
+]
+
+.pull-right[
+![](img/Fig1_strata_mapsC.png)
+]
+
+---
+background-image: url("http://bit.ly/cs631-donkey")
+background-size: cover
+---
+
+# Basic Dynamics
+.pull-center[
+![](img/Math-Equations-on-Chalkboard.jpg)
+]
+--
+**Equation in Document**
++ Key assumptions
++ .inverse[Discuss me]
+
+---
+
+.pull-center[
+![](img/Eq1.png)
+]
+--
+
+**Eq 1**
+
++ Yearly timestep
++ Monitored by sub-area `\(i\)`
++ Movement defined by `\(\textbf{X}^{i,j}\)`
++ .inverse[Plus group for age/length: 95yr/50cm]
+
+---
+# Growth
+
+
+**Eqs 2:5**
++ Growth indexed by stock `\(k\)` via Kapur et al. (2019)
++ Plus group via weighted average
++ .inverse[Plus group for length: 50cm]
+
+---
+# Length to Weight
+
+**Eqs 6:7**
++ `\(\alpha, \beta\)` .inverse[ vary by stock]
++ different `\(w^{f}_{a}\)` for catches
+
+---
+# Reproduction
+
+**Eqs 8:10**
++ Density dependence spatial Bev-Holt at stock level `\(k\)`
++ Steepness `\(h^k\)` .inverse[estimated with penalty/as hyper-parameter?]
++ `\(R_y^{k}\)` .inverse[partitioned to sub-areas] `\(i\)` via eigenvector of `\(\textbf{X}^{i,j}\)`
+
+
+
+---
+
+## Fleets (general data availability)
+
+Note that VAST "combined" some fleets
+
+.pull-center[
+![](img/Fig2_Fleets.png)
+]
+
+---
+
+## Discards &amp; Catches
+
+---
+
+## Surveys 
+
+---
+
+## Selectivity
+
+
+---
+background-image: url("https://media.giphy.com/media/10uVasOeFs6U92/giphy.gif")
+background-size: cover
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+# Model Conditioning
+---
+## Model Conditioning
+
++ TMB (for OM); .inverse[Stock Synthesis for EMs?]
++ Starter equations under "Likelihoods", ppXX
++ Let's focus on key topics first
+---
+
+## Misc Questions
++ start year for whole model
++ aging error
++ expansions of comps, etc
++ data availability (by stock vs mgmt area)
++ treament of sample sizes -- dirichlet?
++ hyperparameters e.g. steepness, penalty on recdevs
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  /* Replace <script> tags in slides area to make them executable
+   *
+   * Runs after post-processing of markdown source into slides and replaces only
+   * <script>s on the last slide of continued slides using the .has-continuation
+   * class added by xaringan. Finally, any <script>s in the slides area that
+   * aren't executed are commented out.
+   */
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container:not(.has-continuation) script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+  var scriptsNotExecuted = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container.has-continuation script'
+  );
+  if (!scriptsNotExecuted.length) return;
+  for (var i = 0; i < scriptsNotExecuted.length; i++) {
+    var comment = document.createComment(scriptsNotExecuted[i].outerHTML)
+    scriptsNotExecuted[i].parentElement.replaceChild(comment, scriptsNotExecuted[i])
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

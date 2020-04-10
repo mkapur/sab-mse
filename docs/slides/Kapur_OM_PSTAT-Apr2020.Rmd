@@ -69,7 +69,7 @@ layout: true
 ]
 
 .pull-right[
-![](/docs/slides//img/groundfloor.gif)
+![](img/groundfloor.gif)
 ]
 ---
 

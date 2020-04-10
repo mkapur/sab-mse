@@ -5,7 +5,7 @@ Materials here maintained by Maia Sosa Kapur kapurm@uw.edu
 
 # Presentations
 
-[PSTAT OM Dev Meeting Apr 2020](/_presentations/Kapur_OM_PSTAT-Apr2020.html)
+[PSTAT OM Dev Meeting Apr 2020](/sab-mse/_presentations/Kapur_OM_PSTAT-Apr2020.html)
 
 # Documents
 [Kapur et al. (2019)]("https://drive.google.com/open?id=1wHTYN1SiO5DMdUDDIKLY70evRyN7AR_B")

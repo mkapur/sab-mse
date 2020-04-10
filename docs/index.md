@@ -8,5 +8,8 @@ Materials here maintained by Maia Sosa Kapur kapurm@uw.edu
 
 [PSTAT OM Dev Meeting Apr 2020](slides/Kapur_OM_PSTAT-Apr2020.html)
 
+# Docs
+[OM Description Draft 1, 10 Apr 2020](OM_Desc_10Apr2020.pdf)
+
 # Code
 Click the blue *View on Github* link on the top right to see the git repo for this site. Note: code is still in development; functionality on your machine is not guaranteed.

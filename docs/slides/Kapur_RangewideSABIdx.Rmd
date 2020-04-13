@@ -64,20 +64,59 @@ Synchronous trends (incl. declines) in relative abundance
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
 knitr::include_graphics("img/figure2.PNG")
 ```
+
 ---
 
-# Methods
+# Methods 1
 + VAST (Thorson, 2019)
-+ Multiple surveys, coverage 1970-2018
-+ "Calibration by Proximity" (CBP)
-+ Full writeup on shared google drive
+Probability distribution function for biomass data $b_i$
+$$
+ \begin{equation}
+    Pr(B = b_i)=
+    \begin{cases}
+    1-r_1(i) & \text{if}\ B=1 
+    \newline
+    r_1(i) \times \Gamma(B = b_i | r_2(i), \sigma_m^2(c_i))  & \text{if}\ B >0
+    \end{cases}
+  \end{equation}
+$$
++ $r_1$ is encounter rate (logit-link); $r_2$ is capture probability for sample $i$ (gamma-distributed)
++ $ \sigma_m^2(c_i) $ is residual variation for each sample
+
 
 ---
+# Methods 2
++ "Calibration by Proximity" (CBP, Thorson et al., in prep)
++ estimates log-ratio of catchability between surveys and reference
++ $\lambda_f = log( \frac{q_f}{q_{f_{ref}}})$
++ this is to generate survey estimates; not committed to using $\hat q_f$ in OM
 
+
+---
+# Methods 3
+
++ Experimented with 100, 250, 500 and 1000 knots; retained 500 due to runtime
++ Sensitivity to alternative 'reference fleet'
++ (baseline reference fleet = AK Domestic LL survey)
++ BC StRs as reference could not converge
++ WCGBTS as reference was very precise for WC but CIs included zero for other regions
+
+
+???
+
+This is likely due to the fact that the trap survey virtually never captures zero sablefish, rendering the catchability of encountered biomass in that region so dissimilar to others that the log-ratios could not be estimated.  Re-running the base model with the WCGBTS survey as reference produced a converged model (Figure 4) with very precise trends for the West Coast, nearly identical to those used in the assessment for that survey. However, model estimates for the Triennial survey were less similar to the assessment, and those for AK and BC were very imprecise (with standard errors including zero) despite mean trends agreeing largely with the previous values used in the assessments. This is likely due to the fact that the WCGBTS does not contain data for the first few decades in the standardization, so estimated log-ratios are based on inferred (and thus more uncertain) values. 
+---
 # Data Inputs
+Multiple surveys, coverage 1970-2018
+
 ```{r, echo = -1, eval = TRUE, out.height=450, out.width= 300}
 knitr::include_graphics("img/datamap_size.png")
 ```
+---
+
+# Data Treatment
++ GOA Trawl survey < 500m, remove 1984 & 1987
++ Timeblocking: Triennial before/after 1993; AK Surveys before/after 1992
 
 ---
 
@@ -93,7 +132,12 @@ knitr::include_graphics("img/index-biomass2.png")
 ```
 
 ---
-## Trends in $\hat \beta$ through time
-```{r, echo = -1, eval = TRUE, out.height=450, out.width= 350}
-knitr::include_graphics("img/NALn_density.png")
-```
+### Trends in $\hat \beta$ through time
+
+.pull-left[
+![](img/NALn_density.png)]
+
+.pull-right[
++describe changes in cold pool etc
+]
+

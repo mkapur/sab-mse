@@ -6,7 +6,7 @@ author: "M Sosa Kapur kapurm@uw.edu"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: [rstudioconf-xaringan-themer.css]
+    css: [rstudioconf-xaringan-themer-black.css]
     nature:
       beforeInit: "https://platform.twitter.com/widgets.js"
       highlightStyle: github
@@ -16,21 +16,21 @@ output:
 
 
 ```{r xaringan-themer, include = FALSE}
-library(xaringanthemer)
-duo_accent(
-  primary_color = "black", 
-  secondary_color = "grey22",
-  title_slide_text_color = "#f8f9fa", 
-  text_color = "#404040", 
-  link_color = "dodgerblue4",
-  inverse_text_color = "goldenrod", 
-  inverse_header_color = "#f8f9fa",
-  text_font_size = "22px",
-  header_font_google = google_font("Helvetica", "400"),
-  text_font_google   = google_font("Helvetica", "400", "400i"),
-  code_font_google   = google_font("Source Code Pro"),
-  background_size = "cover", outfile = "rstudioconf-xaringan-themer.css"
-)
+# library(xaringanthemer)
+# duo_accent(
+#   primary_color = "black", 
+#   secondary_color = "grey22",
+#   title_slide_text_color = "#f8f9fa", 
+#   text_color = "#404040", 
+#   link_color = "dodgerblue4",
+#   inverse_text_color = "goldenrod", 
+#   inverse_header_color = "#f8f9fa",
+#   text_font_size = "22px",
+#   header_font_google = google_font("Helvetica", "400"),
+#   text_font_google   = google_font("Helvetica", "400", "400i"),
+#   code_font_google   = google_font("Source Code Pro"),
+#   background_size = "cover", outfile = "rstudioconf-xaringan-themer.css"
+# )
 ```
 
 ```{r options, include = FALSE, eval = TRUE}
@@ -69,7 +69,7 @@ layout: true
 ]
 
 .pull-right[
-![](img/groundfloor.gif)
+![](https://i.pinimg.com/originals/8b/6a/de/8b6adebac42802a8ef343bc2021eb566.jpg)
 ]
 ---
 

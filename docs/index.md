@@ -7,8 +7,7 @@ Materials here maintained by Maia Sosa Kapur kapurm@uw.edu
 # Presentations
 
 [PSTAT OM Dev Meeting Apr 2020](slides/Kapur_OM_PSTAT-Apr2020.html)
-
-
+<br>
 [Rangewide Index](slides/Kapur_RangewideSABIdx.html)
 
 # Docs

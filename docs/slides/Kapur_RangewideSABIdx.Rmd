@@ -1,0 +1,88 @@
+---
+title: "A Range-wide Index of Abundance for NE Pacific Sablefish"
+subtitle:  ""
+date: "PSTAT Meeting Apr 2020"
+author: "M Sosa Kapur kapurm@uw.edu"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [solarized-dark.css]
+    nature:
+      beforeInit: "https://platform.twitter.com/widgets.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+solarized_dark( 
+   text_font_size = "25px",
+  header_font_google = google_font("Helvetica", "400"),
+  text_font_google   = google_font("Helvetica", "300", "300i"),
+  code_font_google   = google_font("Source Code Pro"), 
+  outfile = "solarized-dark.css")
+
+# solarized_light( 
+#   header_font_google = google_font("Helvetica", "400"),
+#   text_font_google   = google_font("Helvetica", "300", "300i"),
+#   code_font_google   = google_font("Source Code Pro"), 
+#   outfile = "solarized_light.css")
+```
+
+```{r options, include = FALSE, eval = TRUE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,fig.align='center',
+                      fig.width = 3, fig.height = 3,
+                      comment = NA, rows.print = 16)
+```
+
+---
+layout: true
+
+.header[`r icon::fa('github')` @mkapur/sab-idx]
+
+---
+
+# Motivation
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
+knitr::include_graphics("img/RawIndices_TM.PNG")
+```
+
+---
+# Motivation
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
+knitr::include_graphics("img/RawIPHC_TM.PNG")
+```
+
+
+---
+
+# Motivation
+Synchronous trends (incl. declines) in SAB Relative Abundance
+
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
+knitr::include_graphics("img/figure2.PNG")
+```
+---
+
+# Methods
++ VAST (Thorson, 2019)
++ Multiple surveys, coverage 1970-2018
++ "Calibration by Proximity" (CBP)
+
+---
+
+# Data Inputs
+
+
+---
+
+## Resultant Index, compared to previous
+
+---
+
+## Resultant Index,
+
+---
+## Trends in estimated biomass through time

@@ -59,7 +59,7 @@ knitr::include_graphics("img/RawIPHC_TM.PNG")
 ---
 
 # Motivation
-Synchronous trends (incl. declines) in SAB Relative Abundance
+Synchronous trends (incl. declines) in relative abundance
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
 knitr::include_graphics("img/figure2.PNG")
@@ -70,19 +70,30 @@ knitr::include_graphics("img/figure2.PNG")
 + VAST (Thorson, 2019)
 + Multiple surveys, coverage 1970-2018
 + "Calibration by Proximity" (CBP)
++ Full writeup on shared google drive
 
 ---
 
 # Data Inputs
-
+```{r, echo = -1, eval = TRUE, out.height=450, out.width= 300}
+knitr::include_graphics("img/datamap_size.png")
+```
 
 ---
 
 ## Resultant Index, compared to previous
-
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 800}
+knitr::include_graphics("img/compare_all.png")
+```
 ---
 
-## Resultant Index,
+## Resultant Index
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 800}
+knitr::include_graphics("img/index-biomass2.png")
+```
 
 ---
-## Trends in estimated biomass through time
+## Trends in $\hat \beta$ through time
+```{r, echo = -1, eval = TRUE, out.height=450, out.width= 350}
+knitr::include_graphics("img/NALn_density.png")
+```

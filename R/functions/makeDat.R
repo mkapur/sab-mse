@@ -1,6 +1,6 @@
 
 # Make data object (TMB-friendly)
-build_dat <- function(...) {
+makeDat <- function(...) {
   data <- list(
     nareas = nareas,
     nyr = nyr,

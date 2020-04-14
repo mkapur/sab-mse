@@ -7,24 +7,28 @@ source('./R/presets.R')
 mapply(source, list.files("./R/functions", pattern = ".R", full.names=TRUE))
 
 ## Load real data and pass to build_dat, build_pars to get in TMB-friendly format
-surv <- read.csv("input/Indices_SS3_2020-01-23v3.csv")  %>% filter(Fleet != "AllAreas") ## VAST stdization
-NsurveyFleets <- length(unique(surv$Fleet))
-landings <- read.csv("clean_landings.csv") ## made in dataprep.R
-NfisheryFleets <- length(unique(landings$Fleet))
-agecomps <-  read.csv("clean_agecomps.csv") ## made in dataprep.R
-lencomps <-  read.csv("clean_agecomps.csv") ## made in dataprep.R
-discard <- read.csv("clean_discard.csv") ## made in dataprep.R
+surv <- read.csv("input/cleaned/clean_survey.csv")
+NsurveyFleets <- length(unique(surv$fleet))
+
+landings <- read.csv("./input/cleaned/clean_landings.csv") ## made in dataprep.R
+discard <- read.csv("./input/cleaned/clean_discard.csv") ## made in dataprep.R
+NfisheryFleets <- length(unique(landings$fleet))
+
+
+agecomps <-  read.csv("./input/cleaned/clean_agecomps.csv") ## made in dataprep.R
+lencomps <-  read.csv("./input/cleaned/clean_lencomps.csv") ## made in dataprep.R
+
 NFleets <- sum(NsurveyFleets,NfisheryFleets)
 
 ## Structure
 Nareas <- 7 ## number of modeled areas
-startyr <- min(ts$year)                   # model start year
-endyr <- YEAR <- max(ts$year)           # end year
-nyears <- length(syr:lyr)                # number of years        
+startyr <- min(ts$year)               
+endyr <- YEAR <- max(ts$year)           
+nyears <- length(syr:lyr)               
 rec_age <- min(waa$age)               # recruitment age                  
 plus_group <- max(waa$age)            # plus group age
 nage <- length(rec_age:plus_group)    # number of ages
-nlenbin <- length(unique(len$length_bin)) # number of length bins
+nlenbin <- length(unique(len$length_bin)) # number of length bins - poss vary by area
 nsex <- 2                 # single sex or sex-structured
 nproj <- 1                # projection years *FLAG* eventually add to cpp file, currently just for graphics
 include_discards <- TRUE  # include discard mortality, TRUE or FALSE
@@ -39,7 +43,7 @@ M_type <- 0       # Natural mortality: 0 = fixed, 1 = estimated with a prior
 
 
 ## Create dataframes, similar to VAST 
-data <- build_data()
+data <- makeDat()
 parameters <- build_parameters()
 random_vars <- build_random_vars()
 

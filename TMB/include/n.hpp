@@ -11,14 +11,14 @@ Type nllN(dataSet<Type> &dat, confSet &conf, paraSet<Type> &par, array<Type> &lo
       if(i!=j){nvar(i,j)=0.0;}else{nvar(i,j)=varLogN(conf.keyVarLogN(i));}
     }
   }
-  MVMIX_t<Type> neg_log_densityN(nvar,Type(conf.fracMixN));
+  MVMIX_t<Type> neg_log_densityN(nvar,Type(conf.fracMixN)); // setupholder
   Eigen::LLT< Matrix<Type, Eigen::Dynamic, Eigen::Dynamic> > lltCovN(nvar);
   matrix<Type> LN = lltCovN.matrixL();
   matrix<Type> LinvN = LN.inverse();
 
-  for(int i = 1; i < timeSteps; ++i){ 
-    vector<Type> predN = predNFun(dat,conf,par,logN,logF,i); 
-    resN.col(i-1) = LinvN*(vector<Type>(logN.col(i)-predN));    
+  for(int i = 1; i < timeSteps; ++i){ // loop years
+    vector<Type> predN = predNFun(dat,conf,par,logN,logF,i); // called from predn.hpp, requires Fs first 
+    resN.col(i-1) = LinvN*(vector<Type>(logN.col(i)-predN));   // residual on N 
     nll+=neg_log_densityN(logN.col(i)-predN); // N-Process likelihood 
     SIMULATE_F(of){
       if(conf.simFlag==0){

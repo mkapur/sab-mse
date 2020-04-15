@@ -18,13 +18,13 @@ vector<Type> predObsFun(dataSet<Type> &dat, confSet &conf, paraSet<Type> &par, a
   int f, ft, a, y, yy, scaleIdx, ma, pg;  // a is no longer just ages, but an attribute (e.g. age or length) 
   int minYear=dat.aux(0,0);
   Type zz=Type(0);
-  for(int i=0;i<dat.nobs;i++){
-    y=dat.aux(i,0)-minYear;
-    f=dat.aux(i,1);
-    ft=dat.fleetTypes(f-1);
-    a=dat.aux(i,2)-conf.minAge;
-    if(dat.aux(i,2)==dat.maxAgePerFleet(f-1)){ma=1;}else{ma=0;}
-    pg=conf.maxAgePlusGroup(f-1);
+  for(int i=0;i<dat.nobs;i++){ //iterate over obs
+    y=dat.aux(i,0)-minYear; //index years
+    f=dat.aux(i,1); // note fleet
+    ft=dat.fleetTypes(f-1); // now 0 is fishery, 2-3 is survey, 1 is meaningless
+    a=dat.aux(i,2)-conf.minAge; //index ages to all ages in dataset 
+    if(dat.aux(i,2)==dat.maxAgePerFleet(f-1)){ma=1;}else{ma=0;} // if this is a max age reading set ma to 1
+    pg=conf.maxAgePlusGroup(f-1); // check if there is a plus group in this dataset (1 if true)
     if(ft==3){a=0;}
     if(ft<3){ 
       zz = dat.natMor(y,a);
@@ -33,8 +33,8 @@ vector<Type> predObsFun(dataSet<Type> &dat, confSet &conf, paraSet<Type> &par, a
       }
     }    
 
-    switch(ft){
-      case 0:
+    switch(ft){ // switch among fleet types
+      case 0: 
         pred(i)=logN(a,y)-log(zz)+log(1-exp(-zz));
         if(conf.keyLogFsta(f-1,a)>(-1)){
           pred(i)+=logF(conf.keyLogFsta(0,a),y);
@@ -57,14 +57,15 @@ vector<Type> predObsFun(dataSet<Type> &dat, confSet &conf, paraSet<Type> &par, a
         return(0);
       break;
       
-      case 2:
+      case 2: // survey with age data
  	if((pg!=conf.maxAgePlusGroup(0))&&(a==(conf.maxAge-conf.minAge))){
           error("When maximum age for the fleet is the same as maximum age in the assessment it must be treated the same way as catches w.r.t. plusgroup configuration");
   	}
 
-	if((ma==1) && (pg==1)){
+	if((ma==1) && (pg==1)){ // this is a plus group reading from a age-indexed survey
 	  pred(i)=0;
 	  for(int aa=a; aa<=(conf.maxAge-conf.minAge); aa++){
+	    // calc total nat mortality (for denom)
 	    zz = dat.natMor(y,aa);
             if(conf.keyLogFsta(0,aa)>(-1)){
               zz+=exp(logF(conf.keyLogFsta(0,aa),y));
@@ -72,10 +73,11 @@ vector<Type> predObsFun(dataSet<Type> &dat, confSet &conf, paraSet<Type> &par, a
 	    pred(i)+=exp(logN(aa,y)-zz*dat.sampleTimes(f-1));
 	  }
 	  pred(i)=log(pred(i));
-	}else{
+	}else{ // not a plus group situation
           pred(i)=logN(a,y)-zz*dat.sampleTimes(f-1);
 	}
-        if(conf.keyQpow(f-1,a)>(-1)){
+// i believe these are special treatments
+	        if(conf.keyQpow(f-1,a)>(-1)){
           pred(i)*=exp(par.logQpow(conf.keyQpow(f-1,a))); 
         }
         if(conf.keyLogFpar(f-1,a)>(-1)){
@@ -84,12 +86,12 @@ vector<Type> predObsFun(dataSet<Type> &dat, confSet &conf, paraSet<Type> &par, a
         
       break;
   
-      case 3:// biomass or catch survey
-        if(conf.keyBiomassTreat(f-1)==0){
-          pred(i) = logssb(y)+par.logFpar(conf.keyLogFpar(f-1,a));
+      case 3:// biomass survey? will be -1 if NA
+        if(conf.keyBiomassTreat(f-1)==0){ // this is default setting, but seems wrong for a survey? where is q etc?
+          pred(i) = logssb(y)+par.logFpar(conf.keyLogFpar(f-1,a)); // log(F*SSBy)
         }
         if(conf.keyBiomassTreat(f-1)==1){
-          pred(i) = logCatch(y)+par.logFpar(conf.keyLogFpar(f-1,a));
+          pred(i) = logCatch(y)+par.logFpar(conf.keyLogFpar(f-1,a)); // log(Cat * F)
         }
         if(conf.keyBiomassTreat(f-1)==2){
           pred(i) = logfsb(y)+par.logFpar(conf.keyLogFpar(f-1,a));

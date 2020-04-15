@@ -1,5 +1,4 @@
-
-
+// calculation of things that get called later
 
 template <class Type>
 Type ssbi(dataSet<Type> &dat, confSet &conf, array<Type> &logN, array<Type> &logF, int i){

@@ -1,24 +1,5 @@
 ## based on stockassessment::decfon
 
-## some misc helper functions
-setSeq <- function (min, max) 
-{
-  if (min == max) {
-    ret <- 1
-  }
-  else {
-    ret <- c(1:(max - min), max - min)
-  }
-  return(ret)
-}
-
-
-setS <- function (x) 
-{
-  setSeq(1, length(x))
-}
-
-
 modConfig <- function (dat) 
 {
   fleetTypes <- dat$fleetTypes

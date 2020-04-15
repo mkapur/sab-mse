@@ -1,27 +1,39 @@
 ## based on stockassessment::setup.sam.data
 
-makeDat <- function (fleets = NULL, surveys = NULL, residual.fleet = NULL, 
-          prop.mature = NULL, stock.mean.weight = NULL, catch.mean.weight = NULL, 
-          dis.mean.weight = NULL, land.mean.weight = NULL, natural.mortality = NULL, 
-          prop.f = NULL, prop.m = NULL, land.frac = NULL, recapture = NULL) 
+makeDat <-
+  function (fleets = NULL,
+            surveys = NULL,
+            # residual.fleet = NULL, ## we dont sep recreational
+            prop.mature = NULL, ## later index by k
+            stock.mean.weight = NULL,
+            catch.mean.weight = NULL,
+            dis.mean.weight = NULL,
+            land.mean.weight = NULL,
+            natural.mortality = NULL,
+            prop.f = NULL,
+            prop.m = NULL,
+            land.frac = NULL,
+            recapture = NULL)
+
 {
   fleet.idx <- 0
   type <- NULL
   time <- NULL
   name <- NULL
   corList <- list()
+  ## columns are years, 1 row per fleet
   idxCor <- matrix(NA, nrow = length(fleets) + length(surveys) + 
                      1, ncol = nrow(natural.mortality))
   colnames(idxCor) <- rownames(natural.mortality)
   dat <- data.frame(year = NA, fleet = NA, age = NA, aux = NA)
   weight <- NULL
-  doone <- function(m) {
-    year <- rownames(m)[row(m)]
-    fleet.idx <<- fleet.idx + 1
+  doone <- function(m) { ## single fleet per input dataset
+    year <- rownames(m)[row(m)] ## rowNAMES are years
+    fleet.idx <<- fleet.idx + 1 ## updates for nesting as we move along
     fleet <- rep(fleet.idx, length(year))
-    age <- as.integer(colnames(m)[col(m)])
-    aux <- as.vector(m)
-    dat <<- rbind(dat, data.frame(year, fleet, age, aux))
+    age <- as.integer(colnames(m)[col(m)]) ## assumes columns are age bins
+    aux <- as.vector(m) ## vectorize all contents
+    dat <<- rbind(dat, data.frame(year, fleet, age, aux)) ## reshape (again)...
     if ("weight" %in% names(attributes(m))) {
       weight <<- c(weight, as.vector(attr(m, "weight")))
     }
@@ -65,7 +77,7 @@ makeDat <- function (fleets = NULL, surveys = NULL, residual.fleet = NULL,
     }
   }
   if (!is.null(residual.fleet)) {
-    doone(residual.fleet)
+    doone(residual.fleet) ## updates dat with this fleet info
     type <- c(type, 0)
     time <- c(time, 0)
     name <- c(name, "Residual catch")
@@ -73,7 +85,7 @@ makeDat <- function (fleets = NULL, surveys = NULL, residual.fleet = NULL,
   if (!is.null(fleets)) {
     if (is.data.frame(fleets) | is.matrix(fleets)) {
       doone(fleets)
-      type <- c(type, 1)
+      type <- c(type, 1) ## 1 means fishery fleet
       time <- c(time, 0)
       name <- c(name, "Comm fleet")
     }
@@ -89,12 +101,12 @@ makeDat <- function (fleets = NULL, surveys = NULL, residual.fleet = NULL,
     if (is.data.frame(surveys) | is.matrix(surveys)) {
       doone(surveys)
       thistype <- ifelse(min(as.integer(colnames(surveys))) < 
-                           (-0.5), 3, 2)
+                           (-0.5), 3, 2) ## two means normal survey (age?), three means length?
       type <- c(type, thistype)
       time <- c(time, mean(attr(surveys, "time")))
       name <- c(name, "Survey fleet")
     }
-    else {
+    else { ## if more than one survey loop
       dummy <- lapply(surveys, doone)
       type <- c(type, unlist(lapply(surveys, function(x) ifelse(min(as.integer(colnames(x))) < 
                                                                   (-0.5), 3, 2))))
@@ -176,20 +188,41 @@ makeDat <- function (fleets = NULL, surveys = NULL, residual.fleet = NULL,
   attr(dat, "prop.f") <- cutY(prop.f)
   attr(dat, "prop.m") <- cutY(prop.m)
   attr(dat, "land.frac") <- cutY(land.frac)
-  ret <- list(noFleets = length(attr(dat, "type")), fleetTypes = as.integer(attr(dat, 
-                                                                                 "type")), sampleTimes = attr(dat, "time"), noYears = attr(dat, 
-                                                                                                                                           "nyear"), years = attr(dat, "year"), minAgePerFleet = attr(dat, 
-                                                                                                                                                                                                      "minAgePerFleet"), maxAgePerFleet = attr(dat, "maxAgePerFleet"), 
-              nobs = nrow(dat), idx1 = attr(dat, "idx1"), idx2 = attr(dat, 
-                                                                      "idx2"), idxCor = idxCor, aux = do.call(cbind, lapply(dat, 
-                                                                                                                            as.numeric))[, -4], logobs = log(dat[, 4]), weight = as.numeric(weight), 
-              propMat = attr(dat, "prop.mature"), stockMeanWeight = attr(dat, 
-                                                                         "stock.mean.weight"), catchMeanWeight = attr(dat, 
-                                                                                                                      "catch.mean.weight"), natMor = attr(dat, "natural.mortality"), 
-              landFrac = attr(dat, "land.frac"), disMeanWeight = attr(dat, 
-                                                                      "dis.mean.weight"), landMeanWeight = attr(dat, "land.mean.weight"), 
-              propF = attr(dat, "prop.f"), propM = attr(dat, "prop.m"), 
-              corList = corList)
+  ret <-
+    list(
+      noFleets = length(attr(dat, "type")),
+      fleetTypes = as.integer(attr(dat,
+                                   "type")),
+      sampleTimes = attr(dat, "time"),
+      noYears = attr(dat,
+                     "nyear"),
+      years = attr(dat, "year"),
+      minAgePerFleet = attr(dat,
+                            "minAgePerFleet"),
+      maxAgePerFleet = attr(dat, "maxAgePerFleet"),
+      nobs = nrow(dat),
+      idx1 = attr(dat, "idx1"),
+      idx2 = attr(dat,
+                  "idx2"),
+      idxCor = idxCor,
+      aux = do.call(cbind, lapply(dat,
+                                  as.numeric))[,-4],
+      logobs = log(dat[, 4]),
+      weight = as.numeric(weight),
+      propMat = attr(dat, "prop.mature"),
+      stockMeanWeight = attr(dat,
+                             "stock.mean.weight"),
+      catchMeanWeight = attr(dat,
+                             "catch.mean.weight"),
+      natMor = attr(dat, "natural.mortality"),
+      landFrac = attr(dat, "land.frac"),
+      disMeanWeight = attr(dat,
+                           "dis.mean.weight"),
+      landMeanWeight = attr(dat, "land.mean.weight"),
+      propF = attr(dat, "prop.f"),
+      propM = attr(dat, "prop.m"),
+      corList = corList
+    )
   attr(ret, "fleetNames") <- attr(dat, "name")
   return(ret)
 }

@@ -2,6 +2,8 @@
 ## M S KAPUR 
 ## Generate data, condition and export based on OM config, calling functions.R and TMB model XX
 
+
+
 ## Load packages and functions
 source('./R/presets.R') 
 mapply(source, list.files("./R/functions", pattern = ".R", full.names=TRUE))
@@ -43,8 +45,66 @@ M_type <- 0       # Natural mortality: 0 = fixed, 1 = estimated with a prior
 
 
 ## Create dataframes, similar to VAST 
-data <- makeDat()
-parameters <- build_parameters()
-random_vars <- build_random_vars()
+# data <- makeDat()
+
+## these are sitting in input; the function is source()d in helpers.R
+cn <- read.ices("./input/ices_testing/cn.dat") ## residual (Recreational)
+cw <- read.ices("./input/ices_testing/cw.dat") ## catch weights by fleet-year
+dw <- read.ices("./input/ices_testing/dw.dat") ## discard weights by fleet-year
+lf <- read.ices("./input/ices_testing/lf.dat") 
+lw <- read.ices("./input/ices_testing/lw.dat")
+mo <- read.ices("./input/ices_testing/mo.dat")
+nm <- read.ices("./input/ices_testing/nm.dat")
+pf <- read.ices("./input/ices_testing/pf.dat")
+pm <- read.ices("./input/ices_testing/pm.dat")
+sw <- read.ices("./input/ices_testing/sw.dat")
+surveys <- read.ices("./input/ices_testing/survey.dat")
+
+## format data 
+dat2 <- makeDat(surveys=surveys,
+                      residual.fleet=cn, 
+                      prop.mature=mo, 
+                      stock.mean.weight=sw, 
+                      catch.mean.weight=cw, 
+                      dis.mean.weight=dw, 
+                      land.mean.weight=lw,
+                      prop.f=pf, 
+                      prop.m=pm, 
+                      natural.mortality=nm, 
+                      land.frac=lf)
+
+## create basic config
+conf <- modConfig(dat)
+## overwrite as needed
+conf$stockRecruitmentModelCode <- 2 ## BH
+
+conf$fbarRange <- c(2,6)
+conf$corFlag <- 1
+conf$keyLogFpar <- matrix(c(
+  -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+  -1,    0,    1,    2,    3,    4,    5,    6,   -1,
+  -1,    7,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+  8,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1), nrow=4, byrow=TRUE)
+
+par <- makePar(dat,conf)
+# These default initial can be modified (like the configuration)
+par$logFpar <- rep(0,9)
 
 
+## only need to do this part if CPP has changed
+compile("./TMB/CopyOfstockassessment.cpp")
+dyn.load(dynlib("./TMB/CopyOfstockassessment"))
+
+# Now we are ready to optimize the model. This function runs the TMB call
+fit <- runMod(dat2,conf,par) ## currently calling CopyOfstockassessment
+
+stockassessment:::ssbplot(fit) ## this is a stockassessment function; likely rewrite; will fail class(fit) != 'sam'
+
+
+## DEPRECATED ----
+# parameters <- build_parameters()
+# random_vars <- build_random_vars()
+# 
+# TMBphase(data, parameters, random = random_vars, 
+#          model_name = "mod", phase = FALSE, 
+#          debug = FALSE)

@@ -7,16 +7,16 @@ runMod <- function (data, conf, parameters, newtonsteps = 3, rm.unidentified = F
 {
   if (length(conf$maxAgePlusGroup) == 1) {
     tmp <- conf$maxAgePlusGroup
-    conf$maxAgePlusGroup <- defcon(data)$maxAgePlusGroup
+    conf$maxAgePlusGroup <- modConfig(data)$maxAgePlusGroup
     conf$maxAgePlusGroup[1] <- tmp
   }
-  definit <- defpar(data, conf)
+  definit <- makePar(data, conf)
   if (!identical(parameters, relist(unlist(parameters), skeleton = definit))) {
-    warning("Initial values are not consistent, so running with default init values from defpar()")
+    warning("Initial values are not consistent, so running with default init values from makePars()")
     parameters <- definit
   }
   data <- cleanCatch(data, conf)
-  confTmp = defcon(data)
+  confTmp = modConfig(data) ## reconfig based on cleaned dat
   for (i in 1:length(confTmp)) {
     if (!names(confTmp)[i] %in% names(conf)) {
       conf[[length(conf) + 1]] = confTmp[[i]]
@@ -30,7 +30,7 @@ runMod <- function (data, conf, parameters, newtonsteps = 3, rm.unidentified = F
   nmissing <- sum(is.na(data$logobs))
   parameters$missing <- numeric(nmissing)
   ran <- c("logN", "logF", "missing")
-  obj <- MakeADFun(tmball, parameters, random = ran, DLL = "stockassessment", 
+  obj <- MakeADFun(tmball, parameters, random = ran, DLL = "CopyOfstockassessment",  
                    ...)
   if (rm.unidentified) {
     gr <- obj$gr()
@@ -49,7 +49,7 @@ runMod <- function (data, conf, parameters, newtonsteps = 3, rm.unidentified = F
     }
     else {
       obj <- MakeADFun(tmball, parameters, random = ran, 
-                       map = safemap, DLL = "stockassessment", ...)
+                       map = safemap, DLL = "CopyOfstockassessment", ...)
     }
   }
   lower2 <- rep(-Inf, length(obj$par))
@@ -84,9 +84,9 @@ runMod <- function (data, conf, parameters, newtonsteps = 3, rm.unidentified = F
   ret <- list(sdrep = sdrep, pl = pl, plsd = plsd, data = data, 
               conf = conf, opt = opt, obj = obj, rep = rep, low = lower, 
               hig = upper)
-  attr(ret, "RemoteSha") <- substr(packageDescription("stockassessment")$RemoteSha, 
-                                   1, 12)
-  attr(ret, "Version") <- packageDescription("stockassessment")$Version
-  class(ret) <- "sam"
+  # attr(ret, "RemoteSha") <- substr(packageDescription("CopyOfstockassessment")$RemoteSha, 
+  #                                  1, 12)
+  # attr(ret, "Version") <- packageDescription("CopyOfstockassessment")$Version
+  class(ret) <- "sam" ## keep this for using stockassessment:: plotting functions
   return(ret)
 }

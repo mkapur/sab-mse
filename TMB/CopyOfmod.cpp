@@ -1,6 +1,4 @@
 #include <TMB.hpp>
-// #define TMB_LIB_INIT R_init_stockassessment
-#include "./include/SAM.hpp" // call everything in include/
 #include <numeric>
 
 template <class Type> Type square(Type x){return x*x;}

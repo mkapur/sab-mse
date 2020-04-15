@@ -15,6 +15,8 @@ spmat <- data.frame(subarea = c('A1',"A2","B3","B2","B1","C2","C1"),
 # Landings & Discards ----
 ccbase <- SS_output("./input/raw/CC_2019_100.00/", forecast = FALSE, covar = FALSE) ## from STAR - possibly not the most updated
 
+
+## METHOD 1 [me]
 cc_catdis <- ccbase$catch %>%
   select(Fleet_Name, Yr, Obs, ret_bio) %>%
   mutate(discard = Obs-ret_bio) %>%
@@ -30,6 +32,20 @@ cc_catdis <- ccbase$catch %>%
 cc_catdis %>%
   filter(type == 'Catch') %>%
   write.csv(., file = paste0("input/temp/cc_catch_",Sys.Date(),".csv"), row.names = FALSE)
+
+## METHOD 2 [SAM]
+cc_catdis0 <- ccbase$catch %>%
+  select(Fleet_Name, Yr, Obs, ret_bio) %>%
+  mutate(discard = Obs-ret_bio) %>%
+  select(Fleet_Name, Yr, Obs) %>%
+  tidyr::pivot_wider(names_from = Fleet_Name,  values_from = Obs) 
+
+cc_catdis0
+cc_catdis %>%
+  filter(type == 'Catch') %>%
+  write.csv(., file = paste0("input/temp/cc_catch_",Sys.Date(),".csv"), row.names = FALSE)
+
+
 
 cc_catdis %>%
   filter(type == 'Discard') %>%
@@ -92,6 +108,7 @@ ccdat <- SS_readdat(file = "./input/raw/CC_2019_100.00/data.ss")
 ccdat$agecomp$fleet <-   ccdat$fleetnames[ccdat$agecomp$FltSvy ] ## rename fleets
 ccdat$lencomp$fleet <-   ccdat$fleetnames[ccdat$lencomp$FltSvy ] ## rename fleets
 
+## METHOD 1
 ccdat$agecomp %>%
   mutate(Year = Yr, subarea = NA, stock = NA, mgmt = "CC", type = 'age_comp' ) %>%
   select(-Seas, - FltSvy, -Gender, -Part, -Ageerr, -Lbin_lo, -Yr, -Lbin_hi) %>%
@@ -103,6 +120,17 @@ ccdat$lencomp %>%
   select(-Seas, - FltSvy, -Gender, -Part, -Yr) %>%
   select(Year, fleet, type, subarea,stock, mgmt, Nsamp, everything()) %>%
   write.csv(., "./input/temp/CC_lencomps.csv",row.names = FALSE)
+
+
+## METHOD 2
+ccdat$agecomp %>%
+  mutate(Year = Yr, subarea = NA, stock = NA, mgmt = "CC", type = 'age_comp' ) %>%
+  select(-Seas, - FltSvy, -Gender, -Part, -Ageerr, -Lbin_lo, -Yr, -Lbin_hi) %>%
+  select(Year, fleet, Nsamp, everything()) %>%
+  group_split(fleet)
+
+
+write.csv(., "./input/temp/CC_agecomps.csv",row.names = FALSE)
 
 
 ## combine comps and write to CLEAN

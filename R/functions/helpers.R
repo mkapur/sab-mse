@@ -20,3 +20,11 @@ getLowerBounds <- function (parameters)
 {
   list(sigmaObsParUS = rep(-10, length(parameters$sigmaObsParUS)))
 }
+
+getUpperBounds<- function (parameters) 
+{
+  list(sigmaObsParUS = rep(10, length(parameters$sigmaObsParUS)))
+}
+
+## read.ices et al
+source("https://raw.githubusercontent.com/elisvb/CCAM/master/R/reading.R") 

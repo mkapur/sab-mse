@@ -34,11 +34,19 @@ cc_catdis %>%
   write.csv(., file = paste0("input/temp/cc_catch_",Sys.Date(),".csv"), row.names = FALSE)
 
 ## METHOD 2 [SAM]
-cc_catdis0 <- ccbase$catch %>%
+cn <- ccbase$catch %>%
   select(Fleet_Name, Yr, Obs, ret_bio) %>%
   mutate(discard = Obs-ret_bio) %>%
-  select(Fleet_Name, Yr, Obs) %>%
-  tidyr::pivot_wider(names_from = Fleet_Name,  values_from = Obs) 
+  select(Fleet_Name, Yr, Obs) %>%  
+ # tidyr::pivot_wider(names_from = Fleet_Name,  values_from = Obs) %>%
+# group_split(Fleet_Name) %>% data.frame() %>% 
+#   tibble::column_to_rownames('Yr') %>%
+  # select(Fleet_Name, Obs) %>%
+  group_split(Fleet_Name) 
+
+
+rownames(cn) <- cn$Yr
+save(], file = paste0("input/temp/cc_catch_",Sys.Date(),".Rdata"))
 
 cc_catdis0
 cc_catdis %>%
@@ -101,6 +109,22 @@ read.csv("./input/raw/Indices_SS3_2020-01-23v3.csv")  %>% ## VAST stdization
   select(Year, fleet, type, subarea, stock, mgmt, value, sigma) %>%
   arrange(.,Year,fleet) %>%
   write.csv(., "./input/cleaned/clean_survey.csv",row.names = FALSE)
+
+## survey - SAM format
+surveys <- read.csv("./input/raw/Indices_SS3_2020-01-23v3.csv")  %>% ## VAST stdization
+  distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
+  filter(Fleet != "AllAreas") %>%
+  merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
+  mutate(value = Estimate_metric_tons,
+         sigma = SD_log, 
+         fleet = Fleet, 
+         mgmt = fleet, 
+         type = 'survey') %>%
+  select(Year, fleet, type, subarea, stock, mgmt, value, sigma) %>%
+  arrange(.,Year,fleet) %>%
+  filter( fleet == 'CC') %>%
+  group_split(fleet) 
+save(surveys, file = paste0("input/temp/cc_surv_",Sys.Date(),".Rdata"))
 
 
 ## Comps -- would be great to get these @ subarea if possible ----

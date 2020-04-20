@@ -28,6 +28,7 @@ makeDat <-
   dat <- data.frame(year = NA, fleet = NA, age = NA, aux = NA)
   weight <- NULL
   doone <- function(m) { ## single fleet per input dataset
+    if('Yr' %in% colnames(m)  | 'Year'  | colnames(m)) year <- m$
     year <- rownames(m)[row(m)] ## rowNAMES are years
     fleet.idx <<- fleet.idx + 1 ## updates for nesting as we move along
     fleet <- rep(fleet.idx, length(year))

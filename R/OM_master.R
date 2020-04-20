@@ -48,7 +48,7 @@ M_type <- 0       # Natural mortality: 0 = fixed, 1 = estimated with a prior
 # data <- makeDat()
 
 ## these are sitting in input; the function is source()d in helpers.R
-cn <- read.ices("./input/ices_testing/cn.dat") ## residual (Recreational)
+load("input/temp/cc_catch_2020-04-17.Rdata") ## loads as cn  ## list by fleet with single column for catches
 cw <- read.ices("./input/ices_testing/cw.dat") ## catch weights by fleet-year
 dw <- read.ices("./input/ices_testing/dw.dat") ## discard weights by fleet-year
 lf <- read.ices("./input/ices_testing/lf.dat") 
@@ -58,20 +58,22 @@ nm <- read.ices("./input/ices_testing/nm.dat")
 pf <- read.ices("./input/ices_testing/pf.dat")
 pm <- read.ices("./input/ices_testing/pm.dat")
 sw <- read.ices("./input/ices_testing/sw.dat")
-surveys <- read.ices("./input/ices_testing/survey.dat")
+surveys <- load("input/temp/cc_surv_2020-04-17.Rdata") #read.ices("./input/ices_testing/survey.dat")
+
+
 
 ## format data 
-dat2 <- makeDat(surveys=surveys,
-                      residual.fleet=cn, 
-                      prop.mature=mo, 
-                      stock.mean.weight=sw, 
-                      catch.mean.weight=cw, 
-                      dis.mean.weight=dw, 
-                      land.mean.weight=lw,
-                      prop.f=pf, 
-                      prop.m=pm, 
-                      natural.mortality=nm, 
-                      land.frac=lf)
+dat2 <- makeDat(fleets = cn,
+                surveys=surveys,
+                      # prop.mature=mo, 
+                      # stock.mean.weight=sw, 
+                      # catch.mean.weight=cw, 
+                      # dis.mean.weight=dw, 
+                      # land.mean.weight=lw,
+                      # prop.f=pf, 
+                      # prop.m=pm, 
+                      # natural.mortality=nm, 
+                      # land.frac=lf)
 
 ## create basic config
 conf <- modConfig(dat)

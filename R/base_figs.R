@@ -278,26 +278,38 @@ dat$AgeComp[dat$MR == 'AK' & dat$Year >= 1979 ] <- FleetNames[5]
 
 # https://github.com/mkapur/sab-growth/blob/master/SAB_plot_master.R L112
 
-# ypreds <- read.csv("C:/Users/mkapur/Downloads/SAB_predicts_2019-10-04_phase2.csv")
+ypreds <- read.csv("./input/raw/SAB_predicts_2020-04-17.csv")
 # ypreds$gamREG <- ypreds$gamREG
-# levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
-# levels(ypreds$Sex) <- c('Females','Males')
-# levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
-# for(i in 1:nrow(ypreds)){
-#   ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
-#                               'All Years', paste(ypreds$Period[i]))
-# }
-# fd_summary_gamREG <- ypreds %>%
-#   # filter(Age < 75) %>%
-#   group_by(Age, Sex, gamREG,Period) %>%
-#   dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
-# saveRDS(fd_summary_gamREG, file = "./OM2_RegionalCurves.Rdata")
+levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
+levels(ypreds$Sex) <- c('Females','Males')
+levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
+for(i in 1:nrow(ypreds)){
+  ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
+                              'All Years', paste(ypreds$Period[i]))
+}
+fd_summary_gamREG <- ypreds %>%
+  # filter(Age < 75) %>%
+  group_by(Age, Sex, gamREG,Period) %>%
+  dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
+saveRDS(fd_summary_gamREG, file = "./_writing/figures/OMGrowthCurves.Rdata")
 
 
-p2 <- ggplot(readRDS("./OM2_RegionalCurves.Rdata"), aes(x = Age, col = gamREG, group = gamREG)) +
-  kaputils::theme_mk(base_size = 16) +
-  scale_color_manual(values = cbbPalette) +
-  scale_fill_manual(values = cbbPalette) +  
+
+
+ggplot(readRDS("./_writing/figures/OMGrowthCurves.Rdata"), aes(x = Age, col = gamREG, group = gamREG)) +
+  kaputils::theme_mk(base_size = 16) + theme(legend.position = 'right') +
+  scale_color_manual(values = cbbPalette, 
+                     labels = c('Stock R1 (South CC)',
+                                'Stock R2 (North CC/South BC)',
+                                'Stock R3 (BC)',
+                                'Stock R4 (West BC/AK Gulf)',
+                                'Stock R5 (West Gulf/Aleutians)')) +
+  scale_fill_manual(values = cbbPalette,
+                    labels = c('Stock R1 (South CC)',
+                               'Stock R2 (North CC/South BC)',
+                               'Stock R3 (BC)',
+                               'Stock R4 (West BC/AK Gulf)',
+                               'Stock R5 (West Gulf/Aleutians)')) +  
   scale_alpha(guide = 'none') +
   scale_y_continuous(limits = c(0,110)) +
   scale_x_continuous(limits = c(0,65)) +
@@ -305,24 +317,34 @@ p2 <- ggplot(readRDS("./OM2_RegionalCurves.Rdata"), aes(x = Age, col = gamREG, g
   labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
   facet_wrap(~Sex +Period, ncol = 4)
 
-## use ONEREG from dropbox
-# ypreds <- read.csv("C:/Users/mkapur/Downloads/ONEREG_SAB_predicts_2019-10-29.csv")
-# ypreds$gamREG <- ypreds$gamREG
-# levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
-# levels(ypreds$Sex) <- c('Females','Males')
-# levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
-# for(i in 1:nrow(ypreds)){
-#   ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
-#                               'All Years', paste(ypreds$Period[i]))
-# }
-# fd_summary_gamREG <- ypreds %>%
-#   # filter(Age < 75) %>%
-#   group_by(Age, Sex, gamREG,Period) %>%
-#   dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
-# 
-# saveRDS(fd_summary_gamREG, file = "./OM3_RangewideCurve.Rdata")
+ggsave(plot = last_plot(),
+       file = "./_writing/figures/OMGrowthCurves.PNG",
+       height = 8, width = 10, unit = 'in')
 
 
+ ## reshape survey datatable ----
+ surv <-  read.csv("./input/raw/Indices_SS3_2020-01-23v3.csv")
+ 
+ surv_by <- surv %>%
+   distinct() %>%
+   filter(Fleet != 'AllAreas' & Fleet != "Eastern_Bering_Sea") %>%
+   mutate(By = round(Estimate_metric_tons), Epsilon = SD_log) %>%
+   select(Year, Fleet, By) %>%
+   pivot_wider(., values_from = By, names_from = Fleet) %>% data.frame()
+  names(surv_by)[c(4,5)] <- c("AK (A1 + A2)", "AK (A1)") 
+  surv_eps <- surv %>%  
+    distinct() %>%
+   filter(Fleet != 'AllAreas' & Fleet != "Eastern_Bering_Sea") %>%
+   mutate(By = round(Estimate_metric_tons), Epsilon = round(SD_log,3)) %>%
+   select(Year, Fleet, Epsilon) %>%
+   pivot_wider(., values_from = c("Epsilon"), names_from = "Fleet") 
+ names(surv_eps)[c(4,5)] <- c("AK (A1 + A2)", "AK (A1)")  
+ 
+ write.csv(surv_eps,"./_writing/tables/Survey_epsilon_byM.csv",row.names = FALSE)
+ write.csv(surv_by,"./_writing/tables/Survey_biomass_byM.csv",row.names = FALSE)
+ 
+ 
+ 
 p3 <- ggplot(readRDS("./OM3_RangewideCurve.Rdata"), aes(x = Age)) +
   kaputils::theme_mk(base_size = 16) +theme(legend.position = 'none') +
   scale_color_manual(values = cbbPalette) +

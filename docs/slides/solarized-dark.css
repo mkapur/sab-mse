@@ -26,17 +26,16 @@ body {
   font-weight: 300;
   color: #839496;
 }
+.large { font-size: 130% }
+.small { font-size: 75% }
 h1, h2, h3 {
   font-family: Helvetica;
   font-weight: normal;
-  color: #dc322f;
+  color: #92bdca;
 }
 .remark-slide-content {
   background-color: #002b36;
   font-size: 25px;
-  
-  
-  
   padding: 1em 4em 1em 4em;
 }
 .remark-slide-content h1 {
@@ -86,7 +85,7 @@ a, a > code {
   
 }
 .inverse h1, .inverse h2, .inverse h3 {
-  color: #002b36;
+  color: #cabb92;
 }
 .title-slide, .title-slide h1, .title-slide h2, .title-slide h3 {
   color: #002b36;

@@ -47,7 +47,7 @@ Synchronous trends (incl. declines) in relative abundance
 
 ---
 
-# Methods 1
+# Methods I
 + VAST (Thorson, 2019)
 Probability distribution function for biomass data `\(b_i\)`
 $$
@@ -63,9 +63,11 @@ $$
 + `\(r_1\)` is encounter rate (logit-link); `\(r_2\)` is capture probability for sample `\(i\)` (gamma-distributed)
 + $ \sigma_m^2(c_i) $ is residual variation for each sample
 
+???
+Originally we thought we couldn't, but assuming BC encounters everything
 
 ---
-# Methods 2
+# Methods II
 + "Calibration by Proximity" (CBP, Thorson et al., in prep)
 + estimates log-ratio of catchability between surveys and reference
 + `\(\lambda_f = log( \frac{q_f}{q_{f_{ref}}})\)`
@@ -73,7 +75,7 @@ $$
 
 
 ---
-# Methods 3
+# Methods III
 
 + Experimented with 100, 250, 500 and 1000 knots; retained 500 due to runtime
 + Sensitivity to alternative 'reference fleet'
@@ -88,8 +90,7 @@ This is likely due to the fact that the trap survey virtually never captures zer
 ---
 # Data Inputs
 Multiple surveys, coverage 1970-2018
-
-&lt;img src="img/datamap_size.png" width="300" height="450" style="display: block; margin: auto;" /&gt;
+&lt;img src="img/datamap_size.png" width="300" height="400" style="display: block; margin: auto;" /&gt;
 ---
 
 # Data Treatment
@@ -97,23 +98,28 @@ Multiple surveys, coverage 1970-2018
 + Timeblocking: Triennial before/after 1993; AK Surveys before/after 1992
 
 ---
-
-## Resultant Index, compared to previous
+### VAST Index: Compared to previous
 &lt;img src="img/compare_all.png" width="800" height="400" style="display: block; margin: auto;" /&gt;
 ---
-
-## Resultant Index
+### VAST Index: Including "All Areas"
 &lt;img src="img/index-biomass2.png" width="800" height="400" style="display: block; margin: auto;" /&gt;
-
+???
+you'll see a relabeled version of this in OM talk
 ---
-### Trends in `\(\hat \beta\)` through time
-
+### .small[VAST Index: Trends through time]
 .pull-left[
-![](img/NALn_density.png)]
-
-.pull-right[
-+describe changes in cold pool etc
+![](img/NALn_density.png)
 ]
+--
+.pull-right[
+.small[
+.inverse[Possible causes] of NW `\(\hat \beta\)` Shift 
++ Migration GOA `\(\rightarrow\)` EBS (unlikely due to age structure)
++ Cold pool (yet only recently in EBS)
++ Increased recruitment in EBS/pulses of large cohorts (e.g. 2016 incoming)
++ Oceanographic &amp; fishery pressures (decline in `\(L_\infty\)` of late)
++ Synergies of movement, recruitment, and oceanography
+]]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

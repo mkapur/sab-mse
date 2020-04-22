@@ -367,8 +367,10 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 + Such rates are fixed, but included in tuning of $F$
 
 ---
-#Retained Catches
+# Retained Catches
 
+**Eq 17**
++ Baranov (Ricker, 1975): catches occur by fleets $f$ in sub-areas $i$, and accrue to mgmt regions $m$.
 ---
 
 # Survey Biomass

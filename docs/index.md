@@ -7,7 +7,7 @@ Materials here maintained by Maia Sosa Kapur kapurm@uw.edu
 # Presentations
 These are also hosted on the team Google Drive.
 
-[Operating Model Overview @ PSTAT Apr 2020 - Links Broken for now](slides/Kapur_OM_PSTAT-Apr2020.html)
+[Operating Model Overview @ PSTAT Apr 2020](slides/Kapur_OM_PSTAT-Apr2020.html)
 <br>
 [Rangewide Index @ PSTAT Apr 2020 - Links Broken for now](slides/XXKapur_RangewideSABIdx.html)
 

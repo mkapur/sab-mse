@@ -210,6 +210,7 @@ knitr::include_graphics("img/OMGrowthCurves.png")
 .pull-center[$\sigma_G$ now at individual strata]
 
 + Movement & Maturity from collaborators
++ We can discuss $h$, $M_a$ et al. once dynamics are introduced
 ---
 
 background-image: url("https://www.thespruceeats.com/thmb/nsjMWi7TBf7AVMBFulYM3XQOYiQ=/2400x1350/smart/filters:no_upscale()/bowl-chili-98839917-56a8c4ab3df78cf772a0723d.jpg")
@@ -374,7 +375,8 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 + $ \phi_{if} $ determines whether or not $f$ exploits $i$
 ---
 # Survey Biomass
-$B_y^f={\epsilon_y^fq}^f\sum_{i}\sum_{a}{{\phi_{if}w_a^{k,f}s}_a^fN_{y,a}^i}$
+$B_y^f={\epsilon_y^fq}^f\sum_{i}\sum_{a}{{ \phi_{if} w_a^{k,f}s}_a^fN_{y,a}^i}$
+
 **Eqs 33,34**
 + $\epsilon_y^f~lognormal(0,0.2+\sigma_{S,y}^f)$ .small[ , where] $\sigma_{S,y}$ .small[comes from VAST ]
 + $q^f$ estimated
@@ -391,7 +393,7 @@ $$L_\pi^f=\frac{\mathrm{\Gamma}(n_y^f+1)}{\prod_{a}^{A}{\mathrm{\Gamma}(n_y^f\wi
 \ldots \prod_{a}^{A}\frac{\mathrm{\Gamma}(n_y^f\widetilde{\sum_{\gamma}\pi_{y,\gamma,a}^f}+\theta^fn_y^f\sum_{\gamma}\pi_{y,\gamma,a}^f)}{\mathrm{\Gamma}(\theta^fn_y^f\sum_{\gamma}\pi_{y,\gamma,a}^f)}$$
 ** Eq 54** 
 + .inverse[Dirichlet-Multinomial likelihood contribution]
-+ Estimate $n_{eff}$ using $\theta^f$
++ Estimate $n_{eff}$ using $\theta^f$; potentially use for data weighting
 
 
 
@@ -424,8 +426,16 @@ background-size: cover
 # Reference Points 
 
 ---
-# Things I haven't thought through yet
+# Forecasting 
+## Observation Uncertainty
+
+## Process Error
+
+---
+# Things I haven't thought through yet (in detail)
++ .inverse[Forecasting]
 + .inverse[Aging Error]
++ .inverse[Data Weighting]
 + .inverse[Expansions]
 + .inverse[What else?]
 ---

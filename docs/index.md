@@ -12,9 +12,7 @@ These are also hosted on the team Google Drive.
 [Rangewide Index @ PSTAT Apr 2020](slides/Kapur_RangewideSABIdx.html)
 
 # Docs
-These are also hosted on the team Google Drive.
-
-[OM Description Draft 1 @ PSTAT Apr 2020](slides/PSTAT_OMDraft_Apr2020.pdf)
+These are  hosted on the team Google Drive.
 
 # Code
 Click the blue *View on Github* link on the top right to see the git repo for this site. Note: code is still in development; functionality on your machine is not guaranteed. 

@@ -92,14 +92,14 @@ Also -- Space is confusing, so let's abstract these
 # Management Regions
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("img/Fig1_strata_mapsA2.png")
+knitr::include_graphics("./img/Fig1_strata_mapsA2.png")
 ```
 
 ---
 ## Stock (demography)
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("img/Fig1_strata_mapsB.png")
+knitr::include_graphics("./img/Fig1_strata_mapsB.png")
 ```
 
 ???
@@ -111,7 +111,7 @@ knitr::include_graphics("img/Fig1_strata_mapsB.png")
 ## Sub-Areas (what's modeled)
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("img/Fig1_strata_mapsC.png")
+knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 ```
 
 ---
@@ -198,14 +198,14 @@ Recall that some survey fleets were "collapsed" for VAST
 # .small[Data Inputs: Surveys]
 
 ```{r, echo = -1, eval = TRUE, out.height=300, out.width= 500}
-knitr::include_graphics("img/Fig2_OM_Indices.png")
+knitr::include_graphics("./img/Fig2_OM_Indices.png")
 ```
 Note that these are novel "fleets" not equivalent to survey comps fleets.
 
 ---
 # .small[Data Inputs: Growth]
 ```{r, echo = -1, eval = TRUE, out.height=350, out.width= 500}
-knitr::include_graphics("img/OMGrowthCurves.png")
+knitr::include_graphics("./img/OMGrowthCurves.png")
 ```
 .pull-center[$\sigma_G$ now at individual strata]
 

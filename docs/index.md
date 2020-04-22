@@ -9,12 +9,12 @@ These are also hosted on the team Google Drive.
 
 [Operating Model Overview @ PSTAT Apr 2020](slides/Kapur_OM_PSTAT-Apr2020.html)
 <br>
-[Rangewide Index @ PSTAT Apr 2020 - Links Broken for now](slides/XXKapur_RangewideSABIdx.html)
+[Rangewide Index @ PSTAT Apr 2020 - Links Broken for now](slides/Kapur_RangewideSABIdx.html)
 
 # Docs
 These are also hosted on the team Google Drive.
 
-[OM Description Draft 1 @ PSTAT Apr 2020 - Links Broken for now](slides/XXPSTAT_OMDraft_Apr2020.pdf)
+[OM Description Draft 1 @ PSTAT Apr 2020 - Links Broken for now](slides/PSTAT_OMDraft_Apr2020.pdf)
 
 # Code
 Click the blue *View on Github* link on the top right to see the git repo for this site. Note: code is still in development; functionality on your machine is not guaranteed. 

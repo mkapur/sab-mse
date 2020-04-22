@@ -213,12 +213,11 @@ Time series of...
 ...All of which can be used as .inverse[input data] or .inverse[parameter inits] in future EMs.
 
 ---
-background-image: url("http://bit.ly/cs631-donkey")
+background-image: url("./img/joe1.jpg")
 background-size: cover
 &lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;
 # .inverse[Take a break?]
-???
-conditioning &amp; dynamics is next
+## .inverse[Up next: Conditioning &amp; OM dynamics]
 
 ---
 background-image: url("https://media.giphy.com/media/10uVasOeFs6U92/giphy.gif")
@@ -305,12 +304,13 @@ Part of the rationale is that we would otherwise need to track individual growth
 
 ---
 # Reproduction I
-$R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}\ $ 
-`\(S_y^k=\sum_{a}{\phi_{ik}N_{y,\gamma=female,a}^iw_{y,\gamma=female,a}^kE_a^k\ }\)` 
+`\(R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}\)` 
+
+`\(S_y^k=\sum_{a}{\phi_{ik}N_{y,\gamma=female,a}^iw_{y,\gamma=female,a}^kE_a^k}\)` 
 
 **Eqs 12, 13**
 + Density dependence spatial Bev-Holt at stock level `\(k\)`
-+ SSB in `\(k\)` is summation over `\(i\)` in `\(k\)` (the magic of `\(\phi_{ik}\)`)
++ SSB in `\(k\)` is summation over `\(i\)` in `\(k\)` (invoke the magic of `\(\phi_{ik}\)`)
 
 
 
@@ -326,7 +326,8 @@ $R_y^i=\tau_{ik}R_y^k $
 
 ---
 # Reproduction III
-`\(R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}\)` 
+.large[
+`\(R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}\)` ]
 
 **Eq 12**
 + Steepness `\(h^k\)` .inverse[estimated with penalty/as hyper-parameter?]
@@ -339,26 +340,76 @@ $R_y^i=\tau_{ik}R_y^k $
 
 **Eq 16**
 + Discards *and* discard mortality are modeled...
-+ .inverse[Thus discard inputs are not modified by a mortality rate]
++ .inverse[Thus discard input data are not pre-adjusted by mortality]
 + Such rates are fixed, but included in tuning of `\(F\)`
 
 
 ---
-# Catches
+# Retained Catches
+`\(C_y^{m,f}=\sum_{i\epsilon m}\sum_{\gamma}{\sum_{a}{\phi_{if}w}_{\gamma,a}^f\frac{s_{\gamma,a}^fF_y^f\mathrm{\Omega}_{y,\gamma,a}^f}{Z_{y,\gamma,a}^i}N_{y,\gamma,a}^i(1-e^{-Z_{y,\gamma,a}^i})}\)`
 
-+ Hybrid method used to tune `\(F\)`
+**Eq 17**
++ Baranov (Ricker, 1975): catches occur by fleets `\(f\)` in sub-areas `\(i\)`, and accrue to mgmt regions `\(k\)`.
++ `\(\phi_{if}\)` determines whether or not `\(f\)` exploits `\(i\)`
+--
++  `\(w^f_{\gamma,a}\)` .inverse[is fleet- and sex- specific weight-at-age for captured fish (assumed equivalent for all sub-areas i fished by f)]
++ Hybrid method used to tune `\(F\)` and generate `\(C_{pred}\)`, using total mortality (incl. discard, **Eqs 19:24**)
+---
+# Survey Biomass
+`\(B_y^f={\epsilon_y^fq}^f\sum_{i}\sum_{a}{{\phi_{if}w_a^{k,f}s}_a^fN_{y,a}^i}\)`
+
+**Eqs 33,34**
++ `\(\epsilon_y^f~lognormal(0,0.2+\sigma_{S,y}^f)\)` .small[ , where] `\(\sigma_{S,y}\)` .small[comes from VAST ]
++ `\(q^f\)` estimated
+---
+# Comps
+
+`\(\pi_{y,a}^f=\frac{C_{y,a}^f}{\sum_{a}\ C_{y,a}^f}\)`
+
+**Eq 35** - can susbstitute `\(l\)` for `\(a\)`
+--
+
+`$$L_\varphi^f=\frac{\mathrm{\Gamma}(n_y^f+1)}{\prod_{a}^{A}{\mathrm{\Gamma}(n_y^f\widetilde{\sum_{\gamma}\pi_{y,\gamma,a}^f}+1)}}\frac{\mathrm{\Gamma}(\theta^fn_y^f)}{\mathrm{\Gamma}(n_y^f+\theta^fn_y^f)} \\
+\ldots \prod_{a}^{A}\frac{\mathrm{\Gamma}(n_y^f\widetilde{\sum_{\gamma}\pi_{y,\gamma,a}^f}+\theta^fn_y^f\sum_{\gamma}\pi_{y,\gamma,a}^f)}{\mathrm{\Gamma}(\theta^fn_y^f\sum_{\gamma}\pi_{y,\gamma,a}^f)}$$`
+** Eq 54** 
++ .inverse[Dirichlet-Multinomial likelihood contribution]
++ Estimate `\(n_{eff}\)` using `\(\theta^f\)`
+
+
+
+---
+# Equilibrium Abundance
+
+`\(N^i_{0,\gamma,a} =\begin{cases}  0.5 \omega^i_a \tau_{ik} R^k_0 e^{-{ \sum_a M_a^k} }&amp; \text{if}\ a &lt; A \\ \omega^i_a \frac{N^i_{\gamma,A-1} e^{-{ \sum_a M_a^k} }}{1 - e^{-{ \sum_a M_a^k} }} &amp; \text{if}\ a = A\end{cases}\)`
+
++ `\(\omega^i_a\)` is the eigenvector of the movement transition matrix. 
++ The entry for `\(\omega^i_0\)` is an estimated parameter.
++ `\(\tau_{ik}\)` is pre-specified distribution of recruits from `\(k\)` to nested sub-areas `\(i\)`.
+--
++ .inverse[Likely want to but some variation around one or both of these.]
 ---
 
-## Comps
+# Initial Conditions 
+`\(A\)` years of movement, rec-devs and no fishing:
 
-+ .inverse[Aging Error]
-+ .inverse[Expansions]
-+ .inverse[Sample sizes estimated via Dirichlet-Multinomial?]
+`\(N^i_{init,\gamma,a} =\begin{cases}  0.5 \omega^i_a \tau_{ik} R^k_0 e^{-{ \sum_a M_a^k} }e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k} &amp; \text{if}\ a &lt; A \\ \omega^i_a \frac{N^i_{init-1,\gamma,A-1} e^{-{ \sum_a M_a^k} }}{1 - e^{-{ \sum_a M_a^k} }}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k} &amp; \text{if}\ a = A\end{cases}\)`
+
 ---
+background-image: url("./img/joe2.jpg")
+background-size: cover
+&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;
+# .inverse[Take a break?]
+## .inverse[Up next: Reference points, and things I haven't thought of yet]
 
+
+---
 
 # Reference Points 
 
+---
+# Things I haven't gone through yet
++ .inverse[Aging Error]
++ .inverse[Expansions]
 ---
 
 ## Misc Questions 
@@ -369,6 +420,10 @@ $R_y^i=\tau_{ik}R_y^k $
 + data availability (by stock vs mgmt area)
 + treament of sample sizes -- dirichlet?
 + hyperparameters e.g. steepness, penalty on recdevs
+
+---
+background-image: url("./img/thankyou.jpg")
+background-size: cover
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

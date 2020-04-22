@@ -17,18 +17,12 @@ output:
 
 ```{r xaringan-themer, include = FALSE}
 library(xaringanthemer)
-solarized_dark( 
-   text_font_size = "25px",
-  header_font_google = google_font("Helvetica", "400"),
-  text_font_google   = google_font("Helvetica", "300", "300i"),
-  code_font_google   = google_font("Source Code Pro"), 
-  outfile = "solarized-dark.css")
-
-# solarized_light( 
+# solarized_dark( 
+#    text_font_size = "25px",
 #   header_font_google = google_font("Helvetica", "400"),
 #   text_font_google   = google_font("Helvetica", "300", "300i"),
 #   code_font_google   = google_font("Source Code Pro"), 
-#   outfile = "solarized_light.css")
+#   outfile = "solarized-dark.css")
 ```
 
 ```{r options, include = FALSE, eval = TRUE}
@@ -67,7 +61,7 @@ knitr::include_graphics("img/figure2.PNG")
 
 ---
 
-# Methods 1
+# Methods I
 + VAST (Thorson, 2019)
 Probability distribution function for biomass data $b_i$
 $$
@@ -83,9 +77,11 @@ $$
 + $r_1$ is encounter rate (logit-link); $r_2$ is capture probability for sample $i$ (gamma-distributed)
 + $ \sigma_m^2(c_i) $ is residual variation for each sample
 
+???
+Originally we thought we couldn't, but assuming BC encounters everything
 
 ---
-# Methods 2
+# Methods II
 + "Calibration by Proximity" (CBP, Thorson et al., in prep)
 + estimates log-ratio of catchability between surveys and reference
 + $\lambda_f = log( \frac{q_f}{q_{f_{ref}}})$
@@ -93,7 +89,7 @@ $$
 
 
 ---
-# Methods 3
+# Methods III
 
 + Experimented with 100, 250, 500 and 1000 knots; retained 500 due to runtime
 + Sensitivity to alternative 'reference fleet'
@@ -108,8 +104,7 @@ This is likely due to the fact that the trap survey virtually never captures zer
 ---
 # Data Inputs
 Multiple surveys, coverage 1970-2018
-
-```{r, echo = -1, eval = TRUE, out.height=450, out.width= 300}
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 300}
 knitr::include_graphics("img/datamap_size.png")
 ```
 ---
@@ -119,25 +114,30 @@ knitr::include_graphics("img/datamap_size.png")
 + Timeblocking: Triennial before/after 1993; AK Surveys before/after 1992
 
 ---
-
-## Resultant Index, compared to previous
+### VAST Index: Compared to previous
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 800}
 knitr::include_graphics("img/compare_all.png")
 ```
 ---
-
-## Resultant Index
+### VAST Index: Including "All Areas"
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 800}
 knitr::include_graphics("img/index-biomass2.png")
 ```
-
+???
+you'll see a relabeled version of this in OM talk
 ---
-### Trends in $\hat \beta$ through time
-
+### .small[VAST Index: Trends through time]
 .pull-left[
-![](img/NALn_density.png)]
-
-.pull-right[
-+describe changes in cold pool etc
+![](img/NALn_density.png)
 ]
+--
+.pull-right[
+.small[
+.inverse[Possible causes] of NW $\hat \beta$ Shift 
++ Migration GOA $\rightarrow$ EBS (unlikely due to age structure)
++ Cold pool (yet only recently in EBS)
++ Increased recruitment in EBS/pulses of large cohorts (e.g. 2016 incoming)
++ Oceanographic & fishery pressures (decline in $L_\infty$ of late)
++ Synergies of movement, recruitment, and oceanography
+]]
 

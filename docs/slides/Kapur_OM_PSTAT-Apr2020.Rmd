@@ -42,7 +42,7 @@ layout: true
 .inverse[Data Generation] & .inverse[OM Conditioning]
 
 + What gets produced, how, and why
-+ Walk-through equations for dynamics and likelihoods from [document](LINK ME.PDF) 
++ Walk-through equations for dynamics and likelihoods from document 
 + Discuss as we go (interrupt me  `r emo::ji("smile")`)
 
 ???
@@ -81,7 +81,7 @@ For example, R scripts pre-process the data, but TMB code uses that data to prod
 # Spatial Structure
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("img/Fig1_strata_mapsA.png")
+knitr::include_graphics("./img/Fig1_strata_mapsA.png")
 ```
 
 ???

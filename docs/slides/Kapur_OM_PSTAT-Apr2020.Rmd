@@ -371,7 +371,7 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 
 **Eq 17**
 + Baranov (Ricker, 1975): catches occur by fleets $f$ in sub-areas $i$, and accrue to mgmt regions $m$.
-
++ $ \phi_{if} $ determines whether or not $f$ exploits $i$
 ---
 # Survey Biomass
 

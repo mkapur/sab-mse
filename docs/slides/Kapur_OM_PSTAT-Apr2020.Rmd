@@ -371,10 +371,13 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 
 **Eq 17**
 + Baranov (Ricker, 1975): catches occur by fleets $f$ in sub-areas $i$, and accrue to mgmt regions $m$.
----
 
+---
 # Survey Biomass
 
+**Eqs 33,34**
++ $\epsilon_y^f~lognormal(0,0.2+\sigma_{S,y}^f)$ .small[ , where] $\sigma_{S,y}$ .small[comes from VAST ]
++ $q^f$ estimated
 ---
 # Comps I (simple proportion)
 

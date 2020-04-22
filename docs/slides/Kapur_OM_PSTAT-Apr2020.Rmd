@@ -368,11 +368,11 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 
 ---
 # Retained Catches
-$C_y^{m,f}=\sum_{i\epsilon m}\sum_{\gamma}{\sum_{a}{\phi_{if}w}_{\gamma,a}^f\frac{s_{\gamma,a}^fF_y^f\mathrm{\Omega}_{y,\gamma,a}^f}{Z_{y,\gamma,a}^i}N_{y,\gamma,a}^i(1-e^{-Z_{y,\gamma,a}^i})}$
+<!-- $C_y^{m,f}=\sum_{i\epsilon m}\sum_{\gamma}{\sum_{a}{\phi_{if}w}_{\gamma,a}^f\frac{s_{\gamma,a}^fF_y^f\mathrm{\Omega}_{y,\gamma,a}^f}{Z_{y,\gamma,a}^i}N_{y,\gamma,a}^i(1-e^{-Z_{y,\gamma,a}^i})}$ -->
 
 **Eq 17**
 + Baranov (Ricker, 1975): catches occur by fleets $f$ in sub-areas $i$, and accrue to mgmt regions $m$.
-+ $\phi_{if}$ determines whether or not $f$ exploits $i$
++ $ \phi_{if} $ determines whether or not $f$ exploits $i$
 
 --
 <Br>

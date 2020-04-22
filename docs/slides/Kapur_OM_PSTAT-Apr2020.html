@@ -258,11 +258,10 @@ background-size: cover
 + .inverse[Discussion Points]
 
 ---
-# Numbers at Age
-.pull-center[
-![](img/Eq1.png)
+# .small[Numbers at Age]
+.small[
+`\(N_{y+1,\gamma,a}^i=\left\{\begin{matrix}0.5R_{y+1}^i &amp; \text{if}\ a = 0 \newline \sum_{i\neq j}\left[\left(1-\textbf{X}_a^{i,j}\right)\left.\ {N_{y,\gamma,a-1}^ie}^{-Z_{y,\gamma,a-1}^i}\right.+\textbf{X}_a^{j,i}{N_{y,\gamma,a-1}^je}^{-Z_{y,\gamma,a-1}^i}\right] &amp; \text{if}\ 1 \leq a &lt;A\\\sum_{i\neq j}{\left[\left(1-\textbf{X}_a^{i,j}\right)(\left.{N_{y,\gamma,A-1}^ie}^{-Z_{y,\gamma,A-1}^i}\right.\left.+{N_{y,\gamma,A-1}^ie}^{-Z_{y,\gamma,A-1}^i}\right.)\right.\ } &amp; \text{if}\ a = A \\\ldots+\left.\textbf{X}_a^{j,i}\left({N_{y,\gamma,A}^je}^{-Z_{y,\gamma,A}^j}+{N_{y,\gamma,A-1}^je}^{-Z_{y,\gamma,A-1}^j}\right)\right]\\\end{matrix}\right.\)`
 ]
---
 
 **Eq 1**
 
@@ -272,16 +271,16 @@ background-size: cover
 + .inverse[Plus group for age]
 
 ---
-# Growth I
-.pull-center[![](img/Eq2.png)]
+# Growth I [general]
+`\(L_{y+1,\gamma,a}^i=L_{y,\gamma,a}^i+(L_{\infty,\gamma}^i-L_{y,\gamma,a}^i)\left(1-e^{-\kappa_\gamma^i}\right)\ if\ a\ &lt;\ A\)`
 
 **Eq 2**
 + Growth indexed by stock `\(k\)` via Kapur et al. (2020)
 + Plus group via weighted average **Eq 3**
 + .inverse[Plus group for length: 50cm]
 ---
-# Growth II
-.pull-center[![](img/Eq5.png)]
+# Growth II [after movement]
+`\(L_{y+1,\gamma,a}^i=\phi_{ij}\frac{N_{y+1,\gamma,a}^iL_{y,\gamma,a}^i+N_{y+1,\gamma,A}^jL_{y,\gamma,a}^j}{N_{y+1,\gamma,a}^i+N_{y+1,\gamma,a}^j}\)`
 
 **Eq 5**
 + Unlike SS, no growth "morphs"
@@ -294,17 +293,20 @@ Theoretically this could induce shrinkage, but hopefully most of the movement is
 Part of the rationale is that we would otherwise need to track individual growth histories and end up with an IBM like situation: if fish from A1 move to B2 then a bunch move to C2 etc. Instead, the new movement probs AND growth patterns are shared for everyone extant in sub-area i.
 ---
 # Length to Weight
-.pull-center[![](img/Eq7.png)]
-.pull-center[![](img/Eq9.png)]
+.small[
+`\(\widetilde{\textbf{L}_{y,\gamma,a,l}^i}=\left\{\begin{matrix}\mathrm{\Phi}(\theta_1,\widetilde{L_{y,\gamma,a}^i},\sigma_{y,\gamma}^i)&amp;if\ l\ =\ 1\\\mathrm{\Phi}(\theta_{l+1},\widetilde{L_{y,\gamma,a}^i},\sigma_{y,\gamma}^i)-\mathrm{\Phi}(\theta_l,\widetilde{L_{y,\gamma,a}^i},\sigma_{y,\gamma}^i)&amp;if\ 1\ &lt;l\ &lt;\ A_l\\1-\mathrm{\Phi}(\theta_l,\widetilde{L_{y,\gamma,a}^i},\sigma_{y,\gamma}^i)&amp;if\ l\ =\ \ A_l\\\end{matrix}\right.\)` 
+]
 
-**Eqs 7,9**
+`\(w_{\gamma,l}^i=\alpha_\gamma^i{\bar{L_l}}^{\beta_\gamma^i}\)` 
+
+**Eqs 7, 9**
 + `\(\alpha, \beta\)` .inverse[vary by stock]
 + different `\(w^{f}_{a}\)` for catches
 
 ---
 # Reproduction I
-.pull-center[![](img/Eq12.png)]
-.pull-center[![](img/Eq13.png)]
+$R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}\ $ 
+`\(S_y^k=\sum_{a}{\phi_{ik}N_{y,\gamma=female,a}^iw_{y,\gamma=female,a}^kE_a^k\ }\)` 
 
 **Eqs 12, 13**
 + Density dependence spatial Bev-Holt at stock level `\(k\)`
@@ -315,7 +317,7 @@ Part of the rationale is that we would otherwise need to track individual growth
 
 ---
 # Reproduction II
-.pull-center[![](img/Eq15.png)]
+$R_y^i=\tau_{ik}R_y^k $ 
 
 **Eq 15**
 + Recruitment happens at stock `\(k\)` and is partitioned into sub-area `\(i\)`.
@@ -324,7 +326,7 @@ Part of the rationale is that we would otherwise need to track individual growth
 
 ---
 # Reproduction III
-.pull-center[![](img/Eq12.png)]
+`\(R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}\)` 
 
 **Eq 12**
 + Steepness `\(h^k\)` .inverse[estimated with penalty/as hyper-parameter?]
@@ -333,6 +335,9 @@ Part of the rationale is that we would otherwise need to track individual growth
 ---
 # Discards
 
+`\({\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,f,\gamma,a}+\beta_4^{y,f,\gamma,a}}{\beta_2^{y,f,\gamma,a}})\right)^{-1}\)`
+
+**Eq 16**
 + Discards *and* discard mortality are modeled...
 + .inverse[Thus discard inputs are not modified by a mortality rate]
 + Such rates are fixed, but included in tuning of `\(F\)`

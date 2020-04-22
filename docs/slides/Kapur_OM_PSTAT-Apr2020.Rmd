@@ -375,7 +375,7 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 + $ \phi_{if} $ determines whether or not $f$ exploits $i$
 ---
 # Survey Biomass
-$B_y^f={\epsilon_y^fq}^f\sum_{i}\sum_{a}{{ \phi_{if} w_a^{k,f}s}_a^fN_{y,a}^i}$
+$B_y^f={\epsilon_y^fq}^f\sum_{i}\sum_{a}{{ \psi_{if} w_a^{k,f} s_a^f N_{y,a}^i}$
 
 **Eqs 33,34**
 + $\epsilon_y^f~lognormal(0,0.2+\sigma_{S,y}^f)$ .small[ , where] $\sigma_{S,y}$ .small[comes from VAST ]

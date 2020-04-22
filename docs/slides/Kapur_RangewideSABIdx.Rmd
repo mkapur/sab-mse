@@ -126,18 +126,16 @@ knitr::include_graphics("img/index-biomass2.png")
 ???
 you'll see a relabeled version of this in OM talk
 ---
-### .small[VAST Index: Trends through time]
 .pull-left[
 ![](img/NALn_density.png)
 ]
 --
 .pull-right[
-.small[
 .inverse[Possible causes] of NW $\hat \beta$ Shift 
 + Migration GOA $\rightarrow$ EBS (unlikely due to age structure)
 + Cold pool (yet only recently in EBS)
 + Increased recruitment in EBS/pulses of large cohorts (e.g. 2016 incoming)
 + Oceanographic & fishery pressures (decline in $L_\infty$ of late)
 + Synergies of movement, recruitment, and oceanography
-]]
+]
 

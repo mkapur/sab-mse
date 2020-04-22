@@ -75,7 +75,7 @@ $$
   \end{equation}
 $$
 + $r_1$ is encounter rate (logit-link); $r_2$ is capture probability for sample $i$ (gamma-distributed)
-+ $ \sigma_m^2(c_i) $ is residual variation for each sample
++ $\sigma_m^2(c_i)$ is residual variation for each sample
 
 ???
 Originally we thought we couldn't, but assuming BC encounters everything

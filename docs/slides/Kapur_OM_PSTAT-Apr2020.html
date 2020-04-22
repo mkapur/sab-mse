@@ -21,9 +21,6 @@ class: center, middle, inverse, title-slide
 
 
 
-
-
-
 layout: true
 
 .header[<i class="fab  fa-github "></i> @mkapur/sab-mse/]
@@ -42,28 +39,27 @@ layout: true
 + Walk-through details from [document](LINK ME.PDF)
 + Discuss as we go (interrupt me  😄)
 
+???
+Don't forget that it is easy to add n selex curves, harder to change the array structure
 
 ---
 
+
+background-image: url("https://www.thoughtco.com/thmb/Bt4hhUDgr_LhLP5hEh6pP_2o2iM=/768x0/filters:no_upscale():max_bytes(150000):strip_icc()/closed-lift-door-1051317118-5c64607a46e0fb0001587ce5.jpg")
+background-size: cover
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+# .inverse[Ground Floor]
+
+---
 # Ground Floor
 
-.pull-left[
 + OM is written in `R`
++ Conditioning/estimation happens in `TMB` 
++ We are `not` shooting to replicate Stock Synthesis (etc.) exactly in structure nor estimated quantities 
 
-+ Conditioning +/- estimation happens in `TMB` 
-+ We are &lt;b&gt;not&lt;/b&gt; shooting to replicate Stock Synthesis (etc.) exactly in structure nor estimated quantities 
 
 
-]
-
-.pull-right[
-![](https://i.pinimg.com/originals/8b/6a/de/8b6adebac42802a8ef343bc2021eb566.jpg)
-]
 ---
-
-
-
-
 # Spatial Structure
 + A little more complicated than expected (Figure 1)
 
@@ -91,7 +87,6 @@ Also -- Space is confusing, so let's abstract these
 ---
 ## Stock (demography)
 
-
 &lt;img src="img/Fig1_strata_mapsB.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
 
 ???
@@ -110,6 +105,9 @@ Also -- Space is confusing, so let's abstract these
 ### Putting it all together (fleets + surveys)
 
 ![](./img/Fig1_strata_panel.png)
+??
+
+next up is what happens where -- but pause for any questions
 
 ---
 # What happens where
@@ -134,7 +132,7 @@ Alaska (.inverse[A]K), British Columbia (.inverse[B]C), Cal. Current (.inverse[C
 
 .pull-left[
 
-R1:R5, as in Kapur et al. (2019)
+R1:R5, as in Kapur et al. (2020)
 + Share params for growth, maturity(?), density-dependence
 + SRR operates @ `\(k\)` and is partitioned
 ]
@@ -142,6 +140,10 @@ R1:R5, as in Kapur et al. (2019)
 .pull-right[
 ![](img/Fig1_strata_mapsB.png)
 ]
+
+
+???
+stock is actually unit of interest
 ---
 # What happens where
 ## Sub-areas `\(i,j\)`
@@ -153,26 +155,110 @@ R1:R5, as in Kapur et al. (2019)
 
 .pull-right[
 ![](img/Fig1_strata_mapsC.png)
---
-A table with all subscript &amp; param definitions is provided near the end of the OM document.
+
 ]
+???
+
+A table with all subscript &amp; param definitions is provided near the end of the OM document.
+---
+background-image: url("https://dynaimage.cdn.cnn.com/cnn/q_auto,h_600/https%3A%2F%2Fcdn.cnn.com%2Fcnnnext%2Fdam%2Fassets%2F191202162449-ingredients-to-longevity-3.jpg")
+background-size: cover
+&lt;br&gt;&lt;Br&gt;
+# .inverse[Data Inputs]
+---
+# Data Inputs 
+.inverse[Catches &amp; Comps]
+![](img/Fig2_Fleets.png)
+
+--
+
++ `Fixed Gear` for CC is Hook &amp; Line + Pot
++ any others to combine/add/drop?
+
+???
+This is figure 2
+Recall that some survey fleets were "collapsed" for VAST 
+---
+## Data Inputs
+.inverse[Surveys]
+
+&lt;img src="img/Fig2_OM_Indices.png" width="500" height="300" style="display: block; margin: auto;" /&gt;
+Note that these are novel "fleets" not equivalent to survey comps fleets.
+
+---
+## Data Inputs
+.inverse[Demography]
+&lt;img src="img/OMGrowthCurves.png" width="500" height="350" style="display: block; margin: auto;" /&gt;
+`\(\sigma_G\)` now at individual strata
+---
+
+background-image: url("https://www.thespruceeats.com/thmb/nsjMWi7TBf7AVMBFulYM3XQOYiQ=/2400x1350/smart/filters:no_upscale()/bowl-chili-98839917-56a8c4ab3df78cf772a0723d.jpg")
+background-size: cover
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+# .inverse[Data Generation]
+---
+# Data Generation 
+.inverse[What comes out of the OM?]
+
+Time series of...
++ Surveyed abundance, by fleet
++ Age &amp; Length compositions, by fleet (where applicable)
++ Catch &amp; discards
++ Numbers-at-age/length
++ Biomass 
++ Parameters e.g. `\(F\)`, selectivity, `\(R_0\)`
+
+--
+
+...All of which can be used as .inverse[input data] or .inverse[parameter inits] in future EMs.
 
 ---
 background-image: url("http://bit.ly/cs631-donkey")
 background-size: cover
----
+&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;
+# .inverse[Take a break?]
+???
+conditioning &amp; dynamics is next
 
-# Basic Dynamics
-.pull-center[
-![](img/Math-Equations-on-Chalkboard.jpg)
-]
---
+---
+background-image: url("https://media.giphy.com/media/10uVasOeFs6U92/giphy.gif")
+background-size: cover
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+# .inverse[Model Conditioning]
+---
+# Model Conditioning
+## Approach
++ Template Model Builder w/ modular structure (see SAM)
++ Starter equations under "Likelihood Components", page 13
++ Let's discuss general objectives, and get into details in tandem with dynamics
+---
+# Model Conditioning
+## Objectives
++ Fit the input data
++ Roughly reproduce trends from regional assessments
++ .inverse[others?]
+
+???
+In the dynamics section, when I walk thru equations I will include standout likelihood issues/estimation questions
+---
+background-image: url("https://www.vaughn.edu/wp-content/uploads/2019/04/Math-Equations-on-Chalkboard-1024x407.jpg")
+background-size: cover
+&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;
+# .inverse[Operating Model Dynamics]
+### .inverse[...and conditioning concerns]
+
+---
+# OM Dynamics
+
 **Equation in Document**
 + Key assumptions
-+ .inverse[Discuss me]
+--
++ Conditioning concerns (if applicable)
+--
++ .inverse[Discussion Points]
 
 ---
-
+# Numbers at Age
 .pull-center[
 ![](img/Eq1.png)
 ]
@@ -182,73 +268,96 @@ background-size: cover
 
 + Yearly timestep
 + Monitored by sub-area `\(i\)`
-+ Movement defined by `\(\textbf{X}^{i,j}\)`
-+ .inverse[Plus group for age/length: 95yr/50cm]
++ Movement defined by `\(\textbf{X}^{i,j}_a\)`
++ .inverse[Plus group for age]
 
 ---
-# Growth
+# Growth I
+.pull-center[![](img/Eq2.png)]
 
-
-**Eqs 2:5**
-+ Growth indexed by stock `\(k\)` via Kapur et al. (2019)
-+ Plus group via weighted average
+**Eq 2**
++ Growth indexed by stock `\(k\)` via Kapur et al. (2020)
++ Plus group via weighted average **Eq 3**
 + .inverse[Plus group for length: 50cm]
+---
+# Growth II
+.pull-center[![](img/Eq5.png)]
 
+**Eq 5**
++ Unlike SS, no growth "morphs"
++ Incoming fish influence `\(L^i_a\)` similar to plus-group
+
+???
+If fish moves to a new sub-area, it influences the mean length in that sub-area, then obtains growth patterns &amp; corresponding movement probabilities from its sub-area `\(i\)` of residence
+
+Theoretically this could induce shrinkage, but hopefully most of the movement isn't north to south which would cause this to happen.
+Part of the rationale is that we would otherwise need to track individual growth histories and end up with an IBM like situation: if fish from A1 move to B2 then a bunch move to C2 etc. Instead, the new movement probs AND growth patterns are shared for everyone extant in sub-area i.
 ---
 # Length to Weight
+.pull-center[![](img/Eq7.png)]
+.pull-center[![](img/Eq9.png)]
 
-**Eqs 6:7**
-+ `\(\alpha, \beta\)` .inverse[ vary by stock]
+**Eqs 7,9**
++ `\(\alpha, \beta\)` .inverse[vary by stock]
 + different `\(w^{f}_{a}\)` for catches
 
 ---
-# Reproduction
+# Reproduction I
+.pull-center[![](img/Eq12.png)]
+.pull-center[![](img/Eq13.png)]
 
-**Eqs 8:10**
+**Eqs 12, 13**
 + Density dependence spatial Bev-Holt at stock level `\(k\)`
++ SSB in `\(k\)` is summation over `\(i\)` in `\(k\)` (the magic of `\(\phi_{ik}\)`)
+
+
+
+
+---
+# Reproduction II
+.pull-center[![](img/Eq15.png)]
+
+**Eq 15**
++ Recruitment happens at stock `\(k\)` and is partitioned into sub-area `\(i\)`.
++ Likely user-defined, by geographic area.
+
+
+---
+# Reproduction III
+.pull-center[![](img/Eq12.png)]
+
+**Eq 12**
 + Steepness `\(h^k\)` .inverse[estimated with penalty/as hyper-parameter?]
-+ `\(R_y^{k}\)` .inverse[partitioned to sub-areas] `\(i\)` via eigenvector of `\(\textbf{X}^{i,j}\)`
++ RecDevs penalized with a .inverse[bias correction ramp?]
 
+---
+# Discards
+
++ Discards *and* discard mortality are modeled...
++ .inverse[Thus discard inputs are not modified by a mortality rate]
++ Such rates are fixed, but included in tuning of `\(F\)`
 
 
 ---
+# Catches
 
-## Fleets (general data availability)
++ Hybrid method used to tune `\(F\)`
+---
 
-Note that VAST "combined" some fleets
+## Comps
 
-.pull-center[
-![](img/Fig2_Fleets.png)
-]
++ .inverse[Aging Error]
++ .inverse[Expansions]
++ .inverse[Sample sizes estimated via Dirichlet-Multinomial?]
+---
+
+
+# Reference Points 
 
 ---
 
-## Discards &amp; Catches
-
----
-
-## Surveys 
-
----
-
-## Selectivity
-
-
----
-background-image: url("https://media.giphy.com/media/10uVasOeFs6U92/giphy.gif")
-background-size: cover
-
-&lt;br&gt;&lt;br&gt;&lt;br&gt;
-# Model Conditioning
----
-## Model Conditioning
-
-+ TMB (for OM); .inverse[Stock Synthesis for EMs?]
-+ Starter equations under "Likelihoods", ppXX
-+ Let's focus on key topics first
----
-
-## Misc Questions
+## Misc Questions 
+## [copied from Google Doc]
 + start year for whole model
 + aging error
 + expansions of comps, etc

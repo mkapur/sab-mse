@@ -1,6 +1,10 @@
 {
-    "path" : "C:/Users/mkapur/Dropbox/UW/sab-mse/input/raw",
+    "path" : "C:/Users/mkapur/Dropbox/UW/sab-mse/docs/slides/img",
     "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
         {
             "ascending" : true,
             "columnIndex" : 2

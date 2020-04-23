@@ -119,7 +119,7 @@ knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 
 ### Putting it all together (fleets + surveys)
 
-![](./img/Fig1_strata_panel.png)
+![](img/Fig1_strata_panel.png)
 
 
 ???

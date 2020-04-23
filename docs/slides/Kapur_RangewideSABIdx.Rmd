@@ -56,7 +56,7 @@ knitr::include_graphics("img/RawIPHC_TM.PNG")
 Synchronous trends (incl. declines) in relative abundance
 
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
-knitr::include_graphics("img/figure2.PNG")
+knitr::include_graphics("img/figure2.png")
 ```
 
 ---
@@ -121,13 +121,13 @@ knitr::include_graphics("img/compare_all.png")
 ---
 ### VAST Index: Including "All Areas"
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 800}
-knitr::include_graphics("img/index-biomass2.png")
+knitr::include_graphics("img/Index-Biomass2.png")
 ```
 ???
 you'll see a relabeled version of this in OM talk
 ---
 .pull-left[
-![](img/NALn_density.png)
+![](img/NAln_density.png)
 ]
 --
 .pull-right[

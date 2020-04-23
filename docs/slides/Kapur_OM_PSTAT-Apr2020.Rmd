@@ -119,10 +119,7 @@ knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 
 ### Putting it all together (fleets + surveys)
 
-```{r, echo = -1, eval = TRUE, out.height=400, out.width= 600}
-knitr::include_graphics("./img/Fig1_Strata_Panel.PNG")
-```
-
+![](img/Fig1_Strata_Panel.PNG)
 
 ???
 
@@ -187,7 +184,7 @@ background-size: cover
 ---
 # .small[Data Inputs: Catches & Comps]
 
-![](img/Fig2_Fleets.png)
+![](img/Fig2_Fleets.PNG)
 
 --
 
@@ -210,10 +207,11 @@ Note that these are novel "fleets" not equivalent to survey comps fleets.
 ```{r, echo = -1, eval = TRUE, out.height=350, out.width= 500}
 knitr::include_graphics("./img/OMGrowthCurves.PNG")
 ```
-.pull-center[$\sigma_G$ now at individual strata]
-
+$\sigma_G$ now at individual strata
+.small[
 + Movement & Maturity from collaborators
 + We can discuss $h$, $M_a$ et al. once dynamics are introduced
+]
 ---
 
 background-image: url("https://www.thespruceeats.com/thmb/nsjMWi7TBf7AVMBFulYM3XQOYiQ=/2400x1350/smart/filters:no_upscale()/bowl-chili-98839917-56a8c4ab3df78cf772a0723d.jpg")
@@ -304,7 +302,7 @@ $L_{y+1,\gamma,a}^i=L_{y,\gamma,a}^i+(L_{\infty,\gamma}^i-L_{y,\gamma,a}^i)\left
 **Eq 2**
 + Growth indexed by stock $k$ via Kapur et al. (2020)
 + Plus group via weighted average **Eq 3**
-+ .inverse[Plus group for length: 50cm]
++ .inverse[Plus group for length: 50cm?]
 ---
 # Growth II [after movement]
 $L_{y+1,\gamma,a}^i=\phi_{ij}\frac{N_{y+1,\gamma,a}^iL_{y,\gamma,a}^i+N_{y+1,\gamma,A}^jL_{y,\gamma,a}^j}{N_{y+1,\gamma,a}^i+N_{y+1,\gamma,a}^j}$
@@ -344,7 +342,9 @@ $S_y^k=\sum_{a}{\phi_{ik}N_{y,\gamma=female,a}^iw_{y,\gamma=female,a}^kE_a^k}$
 
 ---
 # Reproduction II
+.large[
 $R_y^i=\tau_{ik}R_y^k$ 
+]
 
 **Eq 15**
 + Recruitment happens at stock $k$ and is partitioned into sub-area $i$
@@ -372,12 +372,17 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 
 ---
 # Retained Catches
+.large[
 $C_y^{m,f}=\sum_{i\epsilon m}\sum_{\gamma}{\sum_{a}{\phi_{if}w}_{\gamma,a}^f\frac{s_{\gamma,a}^fF_y^f\mathrm{\Omega}_{y,\gamma,a}^f}{Z_{y,\gamma,a}^i}N_{y,\gamma,a}^i(1-e^{-Z_{y,\gamma,a}^i})}$
+]
 
 --
-<Br>
+
 +  $w^f_{\gamma,a}$ .inverse[is fleet- and sex- specific weight-at-age for captured fish (assumed equivalent for all sub-areas $i$ fished by $f$)]
 + Hybrid method used to tune $F$ and generate $C_{pred}$, using total mortality (incl. discard, **Eqs 19:24**)
+
+--
+
 **Eq 17**
 + Baranov (Ricker, 1975): catches occur by fleets $f$ in sub-areas $i$, and accrue to mgmt regions $m$.
 + $\phi_{if}$ determines whether or not $f$ exploits $i$
@@ -413,7 +418,10 @@ $N^i_{0,\gamma,a} =\begin{cases}  0.5 \omega^i_a \tau_{ik} R^k_0 e^{-{ \sum_a M_
 + $\omega^i_a$ is the eigenvector of the movement transition matrix
 + The entry for $\omega^i_0$ is an estimated parameter
 + $\tau_{ik}$ is pre-specified distribution of recruits from $k$ to nested sub-areas $i$
+
+
 --
+
 + .inverse[Likely want to but some variation around one or both of these]
 ---
 
@@ -427,15 +435,22 @@ background-image: url("./img/joe2.jpg")
 background-size: cover
 <Br><Br><Br><Br><Br><Br>
 # .inverse[Take a break?]
-## .inverse[Up next: Reference points, Forecasting, and other things that require consideration]
+## .inverse[Up next: Reference points, forecasting, and "misc"]
 
 
 ---
 # Reference Points 
+**Eqs 38:43**
++ Calculated for each mgmt region
++ Use time-averaged selex for each fleet within $m$
++ Summations as needed
 
+--
+
++ AEP: "[Reference Points in Spatial Models] are an active area of research."
 ---
 # Forecasting 
-## Observation Uncertainty
+## Observation Error
 + Resample comps, surveys
 + .inverse[Fix catches to average of previous 5 years, or use current ABCs, or...]
 
@@ -444,8 +459,7 @@ background-size: cover
 + If we implement a bias-correction ramp, set $b_y$ (penalty) to 0.5 for projected years
 + Any changes to demography?
 ---
-# Things I haven't thought through yet (in detail)
-+ .inverse[Forecasting]
+# Other things I haven't thought through yet (in detail)
 + .inverse[Aging Error]
 + .inverse[Data Weighting]
 + .inverse[Expansions]
@@ -464,3 +478,5 @@ background-size: cover
 ---
 background-image: url("./img/thankyou.jpg")
 background-size: cover
+<Br><br><Br><br>
+# .inverse[Thank you!]

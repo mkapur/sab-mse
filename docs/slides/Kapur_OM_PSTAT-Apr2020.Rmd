@@ -70,7 +70,7 @@ For example, R scripts pre-process the data, but TMB code uses that data to prod
 # Spatial Structure
 + A little more complicated than expected (Figure 1)
 
-![](img/Fig1_strata_panel.png)
+![](img/Fig1_Strata_Panel.PNG)
 
 --
 
@@ -119,7 +119,7 @@ knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 
 ### Putting it all together (fleets + surveys)
 
-![](img/Fig1_strata_panel.png)
+![](img/Fig1_Strata_Panel.PNG)
 
 
 ???
@@ -184,6 +184,7 @@ background-size: cover
 # .inverse[Data Inputs]
 ---
 # .small[Data Inputs: Catches & Comps]
+
 ![](img/Fig2_Fleets.png)
 
 --
@@ -198,14 +199,14 @@ Recall that some survey fleets were "collapsed" for VAST
 # .small[Data Inputs: Surveys]
 
 ```{r, echo = -1, eval = TRUE, out.height=300, out.width= 500}
-knitr::include_graphics("./img/Fig2_OM_Indices.png")
+knitr::include_graphics("./img/Fig2_OM_indices.png")
 ```
 Note that these are novel "fleets" not equivalent to survey comps fleets.
 
 ---
 # .small[Data Inputs: Growth]
 ```{r, echo = -1, eval = TRUE, out.height=350, out.width= 500}
-knitr::include_graphics("./img/OMGrowthCurves.png")
+knitr::include_graphics("./img/OMGrowthCurves.PNG")
 ```
 .pull-center[$\sigma_G$ now at individual strata]
 

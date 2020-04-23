@@ -30,6 +30,10 @@ layout: true
 + Provide overview of Operating Model design (beta, obviously)
 + Discuss assumptions, data inputs & treatment
 
+
+???
+This is the reference for a dialogue (I'm not the only one talking)
+Everything here is in doc; there are several places that aren't super fleshed out
 ---
 
 # Outline
@@ -95,6 +99,10 @@ Also -- Space is confusing, so let's abstract these
 knitr::include_graphics("./img/Fig1_strata_mapsA2.png")
 ```
 
+???
+Simple lines for illustration -- not spatially ok
+we trust that everything accuring to AK happens in that box
+
 ---
 ## Stock (demography)
 
@@ -103,7 +111,7 @@ knitr::include_graphics("./img/Fig1_strata_mapsB.png")
 ```
 
 ???
-
+overlaying these strata gives many splices, but some can be ignored
 
 
 ---
@@ -113,6 +121,8 @@ knitr::include_graphics("./img/Fig1_strata_mapsB.png")
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
 knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 ```
+???
+the union of those two = this, finest strata
 
 ---
 
@@ -122,6 +132,10 @@ knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 ![](img/Fig1_Strata_Panel.PNG)
 
 ???
+that was RHS of F1
+LHS is a schematic showing how information flows -- you can see how it's important to keep track
+spoiler: this is done via matrices
+
 
 next up is what happens where -- but pause for any questions
 
@@ -134,7 +148,8 @@ next up is what happens where -- but pause for any questions
 Alaska (.inverse[A]K), British Columbia (.inverse[B]C), Cal. Current (.inverse[C]C)
   + Contain fleets
   + Accrue catches
-  + Set ABCs (future)
+  + Calc reference points
+  + Set ABCs (future, as one test within MSE)
 
 
 ]
@@ -174,7 +189,7 @@ stock is actually unit of interest
 
 ]
 ???
-
+The first letter of the subarea gives you a hint which mgmt area it is nested within.
 A table with all subscript & param definitions is provided near the end of the OM document.
 ---
 background-image: url("https://dynaimage.cdn.cnn.com/cnn/q_auto,h_600/https%3A%2F%2Fcdn.cnn.com%2Fcnnnext%2Fdam%2Fassets%2F191202162449-ingredients-to-longevity-3.jpg")
@@ -193,7 +208,7 @@ background-size: cover
 
 ???
 This is figure 2
-Recall that some survey fleets were "collapsed" for VAST 
+The last thing I want to add is about survey fleets; those involved with my sptl temporal std work know that i developed a novel index usting VAST. this means that i actually have unique "survey fleets" for each region which are composites
 ---
 # .small[Data Inputs: Surveys]
 
@@ -207,6 +222,7 @@ Note that these are novel "fleets" not equivalent to survey comps fleets.
 ```{r, echo = -1, eval = TRUE, out.height=350, out.width= 500}
 knitr::include_graphics("./img/OMGrowthCurves.PNG")
 ```
+
 $\sigma_G$ now at individual strata
 .small[
 + Movement & Maturity from collaborators
@@ -234,6 +250,10 @@ Time series of...
 
 ...All of which can be used as .inverse[input data] or .inverse[parameter inits] in future EMs.
 
+???
+1st three things are basically estimates of the data we put in
+
+
 ---
 background-image: url("./img/joe1.jpg")
 background-size: cover
@@ -257,9 +277,15 @@ background-size: cover
 ## Objectives
 + Fit the input data
 + Roughly reproduce trends from regional assessments
+
+--
+
 + .inverse[others?]
 
 ???
+On the "reproduce" point, I am not positive how well matched it will be dependong on movement outcomes
+I can certainly see place for a validation step w movement off
+
 In the dynamics section, when I walk thru equations I will include standout likelihood issues/estimation questions
 ---
 background-image: url("https://www.vaughn.edu/wp-content/uploads/2019/04/Math-Equations-on-Chalkboard-1024x407.jpg")
@@ -303,6 +329,10 @@ $L_{y+1,\gamma,a}^i=L_{y,\gamma,a}^i+(L_{\infty,\gamma}^i-L_{y,\gamma,a}^i)\left
 + Growth indexed by stock $k$ via Kapur et al. (2020)
 + Plus group via weighted average **Eq 3**
 + .inverse[Plus group for length: 50cm?]
+
+?? initial growth not in there yet, likely as in SS
+?? linear growth before a certain age $L_{0, \gamma,a} = L_\infty + 
+
 ---
 # Growth II [after movement]
 $L_{y+1,\gamma,a}^i=\phi_{ij}\frac{N_{y+1,\gamma,a}^iL_{y,\gamma,a}^i+N_{y+1,\gamma,A}^jL_{y,\gamma,a}^j}{N_{y+1,\gamma,a}^i+N_{y+1,\gamma,a}^j}$

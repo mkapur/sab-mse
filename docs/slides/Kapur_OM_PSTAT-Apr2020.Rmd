@@ -119,7 +119,6 @@ knitr::include_graphics("./img/Fig1_strata_mapsC.png")
 
 ### Putting it all together (fleets + surveys)
 
-<!-- ![](img/Fig1_Strata_Panel.PNG) -->
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 600}
 knitr::include_graphics("./img/Fig1_Strata_Panel.PNG")
 ```

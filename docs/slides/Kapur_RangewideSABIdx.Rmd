@@ -35,6 +35,10 @@ layout: true
 
 .header[`r icon::fa('github')` @mkapur/sab-idx]
 
+
+???
+13 slides
+
 ---
 
 # Motivation
@@ -198,8 +202,8 @@ looking fwd to climate drivers discussion
 
 
 ---
-background-image: url("./img/thankyou2.jpg")
+background-image: url("./img/thankyou.jpg")
 background-size: cover
-<Br><br><Br><br>
+<Br><br><Br><br><Br><Br><Br><br><Br><br><Br><Br>
 # .inverse[Thank you!]
 

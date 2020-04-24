@@ -506,7 +506,7 @@ background-size: cover
 + hyperparameters e.g. steepness, penalty on recdevs
 
 ---
-background-image: url("./img/thankyou.jpg")
+background-image: url("./img/thankyou2.jpg")
 background-size: cover
-<Br><br><Br><br>
+<Br><br><Br>
 # .inverse[Thank you!]

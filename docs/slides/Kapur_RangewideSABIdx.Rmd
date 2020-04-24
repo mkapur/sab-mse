@@ -31,7 +31,6 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE,fig.align='center',
                       comment = NA, rows.print = 16)
 ```
 
----
 layout: true
 
 .header[`r icon::fa('github')` @mkapur/sab-idx]

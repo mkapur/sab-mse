@@ -31,6 +31,10 @@ layout: true
 + Provide overview of Operating Model design (beta, obviously)
 + Discuss assumptions, data inputs &amp; treatment
 
+
+???
+This is the reference for a dialogue (I'm not the only one talking)
+Everything here is in doc; there are several places that aren't super fleshed out
 ---
 
 # Outline
@@ -92,13 +96,17 @@ Also -- Space is confusing, so let's abstract these
 
 &lt;img src="./img/Fig1_strata_mapsA2.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
 
+???
+Simple lines for illustration -- not spatially ok
+we trust that everything accuring to AK happens in that box
+
 ---
 ## Stock (demography)
 
 &lt;img src="./img/Fig1_strata_mapsB.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
 
 ???
-
+overlaying these strata gives many splices, but some can be ignored
 
 
 ---
@@ -106,16 +114,21 @@ Also -- Space is confusing, so let's abstract these
 ## Sub-Areas (what's modeled)
 
 &lt;img src="./img/Fig1_strata_mapsC.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+???
+the union of those two = this, finest strata
 
 ---
 
 
 ### Putting it all together (fleets + surveys)
 
-&lt;img src="./img/Fig1_Strata_Panel.PNG" width="600" height="400" style="display: block; margin: auto;" /&gt;
-
+![](img/Fig1_Strata_Panel.PNG)
 
 ???
+that was RHS of F1
+LHS is a schematic showing how information flows -- you can see how it's important to keep track
+spoiler: this is done via matrices
+
 
 next up is what happens where -- but pause for any questions
 
@@ -128,7 +141,8 @@ next up is what happens where -- but pause for any questions
 Alaska (.inverse[A]K), British Columbia (.inverse[B]C), Cal. Current (.inverse[C]C)
   + Contain fleets
   + Accrue catches
-  + Set ABCs (future)
+  + Calc reference points
+  + Set ABCs (future, as one test within MSE)
 
 
 ]
@@ -168,7 +182,7 @@ stock is actually unit of interest
 
 ]
 ???
-
+The first letter of the subarea gives you a hint which mgmt area it is nested within.
 A table with all subscript &amp; param definitions is provided near the end of the OM document.
 ---
 background-image: url("https://dynaimage.cdn.cnn.com/cnn/q_auto,h_600/https%3A%2F%2Fcdn.cnn.com%2Fcnnnext%2Fdam%2Fassets%2F191202162449-ingredients-to-longevity-3.jpg")
@@ -178,7 +192,7 @@ background-size: cover
 ---
 # .small[Data Inputs: Catches &amp; Comps]
 
-![](img/Fig2_Fleets.png)
+![](img/Fig2_Fleets.PNG)
 
 --
 
@@ -187,7 +201,7 @@ background-size: cover
 
 ???
 This is figure 2
-Recall that some survey fleets were "collapsed" for VAST 
+The last thing I want to add is about survey fleets; those involved with my sptl temporal std work know that i developed a novel index usting VAST. this means that i actually have unique "survey fleets" for each region which are composites
 ---
 # .small[Data Inputs: Surveys]
 
@@ -197,10 +211,12 @@ Note that these are novel "fleets" not equivalent to survey comps fleets.
 ---
 # .small[Data Inputs: Growth]
 &lt;img src="./img/OMGrowthCurves.PNG" width="500" height="350" style="display: block; margin: auto;" /&gt;
-.pull-center[$\sigma_G$ now at individual strata]
 
+`\(\sigma_G\)` now at individual strata
+.small[
 + Movement &amp; Maturity from collaborators
 + We can discuss `\(h\)`, `\(M_a\)` et al. once dynamics are introduced
+]
 ---
 
 background-image: url("https://www.thespruceeats.com/thmb/nsjMWi7TBf7AVMBFulYM3XQOYiQ=/2400x1350/smart/filters:no_upscale()/bowl-chili-98839917-56a8c4ab3df78cf772a0723d.jpg")
@@ -222,6 +238,10 @@ Time series of...
 --
 
 ...All of which can be used as .inverse[input data] or .inverse[parameter inits] in future EMs.
+
+???
+1st three things are basically estimates of the data we put in
+
 
 ---
 background-image: url("./img/joe1.jpg")
@@ -246,9 +266,15 @@ background-size: cover
 ## Objectives
 + Fit the input data
 + Roughly reproduce trends from regional assessments
+
+--
+
 + .inverse[others?]
 
 ???
+On the "reproduce" point, I am not positive how well matched it will be dependong on movement outcomes
+I can certainly see place for a validation step w movement off
+
 In the dynamics section, when I walk thru equations I will include standout likelihood issues/estimation questions
 ---
 background-image: url("https://www.vaughn.edu/wp-content/uploads/2019/04/Math-Equations-on-Chalkboard-1024x407.jpg")
@@ -291,7 +317,11 @@ background-size: cover
 **Eq 2**
 + Growth indexed by stock `\(k\)` via Kapur et al. (2020)
 + Plus group via weighted average **Eq 3**
-+ .inverse[Plus group for length: 50cm]
++ .inverse[Plus group for length: 50cm?]
+
+?? initial growth not in there yet, likely as in SS
+?? linear growth before a certain age $L_{0, \gamma,a} = L_\infty + 
+
 ---
 # Growth II [after movement]
 `\(L_{y+1,\gamma,a}^i=\phi_{ij}\frac{N_{y+1,\gamma,a}^iL_{y,\gamma,a}^i+N_{y+1,\gamma,A}^jL_{y,\gamma,a}^j}{N_{y+1,\gamma,a}^i+N_{y+1,\gamma,a}^j}\)`
@@ -331,7 +361,9 @@ Part of the rationale is that we would otherwise need to track individual growth
 
 ---
 # Reproduction II
+.large[
 `\(R_y^i=\tau_{ik}R_y^k\)` 
+]
 
 **Eq 15**
 + Recruitment happens at stock `\(k\)` and is partitioned into sub-area `\(i\)`
@@ -359,12 +391,17 @@ Part of the rationale is that we would otherwise need to track individual growth
 
 ---
 # Retained Catches
+.large[
 `\(C_y^{m,f}=\sum_{i\epsilon m}\sum_{\gamma}{\sum_{a}{\phi_{if}w}_{\gamma,a}^f\frac{s_{\gamma,a}^fF_y^f\mathrm{\Omega}_{y,\gamma,a}^f}{Z_{y,\gamma,a}^i}N_{y,\gamma,a}^i(1-e^{-Z_{y,\gamma,a}^i})}\)`
+]
 
 --
-&lt;Br&gt;
+
 +  `\(w^f_{\gamma,a}\)` .inverse[is fleet- and sex- specific weight-at-age for captured fish (assumed equivalent for all sub-areas `\(i\)` fished by `\(f\)`)]
 + Hybrid method used to tune `\(F\)` and generate `\(C_{pred}\)`, using total mortality (incl. discard, **Eqs 19:24**)
+
+--
+
 **Eq 17**
 + Baranov (Ricker, 1975): catches occur by fleets `\(f\)` in sub-areas `\(i\)`, and accrue to mgmt regions `\(m\)`.
 + `\(\phi_{if}\)` determines whether or not `\(f\)` exploits `\(i\)`
@@ -400,7 +437,10 @@ Part of the rationale is that we would otherwise need to track individual growth
 + `\(\omega^i_a\)` is the eigenvector of the movement transition matrix
 + The entry for `\(\omega^i_0\)` is an estimated parameter
 + `\(\tau_{ik}\)` is pre-specified distribution of recruits from `\(k\)` to nested sub-areas `\(i\)`
+
+
 --
+
 + .inverse[Likely want to but some variation around one or both of these]
 ---
 
@@ -414,15 +454,22 @@ background-image: url("./img/joe2.jpg")
 background-size: cover
 &lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;
 # .inverse[Take a break?]
-## .inverse[Up next: Reference points, Forecasting, and other things that require consideration]
+## .inverse[Up next: Reference points, forecasting, and "misc"]
 
 
 ---
 # Reference Points 
+**Eqs 38:43**
++ Calculated for each mgmt region
++ Use time-averaged selex for each fleet within `\(m\)`
++ Summations as needed
 
+--
+
++ AEP: "[Reference Points in Spatial Models] are an active area of research."
 ---
 # Forecasting 
-## Observation Uncertainty
+## Observation Error
 + Resample comps, surveys
 + .inverse[Fix catches to average of previous 5 years, or use current ABCs, or...]
 
@@ -431,8 +478,7 @@ background-size: cover
 + If we implement a bias-correction ramp, set `\(b_y\)` (penalty) to 0.5 for projected years
 + Any changes to demography?
 ---
-# Things I haven't thought through yet (in detail)
-+ .inverse[Forecasting]
+# Other things I haven't thought through yet (in detail)
 + .inverse[Aging Error]
 + .inverse[Data Weighting]
 + .inverse[Expansions]
@@ -451,6 +497,8 @@ background-size: cover
 ---
 background-image: url("./img/thankyou.jpg")
 background-size: cover
+&lt;Br&gt;&lt;br&gt;&lt;Br&gt;&lt;br&gt;
+# .inverse[Thank you!]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

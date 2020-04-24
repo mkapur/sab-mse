@@ -42,12 +42,18 @@ layout: true
 knitr::include_graphics("img/RawIndices_TM.PNG")
 ```
 
+
+???
+outward motivation was that we had seen syncronous trends across surveys
+
 ---
 # Motivation
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
 knitr::include_graphics("img/RawIPHC_TM.PNG")
 ```
 
+???
+and at the time of our tech memo, it looked like synchronous decliens (here of cours is the IPHC survey which isn't used)
 
 ---
 
@@ -57,6 +63,13 @@ Synchronous trends (incl. declines) in relative abundance
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
 knitr::include_graphics("img/figure2.png")
 ```
+
+???
+
+nevertheless those survey trends persist into model estimates of SSB; top row is five candidate OMs from BC, bottom left is recent AK assessment and right is CC assessment
+
+- see if combining surveys gives coherent picture (there might be something spatial happening)
+- wanted to do this for use in OM
 
 ---
 
@@ -77,6 +90,8 @@ $$
 + $\sigma_m^2(c_i)$ is residual variation for each sample
 
 ???
+obv more than jsut this equation, but the underlying principal is that est biomass is a combination of probability of encountering and capturing,
+and also space & time matters
 Originally we thought we couldn't, but assuming BC encounters everything
 
 ---
@@ -86,7 +101,41 @@ Originally we thought we couldn't, but assuming BC encounters everything
 + $\lambda_f = log( \frac{q_f}{q_{f_{ref}}})$
 + this is to generate survey estimates; not committed to using $\hat q_f$ in OM
 
+???
 
+CBP – everyone’s doing it
+
+Thorson in prep, same data sources
+
+Idea is working with overlapping stuff but want to stictch together
+
+Assumes that biological differences independent of management boundaries
+
+
+
+Important underpinning is q, for same reasons we did time blocks, highly influential for biomass
+
+Select a ref fleet, estimate log ratio of catch for all others vs reference
+
+Trap survey has very different values for “effort”, not km2
+
+First month of data, having massive problems with estimation (order of magnitude), but…
+
+
+
+
+
+
+
+For non-overlapping surveys, however, the model cannot estimate catchability via average differences in catch-rate at the same location and time. 
+
+It therefore informs estimated differences in catchability via the correlation in density between nearby locations that are sampled in the same year. 
+
+We’re lucky that we have some overlap
+
+
+
+This is because we use log link for ni and wi.
 ---
 # Methods III
 
@@ -117,6 +166,12 @@ knitr::include_graphics("img/datamap_size.png")
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 800}
 knitr::include_graphics("img/compare_all.png")
 ```
+
+???
+AK AND BC ASSESSMENT have been multiplied by 1000 to show here; VAST is very clear that it can at best reproduce TREND, not scale. I in turn had to divide all inputs by 1000.
+
+Recall it'll get treated as relabund in OM so not too concerned.
+
 ---
 ### VAST Index: Including "All Areas"
 ```{r, echo = -1, eval = TRUE, out.height=400, out.width= 800}
@@ -134,7 +189,17 @@ you'll see a relabeled version of this in OM talk
 + Migration GOA $\rightarrow$ EBS (unlikely due to age structure)
 + Cold pool (yet only recently in EBS)
 + Increased recruitment in EBS/pulses of large cohorts (e.g. 2016 incoming)
-+ Oceanographic & fishery pressures (decline in $L_\infty$ of late)
++ Change in fishery or demography (decline in $L_\infty$ of late)
 + Synergies of movement, recruitment, and oceanography
 ]
+
+???
+looking fwd to climate drivers discussion
+
+
+---
+background-image: url("./img/thankyou2.jpg")
+background-size: cover
+<Br><br><Br><br>
+# .inverse[Thank you!]
 

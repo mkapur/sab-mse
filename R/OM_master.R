@@ -23,25 +23,25 @@ lencomps <-  read.csv("./input/cleaned/clean_lencomps.csv") ## made in dataprep.
 NFleets <- sum(NsurveyFleets,NfisheryFleets)
 
 ## Structure
-Nareas <- 7 ## number of modeled areas
-startyr <- min(ts$year)               
-endyr <- YEAR <- max(ts$year)           
-nyears <- length(syr:lyr)               
-rec_age <- min(waa$age)               # recruitment age                  
-plus_group <- max(waa$age)            # plus group age
-nage <- length(rec_age:plus_group)    # number of ages
-nlenbin <- length(unique(len$length_bin)) # number of length bins - poss vary by area
-nsex <- 2                 # single sex or sex-structured
-nproj <- 1                # projection years *FLAG* eventually add to cpp file, currently just for graphics
-include_discards <- TRUE  # include discard mortality, TRUE or FALSE
-tmp_debug <- TRUE         # Temporary debug flag, shut off estimation of selectivity pars
-
-# Model switches
-rec_type <- 1     # Recruitment: 0 = penalized likelihood (fixed sigma_r), 1 = random effects
-slx_type <- 1     # Selectivity: 0 = a50, a95 logistic; 1 = a50, slope logistic
-comp_type <- 0    # Age comp likelihood (not currently developed for len comps): 0 = multinomial, 1 = Dirichlet-multinomial
-spr_rec_type <- 1 # SPR equilbrium recruitment: 0 = arithmetic mean, 1 = geometric mean, 2 = median (not coded yet)
-M_type <- 0       # Natural mortality: 0 = fixed, 1 = estimated with a prior
+# Nareas <- 7 ## number of modeled areas
+# startyr <- min(ts$year)               
+# endyr <- YEAR <- max(ts$year)           
+# nyears <- length(syr:lyr)               
+# rec_age <- min(waa$age)               # recruitment age                  
+# plus_group <- max(waa$age)            # plus group age
+# nage <- length(rec_age:plus_group)    # number of ages
+# nlenbin <- length(unique(len$length_bin)) # number of length bins - poss vary by area
+# nsex <- 2                 # single sex or sex-structured
+# nproj <- 1                # projection years *FLAG* eventually add to cpp file, currently just for graphics
+# include_discards <- TRUE  # include discard mortality, TRUE or FALSE
+# tmp_debug <- TRUE         # Temporary debug flag, shut off estimation of selectivity pars
+# 
+# # Model switches
+# rec_type <- 1     # Recruitment: 0 = penalized likelihood (fixed sigma_r), 1 = random effects
+# slx_type <- 1     # Selectivity: 0 = a50, a95 logistic; 1 = a50, slope logistic
+# comp_type <- 0    # Age comp likelihood (not currently developed for len comps): 0 = multinomial, 1 = Dirichlet-multinomial
+# spr_rec_type <- 1 # SPR equilbrium recruitment: 0 = arithmetic mean, 1 = geometric mean, 2 = median (not coded yet)
+# M_type <- 0       # Natural mortality: 0 = fixed, 1 = estimated with a prior
 
 
 ## Create dataframes, similar to VAST 
@@ -64,7 +64,7 @@ surveys <- load("input/temp/cc_surv_2020-04-17.Rdata") #read.ices("./input/ices_
 
 ## format data 
 dat2 <- makeDat(fleets = cn,
-                surveys=surveys,
+                surveys=surveys)
                       # prop.mature=mo, 
                       # stock.mean.weight=sw, 
                       # catch.mean.weight=cw, 

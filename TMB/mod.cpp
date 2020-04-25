@@ -1,3 +1,7 @@
+// # Original: jane.sullivan1@alaska.gov
+// mod: M kapur kapurm@uw.edu; help from G Adams
+// # Last updated Apr 2020
+
 #include <TMB.hpp>
 // #define TMB_LIB_INIT R_init_stockassessment
 #include "./include/SAM.hpp" // call everything in include/

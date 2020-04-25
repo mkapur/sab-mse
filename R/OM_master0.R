@@ -1,7 +1,7 @@
 ## OM_Master.R
 ## M S KAPUR 
 ## Generate data, condition and export based on OM config, calling functions.R and TMB model XX
-
+## deprecated: works with commfish/seak @jane.sullivan1@alaska.gov
 ## Load packages and functions
 source('./R/presets.R') 
 mapply(source, list.files("./R/functions", pattern = ".R", full.names=TRUE))

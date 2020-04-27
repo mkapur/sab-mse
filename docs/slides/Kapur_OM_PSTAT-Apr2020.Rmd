@@ -330,10 +330,12 @@ $L_{y+1,\gamma,a}^i=L_{y,\gamma,a}^i+(L_{\infty,\gamma}^i-L_{y,\gamma,a}^i)\left
 **Eq 2**
 + Growth indexed by stock $k$ via Kapur et al. (2020)
 + Plus group via weighted average **Eq 3**
-+ .inverse[Plus group for length: 50cm?]
++ .inverse[Maximum length bin: 50cm?]
 
-?? initial growth not in there yet, likely as in SS
-?? linear growth before a certain age $L_{0, \gamma,a} = L_\infty + 
+???
+
+initial growth not in there yet, likely as in SS
+linear growth before a certain age $L_{0, \gamma,a} = L_\infty + 
 
 ---
 # Growth II [after movement]

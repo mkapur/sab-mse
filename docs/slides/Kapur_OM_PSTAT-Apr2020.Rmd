@@ -223,11 +223,20 @@ Note that these are novel "fleets" not equivalent to survey comps fleets.
 knitr::include_graphics("./img/OMGrowthCurves.PNG")
 ```
 
-$\sigma_G$ now at individual strata
-.small[
+$\sigma_G$ .small[ now at individual strata
 + Movement & Maturity from collaborators
 + We can discuss $h$, $M_a$ et al. once dynamics are introduced
 ]
+
+
+---
+background-image: url("./img/joe1.jpg")
+background-size: cover
+<Br><Br><Br><Br><Br><Br>
+# .inverse[Take a break?]
+## .inverse[Up next: Data Generation & OM Conditioning]
+
+
 ---
 
 background-image: url("https://www.thespruceeats.com/thmb/nsjMWi7TBf7AVMBFulYM3XQOYiQ=/2400x1350/smart/filters:no_upscale()/bowl-chili-98839917-56a8c4ab3df78cf772a0723d.jpg")
@@ -253,13 +262,6 @@ Time series of...
 ???
 1st three things are basically estimates of the data we put in
 
-
----
-background-image: url("./img/joe1.jpg")
-background-size: cover
-<Br><Br><Br><Br><Br><Br>
-# .inverse[Take a break?]
-## .inverse[Up next: Conditioning & OM dynamics]
 
 ---
 background-image: url("https://media.giphy.com/media/10uVasOeFs6U92/giphy.gif")
@@ -402,9 +404,7 @@ ${\Omega}_{y,\gamma,a}^f=\beta_3^{y,f,\gamma,a}\left(1+exp(-a-(\frac{\beta_1^{y,
 
 ---
 # Retained Catches
-.large[
 $C_y^{m,f}=\sum_{i\epsilon m}\sum_{\gamma}{\sum_{a}{\phi_{if}w}_{\gamma,a}^f\frac{s_{\gamma,a}^fF_y^f\mathrm{\Omega}_{y,\gamma,a}^f}{Z_{y,\gamma,a}^i}N_{y,\gamma,a}^i(1-e^{-Z_{y,\gamma,a}^i})}$
-]
 
 --
 

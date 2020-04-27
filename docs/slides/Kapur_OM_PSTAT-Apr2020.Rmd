@@ -330,7 +330,7 @@ $L_{y+1,\gamma,a}^i=L_{y,\gamma,a}^i+(L_{\infty,\gamma}^i-L_{y,\gamma,a}^i)\left
 **Eq 2**
 + Growth indexed by stock $k$ via Kapur et al. (2020)
 + Plus group via weighted average **Eq 3**
-+ .inverse[Maximum length bin: 50cm?]
+
 
 ???
 
@@ -363,7 +363,7 @@ $w_{\gamma,l}^i=\alpha_\gamma^i{\bar{L_l}}^{\beta_\gamma^i}$
 + The tilde indicates mid-year biomass, used for samples; similar calc. for start of year using $\textbf{L}_{y,\gamma,a,l}^i$
 + $\alpha, \beta$ .inverse[vary by stock]
 + different $w_a$ for captured fish
-
++ .inverse[Maximum length bin: 50cm?]
 ---
 # Reproduction I
 $R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}$ 

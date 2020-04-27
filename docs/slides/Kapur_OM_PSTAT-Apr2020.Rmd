@@ -223,7 +223,8 @@ Note that these are novel "fleets" not equivalent to survey comps fleets.
 knitr::include_graphics("./img/OMGrowthCurves.PNG")
 ```
 
-$\sigma_G$ .small[ now at individual strata
+$\sigma_G$ .xsmall[ now at individual strata]
+.xsmall[
 + Movement & Maturity from collaborators
 + We can discuss $h$, $M_a$ et al. once dynamics are introduced
 ]

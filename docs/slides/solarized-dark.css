@@ -28,6 +28,7 @@ body {
 }
 .large { font-size: 130% }
 .small { font-size: 75% }
+.xsmall { font-size: 60% }
 h1, h2, h3 {
   font-family: Helvetica;
   font-weight: normal;

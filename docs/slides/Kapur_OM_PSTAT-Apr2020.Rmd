@@ -229,7 +229,18 @@ $\sigma_G$ .xsmall[ now at individual strata]
 + We can discuss $h$, $M_a$ et al. once dynamics are introduced
 ]
 
+---
+# .small[Data Inputs: Movement placeholder]
+Can be binned, but ideally age-specific
+Currently $X^{ij}_a$ in OM; would require down-scaling from $X^{m}$
 
+---
+# .small[Data Inputs: Maturity placeholder]
+```{r, echo = -1, eval = TRUE, out.height=350, out.width= 500}
+knitr::include_graphics("./img/Mat_fit6.png")
+```
+
+$E_a^k$ is desired -- looks like Ben et al. are close!
 ---
 background-image: url("./img/joe1.jpg")
 background-size: cover

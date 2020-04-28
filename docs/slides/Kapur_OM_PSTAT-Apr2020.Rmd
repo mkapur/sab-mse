@@ -240,7 +240,7 @@ $\sigma_G$ .xsmall[ now at individual strata]
 ---
 # .small[Data Inputs: Maturity placeholder]
 ```{r, echo = -1, eval = TRUE, out.height=350, out.width= 500}
-knitr::include_graphics("./img/Mat_fit6.png")
+knitr::include_graphics("./img/Mat_fit6.PNG")
 ```
 
 $E_a^k$ is desired -- looks like Ben et al. are close!

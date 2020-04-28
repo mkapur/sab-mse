@@ -231,9 +231,12 @@ $\sigma_G$ .xsmall[ now at individual strata]
 
 ---
 # .small[Data Inputs: Movement placeholder]
-Can be binned, but ideally age-specific
-Currently $X^{ij}_a$ in OM; would require down-scaling from $X^{m}$
++ Can be binned, but ideally age-specific
++ *Priority from the OM standpoint* is to get movement @ sub-areas
 
+--
+
++ Currently $X^{ij}_a$ in OM; would require down-scaling from $X^{m}$
 ---
 # .small[Data Inputs: Maturity placeholder]
 ```{r, echo = -1, eval = TRUE, out.height=350, out.width= 500}

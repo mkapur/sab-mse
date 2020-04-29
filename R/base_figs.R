@@ -43,6 +43,11 @@ regLims <- data.frame(ymax = c(65,65,65,65,50,49,36),
                       xmax = c(-145,-132, -130, rep(-120,3),-115), 
                       xmin = c(-180,-145, -132, rep(-130,4)) )
 
+lukeregLims <- data.frame(ymax = c(65, 65, 65, 50.5, 49,  36),
+                      ymin = c(50.5, 50.5, 50.5, 49, 36, 30), 
+                      xmax = c(-147, -132 ,-115,  -115, -115, -115), 
+                      xmin = c(-180, -147, -132, -132, -132, -132 ))
+
 mgmtLims <- data.frame(ymax = c(65, 65, 49),
                       ymin = c(49, 49, 30), 
                       xmax = c(-180, -115, -115), 
@@ -52,6 +57,11 @@ demoLims <- data.frame(ymax = c(65,65,65,50,36),
                        ymin = c(50,50,50,36,30), 
                        xmin = c(-180,-145, -130,-130,-130), 
                        xmax = c(-145,-130, -115, -115, -115))
+
+lukeLims <- data.frame(ymax = c(65,65,65,50.5,36),
+                       ymin = c(50.5,50.5,49,36,30), 
+                       xmin = c(-180,-147, -132,-132,-132), 
+                       xmax = c(-147,-115, -115, -115, -115))
 
 ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group), 
                         fill = 'grey22') +
@@ -80,24 +90,52 @@ ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group),
   geom_rect(data = demoLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
   fill = NA , size = 1, colour = 'black',linetype = 'dashed', alpha = 0.2) +
 
-  # ## OM SUB AREAS
-  geom_rect(data = regLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
-            fill = rev(cbbPalette[1:7]), size = 1, colour = NA, alpha = 0.3) +
-  geom_label(aes(
-      x = c(rep(-125, 4), -131.5, -140, -155),
-      y = c(33, 40, 49.5, rep(53, 4)),
-      label = c("C1", "C2", "B1", "B2", "B3", "A2", "A1")
-    ),
-    size = 5,
-    fill = cbbPalette[c(1:7)],
-    color = c("grey88", rep('black', 3), 'grey88', rep('black',2))
-  ) +
+  ## line to delete
+  # geom_vline(xintercept = -130, col = 'blue', lwd = 1.1) +
+  
+  ## lines to shift
+  geom_vline(xintercept = -145, col = 'green', lwd = 1.1) +
+  geom_hline(yintercept = 50, col = 'green', lwd = 1.1) +
+  
+  ## LUKE'S PROPOSAL
+  # geom_rect(data = lukeLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+  #           fill = NA , size = 1, colour = 'blue',linetype = 'dotted', alpha = 0.2) +
+  
+
+  
+  ## USING GROWTH PAPER
+  ## OM SUB AREAS
+  # geom_rect(data = regLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+  #           fill = rev(cbbPalette[1:7]), size = 1, colour = NA, alpha = 0.3) +
+  # geom_label(aes(
+  #     x = c(rep(-125, 4), -131.5, -140, -155),
+  #     y = c(33, 40, 49.5, rep(53, 4)),
+  #     label = c("C1", "C2", "B1", "B2", "B3", "A2", "A1")
+  #   ),
+  #   size = 5,
+  #   fill = cbbPalette[c(1:7)],
+  #   color = c("grey88", rep('black', 3), 'grey88', rep('black',2))
+  # ) +
+
+## W Luke's Proposal
+# geom_rect(data = lukeregLims, aes(xmin = xmin, ymin = ymin,
+#                                   xmax = xmax, ymax = ymax),
+#           fill = rev(cbbPalette[1:6]), size = 1, colour = NA, alpha = 0.3) +
+#   geom_label(aes(
+#     x = c(rep(-125, 4), -140, -155),
+#     y = c(33, 40, 49.5, rep(53, 3)),
+#     label = c("C1", "C2", "B1",  "B2", "A2", "A1")
+#   ),
+#   size = 5,
+#   fill = cbbPalette[c(1:6)],
+#   color = c("grey88", rep('black', 3), 'grey88', rep('black',1))
+#   ) +
 
   labs(x = "", y = "") +
   coord_quickmap()  
 
 ggsave(plot = last_plot(),
-       file = paste0("./_writing/figures/Fig1_strata_mapsC.png"),
+       file = paste0("./docs/slides/img/luke3.png"), #paste0("./_writing/figures/Fig1_strata_mapsC.png"),
        width = 10, height = 8, units = 'in', dpi = 720)
 
 

@@ -20,7 +20,39 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE,fig.align='center',
                       comment = NA, rows.print = 16)
 ```
 
+
+# Luke's Spatial Proposal 
+## Original demographic breakpoints
+Leads to 7 sub areas
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
+knitr::include_graphics("img/Fig1_strata_mapsB.png")
+```
+
 ---
+
+# Luke's Spatial Proposal 
+## Delete break @ 130W
+
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
+knitr::include_graphics("img/luke2.png")
+```
+
+---
+# Luke's Spatial Proposal 
+## Shift these to match NMFS boundaries and GMU areas
+
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
+knitr::include_graphics("img/luke3.png")
+```
+
+---
+# Luke's Spatial Proposal 
+## Resultant new sub-areas (6)
+```{r, echo = -1, eval = TRUE, out.height=400, out.width= 500}
+knitr::include_graphics("img/luke1.png")
+```
+---
+
 # .small[Research Questions from Maia's PhD Proposal]
 
 

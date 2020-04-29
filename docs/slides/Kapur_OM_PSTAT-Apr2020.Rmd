@@ -381,7 +381,7 @@ $w_{\gamma,l}^i=\alpha_\gamma^i{\bar{L_l}}^{\beta_\gamma^i}$
 + .inverse[Maximum length bin: 50cm?]
 ---
 # Reproduction I
-$R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}$ 
+$R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h^k\right)+S_y^k(5h^k-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}$ 
 
 $S_y^k=\sum_{a}{\phi_{ik}N_{y,\gamma=female,a}^iw_{y,\gamma=female,a}^kE_a^k}$ 
 
@@ -403,7 +403,8 @@ $R_y^i=\tau_{ik}R_y^k$
 ---
 # Reproduction III
 .large[
-$R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h\right)+S_y^k(5h-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}$ ]
+$R_y^k=\frac{4h^kR_0^kS_y^k}{S_0^k\left(1-h^k\right)+S_y^k(5h^k-1)}e^{-0.5\sigma_R^2+{\widetilde{R}}_y^k}$ 
+]
 
 **Eq 12**
 + Steepness $h^k$ .inverse[estimated with penalty/as hyper-parameter?]

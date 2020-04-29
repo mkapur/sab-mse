@@ -121,8 +121,11 @@ What is the degree of bias or error in estimated management quantities for sable
 ]
 
 ???
+
 This is accomplished by comparing EMs that do or don't match the OM spatial structure. Could also be done using an EM that matches the OM, vs regional assessments.
 
+[for next slide]
+Develop HCRs and see if we can get better performance metrics using spatial OM + EM vs spatial OM + current mgmt framework
 
 ---
 # Research Questions III
@@ -136,8 +139,9 @@ This is accomplished by comparing EMs that do or don't match the OM spatial stru
 + Are there particular combinations of harvest control rules and spatial assessment frameworks that would reduce undesirable OR preferable outcomes for the sablefish fishery or population? 
 ]
 
-??? 
-Develop HCRs and see if we can get better performance metrics using spatial OM + EM vs spatial OM + current mgmt framework
+
+
+
 
 ---
 # .small[Thoughts Arising w.r.t Estimation Models I]

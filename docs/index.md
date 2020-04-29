@@ -9,6 +9,8 @@ These are also hosted on the team Google Drive.
 
 [Operating Model Overview @ PSTAT Apr 2020](slides/Kapur_OM_PSTAT-Apr2020.html)
 <br>
+[Research Questions & Estimation Model Thoughts @ PSTAT Apr 2020 Day 2](slides/Kapur_Day2_PSTAT-Apr2020.html)
+<br>
 [Rangewide Index @ PSTAT Apr 2020](slides/Kapur_RangewideSABIdx.html)
 
 # Docs

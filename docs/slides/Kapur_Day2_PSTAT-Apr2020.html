@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>PSTAT Apr Meeting Day 2</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Maia Sosa Kapur kapurm@uw.edu" />
+    <meta name="date" content="2020-04-29" />
+    <link rel="stylesheet" href="solarized-dark.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# PSTAT Apr Meeting Day 2
+## Research Questions &amp; EM Talking Points
+### Maia Sosa Kapur <a href="mailto:kapurm@uw.edu">kapurm@uw.edu</a>
+### 29 Apr 2020
+
+---
+
+
+
+
+---
+# Topics herein
+
++ Luke's spatial proposal (decrease # subareas)
++ Research questions from my PhD proposal
++ EM Scenarios
++ Performance metrics
+
+???
+2nd and third are place to discuss Brendan's suggestion of hearing from AEP/Dan/Aaron on other questions, directions
+
+# Luke's Spatial Proposal 
+## Original demographic breakpoints
+Leads to 7 sub areas
+&lt;img src="img/Fig1_strata_mapsB.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Luke's Spatial Proposal 
+## Delete break @ 130W
+
+&lt;img src="img/luke2.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+# Luke's Spatial Proposal 
+## Shift these to match NMFS boundaries and GMU areas
+
+&lt;img src="img/luke3.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+# Luke's Spatial Proposal 
+## Resultant new sub-areas (6)
+&lt;img src="img/luke1.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+
+---
+## Close up of BC
+&lt;img src="img/BC_lisa.jpg" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+???
+
+My thoughts:
+implications of "disregarding" growth findings
+keep in mind that movement and breaks aren't necessarily incogruous - note how the 49th "parallel" is angled in the projected image, as should the 50th parallel, etc
+But, no matter what including the 130* breakpt cuts a sliver of BC out so if they are against it no problem
+---
+
+# .small[Research Questions from Maia's PhD Proposal]
+
+
++ .inverse[What are the consequences of a spatially-explicit, range-wide assessment model for NE Pacific sablefish?]
+
+???
+
+split this up into the question and tool (models/scenarios) used to answer it
+
+---
+
+# Research Questions I
+
+.inverse[[The present OM]]
+
++ Does such an operating model produce similar or different population dynamics as suggested by the current regional assessments? 
+
+---
+
+&lt;img src="./img/prop_fig3.PNG" width="400" height="400" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+# Research Questions II
+
+.inverse[[EMs with spatial structure similar to/distinct from the OM]]
+
+.pull-left[![](img/prop_fig3.PNG)]
+
+???
+
+Ignore mention of SS etc
+
+--
+
+.pull-right[ 
+What is the degree of bias or error in estimated management quantities for sablefish &lt;br&gt; if the spatial structure in the assessment diverges from "reality"? 
+
+]
+
+???
+
+This is accomplished by comparing EMs that do or don't match the OM spatial structure. Could also be done using an EM that matches the OM, vs regional assessments.
+
+[for next slide]
+Develop HCRs and see if we can get better performance metrics using spatial OM + EM vs spatial OM + current mgmt framework
+
+---
+# Research Questions III
+.inverse[[EMs with spatial structure similar to/distinct from the OM]]
+
+.pull-left[![](img/prop_fig3.PNG)]
+
+--
+
+.pull-right[
++ Are there particular combinations of harvest control rules and spatial assessment frameworks that would reduce undesirable OR preferable outcomes for the sablefish fishery or population? 
+]
+
+
+
+
+
+---
+# .small[Thoughts Arising w.r.t Estimation Models I]
+
++ "Current management framework" `\(\neq\)` "A regional assessment model", e.g. BC has its own MP which involves an OM and Schaefer model
+
+--
+
++ Will need to decide on baseline for "current management" -- print data from OM and hand to regional models/MPs? Or use custom EM?
+
+
+---
+# .small[Thoughts Arising w.r.t Estimation Models II]
+
+Likely EM Scenarios* 
++ A near-match to the OM
++ A simplification of the OM 
++ Regional assessments (see previous slide)
++ Panmictic .inverse(is this high priority?)]
++ .inverse[others?]
+
+--
+
+*note that much work has been done on spatial mismatch in general, so a full crosswise study may be retracing others' steps
+---
+# Performance Metrics
++ Performance metrics: start simple and steal from others. 
+Ideas:
+AAV in catch (limit this),
+Directed yield (maximize this)
+Minimize discard mortality
+Keep biomass above trigger limits
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  /* Replace <script> tags in slides area to make them executable
+   *
+   * Runs after post-processing of markdown source into slides and replaces only
+   * <script>s on the last slide of continued slides using the .has-continuation
+   * class added by xaringan. Finally, any <script>s in the slides area that
+   * aren't executed are commented out.
+   */
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container:not(.has-continuation) script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+  var scriptsNotExecuted = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container.has-continuation script'
+  );
+  if (!scriptsNotExecuted.length) return;
+  for (var i = 0; i < scriptsNotExecuted.length; i++) {
+    var comment = document.createComment(scriptsNotExecuted[i].outerHTML)
+    scriptsNotExecuted[i].parentElement.replaceChild(comment, scriptsNotExecuted[i])
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>A Range-wide Index of Relative Abundance for NE Pacific Sablefish</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="M Sosa Kapur kapurm@uw.edu" />
+    <link href="libs/font-awesome-5.3.1/css/fontawesome-all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="solarized-dark.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# A Range-wide Index of Relative Abundance for NE Pacific Sablefish
+### M Sosa Kapur <a href="mailto:kapurm@uw.edu">kapurm@uw.edu</a>
+### PSTAT Meeting Apr 2020
+
+---
+
+
+
+
+
+
+
+layout: true
+
+.header[<i class="fab  fa-github "></i> @mkapur/sab-idx]
+
+
+???
+13 slides
+
+---
+
+# Motivation
+&lt;img src="img/RawIndices_TM.PNG" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+
+???
+outward motivation was that we had seen syncronous trends across surveys
+
+---
+# Motivation
+&lt;img src="img/RawIPHC_TM.PNG" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+???
+and at the time of our tech memo, it looked like synchronous decliens (here of cours is the IPHC survey which isn't used)
+
+---
+
+# Motivation
+Synchronous trends (incl. declines) in relative abundance
+
+&lt;img src="img/figure2.png" width="500" height="400" style="display: block; margin: auto;" /&gt;
+
+???
+
+nevertheless those survey trends persist into model estimates of SSB; top row is five candidate OMs from BC, bottom left is recent AK assessment and right is CC assessment
+
+- see if combining surveys gives coherent picture (there might be something spatial happening)
+- wanted to do this for use in OM
+
+---
+
+# Methods I
++ VAST (Thorson, 2019)
+Probability distribution function for biomass data `\(b_i\)`
+$$
+ \begin{equation}
+    Pr(B = b_i)=
+    \begin{cases}
+    1-r_1(i) &amp; \text{if}\ B=1 
+    \newline
+    r_1(i) \times \Gamma(B = b_i | r_2(i), \sigma_m^2(c_i))  &amp; \text{if}\ B &gt;0
+    \end{cases}
+  \end{equation}
+$$
++ `\(r_1\)` is encounter rate (logit-link); `\(r_2\)` is capture probability for sample `\(i\)` (gamma-distributed)
++ `\(\sigma_m^2(c_i)\)` is residual variation for each sample
+
+???
+obv more than jsut this equation, but the underlying principal is that est biomass is a combination of probability of encountering and capturing,
+and also space &amp; time matters
+Originally we thought we couldn't, but assuming BC encounters everything
+
+---
+# Methods II
++ "Calibration by Proximity" (CBP, Thorson et al., in prep)
++ estimates log-ratio of catchability between surveys and reference
++ `\(\lambda_f = log( \frac{q_f}{q_{f_{ref}}})\)`
++ this is to generate survey estimates; not committed to using `\(\hat q_f\)` in OM
+
+???
+
+CBP – everyone’s doing it
+
+Thorson in prep, same data sources
+
+Idea is working with overlapping stuff but want to stictch together
+
+Assumes that biological differences independent of management boundaries
+
+
+
+Important underpinning is q, for same reasons we did time blocks, highly influential for biomass
+
+Select a ref fleet, estimate log ratio of catch for all others vs reference
+
+Trap survey has very different values for “effort”, not km2
+
+First month of data, having massive problems with estimation (order of magnitude), but…
+
+
+
+
+
+
+
+For non-overlapping surveys, however, the model cannot estimate catchability via average differences in catch-rate at the same location and time. 
+
+It therefore informs estimated differences in catchability via the correlation in density between nearby locations that are sampled in the same year. 
+
+We’re lucky that we have some overlap
+
+
+
+This is because we use log link for ni and wi.
+---
+# Methods III
+
++ Experimented with 100, 250, 500 and 1000 knots; retained 500 due to runtime
++ Sensitivity to alternative 'reference fleet'
++ (baseline reference fleet = AK Domestic LL survey)
++ BC StRs as reference could not converge
++ WCGBTS as reference was very precise for WC but CIs included zero for other regions
+
+
+???
+
+This is likely due to the fact that the trap survey virtually never captures zero sablefish, rendering the catchability of encountered biomass in that region so dissimilar to others that the log-ratios could not be estimated.  Re-running the base model with the WCGBTS survey as reference produced a converged model (Figure 4) with very precise trends for the West Coast, nearly identical to those used in the assessment for that survey. However, model estimates for the Triennial survey were less similar to the assessment, and those for AK and BC were very imprecise (with standard errors including zero) despite mean trends agreeing largely with the previous values used in the assessments. This is likely due to the fact that the WCGBTS does not contain data for the first few decades in the standardization, so estimated log-ratios are based on inferred (and thus more uncertain) values. 
+---
+# Data Inputs
+Multiple surveys, coverage 1970-2018
+&lt;img src="img/datamap_size.png" width="300" height="400" style="display: block; margin: auto;" /&gt;
+---
+
+# Data Treatment
++ GOA Trawl survey &lt; 500m, remove 1984 &amp; 1987
++ Timeblocking: Triennial before/after 1993; AK Surveys before/after 1992
+
+---
+### VAST Index: Compared to previous
+&lt;img src="img/compare_all.png" width="800" height="400" style="display: block; margin: auto;" /&gt;
+
+???
+AK AND BC ASSESSMENT have been multiplied by 1000 to show here; VAST is very clear that it can at best reproduce TREND, not scale. I in turn had to divide all inputs by 1000.
+
+Recall it'll get treated as relabund in OM so not too concerned.
+
+---
+### VAST Index: Including "All Areas"
+&lt;img src="img/Index-Biomass2.png" width="800" height="400" style="display: block; margin: auto;" /&gt;
+???
+you'll see a relabeled version of this in OM talk
+---
+.pull-left[
+![](img/NAln_density.png)
+]
+--
+.pull-right[
+.inverse[Possible causes] of NW `\(\hat \beta\)` Shift 
++ Migration GOA `\(\rightarrow\)` EBS (unlikely due to age structure)
++ Cold pool (yet only recently in EBS)
++ Increased recruitment in EBS/pulses of large cohorts (e.g. 2016 incoming)
++ Synergies of movement, recruitment, and oceanography
+]
+
+???
+looking fwd to climate drivers discussion
+
+
+---
+background-image: url("./img/thankyou.jpg")
+background-size: cover
+&lt;Br&gt;&lt;br&gt;&lt;Br&gt;&lt;br&gt;&lt;Br&gt;&lt;Br&gt;&lt;Br&gt;&lt;br&gt;&lt;Br&gt;&lt;br&gt;&lt;Br&gt;&lt;Br&gt;
+# .inverse[Thank you!]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  /* Replace <script> tags in slides area to make them executable
+   *
+   * Runs after post-processing of markdown source into slides and replaces only
+   * <script>s on the last slide of continued slides using the .has-continuation
+   * class added by xaringan. Finally, any <script>s in the slides area that
+   * aren't executed are commented out.
+   */
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container:not(.has-continuation) script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+  var scriptsNotExecuted = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container.has-continuation script'
+  );
+  if (!scriptsNotExecuted.length) return;
+  for (var i = 0; i < scriptsNotExecuted.length; i++) {
+    var comment = document.createComment(scriptsNotExecuted[i].outerHTML)
+    scriptsNotExecuted[i].parentElement.replaceChild(comment, scriptsNotExecuted[i])
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

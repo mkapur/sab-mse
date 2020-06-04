@@ -1,0 +1,512 @@
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_alpha(guide = 'none') +
+scale_y_continuous(limits = c(0,110)) +
+scale_x_continuous(limits = c(0,65)) +
+geom_line(aes(y = meanPred, col = gamREG), lwd = 1.1)+
+labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
+facet_wrap(~Sex +Period, ncol = 4)
+ggsave(plot = last_plot(),
+file = paste0("./_writing/figures/OMGrowthCurves_",Sys.Date,".PNG"),
+height = 8, width = 10, unit = 'in')
+ggplot(readRDS(paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".Rdata")),
+aes(x = Age, col = gamREG, group = gamREG)) +
+kaputils::theme_mk(base_size = 16) + theme(legend.position = 'right') +
+scale_color_manual(values = cbbPalette,
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_fill_manual(values = cbbPalette[c(1,2,4:7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_alpha(guide = 'none') +
+scale_y_continuous(limits = c(0,110)) +
+scale_x_continuous(limits = c(0,65)) +
+geom_line(aes(y = meanPred, col = gamREG), lwd = 1.1)+
+labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
+facet_wrap(~Sex +Period, ncol = 4)
+ggplot(readRDS(paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".Rdata")),
+aes(x = Age, col = gamREG, group = gamREG)) +
+kaputils::theme_mk(base_size = 16) + theme(legend.position = 'right') +
+scale_color_manual(values = cbbPalette[c(1,2,4:7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_fill_manual(values = cbbPalette[c(1,2,4:7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_alpha(guide = 'none') +
+scale_y_continuous(limits = c(0,110)) +
+scale_x_continuous(limits = c(0,65)) +
+geom_line(aes(y = meanPred, col = gamREG), lwd = 1.1)+
+labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
+facet_wrap(~Sex +Period, ncol = 4)
+ggsave(plot = last_plot(),
+file = paste0("./_writing/figures/OMGrowthCurves_",Sys.Date,".PNG"),
+height = 8, width = 10, unit = 'in')
+ggsave(plot = last_plot(),
+file = paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".PNG"),
+height = 8, width = 10, unit = 'in')
+st_read("./_writing/figures/BC_EEZ_bathy.gdb")
+BCbath <- st_read("./_writing/figures/BC_EEZ_bathy.gdb")
+ggplot(data = regions) +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+geom_sf(lwd = 1, col = 'black', fill = NA) +
+geom_sf(data= BCbath) +
+coord_sf(xlim = c(165, 245), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+ggplot(data = regions) +
+# geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+# geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+# geom_sf(lwd = 1, col = 'black', fill = NA) +
+geom_sf(data= BCbath) +
+coord_sf(xlim = c(165, 245), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+ggplot(data = regions) +
+# geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+# geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+# geom_sf(lwd = 1, col = 'black', fill = NA) +
+geom_sf(data= BCbath) +
+# coord_sf(xlim = c(165, 245), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+install.packages(marmap)
+install.packages("marmap")
+BCbath <- getNOAA.bathy(lon1 = -135, lon2 = -120,
+lat1 = 49, lat2 = 57, resolution = 10)
+library(marmap)
+BCbath <- getNOAA.bathy(lon1 = -135, lon2 = -120,
+lat1 = 49, lat2 = 57, resolution = 10)
+plot(BCbath)
+BCbath
+lines(BCangle_poly)
+splitLat <- function(sample_x, xmin, xmax, ymin, ymax){
+ydiff = ymax - ymin
+xdiff = xmax - xmin
+int = ymin - ydiff/xdiff * xmin
+split_y <- (ydiff/xdiff)*sample_x + int
+return(list(ydif, xdiff, int, split_y))
+}
+splitLat <- function(sample_x = 25, xmin, xmax, ymin, ymax){
+ydiff = ymax - ymin
+xdiff = xmax - xmin
+int = ymin - ydiff/xdiff * xmin
+# split_y <- (ydiff/xdiff)*sample_x + int
+return(list(ydiff, xdiff, int))
+}
+splitLat( xmin, xmax, ymin, ymax)
+xmin = -140 + 360
+xmax = -125 +360
+ymin = 45
+ymax = 55
+splitLat( xmin, xmax, ymin, ymax)
+splitLat <- function(sample_x = 25, xmin, xmax, ymin, ymax){
+ydiff = ymax - ymin
+xdiff = xmax - xmin
+int = ymin - ydiff/xdiff * xmin
+# split_y <- (ydiff/xdiff)*sample_x + int
+return(list(ydiff, xdiff, int))
+}
+splitLat( xmin, xmax, ymin, ymax)
+splitLat(sample_x = 25, xmin, xmax, ymin, ymax)
+ydif = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[1]]
+xdif = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[1]]
+int = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[3]]
+BCbath <- getNOAA.bathy(lon1 = -135, lon2 = -120,
+lat1 = 49, lat2 = 57, resolution = 10)
+plot(BCbath, image = TRUE)
+scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+abline(a = ydif/xdif, b = int)
+ydif/xdif
+int
+ydif
+xdif
+xmin
+xmax
+ymin
+ymax
+ydif = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[1]]
+xdif = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[2]]
+abline(a = ydif/xdif, b = int)
+ydif/xdif
+int
+xmin = -140
+xmax = -125
+ydif = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[1]]
+xdif = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[2]]
+int = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[3]]
+abline(a = ydif/xdif, b = int)
+int
+ydif/xdif
+abline(a = ydif/xdif, b = -int)
+int
+int = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[3]]
+abline(a = ydif/xdif, b = -int)
+?abline
+plot(1:100, ydif/xdif*1:100-int)
+plot(1:100, ydif/xdif*1:100+int)
+plot(-140:-120, ydif/xdif*-140:-120+int)
+scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+abline(a = ydif/xdif, b = -int, add = TRUE)
+plot(BCbath, image = TRUE)
+scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+abline(a = ydif/xdif, b = -int, add = TRUE)
+plot(BCbath, image = TRUE)
+# scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+abline(a = ydif/xdif, b = -int, add = TRUE)
+plot(BCbath, image = FALSE)
+# scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+abline(a = ydif/xdif, b = -int, col = RE)
+# scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+abline(a = ydif/xdif, b = -int, col = 'red')
+plot(BCbath)
+# scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+abline(a = ydif/xdif, b = -int, col = 'red')
+plot(-140:-120, ydif/xdif*-140:-120+int)
+lines(BCbath, add = TRUE)
+lines(BCbath)
+lines(BCbath)
+points(BCbath)
+class(BCpath)
+class(BCbath)
+ggplot(BCbath)
+head(BCbath)
+View(BCbath)
+class(plot(BCbath))
+scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+plot(BCbath)
+scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+plot(BCbath)
+scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+plot(BCbath, image = TRUE)
+scaleBathy(BCbath, deg = 2, x = "bottomleft", inset = 5)
+plot(BCbath, image = TRUE, bpal = blues(100))
+blues <- colorRampPalette(c("red","purple","blue",
+"cadetblue1","white"))
+plot(BCbath, image = TRUE, bpal = blues(100))
+BCbath <- getNOAA.bathy(lon1 = -134, lon2 = -120,
+lat1 = 435, lat2 = 57, resolution = 10)
+BCbath <- getNOAA.bathy(lon1 = -134, lon2 = -120,
+lat1 = 45, lat2 = 57, resolution = 10)
+blues <- colorRampPalette(c("red","purple","blue",
+"cadetblue1","white"))
+plot(BCbath, image = TRUE, bpal = blues(100))
+BCbath <- getNOAA.bathy(lon1 = -134, lon2 = -120,
+lat1 = 45, lat2 = 65, resolution = 10)
+plot(BCbath, image = TRUE, bpal = blues(100))
+BCbath <- getNOAA.bathy(lon1 = -140, lon2 = -120,
+lat1 = 45, lat2 = 65, resolution = 10)
+plot(BCbath, image = TRUE, bpal = blues(100))
+library(devtools)
+install_github("ericpante/marmap")
+# install_github("ericpante/marmap") ## to use with GG
+library(marmap)
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.1) + scale_fill_etopo()
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.1) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int)
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.1) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+BCbath <- getNOAA.bathy(lon1 = -140, lon2 = -120,
+lat1 = 45, lat2 = 65, resolution = 4)
+# https://stackoverflow.com/questions/27214282/add-bathymetry-lines-to-ggplot-using-marmap-package-and-getnoaa-bathy
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+# https://stackoverflow.com/questions/27214282/add-bathymetry-lines-to-ggplot-using-marmap-package-and-getnoaa-bathy
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+# scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+?autoplot
+plot(BCbath, image = TRUE)
+# https://stackoverflow.com/questions/27214282/add-bathymetry-lines-to-ggplot-using-marmap-package-and-getnoaa-bathy
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+# scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+plot(BCreg)
+plot(BCreg[[1]])
+plot(BCreg$geometry)
+xmin = -140 + 360
+xmax = -125 + 360
+ymin = 45
+ymax = 55
+xdomain <- seq(xmin,xmax, length.out = 100)
+outerLower <- matrix(c(xmin, ymin,xmax,ymin,xmax,ymax,xmin, ymin),
+ncol=2, byrow=TRUE)
+pts = list(outerLower)
+pl1 = st_polygon(pts)
+BCangle_geom <- st_sfc(list(pl1), crs = "+proj=longlat +datum=WGS84 +no_defs")
+BCangle_shape <- st_sf(BCangle_geom)
+B2 <- st_intersection(BCreg,BCangle_shape)
+plot(BCreg$geometry, B1,B2)
+plot(BCreg$geometry)
+plot(B1)
+plot(B2, add = TRUE)
+par(mfrow = c(1,3)
+plot(BCreg$geometry)
+plot(B1)
+plot(B2, add = TRUE)
+outerUpper <- matrix(c(xmin, ymin,xmin, ymax,xmax,ymax,xmin, ymin),
+ncol=2, byrow=TRUE)
+pts = list(outerUpper)
+p12 = st_polygon(pts)
+BCangle_geom <- st_sfc(list(p12), crs = "+proj=longlat +datum=WGS84 +no_defs")
+BCangle_shape <- st_sf(BCangle_geom)
+B1 <- st_intersection(BCreg,BCangle_shape)
+plot(pl1)
+plot(p12)
+plot(p12, add = TRUE)
+plot(pl1)
+plot(p12, add = TRUE)
+plot(p12, add = TRUE, fill = 'blue')
+plot(p12, add = TRUE, col = 'blue')
+par(mfrow = c(1,2))
+plot(BCreg$geometry)
+plot(pl1)
+plot(p12, add = TRUE, col = 'blue')
+ggplot(data = regions) +
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA)
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo()
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA)
+ggplot() +
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1)
+require(patchwork)
+p1 <- ggplot(data = regions) +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+geom_sf(lwd = 1, col = 'black', fill = NA) +
+coord_sf(xlim = c(165, 245), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+p2 <- autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+p1 |p2
+-140+360
+-120+360
+p1 <- ggplot(data = regions) +
+geom_sf(data = B1, fill = cbbPalette[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette[4], alpha = 0.5, color = NA) +
+geom_sf(lwd = 1, col = 'black', fill = NA) +
+coord_sf(xlim = c(220, 240), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+p1 |p2
+p2 <- autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+p1 <- ggplot(data = regions) +
+geom_sf(data = B1, fill = "blue", alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill= "gold", alpha = 0.5, color = NA) +
+geom_sf(lwd = 1, col = 'black', fill = NA) +
+coord_sf(xlim = c(220, 240), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+p1 |p2
+par(mfrow = c(1,2))
+plot(BCreg$geometry)
+plot(pl1, col = 'gold')
+plot(p12, add = TRUE, col = 'blue')
+## Standalone/Descriptive figures for manuscripts and tech memos
+## This does NOT have functions for ploting OM/EM outputs, just raw input data and maps
+## Kapur M
+library(sf)
+library(tibble)
+require(ggplot2)
+require(dplyr)
+require(patchwork)
+cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
+"#0072B2", "#D55E00", "#CC79A7", "navy", "#F0E442" )
+# cbbPalette <- c("grey22", "seagreen2", "goldenrod", "skyblue",
+## Updated F1 map of strata using Luke's approach ----
+load("./input/raw/eez_nepac_regions.rda")
+source("./R/breakpoints_map.R") ## makes the breakpoint lines & clips
+load("./input/cleaned/sub_area_clips.Rdata") ## default clips for original 7 areas
+rev(c("pink", "gold", "goldenrod2", "dodgerblue3", NA, NA
+"dodgerblue4", "grey22"))
+cbbPalette2 <- rev(c("pink", "gold", "goldenrod2", "dodgerblue3", NA, NA,
+"dodgerblue4", "grey22"))
+cbbPalette2
+cbbPalette2 <- rev(c("pink", "gold", "goldenrod2", "dodgerblue3", NA,
+"dodgerblue4", "grey22"))
+ggplot(data = regions) +
+geom_sf(data = clips[[1]], fill = cbbPalette2[7], alpha = 0.5, color = NA) +
+geom_sf(data =  clips[[2]], fill = cbbPalette2[6], alpha = 0.5, color = NA) +
+geom_sf(data = B1, fill = cbbPalette2[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette2[4], alpha = 0.5, color = NA) +
+# geom_sf(data = clips[[3]], fill = cbbPalette2[5], alpha = 0.5, color = NA) +
+# geom_sf(data = clips[[4]], fill = cbbPalette2[4], alpha = 0.5, color = NA ) +
+# geom_sf(data = clips[[5]], fill = cbbPalette2[3], alpha = 0.5, color = NA) +
+geom_sf(data = clips[[6]], fill = cbbPalette2[2], alpha = 0.5, color = NA) +
+geom_sf(data = clips[[7]], fill = cbbPalette2[1], alpha = 0.5, color = NA) +
+geom_sf(lwd = 1, col = 'black', fill = NA) +
+#
+# geom_label(data = data.frame(), aes(
+#   x = c(238, 233, 232, 233, 225, 220, 200),
+#   y = c(33, 40, 49, 51, 52, 57, 53)),
+#   label = c("C1", "C2", "B1","B2", "B3", "A2", "A1") ,
+#   # size = 5,
+#   fill = cbbPalette[c(1:7)],
+#   color = c("grey88", rep('black', 3), 'grey88', rep('black',2))) +
+#   # ) +
+coord_sf(xlim = c(165, 245), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+cbbPalette2 <- rev(c("pink", "gold", "goldenrod2", "dodgerblue2", NA,
+"dodgerblue3", "grey22"))
+ggplot(data = regions) +
+geom_sf(data = clips[[1]], fill = cbbPalette2[7], alpha = 0.5, color = NA) +
+geom_sf(data =  clips[[2]], fill = cbbPalette2[6], alpha = 0.5, color = NA) +
+geom_sf(data = B1, fill = cbbPalette2[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill = cbbPalette2[4], alpha = 0.5, color = NA) +
+# geom_sf(data = clips[[3]], fill = cbbPalette2[5], alpha = 0.5, color = NA) +
+# geom_sf(data = clips[[4]], fill = cbbPalette2[4], alpha = 0.5, color = NA ) +
+# geom_sf(data = clips[[5]], fill = cbbPalette2[3], alpha = 0.5, color = NA) +
+geom_sf(data = clips[[6]], fill = cbbPalette2[2], alpha = 0.5, color = NA) +
+geom_sf(data = clips[[7]], fill = cbbPalette2[1], alpha = 0.5, color = NA) +
+geom_sf(lwd = 1, col = 'black', fill = NA) +
+#
+# geom_label(data = data.frame(), aes(
+#   x = c(238, 233, 232, 233, 225, 220, 200),
+#   y = c(33, 40, 49, 51, 52, 57, 53)),
+#   label = c("C1", "C2", "B1","B2", "B3", "A2", "A1") ,
+#   # size = 5,
+#   fill = cbbPalette[c(1:7)],
+#   color = c("grey88", rep('black', 3), 'grey88', rep('black',2))) +
+#   # ) +
+coord_sf(xlim = c(165, 245), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+ggsave(here::here("_writing","figures", "map-regions_orthogonal.png"),
+width = 10, height = 8)
+p1 <- ggplot(data = regions) +
+geom_sf(data = B1, fill = cbbPalette2[5], alpha = 0.5, color = NA) +
+geom_sf(data = B2, fill=cbbPalette2[4], alpha = 0.5, color = NA) +
+geom_sf(lwd = 1, col = 'black', fill = NA) +
+coord_sf(xlim = c(220, 240), ylim = c(30, 65)) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+p2 <- autoplot(BCbath, geom=c("r", "c"), colour="white", size=0.05) +
+scale_fill_etopo() +
+geom_abline(slope = ydif/xdif, intercept = int, col = 'red', lwd = 1.1) +
+labs(x ="",y="")+
+theme_classic(base_size = 14)
+p1 |p2
+p1 |p2
+# Save
+ggsave(here::here("_writing","figures", "map-bc_bathy.png"),
+width = 10, height = 8)
+#
+ggplot(readRDS(paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".Rdata")),
+aes(x = Age, col = gamREG, group = gamREG)) +
+kaputils::theme_mk(base_size = 16) + theme(legend.position = 'right') +
+scale_color_manual(values = cbbPalette2[c(1,2,4:7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_fill_manual(values = cbbPalette[c(1,2,4:7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_alpha(guide = 'none') +
+scale_y_continuous(limits = c(0,110)) +
+scale_x_continuous(limits = c(0,65)) +
+geom_line(aes(y = meanPred, col = gamREG), lwd = 1.1)+
+labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
+facet_wrap(~Sex +Period, ncol = 4)
+ggplot(readRDS(paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".Rdata")),
+aes(x = Age, col = gamREG, group = gamREG)) +
+kaputils::theme_mk(base_size = 16) + theme(legend.position = 'right') +
+scale_color_manual(values = cbbPalette2[c(7,6,2,1)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_fill_manual(values = cbbPalette[c(1,2,4:7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_alpha(guide = 'none') +
+scale_y_continuous(limits = c(0,110)) +
+scale_x_continuous(limits = c(0,65)) +
+geom_line(aes(y = meanPred, col = gamREG), lwd = 1.1)+
+labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
+facet_wrap(~Sex +Period, ncol = 4)
+ggplot(readRDS(paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".Rdata")),
+aes(x = Age, col = gamREG, group = gamREG)) +
+kaputils::theme_mk(base_size = 16) + theme(legend.position = 'right') +
+scale_color_manual(values = cbbPalette2[c(1,2,6,7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_fill_manual(values = cbbPalette[c(1,2,4:7)],
+labels = c('Stock R1 (South CC)',
+'Stock R2 (North CC/South BC)',
+# 'Stock R3 (BC)',
+'Stock R4 (West BC/AK Gulf)',
+'Stock R5 (West Gulf/Aleutians)')) +
+scale_alpha(guide = 'none') +
+scale_y_continuous(limits = c(0,110)) +
+scale_x_continuous(limits = c(0,65)) +
+geom_line(aes(y = meanPred, col = gamREG), lwd = 1.1)+
+labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
+facet_wrap(~Sex +Period, ncol = 4)
+ggsave(plot = last_plot(),
+file = paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".PNG"),
+height = 8, width = 10, unit = 'in')
+parest
+rm(list = ls())

@@ -24,11 +24,11 @@ df.simple <- load_data_seasons(nseason = 1,
 sim.data.simple <- run.agebased.true.catch(df.simple)
 
 ## sanity checks
-df <- sim.data.simple$SSB %>% 
+sim.data.simple$SSB %>% 
   data.frame() %>%
   mutate('totalSSB' = X1+X2, year = as.numeric(row.names(.))) %>%
-  melt(id = 'year') 
-  ggplot(df, aes(x = year, y = value, color = variable)) + 
+  melt(id = 'year') %>%
+  ggplot(., aes(x = year, y = value, color = variable)) + 
   geom_line(size =2 ) +  theme_sleek()
   
 ## OM MODEL CONDITIONING ----
@@ -39,7 +39,7 @@ plot.figures = FALSE # Set true for printing to file
 assessment <- read.csv(here("input","data",'assessment_MLE.csv')) ## I believe this comes from SS3
 assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
 Catch.obs <- read.csv(here("input","data",'sab_totcatch.csv'))
-df <- load_data_seasons()
+df <- load_data_seasons(nspace =2)
 df$Catch <- Catch.obs$Fishery
 time <- 1
 yrinit <- df$nyear

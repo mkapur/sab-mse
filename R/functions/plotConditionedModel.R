@@ -21,11 +21,11 @@ source('load_files_OM.R')
 source('load_files.R')
 source('runfuture_OM.R')
 source('run_agebased_model_true_catch.R')
-assessment <- read.csv('data/assessment_MLE.csv')
+assessment <- read.csv('input/data/assessment_MLE.csv')
 
 #assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
-survey.obs <- read.csv('data/survey_country.csv')
-survey.ac <- read.csv('data/ac_survey_country.csv')
+survey.obs <- read.csv('input/data/survey_country.csv')
+survey.ac <- read.csv('input/data/ac_survey_country.csv')
 
 nparms <- 5
 movemax.parms <- seq(0.1,0.9, length.out = nparms)
@@ -53,7 +53,7 @@ AC.catch.tot <- AC.survey.tot <- array(NA, dim = c(df$age_maxage,df$nyear,
                                                    df$nspace,length(movemax.parms)*length(movefifty.parms)))
 survey.ml <- array(NA,dim = c(df$nyear,df$nspace,length(movemax.parms)*length(movefifty.parms)))
 
-catch.ac.obs <- read.csv('data/age_in_catch_obs.csv')
+catch.ac.obs <- read.csv('input/data/age_in_catch_obs.csv')
 standard.move <- runfuture_OM(df, 1)
 standard.move_sel <- runfuture_OM(df.2, 1)
 

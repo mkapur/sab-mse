@@ -1,6 +1,6 @@
 # Run an agebased model based on the parameters from the estimation model
 
-run.agebased.true.catch <- function(df){
+run.agebased.true.catch <- function(df, seed = 731){
   # Constant parameters
   # Initialize the stock by age and sex
   

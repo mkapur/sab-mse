@@ -1,4 +1,5 @@
 *.Rproj.*
+*Rdata
 *.docx
 *input*
 *_examples*

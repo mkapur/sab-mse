@@ -1,7 +1,8 @@
-*.Rproj*
+*.Rproj.*
 *.docx
+*input*
 *_examples*
-*_writing*
 *_presentations*
+*_writing*
 *figures/*
-*writing/*
+

@@ -1,7 +1,3 @@
-## Standalone/Descriptive figures for manuscripts and tech memos
-## This does NOT have functions for ploting OM/EM outputs, just raw input data and maps
-## Kapur M 
-
 require(ggplot2)
 require(dplyr)
 require(patchwork)
@@ -12,7 +8,6 @@ cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
 #                 "blue", "brown", "pink" )
 ## Figure 1 map of strata ----
 usa <- map_data("world") 
-
 load("C:/Users/mkapur/Dropbox/UW/sab-idx/runs/2020-01-23_nx=500_Triennial_WCGBTS_BCs_BCo_AK_DOM_LL_GOA_baseQ=AK_DOM_LL1980_2018/Data_Geostat.Rdata")
 
 survLims <-  Data_Geostat %>% 
@@ -34,19 +29,14 @@ Data_Geostat %>% filter(Region == 'BC') %>%
   summarise(round(max(Lon),10))
 
 ## load polygons  
-load(paste0("./_writing/figures/spdf_fortified_BC.Rdata"))
-load(paste0("./_writing/figures/spdf_fortified_US.Rdata"))
+load(paste0("./writing/figures/spdf_fortified_BC.Rdata"))
+load(paste0("./writing/figures/spdf_fortified_US.Rdata"))
 
 ## clockwise from A1; two for A2 
 regLims <- data.frame(ymax = c(65,65,65,65,50,49,36),
                       ymin = c(50,50,50,50,49,36,30), 
                       xmax = c(-145,-132, -130, rep(-120,3),-115), 
                       xmin = c(-180,-145, -132, rep(-130,4)) )
-
-lukeregLims <- data.frame(ymax = c(65, 65, 65, 50.5, 49,  36),
-                      ymin = c(50.5, 50.5, 50.5, 49, 36, 30), 
-                      xmax = c(-147, -132 ,-115,  -115, -115, -115), 
-                      xmin = c(-180, -147, -132, -132, -132, -132 ))
 
 mgmtLims <- data.frame(ymax = c(65, 65, 49),
                       ymin = c(49, 49, 30), 
@@ -57,11 +47,6 @@ demoLims <- data.frame(ymax = c(65,65,65,50,36),
                        ymin = c(50,50,50,36,30), 
                        xmin = c(-180,-145, -130,-130,-130), 
                        xmax = c(-145,-130, -115, -115, -115))
-
-lukeLims <- data.frame(ymax = c(65,65,65,50.5,36),
-                       ymin = c(50.5,50.5,49,36,30), 
-                       xmin = c(-180,-147, -132,-132,-132), 
-                       xmax = c(-147,-115, -115, -115, -115))
 
 ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group), 
                         fill = 'grey22') +
@@ -90,53 +75,25 @@ ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group),
   geom_rect(data = demoLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
   fill = NA , size = 1, colour = 'black',linetype = 'dashed', alpha = 0.2) +
 
-  ## line to delete
-  # geom_vline(xintercept = -130, col = 'blue', lwd = 1.1) +
-  
-  ## lines to shift
-  geom_vline(xintercept = -145, col = 'green', lwd = 1.1) +
-  geom_hline(yintercept = 50, col = 'green', lwd = 1.1) +
-  
-  ## LUKE'S PROPOSAL
-  # geom_rect(data = lukeLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
-  #           fill = NA , size = 1, colour = 'blue',linetype = 'dotted', alpha = 0.2) +
-  
-
-  
-  ## USING GROWTH PAPER
-  ## OM SUB AREAS
-  # geom_rect(data = regLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
-  #           fill = rev(cbbPalette[1:7]), size = 1, colour = NA, alpha = 0.3) +
-  # geom_label(aes(
-  #     x = c(rep(-125, 4), -131.5, -140, -155),
-  #     y = c(33, 40, 49.5, rep(53, 4)),
-  #     label = c("C1", "C2", "B1", "B2", "B3", "A2", "A1")
-  #   ),
-  #   size = 5,
-  #   fill = cbbPalette[c(1:7)],
-  #   color = c("grey88", rep('black', 3), 'grey88', rep('black',2))
-  # ) +
-
-## W Luke's Proposal
-# geom_rect(data = lukeregLims, aes(xmin = xmin, ymin = ymin,
-#                                   xmax = xmax, ymax = ymax),
-#           fill = rev(cbbPalette[1:6]), size = 1, colour = NA, alpha = 0.3) +
-#   geom_label(aes(
-#     x = c(rep(-125, 4), -140, -155),
-#     y = c(33, 40, 49.5, rep(53, 3)),
-#     label = c("C1", "C2", "B1",  "B2", "A2", "A1")
-#   ),
-#   size = 5,
-#   fill = cbbPalette[c(1:6)],
-#   color = c("grey88", rep('black', 3), 'grey88', rep('black',1))
-#   ) +
+  # ## OM SUB AREAS
+  geom_rect(data = regLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+            fill = rev(cbbPalette[1:7]), size = 1, colour = NA, alpha = 0.3) +
+  geom_label(aes(
+      x = c(rep(-125, 4), -131.5, -140, -155),
+      y = c(33, 40, 49.5, rep(53, 4)),
+      label = c("C1", "C2", "B1", "B2", "A3", "A2", "A1")
+    ),
+    size = 5,
+    fill = cbbPalette[c(1:7)],
+    color = c("grey88", rep('black', 3), 'grey88', rep('black',2))
+  ) +
 
   labs(x = "", y = "") +
   coord_quickmap()  
 
 ggsave(plot = last_plot(),
-       file = paste0("./docs/slides/img/luke3.png"), #paste0("./_writing/figures/Fig1_strata_mapsC.png"),
-       width = 10, height = 8, units = 'in', dpi = 720)
+       file = paste0("./writing/figures/Fig1_strata_mapsC.png"),
+       width = 10, height = 8, units = 'in', dpi = 420)
 
 
 ## Figure 2 panel of OM Indices (made by me with VAST) ----
@@ -158,7 +115,7 @@ for(i in 1:nrow(vastc)){
 vastc <- vastc %>%
   filter(Fleet != 'Eastern_Bering_Sea' & Fleet != 'AllAreas') 
 
-vastc$SubArea[vastc$Fleet == "British_Columbia"] <- "B1, B2, B3 (BC)"
+vastc$SubArea[vastc$Fleet == "British_Columbia"] <- "B1, B2, A3 (BC)"
 vastc$SubArea[vastc$Fleet == "California_current"] <- "C1, C2 (CC)"
 vastc$SubArea[vastc$Fleet == "Gulf_of_Alaska"] <- "A1, A2 (AK)"
 vastc$SubArea[vastc$Fleet == "Aleutian_Islands"] <- "A1 (AK)"
@@ -178,7 +135,7 @@ genPal <- c('brown','dodgerblue','goldenrod','grey22')
               alpha = 0.2,
               show.legend = TRUE)
   ggsave(plot = last_plot(),
-         file = paste0("./_writing/figures/Fig2_OM_indices.png"),
+         file = paste0("./writing/figures/Fig2_OM_indices.png"),
          width = 10, height = 7, units = 'in', dpi = 720)
 
 p2 <- vastc %>%
@@ -216,7 +173,7 @@ fill = "", color = "") +
 
 
 ggsave(plot = (p1  | p2  | p3),
-       file = paste0("./_writing/figures/Fig2_OM_indices.png"),
+       file = paste0("./writing/figures/Fig2_OM_indices.png"),
        width = 17, height = 10, units = 'in', dpi = 720)
 
 ## Figure X pseudo datplot
@@ -264,7 +221,7 @@ ggplot(Fleets, aes(x = FleetNames, y = Type, fill = Type)) +
   labs(x = "Fleet Names", y = "Data Type")
 
 ggsave(plot = last_plot(),
-       file = paste0("./_writing/figures/Data_basic.png"),
+       file = paste0("./writing/figures/Data_basic.png"),
        width = 10, height = 7, units = 'in', dpi = 720)
 ## expand grid into YEAR and drop rows if not applicable
 
@@ -316,38 +273,26 @@ dat$AgeComp[dat$MR == 'AK' & dat$Year >= 1979 ] <- FleetNames[5]
 
 # https://github.com/mkapur/sab-growth/blob/master/SAB_plot_master.R L112
 
-ypreds <- read.csv("./input/raw/SAB_predicts_2020-04-17.csv")
+# ypreds <- read.csv("C:/Users/mkapur/Downloads/SAB_predicts_2019-10-04_phase2.csv")
 # ypreds$gamREG <- ypreds$gamREG
-levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
-levels(ypreds$Sex) <- c('Females','Males')
-levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
-for(i in 1:nrow(ypreds)){
-  ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
-                              'All Years', paste(ypreds$Period[i]))
-}
-fd_summary_gamREG <- ypreds %>%
-  # filter(Age < 75) %>%
-  group_by(Age, Sex, gamREG,Period) %>%
-  dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
-saveRDS(fd_summary_gamREG, file = "./_writing/figures/OMGrowthCurves.Rdata")
+# levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
+# levels(ypreds$Sex) <- c('Females','Males')
+# levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
+# for(i in 1:nrow(ypreds)){
+#   ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
+#                               'All Years', paste(ypreds$Period[i]))
+# }
+# fd_summary_gamREG <- ypreds %>%
+#   # filter(Age < 75) %>%
+#   group_by(Age, Sex, gamREG,Period) %>%
+#   dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
+# saveRDS(fd_summary_gamREG, file = "./OM2_RegionalCurves.Rdata")
 
 
-
-
-ggplot(readRDS("./_writing/figures/OMGrowthCurves.Rdata"), aes(x = Age, col = gamREG, group = gamREG)) +
-  kaputils::theme_mk(base_size = 16) + theme(legend.position = 'right') +
-  scale_color_manual(values = cbbPalette, 
-                     labels = c('Stock R1 (South CC)',
-                                'Stock R2 (North CC/South BC)',
-                                'Stock R3 (BC)',
-                                'Stock R4 (West BC/AK Gulf)',
-                                'Stock R5 (West Gulf/Aleutians)')) +
-  scale_fill_manual(values = cbbPalette,
-                    labels = c('Stock R1 (South CC)',
-                               'Stock R2 (North CC/South BC)',
-                               'Stock R3 (BC)',
-                               'Stock R4 (West BC/AK Gulf)',
-                               'Stock R5 (West Gulf/Aleutians)')) +  
+p2 <- ggplot(readRDS("./OM2_RegionalCurves.Rdata"), aes(x = Age, col = gamREG, group = gamREG)) +
+  kaputils::theme_mk(base_size = 16) +
+  scale_color_manual(values = cbbPalette) +
+  scale_fill_manual(values = cbbPalette) +  
   scale_alpha(guide = 'none') +
   scale_y_continuous(limits = c(0,110)) +
   scale_x_continuous(limits = c(0,65)) +
@@ -355,34 +300,24 @@ ggplot(readRDS("./_writing/figures/OMGrowthCurves.Rdata"), aes(x = Age, col = ga
   labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
   facet_wrap(~Sex +Period, ncol = 4)
 
-ggsave(plot = last_plot(),
-       file = "./_writing/figures/OMGrowthCurves.PNG",
-       height = 8, width = 10, unit = 'in')
+## use ONEREG from dropbox
+# ypreds <- read.csv("C:/Users/mkapur/Downloads/ONEREG_SAB_predicts_2019-10-29.csv")
+# ypreds$gamREG <- ypreds$gamREG
+# levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
+# levels(ypreds$Sex) <- c('Females','Males')
+# levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
+# for(i in 1:nrow(ypreds)){
+#   ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
+#                               'All Years', paste(ypreds$Period[i]))
+# }
+# fd_summary_gamREG <- ypreds %>%
+#   # filter(Age < 75) %>%
+#   group_by(Age, Sex, gamREG,Period) %>%
+#   dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
+# 
+# saveRDS(fd_summary_gamREG, file = "./OM3_RangewideCurve.Rdata")
 
 
- ## reshape survey datatable ----
- surv <-  read.csv("./input/raw/Indices_SS3_2020-01-23v3.csv")
- 
- surv_by <- surv %>%
-   distinct() %>%
-   filter(Fleet != 'AllAreas' & Fleet != "Eastern_Bering_Sea") %>%
-   mutate(By = round(Estimate_metric_tons), Epsilon = SD_log) %>%
-   select(Year, Fleet, By) %>%
-   pivot_wider(., values_from = By, names_from = Fleet) %>% data.frame()
-  names(surv_by)[c(4,5)] <- c("AK (A1 + A2)", "AK (A1)") 
-  surv_eps <- surv %>%  
-    distinct() %>%
-   filter(Fleet != 'AllAreas' & Fleet != "Eastern_Bering_Sea") %>%
-   mutate(By = round(Estimate_metric_tons), Epsilon = round(SD_log,3)) %>%
-   select(Year, Fleet, Epsilon) %>%
-   pivot_wider(., values_from = c("Epsilon"), names_from = "Fleet") 
- names(surv_eps)[c(4,5)] <- c("AK (A1 + A2)", "AK (A1)")  
- 
- write.csv(surv_eps,"./_writing/tables/Survey_epsilon_byM.csv",row.names = FALSE)
- write.csv(surv_by,"./_writing/tables/Survey_biomass_byM.csv",row.names = FALSE)
- 
- 
- 
 p3 <- ggplot(readRDS("./OM3_RangewideCurve.Rdata"), aes(x = Age)) +
   kaputils::theme_mk(base_size = 16) +theme(legend.position = 'none') +
   scale_color_manual(values = cbbPalette) +
@@ -396,6 +331,6 @@ p3 <- ggplot(readRDS("./OM3_RangewideCurve.Rdata"), aes(x = Age)) +
   
   
   ggsave(plot = (p2  / p3),
-         file = paste0("./_writing/figures/FigX_GrowthCurves.png"),
+         file = paste0("./writing/figures/FigX_GrowthCurves.png"),
          width = 17, height = 10, units = 'in', dpi = 720)
   

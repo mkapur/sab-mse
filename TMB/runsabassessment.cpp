@@ -313,15 +313,15 @@ Type objective_function<Type>::operator() ()
       //Type smul = Type(0.58);
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){ // Loop over other ages
-          N_mid(a,time) = N_beg(a,time)*exp(-Z(a)*smul);
-          N_beg(a+1,time+1) = N_beg(a,time)*exp(-Z(a));
+          N_mid(a,time) =  N_beg2(i)(a,time)*exp(-Z(a)*smul);
+          N_beg2(i)(a+1,time+1) =  N_beg2(i)(a,time)*exp(-Z(a));
 
         }
         // N_beg2(i) = N_beg;
       // }
       // // Plus group
-      N_mid(nage-1, time) = N_beg(nage-2,time)*exp(-Z(nage-2)*0.5)+N_beg(nage-1,time)*exp(-Z(nage-1)*smul);
-      N_beg(nage-1, time+1) = N_beg(nage-2,time)*exp(-Z(nage-2))+N_beg(nage-1,time)*exp(-Z(nage-1));
+      N_mid(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
+      N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
       N_beg2(i) = N_beg;
       }
       // for(int i=0;i<(nspace);i++){

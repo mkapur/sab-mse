@@ -276,14 +276,11 @@ Type objective_function<Type>::operator() ()
       if (time == 0){ // YEAR ZERO
         for(int i=0;i<(nspace);i++){ 
           N_beg.setZero();
-          // matrix<Type> temp(nage,tEnd);
           N_beg2(i).setZero();
           for(int a=1;a<(nage-1);a++){
             N_beg(a,time) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
-            // temp(a,time)  = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
           }
           N_beg(nage-1, time) = Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
-          // temp(nage-1, time) = Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
           N_beg2(i) = N_beg;
         } // end subareas
       } // end time == 0
@@ -292,12 +289,11 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<nage;a++){ // Loop over ages
         SSB(time) += N_beg(a,time)*wage_ssb(a,time)*0.5; // hat
         // SSB2(time,i) += 2.0*wage_ssb(a,time)*0.5; // hat
-        // SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
-        
+        SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
         }
       }
       
-      REPORT(SSB2)
+
       
       
       for(int i=0;i<(nage);i++){ // Loop over other ages
@@ -315,29 +311,32 @@ Type objective_function<Type>::operator() ()
       }
       
       //Type smul = Type(0.58);
-      // for(int i=0;i<(nspace);i++){
+      for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){ // Loop over other ages
           N_mid(a,time) = N_beg(a,time)*exp(-Z(a)*smul);
           N_beg(a+1,time+1) = N_beg(a,time)*exp(-Z(a));
+
         }
         // N_beg2(i) = N_beg;
       // }
       // // Plus group
       N_mid(nage-1, time) = N_beg(nage-2,time)*exp(-Z(nage-2)*0.5)+N_beg(nage-1,time)*exp(-Z(nage-1)*smul);
       N_beg(nage-1, time+1) = N_beg(nage-2,time)*exp(-Z(nage-2))+N_beg(nage-1,time)*exp(-Z(nage-1));
+      N_beg2(i) = N_beg;
+      }
       // for(int i=0;i<(nspace);i++){
         // N_beg2(i)(nage-1, time+1) =   N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+  N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
       // }
       Catch(time) = 0;
       
-      for(int i=0;i<nage;i++){ // Loop over other ages
-        CatchAge(i,time)= (Freal(i)/(Z(i)))*(1-exp(-Z(i)))*N_beg(i,time)*wage_catch(i,time);// Calculate the catch in kg
-        CatchNAge(i,time)= (Freal(i)/(Z(i)))*(1-exp(-Z(i)))*N_beg(i,time);// Calculate the catch in kg
-        Catch(time) += CatchAge(i,time);
-        CatchN(time) += CatchNAge(i,time);
+      for(int a=0;a<nage;a++){ // Loop over other ages
+        CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time)*wage_catch(a,time);// Calculate the catch in kg
+        CatchNAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time);// Calculate the catch in kg
+        Catch(time) += CatchAge(a,time);
+        CatchN(time) += CatchNAge(a,time);
         
-        Surveyobs(time) += surveyselc(i)*wage_survey(i,time)*N_mid(i,time)*q;
-        Ntot_survey += surveyselc(i)*N_mid(i,time); // To use with age comps
+        Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q;
+        Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
       }
       
       
@@ -504,6 +503,7 @@ Type objective_function<Type>::operator() ()
     
     // REPORT(N_beg2)
     REPORT(SSB)
+    REPORT(SSB2)
     REPORT(Fyear)
     REPORT(Catch)
     REPORT(R)

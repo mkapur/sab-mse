@@ -194,9 +194,9 @@ Type objective_function<Type>::operator() ()
   //   SSBinit += Ninit(i)*Matsel(i)*0.5;
   // }
   
-  // Plus group
-  // vector<Type>Catch(tEnd, nspace+1);
-  vector<Type>Catch(tEnd);
+
+  array<Type>Catch(tEnd,nspace);
+  // vector<Type>Catch(tEnd); //original
   vector<Type>CatchN(tEnd);
 
   matrix<Type> N_mid(nage,tEnd+1);//previously array
@@ -267,9 +267,9 @@ Type objective_function<Type>::operator() ()
         }
       }
       
-      
-      Catch(time) = 0;
-      
+      for(int i=0;i<(nspace);i++){ 
+        Catch(time,i) = 0;
+      }
       Fyear(time) = F0(time);
       
       
@@ -314,6 +314,7 @@ Type objective_function<Type>::operator() ()
       
       //Type smul = Type(0.58);
       for(int i=0;i<(nspace);i++){
+        Catch(time,i) = 0;
         for(int a=0;a<(nage-1);a++){ // Loop over other ages
           N_mid(a,time) =  N_beg2(i)(a,time)*exp(-Z(a)*smul);
           N_beg2(i)(a+1,time+1) =  N_beg2(i)(a,time)*exp(-Z(a));
@@ -323,18 +324,18 @@ Type objective_function<Type>::operator() ()
         N_mid2(i)(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
         N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
       }
-      Catch(time) = 0;
       
-      for(int a=0;a<nage;a++){ // Loop over other ages
-        CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time)*wage_catch(a,time);// Calculate the catch in kg
-        CatchNAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time);// Calculate the catch in kg
-        Catch(time) += CatchAge(a,time);
-        CatchN(time) += CatchNAge(a,time);
-        
-        Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q;
-        Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<nage;a++){ // Loop over other ages
+          CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time)*wage_catch(a,time);// Calculate the catch in kg
+          CatchNAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time);// Calculate the catch in kg
+          Catch(time,i) += CatchAge(a,time);
+          CatchN(time) += CatchNAge(a,time);
+          
+          Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q;
+          Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
+        }
       }
-      
       
       if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
         
@@ -373,7 +374,7 @@ Type objective_function<Type>::operator() ()
   
   Type ans_catch = 0.0;
   for(int time=0;time<tEnd;time++){ // Total Catches
-    ans_catch += -dnorm(log(Catch(time)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE);
+    // ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE);
   }
   
   
@@ -412,18 +413,18 @@ Type objective_function<Type>::operator() ()
   sum3.setZero();
   sum4.setZero();
   
-  for(int time=1;time<tEnd;time++){ // Loop over available years
-    if(Catch(time)>0){
-      
-      if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
-        for(int i=0;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
-          sum3(time) += lgamma(ss_catch(time)*age_catch(i,time)+1);
-          sum4(time) += lgamma(ss_catch(time)*age_catch(i,time) + phi_catch*ss_catch(time)*age_catch_est(i,time)) - lgamma(phi_catch*ss_catch(time)*age_catch_est(i,time));
-        }
-        ans_catchcomp += lgamma(ss_catch(time)+1)-sum3(time)+lgamma(phi_catch*ss_catch(time))-lgamma(ss_catch(time)+phi_catch*ss_catch(time))+sum4(time);
-      }
-    }
-  }
+  // for(int time=1;time<tEnd;time++){ // Loop over available years
+  //   if(Catch(time)>0){
+  //     
+  //     if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
+  //       for(int i=0;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
+  //         sum3(time) += lgamma(ss_catch(time)*age_catch(i,time)+1);
+  //         sum4(time) += lgamma(ss_catch(time)*age_catch(i,time) + phi_catch*ss_catch(time)*age_catch_est(i,time)) - lgamma(phi_catch*ss_catch(time)*age_catch_est(i,time));
+  //       }
+  //       ans_catchcomp += lgamma(ss_catch(time)+1)-sum3(time)+lgamma(phi_catch*ss_catch(time))-lgamma(ss_catch(time)+phi_catch*ss_catch(time))+sum4(time);
+  //     }
+  //   }
+  // }
   
   
   Type ans_SDR = 0.0;

@@ -309,7 +309,7 @@ Type objective_function<Type>::operator() ()
       for(int i=0;i<(nspace);i++){
         R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
         N_beg(0,time) = R(time); // First one is recruits
-        N_beg2(i) = N_beg;
+        N_beg2(i)(0,time) = R(time);
       }
       
       //Type smul = Type(0.58);
@@ -319,16 +319,10 @@ Type objective_function<Type>::operator() ()
           N_beg2(i)(a+1,time+1) =  N_beg2(i)(a,time)*exp(-Z(a));
         }
         N_mid2(i) = N_mid;
-        // N_beg2(i) = N_beg;
-      // }
-      // // Plus group
-      N_mid2(i)(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
-      N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
-      // N_beg2(i) = N_beg;
+        // Plus group
+        N_mid2(i)(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
+        N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
       }
-      // for(int i=0;i<(nspace);i++){
-        // N_beg2(i)(nage-1, time+1) =   N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+  N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
-      // }
       Catch(time) = 0;
       
       for(int a=0;a<nage;a++){ // Loop over other ages

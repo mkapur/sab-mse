@@ -1,7 +1,6 @@
 ## OM_Master.R
 ## M S Kapur mod N Jacobsen Summer 2020
 ## kapurm@uw.edu
-
 library(TMB)
 library(dplyr)
 library(reshape2)
@@ -12,6 +11,7 @@ library(ggsidekick)
 source(here("R","functions",'load_files_OM.R'))
 compile(here("TMB","runsabassessment.cpp"))
 dyn.load(dynlib(here("TMB","runsabassessment")))
+
 
 ## OM MODEL INIT ----
 # Initialize the model parameters. Make a version with movement and no seasons (simple)
@@ -38,7 +38,7 @@ plot.figures = FALSE # Set true for printing to file
 # Run the simulation model
 assessment <- read.csv(here("input","data",'assessment_MLE.csv')) ## I believe this comes from SS3
 assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
-Catch.obs <- read.csv(here("input","data",'sab_totcatch.csv'))
+Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
 df <- load_data_seasons(nspace =2)
 df$Catch <- Catch.obs$Fishery
 time <- 1
@@ -53,9 +53,6 @@ year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$yea
 N0 <- NA
 sim.data <- run.agebased.true.catch(df)
 simdata0 <- sim.data # The other one is gonna get overwritten. 
-  
-
-
 
 # Plott stuff 
 
@@ -71,11 +68,20 @@ Rdev <- parms$Rin
 parms.new$F0 <- F0
 parms.new$Rin <- Rdev
 
+
 obj <- MakeADFun(df.new,
                  parms.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
 
+dim(reps$N_beg)
+dim(reps$N_beg2[[1]])
+reps$N_beg2[[1]][1:100,]
+reps$SSBzero2
+reps$SSB2
+
+
+# ----
 # SSB 
 plot(df$years,rowSums(sim.data$SSB.weight))
 lines(df$years,SSB.ss3*0.5)

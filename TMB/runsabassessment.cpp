@@ -1,7 +1,7 @@
-// Create a file to run the TMB version of sprat
+// M KAPUR mod N Jacobsen
+// Summer 2020 kapurm@uw.edu
 #include <TMB.hpp>
 #include <iostream>
-
 
 template <class Type>
 vector<Type> cumsum(vector<Type> x) {
@@ -22,8 +22,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(wage_catch); // Weight in catch
   DATA_ARRAY(wage_survey); // Weight in survey
   DATA_ARRAY(wage_mid); // Weight in the middle of the year
-  // //
-  // // // Age
+  // Age
   DATA_INTEGER(nage); // Plus group
   DATA_INTEGER(sum_zero); // should rec dev's sum so zero?
   DATA_VECTOR(age); // ages
@@ -57,22 +56,18 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(logSDcatch); // Error on catch
   DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
   DATA_SCALAR(sigma_psel); // selectivity SD
-  
-  //
-  //   // Mortality
+   // Mortality
   DATA_VECTOR(Msel); // How mortality scales with age
   DATA_VECTOR(Matsel); // Maturity ogive
   // Priors
   DATA_SCALAR(Bprior);
-  DATA_SCALAR(Aprior)
-    //   // Time parameters
-    // Parameter integers
-    PARAMETER(logRinit); // Recruitment at
+  DATA_SCALAR(Aprior);
+  // Time parameters Parameter integers
+  PARAMETER(logRinit); // Recruitment at
   PARAMETER(logh); // Steepness
   PARAMETER(logMinit); // Natural mortality
   PARAMETER(logSDsurv); // Survey uncertainty
   //PARAMETER(logSDR);
-  
   PARAMETER(logphi_catch);
   // PARAMETER(logphi_survey);
   DATA_SCALAR(logphi_survey);
@@ -82,7 +77,6 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(Rin); // Time varying stuff
   PARAMETER_ARRAY(PSEL); // Time varying selectivity
   PARAMETER_VECTOR(F0);
-  
   // Transform out of log space
   Type SDsurv = exp(logSDsurv);
   Type SDcatch = exp(logSDcatch);
@@ -93,31 +87,26 @@ Type objective_function<Type>::operator() ()
   Type q = exp(logQ);
   Type phi_survey = exp(logphi_survey);
   Type phi_catch = exp(logphi_catch);
-  
-  //
-  // //  Minor calculations
+  //  Minor calculations
   vector<Type> M = Minit*Msel; // Natural mortality
   vector<Type> logF(tEnd);
   vector<Type> logR(tEnd);
-  //
   // Vectors for saving stuff
   vector<Type>R(tEnd);
   array<Type> CatchAge(nage,tEnd);
   array<Type> CatchNAge(nage,tEnd);
-  //
   
   
   for(int j=0;j<(tEnd-1);j++){
     logR(j)=Rin(j);
   }
   logR(tEnd-1) = 0;
-  
   // selectivity
   // survey
   vector<Type>surveyselc(nage);
   Type pmax = sum(psel_surv);
   Type ptmp = 0;
-  
+
   for(int j=0;j<nage;j++){ // Fix the survey selectivity
     if (age(j) < Smin_survey){
       surveyselc(j) = 0;
@@ -158,30 +147,36 @@ Type objective_function<Type>::operator() ()
     }
   }
   
-  
+  vector<matrix<Type> > Nzero2(nspace); // create this many matrices within a vector
   vector<Type> Nzero(nage); // Numbers with no fishing
   //vector<Type>Meq = cumsum(M);
-  //
-  Nzero(0) = Rinit;
-  for(int i=1;i<(nage-1);i++){
-    Nzero(i) = Rinit * exp(-(M(i)*age(i)));
-  }
-  //
-  // Nzero(nage-1) = Rinit*exp(-(M(nage-2)*age(nage-2)))/(Type(1.0)-exp(-M(nage-1)));//*exp(initN(nage-2)); // Plus group
   
-  Nzero(nage-1) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+  for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
+    Nzero(0) = Rinit;
+    for(int a=1;a<(nage-1);a++){
+      Nzero(a) = Rinit * exp(-(M(a)*age(a)));
+    }
+    Nzero(nage-1) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+    Nzero2(i) = Nzero;
+  } // end subareas
+
   
   array<Type> SSBage(nage);
   array<Type> Catchinit(nage);
   array<Type>selectivity_save(nage,tEnd);
   Type SSBzero = 0;
+  vector<Type> SSBzero2(nspace);
   vector<Type> Zzero = M;
-  
-  for(int i=0;i<nage;i++){ // Loop over ages
-    SSBzero += Matsel(i)*Nzero(i)*0.5;
+
+  for(int i=0;i<(nspace);i++){ 
+    for(int a=0;a<nage;a++){ // Loop over ages
+      SSBzero += Matsel(a)*Nzero(a)*0.5;// original
+      SSBzero2(i) += Matsel(a)*Nzero2(i)(a)*0.5;
+    } 
   }
   // Run the initial distribution
   REPORT(SSBzero);
+  REPORT(SSBzero2);
   
   // Type SSBinit = 0;
   //
@@ -203,14 +198,15 @@ Type objective_function<Type>::operator() ()
   // vector<Type>Catch(tEnd, nspace+1);
   vector<Type>Catch(tEnd);
   vector<Type>CatchN(tEnd);
-  array<Type> N_beg(nage,tEnd+1);
-  vector<matrix<Type> > testArr(nspace+1); // create this many matrices within a vector
+
   array<Type> N_mid(nage,tEnd+1);
-  N_beg.setZero();
+  matrix<Type> N_beg(nage,tEnd+1); //previously array
+  vector<matrix<Type> > N_beg2(nspace); 
   N_mid.setZero();
   // }
   // // Run the model over time
   array<Type> SSB(tEnd);
+  array<Type> SSB2(tEnd,nspace);
   array<Type>Surveyobs(tEnd); // Survey observed Surveyobs
   array<Type>Surveyobs_tot(tEnd); // Total Surveyobs over age 2
   array<Type>age_survey_est(age_maxage,tEnd);
@@ -275,241 +271,255 @@ Type objective_function<Type>::operator() ()
       Fyear(time) = F0(time);
       
       
+ 
       
       if (time == 0){ // YEAR ZERO
-        for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
+        for(int i=0;i<(nspace);i++){ 
+          N_beg.setZero();
+          // matrix<Type> temp(nage,tEnd);
+          N_beg2(i).setZero();
           for(int a=1;a<(nage-1);a++){
-            matrix<Type> temp(nage,tEnd+1); //temporary matrix for this subarea
-            // temp.fill(Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a)));
-            temp(a,time) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
-            testArr(i) = temp;
-            
             N_beg(a,time) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
+            // temp(a,time)  = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
           }
-          // N_beg(nage-1, time,i) = Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
+          N_beg(nage-1, time) = Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
+          // temp(nage-1, time) = Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
+          N_beg2(i) = N_beg;
         } // end subareas
       } // end time == 0
+      
+      for(int i=0;i<(nspace);i++){ 
+        for(int a=0;a<nage;a++){ // Loop over ages
+        SSB(time) += N_beg(a,time)*wage_ssb(a,time)*0.5; // hat
+        // SSB2(time,i) += 2.0*wage_ssb(a,time)*0.5; // hat
+        // SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
         
-        for(int i=0;i<nage;i++){ // Loop over other ages
-          SSB(time) += N_beg(i,time)*wage_ssb(i,time)*0.5; // hat
-          //SSB(time) += N_beg(i,time)*Matsel(i); // hat
-          
         }
-        
-        for(int i=0;i<(nage);i++){ // Loop over other ages
-          Freal(i) = Fyear(time)*catchselec(i);
-          Z(i) = Freal(i)+Myear(i);
-          selectivity_save(i,time) = catchselec(i);
-          Zsave(i,time) = Z(i);
-          
-          
-        }
-        
+      }
+      
+      REPORT(SSB2)
+      
+      
+      for(int i=0;i<(nage);i++){ // Loop over other ages
+        Freal(i) = Fyear(time)*catchselec(i);
+        Z(i) = Freal(i)+Myear(i);
+        selectivity_save(i,time) = catchselec(i);
+        Zsave(i,time) = Z(i);
+      }
+      
+      
+      for(int i=0;i<(nspace);i++){
         R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
         N_beg(0,time) = R(time); // First one is recruits
-        //
+        N_beg2(i) = N_beg;
+      }
+      
+      //Type smul = Type(0.58);
+      // for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage-1);a++){ // Loop over other ages
+          N_mid(a,time) = N_beg(a,time)*exp(-Z(a)*smul);
+          N_beg(a+1,time+1) = N_beg(a,time)*exp(-Z(a));
+        }
+        // N_beg2(i) = N_beg;
+      // }
+      // // Plus group
+      N_mid(nage-1, time) = N_beg(nage-2,time)*exp(-Z(nage-2)*0.5)+N_beg(nage-1,time)*exp(-Z(nage-1)*smul);
+      N_beg(nage-1, time+1) = N_beg(nage-2,time)*exp(-Z(nage-2))+N_beg(nage-1,time)*exp(-Z(nage-1));
+      // for(int i=0;i<(nspace);i++){
+        // N_beg2(i)(nage-1, time+1) =   N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+  N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
+      // }
+      Catch(time) = 0;
+      
+      for(int i=0;i<nage;i++){ // Loop over other ages
+        CatchAge(i,time)= (Freal(i)/(Z(i)))*(1-exp(-Z(i)))*N_beg(i,time)*wage_catch(i,time);// Calculate the catch in kg
+        CatchNAge(i,time)= (Freal(i)/(Z(i)))*(1-exp(-Z(i)))*N_beg(i,time);// Calculate the catch in kg
+        Catch(time) += CatchAge(i,time);
+        CatchN(time) += CatchNAge(i,time);
         
-        //Type smul = Type(0.58);
+        Surveyobs(time) += surveyselc(i)*wage_survey(i,time)*N_mid(i,time)*q;
+        Ntot_survey += surveyselc(i)*N_mid(i,time); // To use with age comps
+      }
+      
+      
+      if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
         
         for(int i=0;i<(nage-1);i++){ // Loop over other ages
-          N_mid(i,time) = N_beg(i,time)*exp(-Z(i)*smul);
-          N_beg(i+1,time+1) = N_beg(i,time)*exp(-Z(i));
-        }
-        // // Plus group
-        N_mid(nage-1, time) = N_beg(nage-2,time)*exp(-Z(nage-2)*0.5)+N_beg(nage-1,time)*exp(-Z(nage-1)*smul);
-        N_beg(nage-1, time+1) = N_beg(nage-2,time)*exp(-Z(nage-2))+N_beg(nage-1,time)*exp(-Z(nage-1));
-        
-        Catch(time) = 0;
-        
-        for(int i=0;i<nage;i++){ // Loop over other ages
-          CatchAge(i,time)= (Freal(i)/(Z(i)))*(1-exp(-Z(i)))*N_beg(i,time)*wage_catch(i,time);// Calculate the catch in kg
-          CatchNAge(i,time)= (Freal(i)/(Z(i)))*(1-exp(-Z(i)))*N_beg(i,time);// Calculate the catch in kg
-          Catch(time) += CatchAge(i,time);
-          CatchN(time) += CatchNAge(i,time);
-          
-          Surveyobs(time) += surveyselc(i)*wage_survey(i,time)*N_mid(i,time)*q;
-          Ntot_survey += surveyselc(i)*N_mid(i,time); // To use with age comps
-        }
-        
-        
-        if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
-          
-          for(int i=0;i<(nage-1);i++){ // Loop over other ages
-            if(i < age_maxage){
-              age_survey_est(i,time) = (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
-            }else{
-              age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
-            }
+          if(i < age_maxage){
+            age_survey_est(i,time) = (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
+          }else{
+            age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
           }
-        }  //Recruitment
+        }
+      }  //Recruitment
+      
+      if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
         
-        if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
-          
-          for(int i=0;i<(nage-1);i++){ // Loop over ages for catch comp
-            if(i<age_maxage){
-              age_catch_est(i,time) = (CatchNAge(i+1,time)/CatchN(time)); // Catch comp (1 bc the data starts at age = 1)
-            }else{
-              age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time));
-            }
+        for(int i=0;i<(nage-1);i++){ // Loop over ages for catch comp
+          if(i<age_maxage){
+            age_catch_est(i,time) = (CatchNAge(i+1,time)/CatchN(time)); // Catch comp (1 bc the data starts at age = 1)
+          }else{
+            age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time));
           }
         }
       }
-      
-      
-      // // // Make the observation model
-      // using namespace density;
-      Type ans_survey=0.0;
-      ////Save the observation model estimates
-      for(int time=1;time<tEnd;time++){ // Survey Surveyobs
-        
-        if(survey_x(time) == 2){
-          ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
-        }
-      }
-      
-      Type ans_catch = 0.0;
-      for(int time=0;time<tEnd;time++){ // Total Catches
-        ans_catch += -dnorm(log(Catch(time)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE);
-      }
-      
-      
-      
-      
-      REPORT(ans_catch)
-        ////Likelihood function for age composition in survey
-        //
-        Type ans_survcomp = 0.0;
-      Type ans_catchcomp = 0.0;
-      
-      
-      vector<Type>sum1(tEnd);
-      vector<Type>sum2(tEnd);
-      
-      sum1.setZero();
-      sum2.setZero();
-      
-      
-      for(int time=1;time<tEnd;time++){ // Loop over available years
-        if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
-          for(int i=1;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
-            sum1(time) += lgamma(ss_survey(time)*age_survey(i,time)+1);
-            sum2(time) += lgamma(ss_survey(time)*age_survey(i,time) + phi_survey*ss_survey(time)*age_survey_est(i,time)) - lgamma(phi_survey*ss_survey(time)*age_survey_est(i,time));
-          }
-          ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
-          
-        }
-        
-      }
-      
-      
-      vector<Type>sum3(tEnd);
-      vector<Type>sum4(tEnd);
-      //
-      sum3.setZero();
-      sum4.setZero();
-      
-      for(int time=1;time<tEnd;time++){ // Loop over available years
-        if(Catch(time)>0){
-          
-          if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
-            for(int i=0;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
-              sum3(time) += lgamma(ss_catch(time)*age_catch(i,time)+1);
-              sum4(time) += lgamma(ss_catch(time)*age_catch(i,time) + phi_catch*ss_catch(time)*age_catch_est(i,time)) - lgamma(phi_catch*ss_catch(time)*age_catch_est(i,time));
-            }
-            ans_catchcomp += lgamma(ss_catch(time)+1)-sum3(time)+lgamma(phi_catch*ss_catch(time))-lgamma(ss_catch(time)+phi_catch*ss_catch(time))+sum4(time);
-          }
-        }
-      }
-      
-      
-      Type ans_SDR = 0.0;
-      
-      for(int time=0;time<(tEnd-1);time++){ // Start time loop
-        ans_SDR += Type(0.5)*(logR(time)*logR(time))/(SDR*SDR)+b(time)*log(SDR*SDR);
-      }
-      
-      
-      
-      
-      
-      // Error for Selectivity
-      Type ans_psel = 0.0;
-      //
-      for(int time=0;time<year_sel;time++){ // Start time loop
-        for(int i=0;i<psel_fish.size();i++){ // Start time loop
-          ans_psel += Type(0.5)*(PSEL(i,time)*PSEL(i,time))/(sigma_psel*sigma_psel);
-        }
-      }
-      
-      // Priors on h and M
-      Type ans_priors = 0.0;
-      
-      for(int time=0;time<(nage-1);time++){ // Start time loop
-        ans_priors += Type(0.5)*(initN(time)*initN(time))/(SDR*SDR);
-      }
-      
-      // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
-      
-      // Prior on h
-      ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
-      
-      if(sum_zero == 1){
-        ans_priors += ((Type(0.0)-sum(logR))*(Type(0.0)-sum(logR)))/Type(0.01);
-      }
-      
-      // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
-      ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
-      
-      
-      vector<Type>ans_tot(7);
-      ans_tot(0) = ans_SDR;
-      ans_tot(1) = ans_psel;
-      ans_tot(2) = ans_catch;
-      ans_tot(3) = ans_survey;
-      ans_tot(4) = ans_survcomp;
-      ans_tot(5) = ans_catchcomp;
-      ans_tot(6) = ans_priors;
-      
-      Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
-      //
-      
-      
-      // Later Fix F in the likelihood and age comp in catch
-      // Type ans = 0.0;
-      // Report calculations
-      ADREPORT(SSB)
-        //ADREPORT(N)
-        ADREPORT(Catch)
-        ADREPORT(logF)
-        ADREPORT(R)
-        ADREPORT(Surveyobs)
-        ADREPORT(Fyear)
-        ADREPORT(surveyselc)
-        ADREPORT(catchselec)
-        ADREPORT(age_catch)
-        ADREPORT(age_catch_est)
-        ADREPORT(age_survey)
-        ADREPORT(age_survey_est)
-        ADREPORT(ans_tot)
-        ADREPORT(SSBzero)
-        
-        REPORT(testArr)
-        REPORT(SSB)
-        REPORT(Fyear)
-        REPORT(Catch)
-        REPORT(R)
-        REPORT(Nzero)
-        REPORT(ans_tot)
-        REPORT(Zsave)
-        REPORT(age_survey_est)
-        REPORT(age_catch_est)
-        REPORT(CatchN)
-        REPORT(selectivity_save)
-        REPORT(surveyselc)
-        REPORT(N_beg)
-        REPORT(N_mid)
-        REPORT(Surveyobs)
-        
-        return ans;
   }
   
+  
+  // // // Make the observation model
+  // using namespace density;
+  Type ans_survey=0.0;
+  ////Save the observation model estimates
+  for(int time=1;time<tEnd;time++){ // Survey Surveyobs
+    
+    if(survey_x(time) == 2){
+      ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
+    }
+  }
+  
+  Type ans_catch = 0.0;
+  for(int time=0;time<tEnd;time++){ // Total Catches
+    ans_catch += -dnorm(log(Catch(time)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE);
+  }
+  
+  
+  
+  
+  REPORT(ans_catch)
+    ////Likelihood function for age composition in survey
+    //
+    Type ans_survcomp = 0.0;
+  Type ans_catchcomp = 0.0;
+  
+  
+  vector<Type>sum1(tEnd);
+  vector<Type>sum2(tEnd);
+  
+  sum1.setZero();
+  sum2.setZero();
+  
+  
+  for(int time=1;time<tEnd;time++){ // Loop over available years
+    if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
+      for(int i=1;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
+        sum1(time) += lgamma(ss_survey(time)*age_survey(i,time)+1);
+        sum2(time) += lgamma(ss_survey(time)*age_survey(i,time) + phi_survey*ss_survey(time)*age_survey_est(i,time)) - lgamma(phi_survey*ss_survey(time)*age_survey_est(i,time));
+      }
+      ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
+      
+    }
+    
+  }
+  
+  
+  vector<Type>sum3(tEnd);
+  vector<Type>sum4(tEnd);
+  //
+  sum3.setZero();
+  sum4.setZero();
+  
+  for(int time=1;time<tEnd;time++){ // Loop over available years
+    if(Catch(time)>0){
+      
+      if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
+        for(int i=0;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
+          sum3(time) += lgamma(ss_catch(time)*age_catch(i,time)+1);
+          sum4(time) += lgamma(ss_catch(time)*age_catch(i,time) + phi_catch*ss_catch(time)*age_catch_est(i,time)) - lgamma(phi_catch*ss_catch(time)*age_catch_est(i,time));
+        }
+        ans_catchcomp += lgamma(ss_catch(time)+1)-sum3(time)+lgamma(phi_catch*ss_catch(time))-lgamma(ss_catch(time)+phi_catch*ss_catch(time))+sum4(time);
+      }
+    }
+  }
+  
+  
+  Type ans_SDR = 0.0;
+  
+  for(int time=0;time<(tEnd-1);time++){ // Start time loop
+    ans_SDR += Type(0.5)*(logR(time)*logR(time))/(SDR*SDR)+b(time)*log(SDR*SDR);
+  }
+  
+  
+  
+  
+  
+  // Error for Selectivity
+  Type ans_psel = 0.0;
+  //
+  for(int time=0;time<year_sel;time++){ // Start time loop
+    for(int i=0;i<psel_fish.size();i++){ // Start time loop
+      ans_psel += Type(0.5)*(PSEL(i,time)*PSEL(i,time))/(sigma_psel*sigma_psel);
+    }
+  }
+  
+  // Priors on h and M
+  Type ans_priors = 0.0;
+  
+  for(int time=0;time<(nage-1);time++){ // Start time loop
+    ans_priors += Type(0.5)*(initN(time)*initN(time))/(SDR*SDR);
+  }
+  
+  // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
+  
+  // Prior on h
+  ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
+  
+  if(sum_zero == 1){
+    ans_priors += ((Type(0.0)-sum(logR))*(Type(0.0)-sum(logR)))/Type(0.01);
+  }
+  
+  // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
+  ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
+  
+  
+  vector<Type>ans_tot(7);
+  ans_tot(0) = ans_SDR;
+  ans_tot(1) = ans_psel;
+  ans_tot(2) = ans_catch;
+  ans_tot(3) = ans_survey;
+  ans_tot(4) = ans_survcomp;
+  ans_tot(5) = ans_catchcomp;
+  ans_tot(6) = ans_priors;
+  
+  Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
+  //
+  
+  
+  // Later Fix F in the likelihood and age comp in catch
+  // Type ans = 0.0;
+  // Report calculations
+  ADREPORT(SSB)
+    //ADREPORT(N)
+    ADREPORT(Catch)
+    ADREPORT(logF)
+    ADREPORT(R)
+    ADREPORT(Surveyobs)
+    ADREPORT(Fyear)
+    ADREPORT(surveyselc)
+    ADREPORT(catchselec)
+    ADREPORT(age_catch)
+    ADREPORT(age_catch_est)
+    ADREPORT(age_survey)
+    ADREPORT(age_survey_est)
+    ADREPORT(ans_tot)
+    ADREPORT(SSBzero)
+    
+    // REPORT(N_beg2)
+    REPORT(SSB)
+    REPORT(Fyear)
+    REPORT(Catch)
+    REPORT(R)
+    REPORT(Nzero2)
+    REPORT(ans_tot)
+    REPORT(Zsave)
+    REPORT(age_survey_est)
+    REPORT(age_catch_est)
+    REPORT(CatchN)
+    REPORT(selectivity_save)
+    REPORT(surveyselc)
+    REPORT(N_beg2)
+    REPORT(N_beg)
+    
+    REPORT(N_mid)
+    REPORT(Surveyobs)
+    
+    return ans;
+}

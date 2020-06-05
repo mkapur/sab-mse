@@ -199,10 +199,12 @@ Type objective_function<Type>::operator() ()
   vector<Type>Catch(tEnd);
   vector<Type>CatchN(tEnd);
 
-  array<Type> N_mid(nage,tEnd+1);
+  matrix<Type> N_mid(nage,tEnd+1);//previously array
   matrix<Type> N_beg(nage,tEnd+1); //previously array
   vector<matrix<Type> > N_beg2(nspace); 
-  N_mid.setZero();
+  vector<matrix<Type> > N_mid2(nspace); 
+  
+  // N_mid2.setZero();
   // }
   // // Run the model over time
   array<Type> SSB(tEnd);
@@ -315,14 +317,14 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<(nage-1);a++){ // Loop over other ages
           N_mid(a,time) =  N_beg2(i)(a,time)*exp(-Z(a)*smul);
           N_beg2(i)(a+1,time+1) =  N_beg2(i)(a,time)*exp(-Z(a));
-
         }
+        N_mid2(i) = N_mid;
         // N_beg2(i) = N_beg;
       // }
       // // Plus group
-      N_mid(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
+      N_mid2(i)(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
       N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
-      N_beg2(i) = N_beg;
+      // N_beg2(i) = N_beg;
       }
       // for(int i=0;i<(nspace);i++){
         // N_beg2(i)(nage-1, time+1) =   N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+  N_beg2(i)(nage-1,time)*exp(-Z(nage-1));

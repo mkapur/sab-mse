@@ -93,7 +93,9 @@ Type objective_function<Type>::operator() ()
   vector<Type> logR(tEnd);
   // Vectors for saving stuff
   vector<Type>R(tEnd);
-  array<Type> CatchAge(nage,tEnd);
+  array<Type> CatchAge(nage,tEnd); // prev array
+  array<Type> CatchAge2(nspace);
+  
   array<Type> CatchNAge(nage,tEnd);
   
   
@@ -197,7 +199,8 @@ Type objective_function<Type>::operator() ()
 
   array<Type>Catch(tEnd,nspace);
   // vector<Type>Catch(tEnd); //original
-  vector<Type>CatchN(tEnd);
+  array<Type>CatchN(tEnd,nspace);
+  // vector<Type>CatchN(tEnd); // original
 
   matrix<Type> N_mid(nage,tEnd+1);//previously array
   matrix<Type> N_beg(nage,tEnd+1); //previously array
@@ -324,13 +327,15 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<nage;a++){ // Loop over other ages
           CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
           CatchNAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
-          Catch(time,i) += CatchAge(a,time);
-          CatchN(time) += CatchNAge(a,time);
-          
+          Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
+          CatchN(time,i) += CatchNAge(a,time);
           Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q;
           Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
         }
       }
+      
+      
+ 
       
       if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
         
@@ -347,9 +352,9 @@ Type objective_function<Type>::operator() ()
         
         for(int i=0;i<(nage-1);i++){ // Loop over ages for catch comp
           if(i<age_maxage){
-            age_catch_est(i,time) = (CatchNAge(i+1,time)/CatchN(time)); // Catch comp (1 bc the data starts at age = 1)
+            // age_catch_est(i,time) = (CatchNAge(i+1,time)/CatchN(time)); // Catch comp (1 bc the data starts at age = 1)
           }else{
-            age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time));
+            // age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time));
           }
         }
       }

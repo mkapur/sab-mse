@@ -266,13 +266,12 @@ Type objective_function<Type>::operator() ()
           }
         }
       }
+      ///////// MK MONKEY BELOW HERE     
       
       for(int i=0;i<(nspace);i++){ 
         Catch(time,i) = 0;
       }
       Fyear(time) = F0(time);
-      
-      
  
       
       if (time == 0){ // YEAR ZERO
@@ -290,25 +289,21 @@ Type objective_function<Type>::operator() ()
       for(int i=0;i<(nspace);i++){ 
         for(int a=0;a<nage;a++){ // Loop over ages
         SSB(time) += N_beg(a,time)*wage_ssb(a,time)*0.5; // hat
-        // SSB2(time,i) += 2.0*wage_ssb(a,time)*0.5; // hat
         SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
         }
       }
-      
 
-      
-      
-      for(int i=0;i<(nage);i++){ // Loop over other ages
-        Freal(i) = Fyear(time)*catchselec(i);
-        Z(i) = Freal(i)+Myear(i);
-        selectivity_save(i,time) = catchselec(i);
-        Zsave(i,time) = Z(i);
+      for(int a=0;a<(nage);a++){ // Loop over other ages
+        Freal(a) = Fyear(time)*catchselec(a);
+        Z(a) = Freal(a)+Myear(a);
+        selectivity_save(a,time) = catchselec(a);
+        Zsave(a,time) = Z(a);
       }
       
       
       for(int i=0;i<(nspace);i++){
         R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
-        N_beg(0,time) = R(time); // First one is recruits
+        // N_beg(0,time) = R(time); // First one is recruits
         N_beg2(i)(0,time) = R(time);
       }
       
@@ -327,8 +322,8 @@ Type objective_function<Type>::operator() ()
       
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<nage;a++){ // Loop over other ages
-          CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time)*wage_catch(a,time);// Calculate the catch in kg
-          CatchNAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*N_beg(a,time);// Calculate the catch in kg
+          CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
+          CatchNAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
           Catch(time,i) += CatchAge(a,time);
           CatchN(time) += CatchNAge(a,time);
           
@@ -514,8 +509,9 @@ Type objective_function<Type>::operator() ()
     REPORT(surveyselc)
     REPORT(N_beg2)
     REPORT(N_beg)
-    
     REPORT(N_mid)
+    
+    REPORT(N_mid2)
     REPORT(Surveyobs)
     
     return ans;

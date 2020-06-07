@@ -345,7 +345,7 @@ Type objective_function<Type>::operator() ()
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<nage;a++){ // Loop over other ages
           CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
-          // CatchAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,nage,i)*wage_catch(a,time);// Calculate the catch in kg
+          CatchAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i)*wage_catch(a,time);// Calculate the catch in kg
           
           CatchNAge(a,time) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
           // CatchNAge2(a,time,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i);// Calculate the catch in kg

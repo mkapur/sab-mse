@@ -338,15 +338,17 @@ Type objective_function<Type>::operator() ()
         N_mid2(i)(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
         N_mid3(time,nage-1,i) =  N_beg3(time,nage-2,i)*exp(-Z(nage-2)*0.5)+ N_beg3(time,nage-1,i)*exp(-Z(nage-1)*smul);
         N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
+        N_beg3(time+1,nage-1,i) =  N_beg3(time,nage-2,i)*exp(-Z(nage-2))+ N_beg3(time,nage-1,i)*exp(-Z(nage-1));
+        
       }
       
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<nage;a++){ // Loop over other ages
           CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
-          CatchAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,nage,i)*wage_catch(a,time);// Calculate the catch in kg
+          // CatchAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,nage,i)*wage_catch(a,time);// Calculate the catch in kg
           
           CatchNAge(a,time) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
-          CatchNAge2(a,time,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i);// Calculate the catch in kg
+          // CatchNAge2(a,time,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i);// Calculate the catch in kg
           
           Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
           CatchN(time,i) += CatchNAge(a,time);

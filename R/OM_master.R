@@ -86,6 +86,7 @@ reps$SSB2 ## dim time x nspace
 reps$CatchAge2
 reps$Catch
 reps$CatchNAge2
+reps$age_survey_est
 
 
 # ----

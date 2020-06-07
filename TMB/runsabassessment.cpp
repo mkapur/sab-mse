@@ -223,6 +223,8 @@ Type objective_function<Type>::operator() ()
   array<Type>Surveyobs(tEnd); // Survey observed Surveyobs
   array<Type>Surveyobs_tot(tEnd); // Total Surveyobs over age 2
   array<Type>age_survey_est(age_maxage,tEnd);
+  array<Type>age_survey_est2(tEnd, age_maxage, nspace);
+  
   array<Type>age_catch_est(age_maxage,tEnd);
   array<Type>age_catch_est2(tEnd, age_maxage, nspace);
   
@@ -363,18 +365,20 @@ Type objective_function<Type>::operator() ()
         }
       }
       
-      
- 
-      
       if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
-        
-        for(int i=0;i<(nage-1);i++){ // Loop over other ages
-          if(i < age_maxage){
-            age_survey_est(i,time) = (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
-          }else{
-            age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
-          }
-        }
+        for(int i=0;i<(nspace);i++){
+          for(int a=0;a<(nage-1);a++){ // Loop over other ages
+            if(a< age_maxage){
+              age_survey_est(a,time) = (surveyselc(a+1)*N_mid(a+1,time))/Ntot_survey;
+              age_survey_est2(time,a,i) = (surveyselc(a+1)*N_mid3(time,a+1,i))/Ntot_survey;
+              
+            }else{
+              age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
+              age_survey_est2(time,age_maxage-1,i) += (surveyselc(a+1)*N_mid3(time,a+1,i))/Ntot_survey;
+              
+            } // end else
+          } // end ages
+        } // end nspace
       }  //Recruitment
       
       if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
@@ -545,6 +549,9 @@ Type objective_function<Type>::operator() ()
     REPORT(Zsave)
     REPORT(age_survey_est)
     REPORT(age_catch_est)
+    REPORT(age_survey_est2)
+    REPORT(age_catch_est2)
+    
     REPORT(CatchN)
     REPORT(selectivity_save)
     REPORT(surveyselc)

@@ -12,6 +12,11 @@ vector<Type> cumsum(vector<Type> x) {
   return ans;
 }
 
+// TO DO
+// make catches surveys and comps by fleet
+// update likelihoods to match this structure
+// when ready disable the original n_beg etc and remove the numbers
+
 
 template<class Type>
 Type objective_function<Type>::operator() ()
@@ -24,7 +29,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(wage_mid); // Weight in the middle of the year
   // Age
   DATA_INTEGER(nage); // Plus group
-  DATA_INTEGER(sum_zero); // should rec dev's sum so zero?
+  DATA_INTEGER(sum_zero); // should rec dev's sum to zero?
   DATA_VECTOR(age); // ages
   DATA_INTEGER(tEnd);
   DATA_INTEGER(year_sel);
@@ -39,7 +44,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(Smax);
   DATA_INTEGER(Smax_survey);
   // // // Survey
-  DATA_VECTOR(survey); // Acoustic survey
+  DATA_VECTOR(survey); // Acoustic survey - vector of obs x year -- make this deal with VAST input
   DATA_VECTOR(survey_x); // Flag if survey occured
   DATA_VECTOR(survey_err);
   DATA_VECTOR(ss_survey); // Age comp sample size

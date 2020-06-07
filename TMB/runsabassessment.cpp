@@ -211,7 +211,7 @@ Type objective_function<Type>::operator() ()
   matrix<Type> N_beg(nage,tEnd+1); //previously array
   vector<matrix<Type> > N_beg2(nspace); 
   vector<matrix<Type> > N_mid2(nspace); 
-  array<Type>   N_beg3(nspace, nage, tEnd+1); N_beg3.setZero(); 
+  array<Type>   N_beg3( tEnd+1, nage, nspace); N_beg3.setZero(); 
   
   // N_mid2.setZero();
   // }
@@ -289,11 +289,11 @@ Type objective_function<Type>::operator() ()
           N_beg2(i).setZero();
           for(int a=1;a<(nage-1);a++){
             N_beg(a,time) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
-            N_beg3(i,a,time) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
+            N_beg3(time,a,i) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
           }
           N_beg(nage-1, time) = Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
           N_beg2(i) = N_beg;
-          N_beg3(i,nage-1,time) =  Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
+          N_beg3(time,nage-1,i) =  Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
           
         } // end subareas
       } // end time == 0

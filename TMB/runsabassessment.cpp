@@ -212,6 +212,7 @@ Type objective_function<Type>::operator() ()
   vector<matrix<Type> > N_beg2(nspace); 
   vector<matrix<Type> > N_mid2(nspace); 
   array<Type>   N_beg3( tEnd+1, nage, nspace); N_beg3.setZero(); 
+  array<Type>   N_mid3( tEnd+1, nage, nspace); N_mid3.setZero(); 
   
   // N_mid2.setZero();
   // }
@@ -326,11 +327,15 @@ Type objective_function<Type>::operator() ()
         Catch(time,i) = 0;
         for(int a=0;a<(nage-1);a++){ // Loop over other ages
           N_mid(a,time) =  N_beg2(i)(a,time)*exp(-Z(a)*smul);
+          N_mid3(time,a,i) = N_beg3(time,a,i)*exp(-Z(a)*smul);
           N_beg2(i)(a+1,time+1) =  N_beg2(i)(a,time)*exp(-Z(a));
+          N_beg3(time+1,a+1,i) =  N_beg3(time,a,i)*exp(-Z(a));
+          
         }
         N_mid2(i) = N_mid;
         // Plus group
         N_mid2(i)(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
+        N_mid3(time,nage-1,i) =  N_beg3(time,nage-2,i)*exp(-Z(nage-2)*0.5)+ N_beg3(time,nage-1,i)*exp(-Z(nage-1)*smul);
         N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
       }
       
@@ -529,8 +534,9 @@ Type objective_function<Type>::operator() ()
     REPORT(N_beg2)
     REPORT(N_beg)
     REPORT(N_mid)
-    
     REPORT(N_mid2)
+    
+    REPORT(N_mid3)
     REPORT(Surveyobs)
     
     return ans;

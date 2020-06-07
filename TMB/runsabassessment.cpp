@@ -148,17 +148,22 @@ Type objective_function<Type>::operator() ()
       }
     }
   }
-  
+  array<Type>   Nzero3(nage, nspace); Nzero3.setZero();   // grant's approach
   vector<matrix<Type> > Nzero2(nspace); // create this many matrices within a vector
   vector<Type> Nzero(nage); // Numbers with no fishing
   //vector<Type>Meq = cumsum(M);
   
   for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
     Nzero(0) = Rinit;
+    Nzero3(0,i) = Rinit;
     for(int a=1;a<(nage-1);a++){
       Nzero(a) = Rinit * exp(-(M(a)*age(a)));
+      Nzero3(a,i) = Rinit * exp(-(M(a)*age(a)));
+      
     }
     Nzero(nage-1) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+    Nzero3(nage-1,i) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+    
     Nzero2(i) = Nzero;
   } // end subareas
 
@@ -505,6 +510,8 @@ Type objective_function<Type>::operator() ()
     REPORT(Catch)
     REPORT(R)
     REPORT(Nzero2)
+    REPORT(Nzero3)
+    
     REPORT(ans_tot)
     REPORT(Zsave)
     REPORT(age_survey_est)

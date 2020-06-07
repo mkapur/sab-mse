@@ -383,18 +383,20 @@ Type objective_function<Type>::operator() ()
       
       if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
         
-        // for(int i=0;i<(nspace);i++){
+        for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
             if(a<age_maxage){
-              age_catch_est(a,time) = (CatchNAge(a+1,time)/CatchN(time)); // Catch comp (1 bc the data starts at age = 1)
-              // age_catch_est2(time,a,i) = (CatchNAge2(time,a+1,i)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
+              age_catch_est(a,time) = (CatchNAge(a+1,time)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
+              age_catch_est2(time,a,i) = (CatchNAge2(time,a+1,i)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
               
             }else{
-              // age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time));
-            }
+              age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time,i));
+              age_catch_est2(time,age_maxage-1,i) += (CatchNAge2(time,a+1,i)/CatchN(time,i));
+              
+            } // end else
           }
         }
-      // }
+      }
   }
   
   

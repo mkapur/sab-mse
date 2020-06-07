@@ -301,7 +301,8 @@ Type objective_function<Type>::operator() ()
       for(int i=0;i<(nspace);i++){ 
         for(int a=0;a<nage;a++){ // Loop over ages
         SSB(time) += N_beg(a,time)*wage_ssb(a,time)*0.5; // hat
-        SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
+        SSB2(time,i) += N_beg3(time,a,i)*wage_ssb(a,time)*0.5; // hat
+        // SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
         }
       }
 

@@ -318,6 +318,7 @@ Type objective_function<Type>::operator() ()
         R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
         // N_beg(0,time) = R(time); // First one is recruits
         N_beg2(i)(0,time) = R(time);
+        N_beg3(time,0,i) = R(time);
       }
       
       //Type smul = Type(0.58);

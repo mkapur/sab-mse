@@ -56,7 +56,7 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(logSDcatch); // Error on catch
   DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
   DATA_SCALAR(sigma_psel); // selectivity SD
-   // Mortality
+  // Mortality
   DATA_VECTOR(Msel); // How mortality scales with age
   DATA_VECTOR(Matsel); // Maturity ogive
   // Priors
@@ -109,7 +109,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>surveyselc(nage);
   Type pmax = sum(psel_surv);
   Type ptmp = 0;
-
+  
   for(int j=0;j<nage;j++){ // Fix the survey selectivity
     if (age(j) < Smin_survey){
       surveyselc(j) = 0;
@@ -167,7 +167,7 @@ Type objective_function<Type>::operator() ()
     
     Nzero2(i) = Nzero;
   } // end subareas
-
+  
   
   array<Type> SSBage(nage);
   array<Type> Catchinit(nage);
@@ -175,7 +175,7 @@ Type objective_function<Type>::operator() ()
   Type SSBzero = 0;
   vector<Type> SSBzero2(nspace);
   vector<Type> Zzero = M;
-
+  
   for(int i=0;i<(nspace);i++){ 
     for(int a=0;a<nage;a++){ // Loop over ages
       SSBzero += Matsel(a)*Nzero(a)*0.5;// original
@@ -202,12 +202,12 @@ Type objective_function<Type>::operator() ()
   //   SSBinit += Ninit(i)*Matsel(i)*0.5;
   // }
   
-
+  
   array<Type>Catch(tEnd,nspace);
   // vector<Type>Catch(tEnd); //original
   array<Type>CatchN(tEnd,nspace);
   // vector<Type>CatchN(tEnd); // original
-
+  
   matrix<Type> N_mid(nage,tEnd+1);//previously array
   matrix<Type> N_beg(nage,tEnd+1); //previously array
   vector<matrix<Type> > N_beg2(nspace); 
@@ -287,7 +287,7 @@ Type objective_function<Type>::operator() ()
         Catch(time,i) = 0;
       }
       Fyear(time) = F0(time);
- 
+      
       
       if (time == 0){ // YEAR ZERO
         for(int i=0;i<(nspace);i++){ 
@@ -306,12 +306,12 @@ Type objective_function<Type>::operator() ()
       
       for(int i=0;i<(nspace);i++){ 
         for(int a=0;a<nage;a++){ // Loop over ages
-        SSB(time) += N_beg(a,time)*wage_ssb(a,time)*0.5; // hat
-        SSB2(time,i) += N_beg3(time,a,i)*wage_ssb(a,time)*0.5; // hat
-        // SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
+          SSB(time) += N_beg(a,time)*wage_ssb(a,time)*0.5; // hat
+          SSB2(time,i) += N_beg3(time,a,i)*wage_ssb(a,time)*0.5; // hat
+          // SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
         }
       }
-
+      
       for(int a=0;a<(nage);a++){ // Loop over other ages
         Freal(a) = Fyear(time)*catchselec(a);
         Z(a) = Freal(a)+Myear(a);
@@ -379,7 +379,7 @@ Type objective_function<Type>::operator() ()
             } // end else
           } // end ages
         } // end nspace
-      }  //Recruitment
+      }  // end flag
       
       if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
         
@@ -392,15 +392,14 @@ Type objective_function<Type>::operator() ()
             }else{
               age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time,i));
               age_catch_est2(time,age_maxage-1,i) += (CatchNAge2(time,a+1,i)/CatchN(time,i));
-              
             } // end else
-          }
-        }
-      }
-  }
+          } // end ages
+        } // end nspace
+      } // end flag
+  } // END TIME LOOP
   
   
-  // // // Make the observation model
+  // OBSERVATION MODEL //
   // using namespace density;
   Type ans_survey=0.0;
   ////Save the observation model estimates
@@ -413,15 +412,12 @@ Type objective_function<Type>::operator() ()
   
   Type ans_catch = 0.0;
   for(int time=0;time<tEnd;time++){ // Total Catches
-    // ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE);
+    ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
   }
   
-  
-  
-  
   REPORT(ans_catch)
-    ////Likelihood function for age composition in survey
-    //
+    //Likelihood function for age composition in survey
+    
     Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
   

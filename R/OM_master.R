@@ -87,7 +87,7 @@ reps$CatchAge2
 reps$Catch
 reps$CatchNAge2
 reps$age_survey_est2
-
+reps$age_catch_est2
 
 # ----
 # SSB 

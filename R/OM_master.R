@@ -73,6 +73,8 @@ obj <- MakeADFun(df.new,
                  parms.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
+
+
 dim(reps$N_beg)==dim(reps$N_beg2[[1]])
 dim(reps$N_mid)==dim(reps$N_mid2[[1]])
 reps$Nzero3 # age x area
@@ -81,7 +83,8 @@ reps$N_mid3
 reps$N_beg3 ## time x age, x space
 reps$SSBzero2
 reps$SSB2 ## dim time x nspace
-reps$CatchN
+reps$CatchNAge2
+
 
 
 # ----

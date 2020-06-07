@@ -83,8 +83,9 @@ reps$N_mid3
 reps$N_beg3 ## time x age, x space
 reps$SSBzero2
 reps$SSB2 ## dim time x nspace
+reps$CatchAge2
+reps$Catch
 reps$CatchNAge2
-
 
 
 # ----

@@ -97,7 +97,7 @@ Type objective_function<Type>::operator() ()
   array<Type> CatchAge2(tEnd, nage, nspace);
   
   array<Type> CatchNAge(nage,tEnd);
-  array<Type> CatchNAge2(nage,tEnd,nspace);
+  array<Type> CatchNAge2(tEnd,nage,nspace);
   
   
   for(int j=0;j<(tEnd-1);j++){
@@ -348,11 +348,15 @@ Type objective_function<Type>::operator() ()
           CatchAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i)*wage_catch(a,time);// Calculate the catch in kg
           
           CatchNAge(a,time) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
-          // CatchNAge2(a,time,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i);// Calculate the catch in kg
+          CatchNAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i);// Calculate the catch in kg
           
-          Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
-          CatchN(time,i) += CatchNAge(a,time);
-          Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q;
+          // Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
+          Catch(time,i) += CatchAge2(time,a,i); // sum over the current catch at age
+          
+          // CatchN(time,i) += CatchNAge(a,time);
+          CatchN(time,i) += CatchNAge2(time,a,i);
+          
+          Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; // this will have to be by fleet and sum over area using phi
           Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
         }
       }

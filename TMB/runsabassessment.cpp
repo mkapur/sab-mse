@@ -178,7 +178,7 @@ Type objective_function<Type>::operator() ()
   for(int i=0;i<(nspace);i++){ 
     for(int a=0;a<nage;a++){ // Loop over ages
       SSBzero += Matsel(a)*Nzero(a)*0.5;// original
-      SSBzero2(i) += Matsel(a)*Nzero2(i)(a)*0.5;
+      SSBzero2(i) += Matsel(a)*Nzero3(a,i)*0.5;
     } 
   }
   // Run the initial distribution

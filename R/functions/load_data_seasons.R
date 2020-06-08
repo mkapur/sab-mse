@@ -174,6 +174,8 @@ load_data_seasons <- function(nseason = 4,
   
   survey <- read.csv(here("input","data",'survey.csv'))
   survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
+  survey_x2  <- rep(-2, length(years)) ## we have obs from 1970+
+  survey_x2[5:length(survey_x2)] <- -2## a -2 if no survey, 2 if survey occured
   nfleets_surv <- ncol(survey2) 
   
   
@@ -373,7 +375,7 @@ load_data_seasons <- function(nseason = 4,
                   survey = survey, # Make sure the survey has the same length as the catch time series
                   survey2 = survey2,
                   nfleets_surv = nfleets_surv,
-                  survey_x = ac.data$survey_x, # Is there a survey in that year?
+                  survey_x = survey_x2, #ac.data$survey_x, # Is there a survey in that year?
                   survey_err = ac.data$ss.error, # Make sure the survey has the same length as the catch time series
                   ss_survey = ac.data$ss.survey,
                   flag_survey =ac.data$sflag,

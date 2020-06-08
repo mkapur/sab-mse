@@ -443,15 +443,16 @@ Type objective_function<Type>::operator() ()
     for(int time=1;time<tEnd;time++){ // Survey Surveyobs
       if(survey_x(time) == 2){
         // ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
-        ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey(time)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
-      } // end survey flag 
+      ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey2(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
+        } // end survey flag
+        
     } // end time
   } // end surv_flt
   
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     
-  // for(int i=0;i<(nspace);i++){
+    // for(int i=0;i<(nspace);i++){
     for(int time=0;time<tEnd;time++){ // Total Catches
       // ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       ans_catch += -dnorm(log(Catch(time,fish_flt)+1e-6), log(Catchobs2(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
@@ -603,7 +604,7 @@ Type objective_function<Type>::operator() ()
     REPORT(N_mid)
     REPORT(N_mid2)
     REPORT(surv_pred)
-    
+    REPORT(survey2)
     REPORT(N_mid3)
     REPORT(Surveyobs)
     

@@ -139,6 +139,7 @@ surv_vals[is.na(surv_vals)] <- -1
 # row.names(surv_vals) <- surv_vals$Year
 write.csv(surv_vals[,c(3,4,2,5,6)], "./input/cleaned/clean_survey.csv",row.names = FALSE) ## save in special order
 
+modyr
 
 ## survey - SAM format
 surveys <- read.csv("./input/raw/Indices_SS3_2020-01-23v3.csv")  %>% ## VAST stdization

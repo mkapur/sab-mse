@@ -54,10 +54,10 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   
-  DATA_VECTOR(survey_x); // Flag if survey occured
+  DATA_VECTOR(flag_surv_bio); // Flag if survey occured
   DATA_VECTOR(survey_err);
   DATA_VECTOR(ss_survey); // Age comp sample size
-  DATA_VECTOR(flag_survey); // Were ages sampled this year
+  DATA_VECTOR(flag_surv_acomp); // Were ages sampled this year
   DATA_ARRAY(age_survey); // Age compositions, age x year
   DATA_ARRAY(age_survey2); // Age compositions, age x year x nfleets_acomp {right now just survnfleets}
   
@@ -401,7 +401,7 @@ Type objective_function<Type>::operator() ()
       
       REPORT(Ntot_survey2)
       
-      if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
+      if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage-1);a++){ // Loop over other ages
             if(a< age_maxage){
@@ -441,7 +441,7 @@ Type objective_function<Type>::operator() ()
   ////Save the observation model estimates
   for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
     for(int time=1;time<tEnd;time++){ // Survey Surveyobs
-      if(survey_x(time) == 2){
+      if(flag_surv_bio(time) == 2){
         // ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
       ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey2(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
         } // end survey flag
@@ -475,10 +475,14 @@ Type objective_function<Type>::operator() ()
   
   
   for(int time=1;time<tEnd;time++){ // Loop over available years
-    if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
-      for(int i=1;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
-        sum1(time) += lgamma(ss_survey(time)*age_survey(i,time)+1);
-        sum2(time) += lgamma(ss_survey(time)*age_survey(i,time) + phi_survey*ss_survey(time)*age_survey_est(i,time)) - lgamma(phi_survey*ss_survey(time)*age_survey_est(i,time));
+    
+    if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
+      for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
+        sum1(time) += lgamma(ss_survey(time)*age_survey(a,time)+1);
+        sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est(a,time)) -
+          lgamma(phi_survey*ss_survey(time)*age_survey_est(a,time));
+        
+        
       }
       ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
       

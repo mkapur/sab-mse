@@ -489,7 +489,7 @@ run.agebased.true.catch <- function(df, seed = 731){
                          exp(-Msurveymul*Z.save[,yr,space,df$surveyseason]))
     }
     
-    if (df$flag_survey[yr] == 1){
+    if (df$flag_surv_acomp[yr] == 1){
       
       
       if(year[yr] > 2018){
@@ -507,7 +507,7 @@ run.agebased.true.catch <- function(df, seed = 731){
     
     surv.tmp <- sum(Ntot.year*surv.sel*q)
     
-    if(df$flag_survey[yr] == 1){
+    if(df$flag_surv_acomp[yr] == 1){
       age_comps_surv[1,yr] <- 0 # No year 1 recorded
       
       age_comps_surv[1:(df$age_maxage-1),yr] <-  (Ntot.year[2:(df$age_maxage)]*surv.sel[2:(df$age_maxage)]*q)/surv.tmp

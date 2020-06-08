@@ -24,6 +24,7 @@ getParameters_OM <- function(trueparms = TRUE,df){
     
     parms <- list( # Just start all the simluations with the same initial conditions 
       logRinit = 16,
+      logRinit2 = rep(16, df$nstocks),
       logh = log(0.7),
       logMinit = log(0.3),
       logSDsurv = log(0.3),
@@ -36,6 +37,7 @@ getParameters_OM <- function(trueparms = TRUE,df){
       psel_surv = c(0.568618,-0.216172,0.305286 ,0.373829),
       initN = initN,
       Rin = Rdev,
+      # Rin2 = Rdev,
       F0 = F0,
       PSEL = PSEL
     )

@@ -85,12 +85,13 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(Msel); // How mortality scales with age
   DATA_VECTOR(Matsel); // Maturity ogive
   
-
+  
   // Priors
   DATA_SCALAR(Bprior);
   DATA_SCALAR(Aprior);
   // Time parameters Parameter integers
-  PARAMETER(logRinit); // Recruitment at
+  PARAMETER(logRinit); // Recruitment at equil
+  PARAMETER_VECTOR(logRinit2); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
   PARAMETER(logMinit); // Natural mortality
   PARAMETER(logSDsurv); // Survey uncertainty
@@ -102,13 +103,15 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(psel_surv);
   PARAMETER_VECTOR(initN);
   PARAMETER_VECTOR(Rin); // Time varying stuff
-  PARAMETER_ARRAY(PSEL); // Time varying selectivity
   PARAMETER_VECTOR(F0);
+  PARAMETER_ARRAY(PSEL); // Time varying selectivity
+
   // Transform out of log space
   Type SDsurv = exp(logSDsurv);
   Type SDcatch = exp(logSDcatch);
   Type SDR = exp(logSDR);
   Type Rinit = exp(logRinit);
+  vector<Type> Rinit2 = exp(logRinit2);
   Type h = exp(logh);
   Type Minit = exp(logMinit);
   Type q = exp(logQ);

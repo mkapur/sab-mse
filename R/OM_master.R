@@ -58,7 +58,7 @@ simdata0 <- sim.data # The other one is gonna get overwritten.
 
 # Plott stuff 
 
-parms <- getParameters_OM(trueparms = TRUE, df = df)
+parms <- getParameters_OM(trueparms = FALSE, df = df)
 
 ##  Create a data frame to send to runsabassessment 
 

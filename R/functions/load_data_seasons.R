@@ -431,7 +431,8 @@ load_data_seasons <- function(nseason = 4,
                  phi_if_surv = phi_if_surv,
                  phi_if_fish = phi_if_fish,
                  phi_ik = phi_ik,
-                 tau_ik = tau_ik
+                 tau_ik = tau_ik,
+                 nstocks = nrow(phi_ik)
                   # Parameters from the estimation model 
               
   )

@@ -51,7 +51,8 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(Smax_survey);
   // // // Survey
   DATA_VECTOR(survey); // Acoustic survey - vector of obs x year 
-  DATA_ARRAY(survey2); // now this is year x fleets
+  DATA_ARRAY(survey2); // year x fleets relbio
+  
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   
@@ -462,8 +463,8 @@ Type objective_function<Type>::operator() ()
   }
   
   REPORT(ans_catch)
-  //Likelihood function for age composition in survey
     
+  // LIKELIHOOD: age comp in survey
   Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
   
@@ -478,13 +479,13 @@ Type objective_function<Type>::operator() ()
     for(int time=1;time<tEnd;time++){ // Loop over available years
       if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
         for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
-          sum1(time) += lgamma(ss_survey(time)*age_survey(a,time)+1);
-          sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est(a,time)) -
-            lgamma(phi_survey*ss_survey(time)*age_survey_est(a,time));
-          
           // sum1(time) += lgamma(ss_survey(time)*age_survey(a,time)+1);
-          // sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est2(time,age,surv_flt_acomp)) -
+          // sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est(a,time)) -
           //   lgamma(phi_survey*ss_survey(time)*age_survey_est(a,time));
+          // NOTE THAT THE age_survey2 OBS ARE IN A X TIME X FLEET, which is not the typical ordering
+          sum1(time) += lgamma(ss_survey(time)*age_survey2(a,time,surv_flt_acomp)+1);
+          sum2(time) += lgamma(ss_survey(time)*age_survey2(a,time,surv_flt_acomp) + phi_survey*ss_survey(time)*age_survey_est2(time,a,surv_flt_acomp)) -
+            lgamma(phi_survey*ss_survey(time)*age_survey_est2(time,a,surv_flt_acomp));
         } // end ages
         ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
         

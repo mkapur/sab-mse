@@ -13,7 +13,7 @@ vector<Type> cumsum(vector<Type> x) {
 }
 
 // TO DO
-// make catches surveys and comps by fleet
+// make catches   comps by fleet
 // update likelihoods to match this structure
 // when ready disable the original n_beg etc and remove the numbers
 
@@ -25,6 +25,9 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nspace); // number of subreas to track
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
+  DATA_INTEGER(nfleets_acomp); // number of age comp fleets
+  DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
+  
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch
   DATA_ARRAY(wage_survey); // Weight in survey
@@ -55,7 +58,9 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(survey_err);
   DATA_VECTOR(ss_survey); // Age comp sample size
   DATA_VECTOR(flag_survey); // Were ages sampled this year
-  DATA_ARRAY(age_survey); // Age compositions
+  DATA_ARRAY(age_survey); // Age compositions, age x year
+  DATA_ARRAY(age_survey2); // Age compositions, age x year x nfleets_acomp {right now just survnfleets}
+  
   DATA_INTEGER(age_maxage); // Last age included in age comps
   DATA_SCALAR(smul); // Multiplier for survey selectivity
   // Catches
@@ -270,6 +275,7 @@ Type objective_function<Type>::operator() ()
   for(int time=0;time<(tEnd);time++){ // Start time loop
     
     Type Ntot_survey = 0;
+    vector<Type>Ntot_survey2(nfleets_acomp);
     pmax_catch_save(time) = pmax_catch;
     // Take care of selectivity
     REPORT(flag_sel)
@@ -387,16 +393,20 @@ Type objective_function<Type>::operator() ()
             Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; 
             surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_mid3(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
             Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
+            Ntot_survey2(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_mid3(time,a,i); // To use with age comps; may need to change phi to sum acomp surveys
+            
           } // end fleets
         } // end ages
       } // end nspace
+      
+      REPORT(Ntot_survey2)
       
       if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage-1);a++){ // Loop over other ages
             if(a< age_maxage){
               age_survey_est(a,time) = (surveyselc(a+1)*N_mid(a+1,time))/Ntot_survey;
-              age_survey_est2(time,a,i) = (surveyselc(a+1)*N_mid3(time,a+1,i))/Ntot_survey;
+              age_survey_est2(time,a,i) = (surveyselc(a+1)*N_mid3(time,a+1,i))/Ntot_survey; // estimated comps based on nbeg
               
             }else{
               age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
@@ -448,9 +458,9 @@ Type objective_function<Type>::operator() ()
   }
   
   REPORT(ans_catch)
-    //Likelihood function for age composition in survey
+  //Likelihood function for age composition in survey
     
-    Type ans_survcomp = 0.0;
+  Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
   
   

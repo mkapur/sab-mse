@@ -191,6 +191,8 @@ load_data_seasons <- function(nseason = 4,
   }
   # Load the age comps 
   age_survey.tmp <- read.csv(here("input","data",'age_survey_ss.csv'))
+  age_survey.tmp2 <- array(NA, dim = c(nrow(age_survey.tmp),ncol(age_survey.tmp), nfleets_surv)) ## placeholder; the last term should be nfleets-acomp
+  age_survey.tmp2[,,1] <- age_survey.tmp2[,,2] <- as.matrix(age_survey.tmp)
   age_catch.tmp <- read.csv(here("input","data",'age_catch_ss.csv'))
   ac.data <- read.csv(here("input","data",'ac_data.csv'))
   
@@ -376,6 +378,7 @@ load_data_seasons <- function(nseason = 4,
                   ss_survey = ac.data$ss.survey,
                   flag_survey =ac.data$sflag,
                   age_survey = age_survey.tmp,
+                  age_survey2 = age_survey.tmp2,
                   age_maxage = 15, # Max age for age comps 
                   # Catch
                   #                Catchobs = catch$Fishery, # Convert to kg

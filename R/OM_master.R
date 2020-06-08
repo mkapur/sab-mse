@@ -41,8 +41,7 @@ assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
 Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
 df <- load_data_seasons(nspace =2)
 df$Catch <- Catch.obs$Fishery
-df$survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
-df$nfleets_surv <- ncol(df.new$survey2) 
+
 
 time <- 1
 yrinit <- df$nyear

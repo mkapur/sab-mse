@@ -49,19 +49,19 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(Matsel); // Maturity ogive
   PARAMETER(logMinit); // Natural mortality
   // biology storage
-  array<Type>   Nzero3(nage, nspace);
+  array<Type>   N_0ai(nage, nspace); // numbers in year 0 at age in subarea
   // array<Type> SSBage(nage);
   // Type SSBzero = 0;
-  vector<Type> SSBzero2(nspace);
+  vector<Type> SSB_0i(nspace);
   
   // matrix<Type> N_mid(nage,tEnd+1);//previously array
   // matrix<Type> N_beg(nage,tEnd+1); //previously array
   // vector<matrix<Type> > N_beg2(nspace); 
   // vector<matrix<Type> > N_mid2(nspace); 
-  array<Type>   N_beg3( tEnd+1, nage, nspace); N_beg3.setZero(); 
-  array<Type>   N_mid3( tEnd+1, nage, nspace); N_mid3.setZero(); 
+  array<Type>   N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
+  array<Type>   N_yai_mid( tEnd+1, nage, nspace); N_yai_mid.setZero(); 
   // array<Type> SSB(tEnd);
-  array<Type> SSB2(tEnd,nspace);
+  array<Type> SSB_yi(tEnd,nspace);
   // array<Type> Surveyobs(tEnd); // Survey observed Surveyobs
   array<Type> surv_pred(tEnd,nfleets_surv); // this is actually predicted
   array<Type> Zsave(nage,tEnd);
@@ -74,14 +74,14 @@ Type objective_function<Type>::operator() ()
   
   // repro //
   PARAMETER(logRinit); // Recruitment at equil
-  PARAMETER_VECTOR(logRinit2); // Recruitment at equil by stock
+  PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
   DATA_INTEGER(sum_zero); // should rec dev's sum to zero?
   DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
   // repro storage
   vector<Type> R(tEnd);
-  array<Type>  R_k(tEnd,nstocks); // stock-level recruitment (bev-holt)
-  array<Type>  R_i(tEnd,nspace); // subarea-level recruitment (downscaled)
+  array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
+  array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
   
   // observations //
   DATA_INTEGER(year_sel);
@@ -128,7 +128,7 @@ Type objective_function<Type>::operator() ()
   
   // Catches
   DATA_VECTOR(Catchobs); // Total catch
-  DATA_ARRAY(Catchobs2); // catch by fleet
+  DATA_ARRAY(catch_obs_yf); // catch by fleet
   DATA_SCALAR(logSDcatch); // Error on catch
   PARAMETER(logphi_catch);
   
@@ -137,11 +137,10 @@ Type objective_function<Type>::operator() ()
   array<Type>age_catch_est2(tEnd, age_maxage, nspace);
   // Catch storage
   // array<Type> CatchAge(nage,tEnd); // original
-  array<Type> CatchAge2(tEnd, nage, nfleets_fish);
+  array<Type> Catch_yaf(tEnd, nage, nfleets_fish);
   array<Type> Catchinit(nage);
-  array<Type> CatchNAge(nage,tEnd);
-  array<Type> CatchNAge2(tEnd,nage,nfleets_fish);
-  array<Type>Catch(tEnd,nfleets_fish);
+  array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
+  array<Type> Catch_yf(tEnd,nfleets_fish);
   // vector<Type>Catch(tEnd); //original
   array<Type>CatchN(tEnd,nfleets_fish);
   // vector<Type>CatchN(tEnd); // original
@@ -164,7 +163,7 @@ Type objective_function<Type>::operator() ()
   Type SDcatch = exp(logSDcatch);
   Type SDR = exp(logSDR);
   Type Rinit = exp(logRinit);
-  vector<Type> Rinit2 = exp(logRinit2);
+  vector<Type> R_0k = exp(logR_0k);
   Type h = exp(logh);
   Type Minit = exp(logMinit);
   Type q = exp(logQ);
@@ -237,30 +236,22 @@ Type objective_function<Type>::operator() ()
   // Run the initial distribution
   for(int i=0;i<(nspace);i++){ 
     for(int a=0;a<nage;a++){ // Loop over ages
-      SSBzero2(i) += Matsel(a)*Nzero3(a,i)*0.5;
+      SSB_0i(i) += Matsel(a)*N_0ai(a,i)*0.5;
     } 
   }
   // vector<Type> Nzero(nage); // Numbers with no fishing
   //vector<Type>Meq = cumsum(M);
-  Nzero3.setZero();   
+  N_0ai.setZero();   
   
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
-      Nzero3(0,i) = Rinit2(k)*tau_ik(k,i);
+      N_0ai(0,i) = R_0k(k)*tau_ik(k,i);
       for(int a=1;a<(nage-1);a++){
-        Nzero3(a,i) =  Rinit2(k)*tau_ik(k,i) * exp(-(M(a)*age(a)));
+        N_0ai(a,i) =  R_0k(k)*tau_ik(k,i) * exp(-(M(a)*age(a)));
       }
-      Nzero3(nage-1,i) = ( Rinit2(k)*tau_ik(k,i)*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+      N_0ai(nage-1,i) = ( R_0k(k)*tau_ik(k,i)*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
     } // end subareas
   } // end stocks
-  
-  
-  
-  //
-  age_survey_est.setZero();
-  age_catch_est.setZero();
-  Catch.setZero();
-  CatchN.setZero();
   
   //vector<Type>Fpope(tEnd);
   
@@ -303,7 +294,7 @@ Type objective_function<Type>::operator() ()
     }
     
     for(int fish_flt=0;fish_flt<(nfleets_fish);fish_flt++){
-      Catch(time,fish_flt) = 0;
+      Catch_yf(time,fish_flt) = 0;
     }
     Fyear(time) = F0(time);
     
@@ -311,16 +302,16 @@ Type objective_function<Type>::operator() ()
     if (time == 0){ // YEAR ZERO
       for(int i=0;i<(nspace);i++){ 
         for(int a=1;a<(nage-1);a++){
-          N_beg3(time,a,i) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
+          N_yai_beg(time,a,i) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
         }
-        N_beg3(time,nage-1,i) =  Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
+        N_yai_beg(time,nage-1,i) =  Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
         
       } // end subareas
     } // end time == 0
     
     for(int i=0;i<(nspace);i++){ 
       for(int a=0;a<nage;a++){ // Loop over ages
-        SSB2(time,i) += N_beg3(time,a,i)*wage_ssb(a,time)*0.5; // hat
+        SSB_yi(time,i) += N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
       }
     }
     
@@ -333,21 +324,21 @@ Type objective_function<Type>::operator() ()
     
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){
-        R_k(time,k) += phi_ik(k,i)*(4*h*Rinit*SSB2(time,i)/(SSBzero2(i)*(1-h)+ SSB2(time,i)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
-        R_i(time,i) = R_k(time,k)*tau_ik(k,i); // downscale to subarea
+        R_yk(time,k) += phi_ik(k,i)*(4*h*Rinit*SSB_yi(time,i)/(SSB_0i(i)*(1-h)+ SSB_yi(time,i)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
+        R_yi(time,i) = R_yk(time,k)*tau_ik(k,i); // downscale to subarea
       } // end stocks
-      N_beg3(time,0,i) =  R_i(time,i);
+      N_yai_beg(time,0,i) =  R_yi(time,i);
     } // end space
     for(int i=0;i<(nspace);i++){
       // Catch(time,i) = 0;
       for(int a=0;a<(nage-1);a++){ // Loop over other ages
-        N_mid3(time,a,i) = N_beg3(time,a,i)*exp(-Z(a)*smul);
-        N_beg3(time+1,a+1,i) =  N_beg3(time,a,i)*exp(-Z(a));
+        N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-Z(a)*smul);
+        N_yai_beg(time+1,a+1,i) =  N_yai_beg(time,a,i)*exp(-Z(a));
         
       }
       // Plus group
-      N_mid3(time,nage-1,i) =  N_beg3(time,nage-2,i)*exp(-Z(nage-2)*0.5)+ N_beg3(time,nage-1,i)*exp(-Z(nage-1)*smul);
-      N_beg3(time+1,nage-1,i) =  N_beg3(time,nage-2,i)*exp(-Z(nage-2))+ N_beg3(time,nage-1,i)*exp(-Z(nage-1));
+      N_yai_mid(time,nage-1,i) =  N_yai_beg(time,nage-2,i)*exp(-Z(nage-2)*0.5)+ N_yai_beg(time,nage-1,i)*exp(-Z(nage-1)*smul);
+      N_yai_beg(time+1,nage-1,i) =  N_yai_beg(time,nage-2,i)*exp(-Z(nage-2))+ N_yai_beg(time,nage-1,i)*exp(-Z(nage-1));
     }
     
     for(int i=0;i<(nspace);i++){
@@ -355,18 +346,18 @@ Type objective_function<Type>::operator() ()
       for(int a=0;a<nage;a++){
         
         for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-          CatchAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i)*wage_catch(a,time); // do this by fleet with phi
-          CatchNAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i);// Calculate the catch in kg
+          Catch_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
+          CatchN_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i);// Calculate the catch in kg
           
-          Catch(time,fish_flt) += CatchAge2(time,a,fish_flt); // sum over the current catch at age 
+          Catch_yf(time,fish_flt) += Catch_yaf(time,a,fish_flt); // sum over the current catch at age 
           
-          CatchN(time,fish_flt) += CatchNAge2(time,a,fish_flt);
+          CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
         }
         
         for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
           
-          surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_mid3(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
-          Ntot_survey2(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_mid3(time,a,i); // To use with age comps; may need to change phi to sum acomp surveys
+          surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
+          Ntot_survey2(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i); // To use with age comps; may need to change phi to sum acomp surveys
           
         } // end fleets
       } // end ages
@@ -379,10 +370,10 @@ Type objective_function<Type>::operator() ()
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage-1);a++){ // Loop over other ages
             if(a< age_maxage){
-              age_survey_est2(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_mid3(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
+              age_survey_est2(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
               
             }else{
-              age_survey_est2(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_mid3(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // placeholder note the indexing on ntot might be off
+              age_survey_est2(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // placeholder note the indexing on ntot might be off
               
             } // end else
           } // end ages
@@ -395,12 +386,10 @@ Type objective_function<Type>::operator() ()
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
           if(a<age_maxage){
-            age_catch_est(a,time) = (CatchNAge(a+1,time)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
-            age_catch_est2(time,a,i) = (CatchNAge2(time,a+1,i)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
+            age_catch_est2(time,a,i) = (CatchN_yaf(time,a+1,i)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
             
           }else{
-            age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time,i));
-            age_catch_est2(time,age_maxage-1,i) += (CatchNAge2(time,a+1,i)/CatchN(time,i));
+            age_catch_est2(time,age_maxage-1,i) += (CatchN_yaf(time,a+1,i)/CatchN(time,i));
           } // end else
         } // end ages
       } // end nspace
@@ -424,7 +413,7 @@ Type objective_function<Type>::operator() ()
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int time=0;time<tEnd;time++){ // Total Catches
-      ans_catch += -dnorm(log(Catch(time,fish_flt)+1e-6), log(Catchobs2(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+      ans_catch += -dnorm(log(Catch_yf(time,fish_flt)+1e-6), log(catch_obs_yf(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       
     }
   }
@@ -533,28 +522,25 @@ Type objective_function<Type>::operator() ()
   // Later Fix F in the likelihood and age comp in catch
   // Type ans = 0.0;
   // Report calculations
-  ADREPORT(Catch)
-    ADREPORT(logF)
-    ADREPORT(R)
-    ADREPORT(Fyear)
-    ADREPORT(surveyselc)
-    ADREPORT(catchselec)
-    ADREPORT(age_catch)
-    ADREPORT(age_catch_est)
-    ADREPORT(age_survey)
-    ADREPORT(age_survey_est)
-    ADREPORT(ans_tot)
-    REPORT(SSBzero2)
-    REPORT(SSB2)
+    // ADREPORT(logF)
+    // ADREPORT(R)
+    // ADREPORT(Fyear)
+    // ADREPORT(surveyselc)
+    // ADREPORT(catchselec)
+    // ADREPORT(age_catch)
+    // ADREPORT(age_catch_est)
+    // ADREPORT(age_survey)
+    // ADREPORT(age_survey_est)
+    // ADREPORT(ans_tot)
+    REPORT(SSB_0i)
+    REPORT(SSB_yi)
     REPORT(Fyear)
-    REPORT(Catch)
-    REPORT(R)
-    REPORT(R_k)
-    REPORT(R_i)
-    REPORT(Rinit2)
-    REPORT(Nzero3)
-    REPORT(CatchAge2)
-    REPORT(CatchNAge2)
+    REPORT(R_yk)
+    REPORT(R_yi)
+    REPORT(R_0k)
+    REPORT(N_0ai)
+    REPORT(Catch_yaf)
+    REPORT(CatchN_yaf)
     REPORT(ans_tot)
     REPORT(Zsave)
     REPORT(age_survey_est)
@@ -563,13 +549,12 @@ Type objective_function<Type>::operator() ()
     REPORT(age_catch_est2)
     REPORT(flag_sel)
     REPORT(PSEL.cols())
-    REPORT(CatchN)
     REPORT(selectivity_save)
     REPORT(surveyselc)
-    REPORT(N_beg3)
+    REPORT(N_yai_beg)
     REPORT(surv_pred)
     REPORT(survey2)
-    REPORT(N_mid3)
+    REPORT(N_yai_mid)
     REPORT(Ntot_survey2)
     return ans;
 }

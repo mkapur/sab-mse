@@ -13,9 +13,10 @@ vector<Type> cumsum(vector<Type> x) {
 }
 
 // TO DO
-// make catches   comps by fleet
-// update likelihoods to match this structure
 // when ready disable the original n_beg etc and remove the numbers
+// add in growth and movement propertly
+// make selex fleet specific
+// introduce tuning of F
 
 
 template<class Type>
@@ -245,7 +246,7 @@ Type objective_function<Type>::operator() ()
   // array<Type>surv_pred_tot(tEnd); // Total Surveyobs over age 2
   
   array<Type>age_survey_est(age_maxage,tEnd);
-  array<Type>age_survey_est2(tEnd, age_maxage, nspace); // probably should be by fleet
+  array<Type>age_survey_est2(tEnd, age_maxage, nfleets_acomp); 
   
   array<Type>age_catch_est(age_maxage,tEnd);
   array<Type>age_catch_est2(tEnd, age_maxage, nspace);
@@ -304,11 +305,10 @@ Type objective_function<Type>::operator() ()
           }
         }
       }
-      ///////// MK MONKEY BELOW HERE     
       
-      // for(int i=0;i<(nspace);i++){ 
-      //   Catch(time,i) = 0;
-      // }
+      for(int fish_flt=0;fish_flt<(nfleets_fish);fish_flt++){
+        Catch(time,fish_flt) = 0;
+      }
       Fyear(time) = F0(time);
       
       
@@ -382,7 +382,7 @@ Type objective_function<Type>::operator() ()
           CatchNAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i);// Calculate the catch in kg
           
           // Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
-          Catch(time,fish_flt) += CatchAge2(time,a,fish_flt); // sum over the current catch at age [ needs to also be by fleet]
+          Catch(time,fish_flt) += CatchAge2(time,a,fish_flt); // sum over the current catch at age 
           
           // CatchN(time,i) += CatchNAge(a,time);
           CatchN(time,fish_flt) += CatchNAge2(time,a,fish_flt);
@@ -400,22 +400,24 @@ Type objective_function<Type>::operator() ()
       } // end nspace
       
       REPORT(Ntot_survey2)
-      
-      if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
-        for(int i=0;i<(nspace);i++){
-          for(int a=0;a<(nage-1);a++){ // Loop over other ages
-            if(a< age_maxage){
-              age_survey_est(a,time) = (surveyselc(a+1)*N_mid(a+1,time))/Ntot_survey;
-              age_survey_est2(time,a,i) = (surveyselc(a+1)*N_mid3(time,a+1,i))/Ntot_survey; // estimated comps based on nbeg
-              
-            }else{
-              age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
-              age_survey_est2(time,age_maxage-1,i) += (surveyselc(a+1)*N_mid3(time,a+1,i))/Ntot_survey;
-              
-            } // end else
-          } // end ages
-        } // end nspace
-      }  // end flag
+        
+        for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
+          if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
+            for(int i=0;i<(nspace);i++){
+              for(int a=0;a<(nage-1);a++){ // Loop over other ages
+                if(a< age_maxage){
+                  age_survey_est(a,time) = (surveyselc(a+1)*N_mid(a+1,time))/Ntot_survey;
+                  age_survey_est2(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_mid3(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
+                  
+                }else{
+                  age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
+                  age_survey_est2(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_mid3(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // placeholder note the indexing on ntot might be off
+                  
+                } // end else
+              } // end ages
+            } // end nspace
+          }  // end flag
+        } // end acomp survey fleets
       
       if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
         
@@ -443,7 +445,7 @@ Type objective_function<Type>::operator() ()
     for(int time=1;time<tEnd;time++){ // Survey Surveyobs
       if(flag_surv_bio(time) == 2){
         // ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
-      ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey2(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
+        ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey2(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
         } // end survey flag
         
     } // end time
@@ -451,8 +453,7 @@ Type objective_function<Type>::operator() ()
   
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    
-    // for(int i=0;i<(nspace);i++){
+   // for(int i=0;i<(nspace);i++){
     for(int time=0;time<tEnd;time++){ // Total Catches
       // ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       ans_catch += -dnorm(log(Catch(time,fish_flt)+1e-6), log(Catchobs2(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
@@ -473,22 +474,23 @@ Type objective_function<Type>::operator() ()
   sum1.setZero();
   sum2.setZero();
   
-  
-  for(int time=1;time<tEnd;time++){ // Loop over available years
-    
-    if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
-      for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
-        sum1(time) += lgamma(ss_survey(time)*age_survey(a,time)+1);
-        sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est(a,time)) -
-          lgamma(phi_survey*ss_survey(time)*age_survey_est(a,time));
+  for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
+    for(int time=1;time<tEnd;time++){ // Loop over available years
+      if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
+        for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
+          sum1(time) += lgamma(ss_survey(time)*age_survey(a,time)+1);
+          sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est(a,time)) -
+            lgamma(phi_survey*ss_survey(time)*age_survey_est(a,time));
+          
+          // sum1(time) += lgamma(ss_survey(time)*age_survey(a,time)+1);
+          // sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est2(time,age,surv_flt_acomp)) -
+          //   lgamma(phi_survey*ss_survey(time)*age_survey_est(a,time));
+        } // end ages
+        ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
         
-        
-      }
-      ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
-      
-    }
-    
-  }
+      } // end acomp flag
+    } // end time
+  } // end survey acomp fleets
   
   
   vector<Type>sum3(tEnd);

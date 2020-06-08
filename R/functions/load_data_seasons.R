@@ -174,7 +174,7 @@ load_data_seasons <- function(nseason = 4,
   
   survey <- read.csv(here("input","data",'survey.csv'))
   survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
-  nfleets_surv <- ncol(df.new$survey2) 
+  nfleets_surv <- ncol(survey2) 
   
   
   ## setup phi (matching matrix) depending on spatial setup

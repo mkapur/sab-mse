@@ -439,12 +439,14 @@ Type objective_function<Type>::operator() ()
   // using namespace density;
   Type ans_survey=0.0;
   ////Save the observation model estimates
-  for(int time=1;time<tEnd;time++){ // Survey Surveyobs
-    
-    if(survey_x(time) == 2){
-      ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
-    }
-  }
+  for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
+    for(int time=1;time<tEnd;time++){ // Survey Surveyobs
+      if(survey_x(time) == 2){
+        // ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
+        ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey(time)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
+      } // end survey flag 
+    } // end time
+  } // end surv_flt
   
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){

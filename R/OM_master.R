@@ -79,21 +79,7 @@ reps <- obj$report()
 
 dim(reps$N_beg)==dim(reps$N_beg2[[1]])
 dim(reps$N_mid)==dim(reps$N_mid2[[1]])
-reps$Nzero3 # age x area
-reps$N_beg2[[1]][1:100,]
-reps$N_mid3
-reps$N_beg3 ## time x age, x space
-reps$SSBzero2
-reps$SSB2 ## dim time x nspace
-reps$CatchAge2
-reps$Catch
-reps$CatchNAge2
-reps$age_survey_est2
-reps$surv_pred
-reps$survey2
-reps$R2
-reps$ini
-reps$age_catch_est2
+
 reps$surv_pred ## there should be zeros if the fleet doesn't happen in either area, and doubles if in both, ncol == nfleets_suv
 ncol(reps$surv_pred) == df.new$nfleets_surv
 ncol(reps$Catch) == df.new$nfleets_fish

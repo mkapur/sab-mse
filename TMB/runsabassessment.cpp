@@ -18,7 +18,8 @@ vector<Type> cumsum(vector<Type> x) {
 // add spatial R init and R (likely need phi_ik)
 // make selex fleet specific
 // introduce tuning of F
-
+// consolidate some loops
+// organize data sections
 
 template<class Type>
 Type objective_function<Type>::operator() ()
@@ -187,21 +188,22 @@ Type objective_function<Type>::operator() ()
   vector<matrix<Type> > Nzero2(nspace); // create this many matrices within a vector
   vector<Type> Nzero(nage); // Numbers with no fishing
   //vector<Type>Meq = cumsum(M);
-  
-  for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
-    Nzero(0) = Rinit;
-    Nzero3(0,i) = Rinit;
-    for(int a=1;a<(nage-1);a++){
-      Nzero(a) = Rinit * exp(-(M(a)*age(a)));
-      Nzero3(a,i) = Rinit * exp(-(M(a)*age(a)));
-      
-    }
-    Nzero(nage-1) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
-    Nzero3(nage-1,i) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+  for(int k=0;k<(nstocks);k++){
     
-    Nzero2(i) = Nzero;
-  } // end subareas
-  
+    for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
+      Nzero(0) = Rinit;
+      Nzero3(0,i) = Rinit2(k)*tau_ik(k,i);
+      for(int a=1;a<(nage-1);a++){
+        Nzero(a) = Rinit * exp(-(M(a)*age(a)));
+        Nzero3(a,i) = Rinit * exp(-(M(a)*age(a)));
+        
+      }
+      Nzero(nage-1) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+      Nzero3(nage-1,i) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+      
+      Nzero2(i) = Nzero;
+    } // end subareas
+  } // end stocks
   
   array<Type> SSBage(nage);
   array<Type> Catchinit(nage);
@@ -608,6 +610,7 @@ Type objective_function<Type>::operator() ()
     REPORT(R)
     REPORT(R_k)
     REPORT(R_i)
+    REPORT(Rinit2)
     REPORT(Nzero2)
     REPORT(Nzero3)
     REPORT(CatchAge2)

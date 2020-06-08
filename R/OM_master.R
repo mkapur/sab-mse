@@ -92,7 +92,7 @@ reps$age_survey_est2
 reps$surv_pred
 reps$survey2
 reps$R2
-
+reps$ini
 reps$age_catch_est2
 reps$surv_pred ## there should be zeros if the fleet doesn't happen in either area, and doubles if in both, ncol == nfleets_suv
 ncol(reps$surv_pred) == df.new$nfleets_surv

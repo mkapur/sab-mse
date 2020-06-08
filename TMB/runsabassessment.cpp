@@ -195,11 +195,11 @@ Type objective_function<Type>::operator() ()
       Nzero3(0,i) = Rinit2(k)*tau_ik(k,i);
       for(int a=1;a<(nage-1);a++){
         Nzero(a) = Rinit * exp(-(M(a)*age(a)));
-        Nzero3(a,i) = Rinit * exp(-(M(a)*age(a)));
+        Nzero3(a,i) =  Rinit2(k)*tau_ik(k,i) * exp(-(M(a)*age(a)));
         
       }
       Nzero(nage-1) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
-      Nzero3(nage-1,i) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+      Nzero3(nage-1,i) = ( Rinit2(k)*tau_ik(k,i)*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
       
       Nzero2(i) = Nzero;
     } // end subareas

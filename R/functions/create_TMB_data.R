@@ -100,7 +100,8 @@ create_TMB_data <- function(sim.data, df,
                   Aprior = tau*(1-mu),
                   survey_err = df$survey_err,
                   nspace = nspace,
-                  nfleets_surv = df$nfleets_surv
+                  nfleets_surv = df$nfleets_surv,
+                  phi_if = df$phi_if
                 
   )
   

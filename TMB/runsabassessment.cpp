@@ -47,6 +47,7 @@ Type objective_function<Type>::operator() ()
   // // // Survey
   DATA_VECTOR(survey); // Acoustic survey - vector of obs x year 
   DATA_ARRAY(survey2); // now this is year x fleets
+  DATA_ARRAY(phi_if); // turn on/off subareas for survey fleets
   
   DATA_VECTOR(survey_x); // Flag if survey occured
   DATA_VECTOR(survey_err);
@@ -371,17 +372,13 @@ Type objective_function<Type>::operator() ()
           CatchN(time,i) += CatchNAge2(time,a,i);
           
           
-        } // end age
-      } // end space
-      
-      for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
-        for(int a=0;a<nage;a++){
-          Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; 
-          surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*N_mid3(time,a,0)*q; // need to include phi matrix to conditionally sum biomass over i 
-          Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
-        }
-      }
-      REPORT(surv_pred)
+          for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
+            Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; 
+            surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if(sur_flt,i)*N_mid3(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
+            Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
+          } // end fleets
+        } // end ages
+      } // end nspace
       
       if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
         for(int i=0;i<(nspace);i++){
@@ -578,6 +575,7 @@ Type objective_function<Type>::operator() ()
     REPORT(N_beg)
     REPORT(N_mid)
     REPORT(N_mid2)
+    REPORT(surv_pred)
     
     REPORT(N_mid3)
     REPORT(Surveyobs)

@@ -43,6 +43,14 @@ load_data_seasons <- function(nseason = 4,
   }
   
   
+  ## setup phi (matching matrix) depending on spatial setup
+  if(nspace == 6){ ## OM
+    phi_if <- matrix(0, nrow = 5, ncol = nspace)
+    phi_if[1,1:2] <-  phi_if[2,1:2] <-  phi_if[3,3:4]<-  phi_if[4,3:4] <-  phi_if[5,5:6] <- 1
+  } else {
+    phi_if <- matrix(1, nrow = 5, ncol = nspace) ## placeholder for alternative spatial stratificationss
+  }
+
   years <- 1966:(myear+yr_future)
   nyear <- length(years)
   tEnd <- length(years)*nseason
@@ -165,6 +173,8 @@ load_data_seasons <- function(nseason = 4,
   }
   
   survey <- read.csv(here("input","data",'survey.csv'))
+  survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
+  nfleets_surv <- ncol(df.new$survey2) 
   # Load the age comps 
   age_survey.tmp <- read.csv(here("input","data",'age_survey_ss.csv'))
   age_catch.tmp <- read.csv(here("input","data",'age_catch_ss.csv'))
@@ -317,6 +327,8 @@ load_data_seasons <- function(nseason = 4,
      flag_sel <- rep(0,nyear)
      flag_sel[which(years == selYear):which(years == myear)] <- 1
      
+     
+     
   df <-list(      #### Parameters #####
                   wage_ssb = t(wage_ssb),
                   wage_catch = t(wage_catch),
@@ -325,7 +337,6 @@ load_data_seasons <- function(nseason = 4,
                   selidx = which(years == selYear),
                   #  Input parameters
                   year_sel = length(1991:max(years)), # Years to model time varying sel
-                  
                   Msel = msel,
                   Matsel= as.numeric(mat),
                   nage = nage,
@@ -344,6 +355,8 @@ load_data_seasons <- function(nseason = 4,
                   nsurvey = nsurvey, # Frequency of survey years (e.g., 2 is every second year)
                   # survey
                   survey = survey, # Make sure the survey has the same length as the catch time series
+                  survey2 = survey2,
+                  nfleets_surv = nfleets_surv,
                   survey_x = ac.data$survey_x, # Is there a survey in that year?
                   survey_err = ac.data$ss.error, # Make sure the survey has the same length as the catch time series
                   ss_survey = ac.data$ss.survey,
@@ -383,8 +396,8 @@ load_data_seasons <- function(nseason = 4,
                   parms = parms,
                   Fnseason = Fnseason,
                   selectivity_change = selectivity_change,
-                  Catch = catch
-                
+                  Catch = catch,
+                phi_if = phi_if
                   # Parameters from the estimation model 
               
   )

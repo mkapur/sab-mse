@@ -103,12 +103,14 @@ create_TMB_data <- function(sim.data, df,
                   Aprior = tau*(1-mu),
                   survey_err = df$survey_err,
                   nspace = nspace,
+                  nstocks = nrow(df$phi_ik),
                   nfleets_surv = df$nfleets_surv,
                   nfleets_fish = df$nfleets_fish,
                   nfleets_acomp = df$nfleets_surv, ## PLACEHOLDER
                   nfleets_lcomp = df$nfleets_surv, ## PLACEHOLDER
                   phi_if_surv = df$phi_if_surv,
-                  phi_if_fish = df$phi_if_fish
+                  phi_if_fish = df$phi_if_fish,
+                  phi_ik = df$phi_ik
                 
   )
   

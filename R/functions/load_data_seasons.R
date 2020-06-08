@@ -185,10 +185,16 @@ load_data_seasons <- function(nseason = 4,
     phi_if_surv[1,1:2] <-  phi_if_surv[2,1:2] <-  phi_if_surv[3,3:4]<-  phi_if_surv[4,3:4] <-  phi_if_surv[5,5:6] <- 1
     
     phi_if_fish <- matrix(1, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
+    
+    phi_ik <-  matrix(0, ncol = nspace, nrow = 4) ## nesting of subareas within stocks, for recruitment purposes
+    phi_ik[1,1] <-  phi_ik[2,2:3] <-  phi_ik[3,4:5]<-  phi_ik[4,5]  <- 1
+    
     # phi_if_fish[1,1:2] <-  phi_if_fish[2,1:2] <-  phi_if_fish[3,3:4]<-  phi_if_fish[4,3:4] <-  phi_if_fish[5,5:6] <- 1
   } else {
     phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_if_fish <- matrix(rbinom(nfleets_fish*nspace,1,0.5), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
+    phi_ik <- matrix(rbinom(4*nspace,1,0.5), nrow = 4, ncol = nspace) ## placeholder for alternative spatial stratifications
+    
     
   }
   # Load the age comps 
@@ -419,7 +425,8 @@ load_data_seasons <- function(nseason = 4,
                   Catch = catch,
                  Catch2 = catch2,
                  phi_if_surv = phi_if_surv,
-                 phi_if_fish = phi_if_fish
+                 phi_if_fish = phi_if_fish,
+                 phi_ik = phi_ik
                   # Parameters from the estimation model 
               
   )

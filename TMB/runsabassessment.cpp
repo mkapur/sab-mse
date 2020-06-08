@@ -14,7 +14,8 @@ vector<Type> cumsum(vector<Type> x) {
 
 // TO DO
 // when ready disable the original n_beg etc and remove the numbers
-// add in growth and movement propertly
+// add in growth and movement properly
+// add spatial R init and R (likely need phi_ik)
 // make selex fleet specific
 // introduce tuning of F
 
@@ -24,6 +25,8 @@ Type objective_function<Type>::operator() ()
 {
   // Data input
   DATA_INTEGER(nspace); // number of subreas to track
+  DATA_INTEGER(nstocks); // number of stocks (demography)
+  
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
   DATA_INTEGER(nfleets_acomp); // number of age comp fleets
@@ -55,6 +58,7 @@ Type objective_function<Type>::operator() ()
   
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
+  DATA_ARRAY(phi_ik); // nesting of subareas i into stocks k (rows)
   
   DATA_VECTOR(flag_surv_bio); // Flag if survey occured
   DATA_VECTOR(survey_err);
@@ -112,7 +116,9 @@ Type objective_function<Type>::operator() ()
   vector<Type> logF(tEnd);
   vector<Type> logR(tEnd);
   // Vectors for saving stuff
-  vector<Type>R(tEnd);
+  vector<Type> R(tEnd);
+  array<Type>  R2(tEnd,nstocks);
+  
   array<Type> CatchAge(nage,tEnd); // original
   array<Type> CatchAge2(tEnd, nage, nfleets_fish);
   
@@ -343,14 +349,16 @@ Type objective_function<Type>::operator() ()
         Zsave(a,time) = Z(a);
       }
       
-      
-      for(int i=0;i<(nspace);i++){
-        R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
-        // N_beg(0,time) = R(time); // First one is recruits
-        N_beg2(i)(0,time) = R(time);
-        N_beg3(time,0,i) = R(time);
-      }
-      
+  
+        
+        for(int i=0;i<(nspace);i++){
+          R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
+          for(int k=0;k<(nstocks);k++){
+            // R2(time,k) += phi_ik(k,nspace)*(4*h*Rinit*SSB2(time,i)/(SSBzero2(i)*(1-h)+ SSB2(time,i)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
+            N_beg2(i)(0,time) = R(time);
+            N_beg3(time,0,i) = R(time);
+          } // end stocks
+        } // end space
       //Type smul = Type(0.58);
       for(int i=0;i<(nspace);i++){
         // Catch(time,i) = 0;

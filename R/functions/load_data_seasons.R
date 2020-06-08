@@ -43,13 +43,7 @@ load_data_seasons <- function(nseason = 4,
   }
   
   
-  ## setup phi (matching matrix) depending on spatial setup
-  if(nspace == 6){ ## OM
-    phi_if <- matrix(0, nrow = 5, ncol = nspace)
-    phi_if[1,1:2] <-  phi_if[2,1:2] <-  phi_if[3,3:4]<-  phi_if[4,3:4] <-  phi_if[5,5:6] <- 1
-  } else {
-    phi_if <- matrix(1, nrow = 5, ncol = nspace) ## placeholder for alternative spatial stratificationss
-  }
+
 
   years <- 1966:(myear+yr_future)
   nyear <- length(years)
@@ -146,6 +140,12 @@ load_data_seasons <- function(nseason = 4,
   
   # Catch
   catch <- read.csv(here("input","data",'hake_totcatch.csv'))
+  catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
+  nfleets_fish <- ncol(catch2)-1 
+  
+  
+ 
+  
   
   # Survey abundance
   df.survey <- read.csv(here("input","data",'acoustic survey.csv'))
@@ -175,6 +175,20 @@ load_data_seasons <- function(nseason = 4,
   survey <- read.csv(here("input","data",'survey.csv'))
   survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
   nfleets_surv <- ncol(df.new$survey2) 
+  
+  
+  ## setup phi (matching matrix) depending on spatial setup
+  if(nspace == 6){ ## OM
+    phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
+    phi_if_surv[1,1:2] <-  phi_if_surv[2,1:2] <-  phi_if_surv[3,3:4]<-  phi_if_surv[4,3:4] <-  phi_if_surv[5,5:6] <- 1
+    
+    phi_if_fish <- matrix(1, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
+    # phi_if_fish[1,1:2] <-  phi_if_fish[2,1:2] <-  phi_if_fish[3,3:4]<-  phi_if_fish[4,3:4] <-  phi_if_fish[5,5:6] <- 1
+  } else {
+    phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
+    phi_if_fish <- matrix(rbinom(nfleets_fish*nspace,1,0.5), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
+    
+  }
   # Load the age comps 
   age_survey.tmp <- read.csv(here("input","data",'age_survey_ss.csv'))
   age_catch.tmp <- read.csv(here("input","data",'age_catch_ss.csv'))
@@ -368,6 +382,7 @@ load_data_seasons <- function(nseason = 4,
                   ss_catch = ac.data$ss.catch,
                   flag_catch =ac.data$cflag,
                   age_catch = age_catch.tmp,
+                  nfleets_fish = nfleets_fish,
                   # variance parameters
                   logSDcatch = log(0.01),
                   logSDR = log(logSDR), # Fixed in stock assessment ,
@@ -397,7 +412,9 @@ load_data_seasons <- function(nseason = 4,
                   Fnseason = Fnseason,
                   selectivity_change = selectivity_change,
                   Catch = catch,
-                phi_if = phi_if
+                 Catch2 = catch2,
+                 phi_if_surv = phi_if_surv,
+                 phi_if_fish = phi_if_fish
                   # Parameters from the estimation model 
               
   )

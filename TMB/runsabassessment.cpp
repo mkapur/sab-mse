@@ -24,6 +24,7 @@ Type objective_function<Type>::operator() ()
   // Data input
   DATA_INTEGER(nspace); // number of subreas to track
   DATA_INTEGER(nfleets_surv); // number of survey fleets
+  DATA_INTEGER(nfleets_fish); //number of fishery fleets
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch
   DATA_ARRAY(wage_survey); // Weight in survey
@@ -47,7 +48,8 @@ Type objective_function<Type>::operator() ()
   // // // Survey
   DATA_VECTOR(survey); // Acoustic survey - vector of obs x year 
   DATA_ARRAY(survey2); // now this is year x fleets
-  DATA_ARRAY(phi_if); // turn on/off subareas for survey fleets
+  DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
+  DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   
   DATA_VECTOR(survey_x); // Flag if survey occured
   DATA_VECTOR(survey_err);
@@ -58,6 +60,8 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(smul); // Multiplier for survey selectivity
   // Catches
   DATA_VECTOR(Catchobs); // Total catch
+  DATA_ARRAY(Catchobs2); // catch by fleet
+  
   DATA_VECTOR(ss_catch); // age comp sample size
   DATA_VECTOR(flag_catch); // Years age was sampled
   DATA_ARRAY(age_catch); // Age comps
@@ -102,11 +106,11 @@ Type objective_function<Type>::operator() ()
   vector<Type> logR(tEnd);
   // Vectors for saving stuff
   vector<Type>R(tEnd);
-  array<Type> CatchAge(nage,tEnd); // prev array
-  array<Type> CatchAge2(tEnd, nage, nspace);
+  array<Type> CatchAge(nage,tEnd); // original
+  array<Type> CatchAge2(tEnd, nage, nfleets_fish);
   
   array<Type> CatchNAge(nage,tEnd);
-  array<Type> CatchNAge2(tEnd,nage,nspace);
+  array<Type> CatchNAge2(tEnd,nage,nfleets_fish);
   
   
   for(int j=0;j<(tEnd-1);j++){
@@ -212,9 +216,9 @@ Type objective_function<Type>::operator() ()
   // }
   
   
-  array<Type>Catch(tEnd,nspace);
+  array<Type>Catch(tEnd,nfleets_fish);
   // vector<Type>Catch(tEnd); //original
-  array<Type>CatchN(tEnd,nspace);
+  array<Type>CatchN(tEnd,nfleets_fish);
   // vector<Type>CatchN(tEnd); // original
   
   matrix<Type> N_mid(nage,tEnd+1);//previously array
@@ -229,12 +233,14 @@ Type objective_function<Type>::operator() ()
   // // Run the model over time
   array<Type> SSB(tEnd);
   array<Type> SSB2(tEnd,nspace);
-  array<Type>Surveyobs(tEnd); // Survey observed Surveyobs
+  array<Type> Surveyobs(tEnd); // Survey observed Surveyobs
   array<Type> surv_pred(tEnd,nfleets_surv); // this is actually predicted
   
-  array<Type>Surveyobs_tot(tEnd); // Total Surveyobs over age 2
+  // array<Type>Surveyobs_tot(tEnd); // Total Surveyobs over age 2
+  // array<Type>surv_pred_tot(tEnd); // Total Surveyobs over age 2
+  
   array<Type>age_survey_est(age_maxage,tEnd);
-  array<Type>age_survey_est2(tEnd, age_maxage, nspace);
+  array<Type>age_survey_est2(tEnd, age_maxage, nspace); // probably should be by fleet
   
   array<Type>age_catch_est(age_maxage,tEnd);
   array<Type>age_catch_est2(tEnd, age_maxage, nspace);
@@ -294,9 +300,9 @@ Type objective_function<Type>::operator() ()
       }
       ///////// MK MONKEY BELOW HERE     
       
-      for(int i=0;i<(nspace);i++){ 
-        Catch(time,i) = 0;
-      }
+      // for(int i=0;i<(nspace);i++){ 
+      //   Catch(time,i) = 0;
+      // }
       Fyear(time) = F0(time);
       
       
@@ -340,7 +346,7 @@ Type objective_function<Type>::operator() ()
       
       //Type smul = Type(0.58);
       for(int i=0;i<(nspace);i++){
-        Catch(time,i) = 0;
+        // Catch(time,i) = 0;
         for(int a=0;a<(nage-1);a++){ // Loop over other ages
           N_mid(a,time) =  N_beg2(i)(a,time)*exp(-Z(a)*smul);
           N_mid3(time,a,i) = N_beg3(time,a,i)*exp(-Z(a)*smul);
@@ -358,23 +364,28 @@ Type objective_function<Type>::operator() ()
       }
       
       for(int i=0;i<(nspace);i++){
+        
         for(int a=0;a<nage;a++){
+          
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            
           CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
-          CatchAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i)*wage_catch(a,time);// Calculate the catch in kg
+          CatchAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i)*wage_catch(a,time); // do this by fleet with phi
           
           CatchNAge(a,time) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
-          CatchNAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i);// Calculate the catch in kg
+          CatchNAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i);// Calculate the catch in kg
           
           // Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
-          Catch(time,i) += CatchAge2(time,a,i); // sum over the current catch at age
+          Catch(time,fish_flt) += CatchAge2(time,a,fish_flt); // sum over the current catch at age [ needs to also be by fleet]
           
           // CatchN(time,i) += CatchNAge(a,time);
-          CatchN(time,i) += CatchNAge2(time,a,i);
-          
+          CatchN(time,fish_flt) += CatchNAge2(time,a,fish_flt);
+          }
           
           for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
+            
             Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; 
-            surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if(sur_flt,i)*N_mid3(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
+            surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_mid3(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
             Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
           } // end fleets
         } // end ages
@@ -426,9 +437,13 @@ Type objective_function<Type>::operator() ()
   }
   
   Type ans_catch = 0.0;
-  for(int i=0;i<(nspace);i++){
+  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    
+  // for(int i=0;i<(nspace);i++){
     for(int time=0;time<tEnd;time++){ // Total Catches
-      ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+      // ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+      ans_catch += -dnorm(log(Catch(time,fish_flt)+1e-6), log(Catchobs2(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+      
     }
   }
   

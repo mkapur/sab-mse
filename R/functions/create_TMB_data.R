@@ -85,7 +85,8 @@ create_TMB_data <- function(sim.data, df,
                   age_maxage = df$age_maxage, # Max age for age comps 
                   # Catch
                   Catchobs = sim.data$Catch,
-                  #                Catchobs = catch$Fishery, # Convert to kg
+                  Catchobs2 = df$Catch2,
+                  # Catchobs = catch$Fishery, # Convert to kg
                   ss_catch = df$ss_catch,
                   flag_catch =df$flag_catch,
                   age_catch = sim.data$age_catch,
@@ -101,7 +102,9 @@ create_TMB_data <- function(sim.data, df,
                   survey_err = df$survey_err,
                   nspace = nspace,
                   nfleets_surv = df$nfleets_surv,
-                  phi_if = df$phi_if
+                  nfleets_fish = df$nfleets_fish,
+                  phi_if_surv = df$phi_if_surv,
+                  phi_if_fish = df$phi_if_fish
                 
   )
   

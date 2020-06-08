@@ -53,7 +53,7 @@ Type objective_function<Type>::operator() ()
   // array<Type> SSBage(nage);
   // Type SSBzero = 0;
   vector<Type> SSBzero2(nspace);
-
+  
   // matrix<Type> N_mid(nage,tEnd+1);//previously array
   // matrix<Type> N_beg(nage,tEnd+1); //previously array
   // vector<matrix<Type> > N_beg2(nspace); 
@@ -237,26 +237,20 @@ Type objective_function<Type>::operator() ()
   // Run the initial distribution
   for(int i=0;i<(nspace);i++){ 
     for(int a=0;a<nage;a++){ // Loop over ages
-      // SSBzero += Matsel(a)*Nzero(a)*0.5;// original
       SSBzero2(i) += Matsel(a)*Nzero3(a,i)*0.5;
     } 
   }
-  // vector<matrix<Type> > Nzero2(nspace); // create this many matrices within a vector
   // vector<Type> Nzero(nage); // Numbers with no fishing
   //vector<Type>Meq = cumsum(M);
   Nzero3.setZero();   
   
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
-      // Nzero(0) = Rinit;
       Nzero3(0,i) = Rinit2(k)*tau_ik(k,i);
       for(int a=1;a<(nage-1);a++){
-        // Nzero(a) = Rinit * exp(-(M(a)*age(a)));
         Nzero3(a,i) =  Rinit2(k)*tau_ik(k,i) * exp(-(M(a)*age(a)));
       }
-      // Nzero(nage-1) = (Rinit*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
       Nzero3(nage-1,i) = ( Rinit2(k)*tau_ik(k,i)*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
-      // Nzero2(i) = Nzero;
     } // end subareas
   } // end stocks
   
@@ -279,7 +273,7 @@ Type objective_function<Type>::operator() ()
   for(int time=0;time<(tEnd);time++){ // Start time loop
     
     Type Ntot_survey = 0;
-
+    
     pmax_catch_save(time) = pmax_catch;
     // Take care of selectivity
     
@@ -316,14 +310,9 @@ Type objective_function<Type>::operator() ()
     
     if (time == 0){ // YEAR ZERO
       for(int i=0;i<(nspace);i++){ 
-        // N_beg.setZero();
-        // N_beg2(i).setZero();
         for(int a=1;a<(nage-1);a++){
-          // N_beg(a,time) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
           N_beg3(time,a,i) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
         }
-        // N_beg(nage-1, time) = Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
-        // N_beg2(i) = N_beg;
         N_beg3(time,nage-1,i) =  Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
         
       } // end subareas
@@ -331,9 +320,7 @@ Type objective_function<Type>::operator() ()
     
     for(int i=0;i<(nspace);i++){ 
       for(int a=0;a<nage;a++){ // Loop over ages
-        // SSB(time) += N_beg(a,time)*wage_ssb(a,time)*0.5; // hat
         SSB2(time,i) += N_beg3(time,a,i)*wage_ssb(a,time)*0.5; // hat
-        // SSB2(time,i) += N_beg2(i)(a,time)*wage_ssb(a,time)*0.5; // hat
       }
     }
     
@@ -345,31 +332,22 @@ Type objective_function<Type>::operator() ()
     }
     
     for(int i=0;i<(nspace);i++){
-      // R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
       for(int k=0;k<(nstocks);k++){
         R_k(time,k) += phi_ik(k,i)*(4*h*Rinit*SSB2(time,i)/(SSBzero2(i)*(1-h)+ SSB2(time,i)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
         R_i(time,i) = R_k(time,k)*tau_ik(k,i); // downscale to subarea
       } // end stocks
-      // N_beg2(i)(0,time) = R(time);
       N_beg3(time,0,i) =  R_i(time,i);
     } // end space
-    //Type smul = Type(0.58);
     for(int i=0;i<(nspace);i++){
       // Catch(time,i) = 0;
       for(int a=0;a<(nage-1);a++){ // Loop over other ages
-        // N_mid(a,time) =  N_beg2(i)(a,time)*exp(-Z(a)*smul);
         N_mid3(time,a,i) = N_beg3(time,a,i)*exp(-Z(a)*smul);
-        // N_beg2(i)(a+1,time+1) =  N_beg2(i)(a,time)*exp(-Z(a));
         N_beg3(time+1,a+1,i) =  N_beg3(time,a,i)*exp(-Z(a));
         
       }
-      // N_mid2(i) = N_mid;
       // Plus group
-      // N_mid2(i)(nage-1, time) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2)*0.5)+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1)*smul);
       N_mid3(time,nage-1,i) =  N_beg3(time,nage-2,i)*exp(-Z(nage-2)*0.5)+ N_beg3(time,nage-1,i)*exp(-Z(nage-1)*smul);
-      // N_beg2(i)(nage-1, time+1) =  N_beg2(i)(nage-2,time)*exp(-Z(nage-2))+ N_beg2(i)(nage-1,time)*exp(-Z(nage-1));
       N_beg3(time+1,nage-1,i) =  N_beg3(time,nage-2,i)*exp(-Z(nage-2))+ N_beg3(time,nage-1,i)*exp(-Z(nage-1));
-      
     }
     
     for(int i=0;i<(nspace);i++){
@@ -377,25 +355,17 @@ Type objective_function<Type>::operator() ()
       for(int a=0;a<nage;a++){
         
         for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-          
-          // CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
           CatchAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i)*wage_catch(a,time); // do this by fleet with phi
-          
-          // CatchNAge(a,time) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
           CatchNAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i);// Calculate the catch in kg
           
-          // Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
           Catch(time,fish_flt) += CatchAge2(time,a,fish_flt); // sum over the current catch at age 
           
-          // CatchN(time,i) += CatchNAge(a,time);
           CatchN(time,fish_flt) += CatchNAge2(time,a,fish_flt);
         }
         
         for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
           
-          // Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; 
           surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_mid3(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
-          // Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
           Ntot_survey2(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_mid3(time,a,i); // To use with age comps; may need to change phi to sum acomp surveys
           
         } // end fleets
@@ -409,11 +379,9 @@ Type objective_function<Type>::operator() ()
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage-1);a++){ // Loop over other ages
             if(a< age_maxage){
-              // age_survey_est(a,time) = (surveyselc(a+1)*N_mid(a+1,time))/Ntot_survey;
               age_survey_est2(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_mid3(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
               
             }else{
-              // age_survey_est(age_maxage-1,time) += (surveyselc(i+1)*N_mid(i+1,time))/Ntot_survey;
               age_survey_est2(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_mid3(time,a+1,i))/Ntot_survey2(surv_flt_acomp); // placeholder note the indexing on ntot might be off
               
             } // end else
@@ -447,7 +415,6 @@ Type objective_function<Type>::operator() ()
   for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
     for(int time=1;time<tEnd;time++){ // Survey Surveyobs
       if(flag_surv_bio(time) == 2){
-        // ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
         ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey2(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
       } // end survey flag
       
@@ -456,9 +423,7 @@ Type objective_function<Type>::operator() ()
   
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    // for(int i=0;i<(nspace);i++){
     for(int time=0;time<tEnd;time++){ // Total Catches
-      // ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       ans_catch += -dnorm(log(Catch(time,fish_flt)+1e-6), log(Catchobs2(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       
     }
@@ -481,9 +446,6 @@ Type objective_function<Type>::operator() ()
     for(int time=1;time<tEnd;time++){ // Loop over available years
       if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
         for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
-          // sum1(time) += lgamma(ss_survey(time)*age_survey(a,time)+1);
-          // sum2(time) += lgamma(ss_survey(time)*age_survey(a,time) + phi_survey*ss_survey(time)*age_survey_est(a,time)) -
-          //   lgamma(phi_survey*ss_survey(time)*age_survey_est(a,time));
           // NOTE THAT THE age_survey2 OBS ARE IN A X TIME X FLEET, which is not the typical ordering
           sum1(time) += lgamma(ss_survey(time)*age_survey2(a,time,surv_flt_acomp)+1);
           sum2(time) += lgamma(ss_survey(time)*age_survey2(a,time,surv_flt_acomp) + phi_survey*ss_survey(time)*age_survey_est2(time,a,surv_flt_acomp)) -
@@ -571,12 +533,9 @@ Type objective_function<Type>::operator() ()
   // Later Fix F in the likelihood and age comp in catch
   // Type ans = 0.0;
   // Report calculations
-  // ADREPORT(SSB)
-    //ADREPORT(N)
-    ADREPORT(Catch)
+  ADREPORT(Catch)
     ADREPORT(logF)
     ADREPORT(R)
-    // ADREPORT(Surveyobs)
     ADREPORT(Fyear)
     ADREPORT(surveyselc)
     ADREPORT(catchselec)
@@ -585,11 +544,7 @@ Type objective_function<Type>::operator() ()
     ADREPORT(age_survey)
     ADREPORT(age_survey_est)
     ADREPORT(ans_tot)
-    // ADREPORT(SSBzero)
-    
     REPORT(SSBzero2)
-    // REPORT(N_beg2)
-    // REPORT(SSB)
     REPORT(SSB2)
     REPORT(Fyear)
     REPORT(Catch)
@@ -597,7 +552,6 @@ Type objective_function<Type>::operator() ()
     REPORT(R_k)
     REPORT(R_i)
     REPORT(Rinit2)
-    // REPORT(Nzero2)
     REPORT(Nzero3)
     REPORT(CatchAge2)
     REPORT(CatchNAge2)
@@ -613,14 +567,9 @@ Type objective_function<Type>::operator() ()
     REPORT(selectivity_save)
     REPORT(surveyselc)
     REPORT(N_beg3)
-    // REPORT(N_beg2)
-    // REPORT(N_beg)
-    // REPORT(N_mid)
-    // REPORT(N_mid2)
     REPORT(surv_pred)
     REPORT(survey2)
     REPORT(N_mid3)
-    // REPORT(Surveyobs)
     REPORT(Ntot_survey2)
     return ans;
 }

@@ -41,6 +41,9 @@ assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
 Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
 df <- load_data_seasons(nspace =2)
 df$Catch <- Catch.obs$Fishery
+df$survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
+df$nfleets_surv <- ncol(df.new$survey2) 
+
 time <- 1
 yrinit <- df$nyear
 ### Run the OM and the EM for x number of years in the MSE 
@@ -88,7 +91,7 @@ reps$Catch
 reps$CatchNAge2
 reps$age_survey_est2
 reps$age_catch_est2
-
+reps$surv_pred
 # ----
 # SSB 
 plot(df$years,rowSums(sim.data$SSB.weight))

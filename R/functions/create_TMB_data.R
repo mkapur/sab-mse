@@ -77,6 +77,7 @@ create_TMB_data <- function(sim.data, df,
                   b = b,
                   # survey
                   survey = sim.data$survey,#df.survey, # Make sure the survey has the same length as the catch time series
+                  survey2 = df$survey2, ## VAST stuff; rename later
                   survey_x = df$survey_x, # Is there a survey in that year?
                   ss_survey = df$ss_survey,
                   flag_survey =df$flag_survey,
@@ -98,7 +99,8 @@ create_TMB_data <- function(sim.data, df,
                   Bprior= tau*mu,
                   Aprior = tau*(1-mu),
                   survey_err = df$survey_err,
-                  nspace = nspace
+                  nspace = nspace,
+                  nfleets_surv = df$nfleets_surv
                 
   )
   

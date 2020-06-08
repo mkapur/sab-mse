@@ -23,6 +23,7 @@ Type objective_function<Type>::operator() ()
 {
   // Data input
   DATA_INTEGER(nspace); // number of subreas to track
+  DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch
   DATA_ARRAY(wage_survey); // Weight in survey
@@ -44,7 +45,9 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(Smax);
   DATA_INTEGER(Smax_survey);
   // // // Survey
-  DATA_VECTOR(survey); // Acoustic survey - vector of obs x year -- make this deal with VAST input
+  DATA_VECTOR(survey); // Acoustic survey - vector of obs x year 
+  DATA_ARRAY(survey2); // now this is year x fleets
+  
   DATA_VECTOR(survey_x); // Flag if survey occured
   DATA_VECTOR(survey_err);
   DATA_VECTOR(ss_survey); // Age comp sample size
@@ -226,6 +229,8 @@ Type objective_function<Type>::operator() ()
   array<Type> SSB(tEnd);
   array<Type> SSB2(tEnd,nspace);
   array<Type>Surveyobs(tEnd); // Survey observed Surveyobs
+  array<Type> surv_pred(tEnd,nfleets_surv); // this is actually predicted
+  
   array<Type>Surveyobs_tot(tEnd); // Total Surveyobs over age 2
   array<Type>age_survey_est(age_maxage,tEnd);
   array<Type>age_survey_est2(tEnd, age_maxage, nspace);
@@ -352,7 +357,7 @@ Type objective_function<Type>::operator() ()
       }
       
       for(int i=0;i<(nspace);i++){
-        for(int a=0;a<nage;a++){ // Loop over other ages
+        for(int a=0;a<nage;a++){
           CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
           CatchAge2(time,a,i) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg3(time,a,i)*wage_catch(a,time);// Calculate the catch in kg
           
@@ -365,10 +370,18 @@ Type objective_function<Type>::operator() ()
           // CatchN(time,i) += CatchNAge(a,time);
           CatchN(time,i) += CatchNAge2(time,a,i);
           
-          Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; // this will have to be by fleet and sum over area using phi
+          
+        } // end age
+      } // end space
+      
+      for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
+        for(int a=0;a<nage;a++){
+          Surveyobs(time) += surveyselc(a)*wage_survey(a,time)*N_mid(a,time)*q; 
+          surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*N_mid3(time,a,0)*q; // need to include phi matrix to conditionally sum biomass over i 
           Ntot_survey += surveyselc(a)*N_mid(a,time); // To use with age comps
         }
       }
+      REPORT(surv_pred)
       
       if(flag_survey(time) == 1){ // Flag if  there was a measurement that year
         for(int i=0;i<(nspace);i++){
@@ -416,8 +429,10 @@ Type objective_function<Type>::operator() ()
   }
   
   Type ans_catch = 0.0;
-  for(int time=0;time<tEnd;time++){ // Total Catches
-    ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+  for(int i=0;i<(nspace);i++){
+    for(int time=0;time<tEnd;time++){ // Total Catches
+      ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+    }
   }
   
   REPORT(ans_catch)

@@ -110,7 +110,8 @@ create_TMB_data <- function(sim.data, df,
                   nfleets_lcomp = df$nfleets_surv, ## PLACEHOLDER
                   phi_if_surv = df$phi_if_surv,
                   phi_if_fish = df$phi_if_fish,
-                  phi_ik = df$phi_ik
+                  phi_ik = df$phi_ik,
+                  tau_ik = df$tau_ik
                 
   )
   

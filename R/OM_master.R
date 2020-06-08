@@ -91,7 +91,7 @@ reps$CatchNAge2
 reps$age_survey_est2
 reps$surv_pred
 reps$survey2
-
+reps$R2
 
 reps$age_catch_est2
 reps$surv_pred ## there should be zeros if the fleet doesn't happen in either area, and doubles if in both, ncol == nfleets_suv

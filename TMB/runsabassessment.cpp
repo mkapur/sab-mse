@@ -59,6 +59,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   DATA_ARRAY(phi_ik); // nesting of subareas i into stocks k (rows)
+  DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
   
   DATA_VECTOR(flag_surv_bio); // Flag if survey occured
   DATA_VECTOR(survey_err);
@@ -83,6 +84,8 @@ Type objective_function<Type>::operator() ()
   // Mortality
   DATA_VECTOR(Msel); // How mortality scales with age
   DATA_VECTOR(Matsel); // Maturity ogive
+  
+
   // Priors
   DATA_SCALAR(Bprior);
   DATA_SCALAR(Aprior);
@@ -117,7 +120,9 @@ Type objective_function<Type>::operator() ()
   vector<Type> logR(tEnd);
   // Vectors for saving stuff
   vector<Type> R(tEnd);
-  array<Type>  R2(tEnd,nstocks);
+  array<Type>  R_k(tEnd,nstocks); // stock-level recruitment (bev-holt)
+  array<Type>  R_i(tEnd,nspace); // subarea-level recruitment (downscaled)
+  
   
   array<Type> CatchAge(nage,tEnd); // original
   array<Type> CatchAge2(tEnd, nage, nfleets_fish);
@@ -349,16 +354,15 @@ Type objective_function<Type>::operator() ()
         Zsave(a,time) = Z(a);
       }
       
-  
-        
-        for(int i=0;i<(nspace);i++){
-          R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
-          for(int k=0;k<(nstocks);k++){
-            // R2(time,k) += phi_ik(k,nspace)*(4*h*Rinit*SSB2(time,i)/(SSBzero2(i)*(1-h)+ SSB2(time,i)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
-            N_beg2(i)(0,time) = R(time);
-            N_beg3(time,0,i) = R(time);
-          } // end stocks
-        } // end space
+      for(int i=0;i<(nspace);i++){
+        R(time) = (4*h*Rinit*SSB(time)/(SSBzero*(1-h)+ SSB(time)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
+        for(int k=0;k<(nstocks);k++){
+          R_k(time,k) += phi_ik(k,i)*(4*h*Rinit*SSB2(time,i)/(SSBzero2(i)*(1-h)+ SSB2(time,i)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
+          R_i(time,i) = R_k(time,k)*tau_ik(k,i); // downscale to subarea
+        } // end stocks
+        N_beg2(i)(0,time) = R(time);
+        N_beg3(time,0,i) =  R_i(time,i);
+      } // end space
       //Type smul = Type(0.58);
       for(int i=0;i<(nspace);i++){
         // Catch(time,i) = 0;
@@ -384,17 +388,17 @@ Type objective_function<Type>::operator() ()
           
           for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
             
-          CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
-          CatchAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i)*wage_catch(a,time); // do this by fleet with phi
-          
-          CatchNAge(a,time) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
-          CatchNAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i);// Calculate the catch in kg
-          
-          // Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
-          Catch(time,fish_flt) += CatchAge2(time,a,fish_flt); // sum over the current catch at age 
-          
-          // CatchN(time,i) += CatchNAge(a,time);
-          CatchN(time,fish_flt) += CatchNAge2(time,a,fish_flt);
+            CatchAge(a,time)= (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time)*wage_catch(a,time);// Calculate the catch in kg
+            CatchAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i)*wage_catch(a,time); // do this by fleet with phi
+            
+            CatchNAge(a,time) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* N_beg2(i)(a,time);// Calculate the catch in kg
+            CatchNAge2(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_beg3(time,a,i);// Calculate the catch in kg
+            
+            // Catch(time,i) += CatchAge(a,time); // sum over the current catch at age
+            Catch(time,fish_flt) += CatchAge2(time,a,fish_flt); // sum over the current catch at age 
+            
+            // CatchN(time,i) += CatchNAge(a,time);
+            CatchN(time,fish_flt) += CatchNAge2(time,a,fish_flt);
           }
           
           for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
@@ -427,22 +431,22 @@ Type objective_function<Type>::operator() ()
             } // end nspace
           }  // end flag
         } // end acomp survey fleets
-      
-      if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
         
-        for(int i=0;i<(nspace);i++){
-          for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
-            if(a<age_maxage){
-              age_catch_est(a,time) = (CatchNAge(a+1,time)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
-              age_catch_est2(time,a,i) = (CatchNAge2(time,a+1,i)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
-              
-            }else{
-              age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time,i));
-              age_catch_est2(time,age_maxage-1,i) += (CatchNAge2(time,a+1,i)/CatchN(time,i));
-            } // end else
-          } // end ages
-        } // end nspace
-      } // end flag
+        if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
+          
+          for(int i=0;i<(nspace);i++){
+            for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
+              if(a<age_maxage){
+                age_catch_est(a,time) = (CatchNAge(a+1,time)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
+                age_catch_est2(time,a,i) = (CatchNAge2(time,a+1,i)/CatchN(time,i)); // Catch comp (1 bc the data starts at age = 1)
+                
+              }else{
+                age_catch_est(age_maxage-1,time) += (CatchNAge(i+1,time)/CatchN(time,i));
+                age_catch_est2(time,age_maxage-1,i) += (CatchNAge2(time,a+1,i)/CatchN(time,i));
+              } // end else
+            } // end ages
+          } // end nspace
+        } // end flag
   } // END TIME LOOP
   
   
@@ -455,14 +459,14 @@ Type objective_function<Type>::operator() ()
       if(flag_surv_bio(time) == 2){
         // ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
         ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey2(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
-        } // end survey flag
-        
+      } // end survey flag
+      
     } // end time
   } // end surv_flt
   
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-   // for(int i=0;i<(nspace);i++){
+    // for(int i=0;i<(nspace);i++){
     for(int time=0;time<tEnd;time++){ // Total Catches
       // ans_catch += -dnorm(log(Catch(time,i)+1e-6), log(Catchobs(time)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       ans_catch += -dnorm(log(Catch(time,fish_flt)+1e-6), log(Catchobs2(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
@@ -472,8 +476,8 @@ Type objective_function<Type>::operator() ()
   
   REPORT(ans_catch)
     
-  // LIKELIHOOD: age comp in survey
-  Type ans_survcomp = 0.0;
+    // LIKELIHOOD: age comp in survey
+    Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
   
   
@@ -599,6 +603,8 @@ Type objective_function<Type>::operator() ()
     REPORT(Fyear)
     REPORT(Catch)
     REPORT(R)
+    REPORT(R_k)
+    REPORT(R_i)
     REPORT(Nzero2)
     REPORT(Nzero3)
     REPORT(CatchAge2)

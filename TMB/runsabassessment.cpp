@@ -17,7 +17,7 @@ vector<Type> cumsum(vector<Type> x) {
 // make selex fleet specific
 // introduce tuning of F
 // consolidate some loops
-// make master flag_fleet matrix
+// on pause: make master flag_fleet matrix
 
 template<class Type>
 Type objective_function<Type>::operator() ()
@@ -50,10 +50,10 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logMinit); // Natural mortality
   // biology storage
   array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
-  vector<Type> SSB_0i(nspace);
+  vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
   array<Type> N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
   array<Type> N_yai_mid( tEnd+1, nage, nspace); N_yai_mid.setZero(); 
-  array<Type> SSB_yi(tEnd,nspace);
+  array<Type> SSB_yk(tEnd,nstocks);
   array<Type> surv_pred(tEnd,nfleets_surv); // this is actually predicted
   array<Type> Zsave(nage,tEnd);
   
@@ -65,7 +65,6 @@ Type objective_function<Type>::operator() ()
   
   // repro //
   PARAMETER_VECTOR(omega_ij); // eigenvect of movement between subareas
-  // PARAMETER(logRinit); // Recruitment at equil
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
   PARAMETER_VECTOR(logh_k); // Steepness by stock
@@ -152,7 +151,6 @@ Type objective_function<Type>::operator() ()
   Type SDsurv = exp(logSDsurv);
   Type SDcatch = exp(logSDcatch);
   Type SDR = exp(logSDR);
-  // Type Rinit = exp(logRinit);
   vector<Type> R_0k = exp(logR_0k);
   Type h = exp(logh);
   vector<Type> h_k = exp(logh_k);
@@ -167,7 +165,6 @@ Type objective_function<Type>::operator() ()
   vector<Type> Myear = M*Msel; // Natural mortality (if we want to change it later)
   vector<Type> Zzero = M;
   vector<Type> logF(tEnd);
-  // vector<Type> logR(tEnd);
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   
   
@@ -231,9 +228,9 @@ Type objective_function<Type>::operator() ()
     }
   }
   // Run the initial distribution
-  for(int i=0;i<(nspace);i++){ 
+  for(int k=0;k<(nstocks);k++){ 
     for(int a=0;a<nage;a++){ // Loop over ages
-      SSB_0i(i) += Matsel(a)*N_0ai(a,i)*0.5;
+      SSB_0k(k) += phi_ik(k,i)*Matsel(a)*N_0ai(a,i)*0.5;
     } 
   }
   // vector<Type> Nzero(nage); // Numbers with no fishing
@@ -245,7 +242,7 @@ Type objective_function<Type>::operator() ()
   // REPORT(test)
   //array<Type> PSEL_save(5,)
   
-  // Equilibrium numbers-at-age, subarea
+  // Equilibrium numbers-at-age, subarea (outside of time loop)
   N_0ai.setZero();   
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
@@ -308,9 +305,10 @@ Type objective_function<Type>::operator() ()
       } // end stocks
     } // end time == 0
     
-    for(int i=0;i<(nspace);i++){ 
+    // calculate SSB using time at beginning of year
+    for(int k=0;k<(nstocks);k++){     
       for(int a=0;a<nage;a++){ // Loop over ages
-        SSB_yi(time,i) += N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
+        SSB_yk(time,k) += phi_ik(k,i)*N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
       }
     }
     
@@ -321,14 +319,18 @@ Type objective_function<Type>::operator() ()
       Zsave(a,time) = Z(a);
     }
     
+    // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){
-        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yi(time,i)/(SSB_0i(i)*(1-h_k(k))+ 
-          SSB_yi(time,i)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
+        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yk(time,k)/(SSB_0k(k)*(1-h_k(k))+ 
+          SSB_yk(time,k)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
         R_yi(time,i) = R_yk(time,k)*tau_ik(k,i); // downscale to subarea
       } // end stocks
       N_yai_beg(time,0,i) =  R_yi(time,i);
     } // end space
+    
+    // N-at-age for the middle of this year and beginning of next
+    // movement and growth need to happen here
     for(int i=0;i<(nspace);i++){
       // Catch(time,i) = 0;
       for(int a=0;a<(nage-1);a++){ // Loop over other ages
@@ -341,28 +343,25 @@ Type objective_function<Type>::operator() ()
       N_yai_beg(time+1,nage-1,i) =  N_yai_beg(time,nage-2,i)*exp(-Z(nage-2))+ N_yai_beg(time,nage-1,i)*exp(-Z(nage-1));
     }
     
+    // Count catches using beginning of year & survey midyear biomass
+    // F tuning needs to happen here
     for(int i=0;i<(nspace);i++){
-      
       for(int a=0;a<nage;a++){
-        
         for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
           Catch_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
           CatchN_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i);// Calculate the catch in kg
           Catch_yf(time,fish_flt) += Catch_yaf(time,a,fish_flt); // sum over the current catch at age 
           CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
         }
-        
         for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
-          
           surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
           Nsamp_acomp_f(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i); // To use with age comps; may need to change phi to sum acomp surveys
-          
         } // end fleets
       } // end ages
     } // end nspace
     
     
-    
+    // estimate age comps in surveys
     for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
       if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
         for(int i=0;i<(nspace);i++){
@@ -377,6 +376,7 @@ Type objective_function<Type>::operator() ()
       }  // end flag
     } // end acomp survey fleets
     
+    // estimate age comps in catches
     if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
         for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
@@ -496,8 +496,6 @@ Type objective_function<Type>::operator() ()
   ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
   
   if(sum_zero == 1){
-    // for(int k=0;k<(nstocks);k++){
-      
     ans_priors += ((Type(0.0)-sum(tildeR_yk))*(Type(0.0)-sum(tildeR_yk)))/Type(0.01);
     }
   
@@ -532,8 +530,8 @@ Type objective_function<Type>::operator() ()
     // ADREPORT(age_survey)
     // ADREPORT(age_survey_est)
     // ADREPORT(ans_tot)
-    REPORT(SSB_0i)
-    REPORT(SSB_yi)
+    REPORT(SSB_0k)
+    REPORT(SSB_yk)
     REPORT(Fyear)
     REPORT(R_yk)
     REPORT(R_yi)

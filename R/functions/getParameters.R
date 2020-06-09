@@ -56,6 +56,9 @@ getParameters_OM <- function(trueparms = TRUE, mod = NA,df){
     parms <- list( # Just start all the simluations with the same initial conditions 
       logRinit = 16,
       logh = log(0.7),
+      logh_k = rep(log(0.7, df$nstocks)),
+      logR_0k = rep(log(16, df$nstocks)),
+      
       logMinit = log(0.3),
       logSDsurv = log(0.3),
       # logSDR = log(1.4),

@@ -13,13 +13,10 @@ vector<Type> cumsum(vector<Type> x) {
 }
 
 // TO DO
-// when ready disable the original n_beg etc and remove the numbers
 // add in growth and movement properly
-// add spatial R init and R (likely need phi_ik)
 // make selex fleet specific
 // introduce tuning of F
 // consolidate some loops
-// organize data sections
 
 template<class Type>
 Type objective_function<Type>::operator() ()
@@ -49,20 +46,11 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(Matsel); // Maturity ogive
   PARAMETER(logMinit); // Natural mortality
   // biology storage
-  array<Type>   N_0ai(nage, nspace); // numbers in year 0 at age in subarea
-  // array<Type> SSBage(nage);
-  // Type SSBzero = 0;
+  array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
   vector<Type> SSB_0i(nspace);
-  
-  // matrix<Type> N_mid(nage,tEnd+1);//previously array
-  // matrix<Type> N_beg(nage,tEnd+1); //previously array
-  // vector<matrix<Type> > N_beg2(nspace); 
-  // vector<matrix<Type> > N_mid2(nspace); 
-  array<Type>   N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
-  array<Type>   N_yai_mid( tEnd+1, nage, nspace); N_yai_mid.setZero(); 
-  // array<Type> SSB(tEnd);
+  array<Type> N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
+  array<Type> N_yai_mid( tEnd+1, nage, nspace); N_yai_mid.setZero(); 
   array<Type> SSB_yi(tEnd,nspace);
-  // array<Type> Surveyobs(tEnd); // Survey observed Surveyobs
   array<Type> surv_pred(tEnd,nfleets_surv); // this is actually predicted
   array<Type> Zsave(nage,tEnd);
   
@@ -76,6 +64,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logRinit); // Recruitment at equil
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
+  PARAMETER_VECTOR(logh_k); // Steepness by stock
   DATA_INTEGER(sum_zero); // should rec dev's sum to zero?
   DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
   // repro storage
@@ -94,6 +83,7 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(ss_catch); // age comp sample size
   DATA_VECTOR(flag_catch); // Years age was sampled
   DATA_ARRAY(age_catch); // Age comps
+  
   // Selectivity
   DATA_INTEGER(Smin);
   DATA_INTEGER(Smin_survey);
@@ -136,14 +126,11 @@ Type objective_function<Type>::operator() ()
   array<Type>age_catch_est(age_maxage,tEnd);
   array<Type>age_catch_est2(tEnd, age_maxage, nspace);
   // Catch storage
-  // array<Type> CatchAge(nage,tEnd); // original
   array<Type> Catch_yaf(tEnd, nage, nfleets_fish);
   array<Type> Catchinit(nage);
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
   array<Type> Catch_yf(tEnd,nfleets_fish);
-  // vector<Type>Catch(tEnd); //original
   array<Type>CatchN(tEnd,nfleets_fish);
-  // vector<Type>CatchN(tEnd); // original
   vector<Type> Fyear(tEnd);
   vector<Type> Freal(nage);
   vector<Type> Z(nage);
@@ -165,6 +152,8 @@ Type objective_function<Type>::operator() ()
   Type Rinit = exp(logRinit);
   vector<Type> R_0k = exp(logR_0k);
   Type h = exp(logh);
+  vector<Type> h_k = exp(logh_k);
+  
   Type Minit = exp(logMinit);
   Type q = exp(logQ);
   Type phi_survey = exp(logphi_survey);
@@ -324,7 +313,7 @@ Type objective_function<Type>::operator() ()
     
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){
-        R_yk(time,k) += phi_ik(k,i)*(4*h*Rinit*SSB_yi(time,i)/(SSB_0i(i)*(1-h)+ SSB_yi(time,i)*(5*h-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
+        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*Rinit*SSB_yi(time,i)/(SSB_0i(i)*(1-h_k(k))+ SSB_yi(time,i)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
         R_yi(time,i) = R_yk(time,k)*tau_ik(k,i); // downscale to subarea
       } // end stocks
       N_yai_beg(time,0,i) =  R_yi(time,i);

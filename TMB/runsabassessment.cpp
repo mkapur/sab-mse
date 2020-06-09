@@ -62,7 +62,7 @@ Type objective_function<Type>::operator() ()
   array<Type> N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
   array<Type> N_yai_mid( tEnd+1, nage, nspace); N_yai_mid.setZero(); 
   array<Type> SSB_yk(tEnd,nstocks);
-  array<Type> surv_pred(tEnd,nfleets_surv); // this is actually predicted
+  array<Type> survey_bio_f_est(tEnd,nfleets_surv); // this is actually predicted
   array<Type> Zsave(nage,tEnd);
   
   // growth //
@@ -132,23 +132,26 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logphi_catch);
   
   // Catch Comps
-  // array<Type> age_catch_est(age_maxage,tEnd); // original
   array<Type> catch_acomp_f_est(tEnd, age_maxage, nfleets_fish); // estimated catch comps; uses derived quants
   
   // Catch storage
   array<Type> Catch_yaf_est(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
-  // array<Type> Catchinit(nage);
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
   array<Type> Catch_yf_est(tEnd,nfleets_fish); // estimated total catches by fleet
   array<Type> CatchN(tEnd,nfleets_fish);
   
   // F tuning storage
+  array<Type> Ftuned_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
+  array<Type> Ftuned_ym(tEnd,nfleets_fish); // summation of Fs nested in mgmt regions
+  array<Type> Ztuned_yf(tEnd, nage, nspace); // final tuned subarea and yr specific Z
+  
+
   vector<Type> Fyear(tEnd);
   vector<Type> Freal(nage);
   vector<Type> Z(nage);
   vector<Type> pmax_catch_save(tEnd);
   vector<Type> psel_fish_zero = psel_fish;
-  vector<Type> Catchsave(tEnd);
+
   
   // Priors
   DATA_SCALAR(Bprior);
@@ -381,23 +384,44 @@ Type objective_function<Type>::operator() ()
       N_yai_beg(time+1,nage-1,i) =  N_yai_beg(time,nage-2,i)*exp(-Z(nage-2))+ N_yai_beg(time,nage-1,i)*exp(-Z(nage-1));
     }
     
-    // Count catches using beginning of year & survey midyear biomass
-    // F tuning needs to happen here
+
+    // Catch at beginning of year
+    // Hybrid F tuning inputs
+    Type Fmax = 3.5;
+    Type v1=0.99; //corresponds to an Fmax of 3
+    // Type v1=0.865; //corresponds to an Fmax of 2
+    // Type v1=0.95;
+    Type v2=30;
+    Type F_no_inc=7;
+    array<Type> F1_yf(tEnd,nfleets_fish);
     
-  
+ 
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<nage;a++){
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            // make an initial guess for F using obs catch - need to update selex
+            F1_yf(time,fish_flt) = catch_yf_obs(time, fish_flt)/
+              (phi_if_fish(fish_flt, i) * N_yai_beg(time,a,i)*wage_catch(a,time) *  selectivity_save(a,time) + catch_yf_obs(time, fish_flt));
+            
+            
+            // for(fiter=0; fiter<10;fiter++){
+            // } // end hybrid F iterations
+            Catch_yaf_est(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
+            CatchN_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i);// Calculate the catch in kg
+            Catch_yf_est(time,fish_flt) += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age 
+            CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
+          } // end fishery fleets
+        } // end ages
+      } // end nspace
+
     
+    // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
-      for(int a=0;a<nage;a++){
-        for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-          Catch_yaf_est(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
-          CatchN_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i);// Calculate the catch in kg
-          Catch_yf_est(time,fish_flt) += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age 
-          CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
-        }
+      for(int a=0;a<nage;a++){   
         for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
-          surv_pred(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
+          survey_bio_f_est(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
           Nsamp_acomp_f(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i); // To use with age comps; may need to change phi to sum acomp surveys
-        } // end fleets
+        } // end surv fleets
       } // end ages
     } // end nspace
     
@@ -439,7 +463,7 @@ Type objective_function<Type>::operator() ()
   for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
     for(int time=1;time<tEnd;time++){ // Survey Surveyobs
       if(flag_surv_bio(time) == 2){
-        ans_survey += -dnorm(log(surv_pred(time,surv_flt)), log(survey_bio_f_obs(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
+        ans_survey += -dnorm(log(survey_bio_f_est(time,surv_flt)), log(survey_bio_f_obs(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
       } // end survey flag
       
     } // end time
@@ -594,7 +618,7 @@ Type objective_function<Type>::operator() ()
     REPORT(selectivity_save)
     REPORT(surveyselc)
     REPORT(N_yai_beg)
-    REPORT(surv_pred)
+    REPORT(survey_bio_f_est)
     REPORT(survey_bio_f_obs)
     REPORT(N_yai_mid)
     REPORT(Nsamp_acomp_f)

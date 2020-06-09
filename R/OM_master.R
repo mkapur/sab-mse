@@ -15,21 +15,21 @@ dyn.load(dynlib(here("TMB","runsabassessment")))
 
 ## OM MODEL INIT ----
 # Initialize the model parameters. Make a version with movement and no seasons (simple)
-df.simple <- load_data_seasons(nseason = 1, 
-                               nspace = 2, 
-                               bfuture = 0.5, 
-                               movemaxinit = 0.5, 
-                               movefiftyinit =8) # Prepare data for operating model
-# Run the model using 'run.agebased.true.catch()' -- will fail if pars not == nspace
-sim.data.simple <- run.agebased.true.catch(df.simple)
-
-## sanity checks
-sim.data.simple$SSB %>% 
-  data.frame() %>%
-  mutate('totalSSB' = X1+X2, year = as.numeric(row.names(.))) %>%
-  melt(id = 'year') %>%
-  ggplot(., aes(x = year, y = value, color = variable)) + 
-  geom_line(size =2 ) +  theme_sleek()
+# df.simple <- load_data_seasons(nseason = 1, 
+#                                nspace = 2, 
+#                                bfuture = 0.5, 
+#                                movemaxinit = 0.5, 
+#                                movefiftyinit =8) # Prepare data for operating model
+# # Run the model using 'run.agebased.true.catch()' -- will fail if pars not == nspace
+# sim.data.simple <- run.agebased.true.catch(df.simple)
+# 
+# ## sanity checks
+# sim.data.simple$SSB %>% 
+#   data.frame() %>%
+#   mutate('totalSSB' = X1+X2, year = as.numeric(row.names(.))) %>%
+#   melt(id = 'year') %>%
+#   ggplot(., aes(x = year, y = value, color = variable)) + 
+#   geom_line(size =2 ) +  theme_sleek()
   
 ## OM MODEL CONDITIONING ----
   # runomem and run om condition

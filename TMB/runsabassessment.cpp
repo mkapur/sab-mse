@@ -18,7 +18,8 @@ vector<Type> cumsum(vector<Type> x) {
 // introduce tuning of F
 // consolidate some loops
 // need error on tau
-// M vs myear 
+// M vs myear -- at age or what?
+// estimate SDR (currently parameter)
 // double check some indexing
 // need omega ij to also be age spec 
 // ninit should not be estimated, but instead calculated for A years using eq 29
@@ -126,7 +127,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER_ARRAY(PSEL); // Time varying selectivity
   
   // Catches
-  DATA_ARRAY(catch_obs_yf); // catch by year and fleet
+  DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   DATA_SCALAR(logSDcatch); // Error on catch, should be by fleet
   PARAMETER(logphi_catch);
   
@@ -135,11 +136,13 @@ Type objective_function<Type>::operator() ()
   array<Type> catch_acomp_f_est(tEnd, age_maxage, nfleets_fish); // estimated catch comps; uses derived quants
   
   // Catch storage
-  array<Type> Catch_yaf(tEnd, nage, nfleets_fish);
-  array<Type> Catchinit(nage);
+  array<Type> Catch_yaf_est(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
+  // array<Type> Catchinit(nage);
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
-  array<Type> Catch_yf(tEnd,nfleets_fish); 
+  array<Type> Catch_yf_est(tEnd,nfleets_fish); // estimated total catches by fleet
   array<Type> CatchN(tEnd,nfleets_fish);
+  
+  // F tuning storage
   vector<Type> Fyear(tEnd);
   vector<Type> Freal(nage);
   vector<Type> Z(nage);
@@ -151,7 +154,7 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(Bprior);
   DATA_SCALAR(Aprior);
   
-  //PARAMETER(logSDR);
+  // PARAMETER(logSDR);
   // PARAMETER(logphi_survey);
   
   // Transform out of log space
@@ -170,7 +173,7 @@ Type objective_function<Type>::operator() ()
   //  Minor calculations
   vector<Type> M = Minit*Msel; // Natural mortality
   vector<Type> Myear = M*Msel; // Natural mortality (if we want to change it later)
-  vector<Type> Zzero = M;
+  vector<Type> Zzero = M; // total mortality without fishing
   vector<Type> logF(tEnd);
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   array<Type> tildeR_initk(nage,nstocks); // recdevs for early (init) years
@@ -273,7 +276,7 @@ Type objective_function<Type>::operator() ()
     } // end space
   } // end stocks
   
- // Run nage years for Ninit_Aai
+ // Run nage years for Ninit_Aai pre-model
   for(int time=0;time<(nage);time++){ // note that x,y dims are identical
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
@@ -317,11 +320,18 @@ Type objective_function<Type>::operator() ()
     }
     
     for(int fish_flt=0;fish_flt<(nfleets_fish);fish_flt++){
-      Catch_yf(time,fish_flt) = 0;
+      Catch_yf_est(time,fish_flt) = 0;
     }
     
     Fyear(time) = F0(time);
     
+
+    for(int a=0;a<(nage);a++){ // Loop over other ages
+      Freal(a) = Fyear(time)*catchselec(a);
+      Z(a) = Freal(a)+Myear(a);
+      selectivity_save(a,time) = catchselec(a);
+      Zsave(a,time) = Z(a);
+    }
 
         
     // model year zero, use last year of Ninit_Aai, and equil movement (omega) and downscaling (tau)
@@ -337,7 +347,7 @@ Type objective_function<Type>::operator() ()
       } // end stocks
     } // end time == 0
     
-    // calculate SSB using time at beginning of year
+    // calculate SSB using N at beginning of year
     for(int k=0;k<(nstocks);k++){  
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<nage;a++){ // Loop over ages
@@ -346,12 +356,7 @@ Type objective_function<Type>::operator() ()
       } // end space
     } // end stocks
     
-    for(int a=0;a<(nage);a++){ // Loop over other ages
-      Freal(a) = Fyear(time)*catchselec(a);
-      Z(a) = Freal(a)+Myear(a);
-      selectivity_save(a,time) = catchselec(a);
-      Zsave(a,time) = Z(a);
-    }
+
     
     // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
@@ -378,12 +383,15 @@ Type objective_function<Type>::operator() ()
     
     // Count catches using beginning of year & survey midyear biomass
     // F tuning needs to happen here
+    
+  
+    
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<nage;a++){
         for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-          Catch_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
+          Catch_yaf_est(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
           CatchN_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i);// Calculate the catch in kg
-          Catch_yf(time,fish_flt) += Catch_yaf(time,a,fish_flt); // sum over the current catch at age 
+          Catch_yf_est(time,fish_flt) += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age 
           CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
         }
         for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
@@ -440,7 +448,7 @@ Type objective_function<Type>::operator() ()
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int time=0;time<tEnd;time++){ // Total Catches
-      ans_catch += -dnorm(log(Catch_yf(time,fish_flt)+1e-6), log(catch_obs_yf(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+      ans_catch += -dnorm(log(Catch_yf_est(time,fish_flt)+1e-6), log(catch_yf_obs(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       
     }
   }
@@ -482,7 +490,7 @@ Type objective_function<Type>::operator() ()
   // the obs catch acomps need to be fleet specific
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ 
     for(int time=1;time<tEnd;time++){ // Loop over available years
-      if(catch_obs_yf(time,fish_flt)>0){ // only bother if we caught something
+      if(catch_yf_obs(time,fish_flt)>0){ // only bother if we caught something
         if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
           for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
             // sum3(time) += lgamma(ss_catch(time)*age_catch(a,time)+1);
@@ -567,12 +575,15 @@ Type objective_function<Type>::operator() ()
     // ADREPORT(ans_tot)
     REPORT(SSB_0k)
     REPORT(SSB_yk)
+    REPORT(Ninit_Aai)
     REPORT(Fyear)
     REPORT(R_yk)
     REPORT(R_yi)
     REPORT(R_0k)
+    REPORT(tildeR_yk)
+    REPORT(tildeR_initk)
     REPORT(N_0ai)
-    REPORT(Catch_yaf)
+    REPORT(Catch_yaf_est)
     REPORT(CatchN_yaf)
     REPORT(ans_tot)
     REPORT(Zsave)

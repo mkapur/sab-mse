@@ -86,7 +86,7 @@ create_TMB_data <- function(sim.data, df,
                   
                   age_maxage = df$age_maxage, # Max age for age comps 
                   # Catch
-                  catch_obs_yf = df$Catch2,
+                  catch_yf_obs = df$Catch2,
                   ss_catch = df$ss_catch,
                   flag_catch =df$flag_catch,
                   age_catch = sim.data$age_catch,

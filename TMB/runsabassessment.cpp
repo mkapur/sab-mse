@@ -429,7 +429,7 @@ Type objective_function<Type>::operator() ()
               // // calculate adj at subarea
               adj_yi(time,i) = phi_if_fish(fish_flt,i)*catch_yf_obs(time, fish_flt)/Catch_yf_est(time,fish_flt);
               // // re-scale Z (overwrite what was done previously) need to add selex and discard
-              // Z1_yai(time,a,i) = M(a) +  adj_yi(time,i)*F1_yf(time,fish_flt);
+              Z1_yai(time,a,i) = M(a) +  adj_yi(time,i)*F1_yf(time,fish_flt);
               // // update F guess with new mortality
               // fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,a,i)));
               // scaled_mort(time,a,i) =   selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,a,i); // need to add retention function to this

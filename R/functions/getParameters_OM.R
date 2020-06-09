@@ -29,7 +29,7 @@ getParameters_OM <- function(trueparms = TRUE,df){
       logR_0k = rep(16, df$nstocks),
       logh = log(0.7),
       logh_k = rep(0.7, df$nstocks),
-      
+      omega_ij = rep(0.02, df$nspace),
       logMinit = log(0.3),
       logSDsurv = log(0.3),
       # logSDR = log(1.4),

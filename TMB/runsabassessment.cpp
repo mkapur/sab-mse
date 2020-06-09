@@ -64,6 +64,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(wage_mid); // Weight in the middle of the year
   
   // repro //
+  PARAMETER_VECTOR(omega_ij); // eigenvect of movement between subareas
   PARAMETER(logRinit); // Recruitment at equil
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
@@ -131,7 +132,7 @@ Type objective_function<Type>::operator() ()
   array<Type> Catch_yaf(tEnd, nage, nfleets_fish);
   array<Type> Catchinit(nage);
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
-  array<Type> Catch_yf(tEnd,nfleets_fish);
+  array<Type> Catch_yf(tEnd,nfleets_fish); 
   array<Type> CatchN(tEnd,nfleets_fish);
   vector<Type> Fyear(tEnd);
   vector<Type> Freal(nage);
@@ -286,16 +287,19 @@ Type objective_function<Type>::operator() ()
     for(int fish_flt=0;fish_flt<(nfleets_fish);fish_flt++){
       Catch_yf(time,fish_flt) = 0;
     }
+    
     Fyear(time) = F0(time);
     
-    
-    if (time == 0){ // year zero, use initN which is estimated
-      for(int i=0;i<(nspace);i++){ 
-        for(int a=1;a<(nage-1);a++){
-          N_yai_beg(time,a,i) = Rinit * exp(-0.5*0*SDR*SDR+Ninit_ai(a-1,i))*exp(-Myear(a)*age(a));
-        }
-        N_yai_beg(time,nage-1,i) =  Rinit * exp(-0.5*0*SDR*SDR+Ninit_ai(nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
-      } // end subareas
+    // year zero, use Ninit_ai which is estimated, and equil movement (omega) and downscaling (tau)
+    if (time == 0){  
+      for(int k=0;k<(nstocks);k++){
+        for(int i=0;i<(nspace);i++){ 
+          for(int a=1;a<(nage-1);a++){
+            N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ij(i) * exp(-0.5*0*SDR*SDR+Ninit_ai(a-1,i))*exp(-Myear(a)*age(a));
+          } // end ages
+          N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ij(i) * exp(-0.5*0*SDR*SDR+Ninit_ai(nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
+        } // end subareas
+      } // end stocks
     } // end time == 0
     
     for(int i=0;i<(nspace);i++){ 

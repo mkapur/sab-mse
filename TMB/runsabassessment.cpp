@@ -168,13 +168,18 @@ Type objective_function<Type>::operator() ()
   vector<Type> Zzero = M;
   vector<Type> logF(tEnd);
   vector<Type> logR(tEnd);
+  array<Type> logR_yk(tEnd,nstocks);
   
   
   
   //  END DATA & PARS, BEGIN MODEL //
-  
-  for(int j=0;j<(tEnd-1);j++){
-    logR(j)=Rin(j);
+  for(int k=0;k<(nstocks);k++){
+    for(int time=0;time<(tEnd-1);time++){
+      logR(time)= Rin(time);
+      logR_yk(time,k) =0;
+      
+    }
+    logR_yk(tEnd-1,k) =0;
   }
   logR(tEnd-1) = 0;
   
@@ -318,7 +323,8 @@ Type objective_function<Type>::operator() ()
     
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){
-        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yi(time,i)/(SSB_0i(i)*(1-h_k(k))+ SSB_yi(time,i)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+logR(time));
+        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yi(time,i)/(SSB_0i(i)*(1-h_k(k))+ 
+          SSB_yi(time,i)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+logR_yk(time,i));
         R_yi(time,i) = R_yk(time,k)*tau_ik(k,i); // downscale to subarea
       } // end stocks
       N_yai_beg(time,0,i) =  R_yi(time,i);
@@ -457,9 +463,10 @@ Type objective_function<Type>::operator() ()
   } // end fish fleets 
 
   Type ans_SDR = 0.0;
-  
-  for(int time=0;time<(tEnd-1);time++){ // Start time loop
-    ans_SDR += Type(0.5)*(logR(time)*logR(time))/(SDR*SDR)+b(time)*log(SDR*SDR);
+  for(int k=0;k<(nstocks);k++){
+    for(int time=0;time<(tEnd-1);time++){ // Start time loop
+      ans_SDR += Type(0.5)*(logR_yk(time,k)*logR_yk(time,k))/(SDR*SDR)+b(time)*log(SDR*SDR);
+    }
   }
   
   

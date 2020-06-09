@@ -273,19 +273,19 @@ Type objective_function<Type>::operator() ()
     } // end space
   } // end stocks
   
-  // Run nage years for Ninit_Aai
-  // for(int time=0;time<(nage);time++){ // note that x,y dims are identical
-  //   for(int k=0;k<(nstocks);k++){ 
-  //     for(int i=0;i<(nspace);i++){ 
-  //       for(int a=1;a<(nage-1);a++){
-  //         Ninit_Aai(time,a,i) = 0.5* omega_ij(i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(time,k)); 
-  //       } // end ages
-  //       Ninit_Aai(time,nage-1,i) = (omega_ij(i) * Ninit_Aai(time,nage-2,i) * exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(time,k)))/(Type(1.0)-exp(-M(nage-1))); 
-  //       
-  //     } // end space
-  //   } // end stocks
-  // } // end init years (nage)
-  // 
+ // Run nage years for Ninit_Aai
+  for(int time=0;time<(nage);time++){ // note that x,y dims are identical
+    for(int k=0;k<(nstocks);k++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=1;a<(nage-1);a++){
+          Ninit_Aai(time,a,i) = 0.5* omega_ij(i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(time,k));
+        } // end ages
+        Ninit_Aai(time,nage-1,i) = (omega_ij(i) * Ninit_Aai(time,nage-2,i) * exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(time,k)))/(Type(1.0)-exp(-M(nage-1)));
+
+      } // end space
+    } // end stocks
+  } // end init years (nage)
+  
   for(int time=0;time<(tEnd);time++){ // Start time loop
     
     pmax_catch_save(time) = pmax_catch;

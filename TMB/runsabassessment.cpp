@@ -17,6 +17,7 @@ vector<Type> cumsum(vector<Type> x) {
 // make selex fleet specific
 // introduce tuning of F
 // consolidate some loops
+// make master flag_fleet matrix
 
 template<class Type>
 Type objective_function<Type>::operator() ()
@@ -39,6 +40,8 @@ Type objective_function<Type>::operator() ()
   
   // biology // 
   PARAMETER_VECTOR(initN);
+  PARAMETER_ARRAY(Ninit_ai); // initial numbers at age in subarea
+  
   PARAMETER_VECTOR(Rin); // Time varying stuff
   DATA_INTEGER(nage); // Plus group
   DATA_VECTOR(age); // ages
@@ -174,7 +177,7 @@ Type objective_function<Type>::operator() ()
   }
   logR(tEnd-1) = 0;
   
-  /// LIKELY MOVE THIS OUT FOR DIFF SELEX HANDLING
+  /// LIKELY MOVE THIS OUT FOR DIFF SELEX HANDLING ----
   
   // selectivity
   // survey
@@ -229,8 +232,15 @@ Type objective_function<Type>::operator() ()
   }
   // vector<Type> Nzero(nage); // Numbers with no fishing
   //vector<Type>Meq = cumsum(M);
-  N_0ai.setZero();   
+  //vector<Type>Fpope(tEnd);
+  // vector<Type>Bmid(nage); // Biomass at the middle of the year
+  // // vector<Type>test(3);
+  // // test = cumsum(test);
+  // REPORT(test)
+  //array<Type> PSEL_save(5,)
   
+  // Equilibrium numbers-at-age, subarea
+  N_0ai.setZero();   
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
       N_0ai(0,i) = R_0k(k)*tau_ik(k,i);
@@ -240,15 +250,7 @@ Type objective_function<Type>::operator() ()
       N_0ai(nage-1,i) = ( R_0k(k)*tau_ik(k,i)*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
     } // end subareas
   } // end stocks
-  
-  //vector<Type>Fpope(tEnd);
-  
-  // vector<Type>Bmid(nage); // Biomass at the middle of the year
-  // // vector<Type>test(3);
-  // // test = cumsum(test);
-  // REPORT(test)
-  //array<Type> PSEL_save(5,)
-  
+
   for(int time=0;time<(tEnd);time++){ // Start time loop
     
     Type Ntot_survey = 0;
@@ -287,13 +289,12 @@ Type objective_function<Type>::operator() ()
     Fyear(time) = F0(time);
     
     
-    if (time == 0){ // YEAR ZERO
+    if (time == 0){ // year zero, use initN which is estimated
       for(int i=0;i<(nspace);i++){ 
         for(int a=1;a<(nage-1);a++){
-          N_yai_beg(time,a,i) = Rinit * exp(-0.5*0*SDR*SDR+initN(a-1))*exp(-Myear(a)*age(a));
+          N_yai_beg(time,a,i) = Rinit * exp(-0.5*0*SDR*SDR+Ninit_ai(a-1,i))*exp(-Myear(a)*age(a));
         }
-        N_yai_beg(time,nage-1,i) =  Rinit * exp(-0.5*0*SDR*SDR+initN(nage-2)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
-        
+        N_yai_beg(time,nage-1,i) =  Rinit * exp(-0.5*0*SDR*SDR+Ninit_ai(nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / (1 - exp(-Myear(nage-1)));
       } // end subareas
     } // end time == 0
     

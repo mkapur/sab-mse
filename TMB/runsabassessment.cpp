@@ -365,18 +365,17 @@ Type objective_function<Type>::operator() ()
       }  // end flag
     } // end acomp survey fleets
     
-    // if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
-    //   
-    //   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //     for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
-    //       if(a<age_maxage){
-    //         // catch_acomp_f_est(time,a,fish_flt) = (CatchN_yaf(time,a+1,fish_flt)/CatchN(time,fish_flt)); // Catch comp (1 bc the data starts at age = 1)
-    //       }else{
-    //         // catch_acomp_f_est(time,age_maxage-1,fish_flt) += (CatchN_yaf(time,a+1,fish_flt)/CatchN(time,fish_flt));
-    //       } // end else
-    //     } // end ages
-    //   } // end fish_flt
-    // } // end flag
+    if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
+      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+        for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
+          if(a<age_maxage){
+            catch_acomp_f_est(time,a,fish_flt) = (CatchN_yaf(time,a+1,fish_flt)/CatchN(time,fish_flt)); // Catch comp (1 bc the data starts at age = 1)
+          }else{
+            catch_acomp_f_est(time,age_maxage-1,fish_flt) += (CatchN_yaf(time,a+1,fish_flt)/CatchN(time,fish_flt));
+          } // end else
+        } // end ages
+      } // end fish_flt
+    } // end flag
   } // END TIME LOOP
   
   
@@ -424,7 +423,7 @@ Type objective_function<Type>::operator() ()
   //           lgamma(phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp));
   //       } // end ages
   //       ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
-  //       
+  // 
   //     } // end acomp flag
   //   } // end time
   // } // end survey acomp fleets

@@ -56,7 +56,7 @@ N0 <- NA
 sim.data <- run.agebased.true.catch(df)
 simdata0 <- sim.data # The other one is gonna get overwritten. 
 
-# Plott stuff 
+# Plot stuff 
 
 parms <- getParameters_OM(trueparms = FALSE, df = df)
 

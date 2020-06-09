@@ -77,12 +77,25 @@ obj <- MakeADFun(df.new,
 reps <- obj$report()
 
 
+
+## simulate and re-estimate from OM https://kaskr.github.io/adcomp/Simulation.html
+sim <- replicate(5, {
+  simdata <- obj$simulate(par=obj$par, complete=TRUE)
+  obj2 <- MakeADFun(simdata, parms.new, DLL="runsabassessment", silent=TRUE) ## use original start pars
+  nlminb(obj2$par, obj2$fn, obj2$gr)$par
+})
+
+library(lattice)
+df <- data.frame(estimate=as.vector(sim), parameter=names(obj$par)[row(sim)])
+densityplot( ~ estimate | parameter, data=df, layout=c(3,1))
 dim(reps$N_beg)==dim(reps$N_beg2[[1]])
 dim(reps$N_mid)==dim(reps$N_mid2[[1]])
 
 reps$surv_pred ## there should be zeros if the fleet doesn't happen in either area, and doubles if in both, ncol == nfleets_suv
 ncol(reps$surv_pred) == df.new$nfleets_surv
 ncol(reps$Catch) == df.new$nfleets_fish
+
+
 
 # ----
 # SSB 

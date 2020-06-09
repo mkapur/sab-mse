@@ -413,20 +413,20 @@ Type objective_function<Type>::operator() ()
   sum1.setZero();
   sum2.setZero();
   
-  // for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
-  //   for(int time=1;time<tEnd;time++){ // Loop over available years
-  //     if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
-  //       for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
-  //         // NOTE THAT THE survey_acomp_f_est OBS ARE IN A X TIME X FLEET, which is not the typical ordering
-  //         sum1(time) += lgamma(ss_survey(time)*survey_acomp_f_est(a,time,surv_flt_acomp)+1);
-  //         sum2(time) += lgamma(ss_survey(time)*survey_acomp_f_est(a,time,surv_flt_acomp) + phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp)) -
-  //           lgamma(phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp));
-  //       } // end ages
-  //       ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
-  // 
-  //     } // end acomp flag
-  //   } // end time
-  // } // end survey acomp fleets
+  for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
+    for(int time=1;time<tEnd;time++){ // Loop over available years
+      if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
+        for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
+          // NOTE THAT THE survey_acomp_f_obs ARE IN A X TIME X FLEET, which is not the typical ordering
+          sum1(time) += lgamma(ss_survey(time)*survey_acomp_f_obs(a,time,surv_flt_acomp)+1);
+          sum2(time) += lgamma(ss_survey(time)*survey_acomp_f_obs(a,time,surv_flt_acomp) + phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp)) -
+            lgamma(phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp));
+        } // end ages
+        ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
+
+      } // end acomp flag
+    } // end time
+  } // end survey acomp fleets
   
   
   vector<Type>sum3(tEnd);

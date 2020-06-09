@@ -472,10 +472,11 @@ Type objective_function<Type>::operator() ()
   
   // Priors on h and M
   Type ans_priors = 0.0;
-  
-  for(int time=0;time<(nage-1);time++){ // Start time loop
-    ans_priors += Type(0.5)*(initN(time)*initN(time))/(SDR*SDR);
-  }
+  for(int i=0;i<(nspace);i++){
+    for(int a=0;a<(nage-1);a++){ // Start time loop
+      ans_priors += Type(0.5)*(Ninit_ai(a,i)*Ninit_ai(a,i))/(SDR*SDR);
+    } // end ages
+  } // end space
   
   // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
   

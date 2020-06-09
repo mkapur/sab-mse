@@ -1,5 +1,5 @@
 ## OM_Master.R
-## M S Kapur mod N Jacobsen Summer 2020
+## M S Kapur mod from N Jacobsen Summer 2020
 ## kapurm@uw.edu
 library(TMB)
 library(dplyr)

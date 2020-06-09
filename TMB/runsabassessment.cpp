@@ -82,7 +82,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(age_maxage); // Last age included in age comps
   DATA_VECTOR(ss_catch); // age comp sample size
   DATA_VECTOR(flag_catch); // Years age was sampled
-  DATA_ARRAY(age_catch); // Age comps
+  DATA_ARRAY(age_catch); // Age comps in catch -- should be by fleet
   
   // Selectivity
   DATA_INTEGER(Smin);
@@ -121,7 +121,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logphi_catch);
   
   // Catch Comps
-  array<Type> age_catch_est(age_maxage,tEnd);
+  // array<Type> age_catch_est(age_maxage,tEnd); // original
   array<Type> catch_acomp_f_est(tEnd, age_maxage, nfleets_fish); // estimated catch comps; uses derived quants
   
   // Catch storage
@@ -402,8 +402,8 @@ Type objective_function<Type>::operator() ()
   
   REPORT(ans_catch)
     
-    // LIKELIHOOD: age comp in survey
-    Type ans_survcomp = 0.0;
+  // LIKELIHOOD: age comp in survey
+  Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
   
   
@@ -423,7 +423,6 @@ Type objective_function<Type>::operator() ()
             lgamma(phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp));
         } // end ages
         ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
-
       } // end acomp flag
     } // end time
   } // end survey acomp fleets
@@ -435,20 +434,22 @@ Type objective_function<Type>::operator() ()
   sum3.setZero();
   sum4.setZero();
   
-  // for(int time=1;time<tEnd;time++){ // Loop over available years
-  //   if(Catch(time)>0){
-  //     
-  //     if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
-  //       for(int i=0;i<age_maxage;i++){ // Loop over other ages (first one is empty for survey)
-  //         sum3(time) += lgamma(ss_catch(time)*age_catch(i,time)+1);
-  //         sum4(time) += lgamma(ss_catch(time)*age_catch(i,time) + phi_catch*ss_catch(time)*age_catch_est(i,time)) - lgamma(phi_catch*ss_catch(time)*age_catch_est(i,time));
-  //       }
-  //       ans_catchcomp += lgamma(ss_catch(time)+1)-sum3(time)+lgamma(phi_catch*ss_catch(time))-lgamma(ss_catch(time)+phi_catch*ss_catch(time))+sum4(time);
-  //     }
-  //   }
-  // }
-  
-  
+  // the obs catch acomps need to be fleet specific
+  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ 
+    for(int time=1;time<tEnd;time++){ // Loop over available years
+      if(catch_obs_yf(time,fish_flt)>0){ // only bother if we caught something
+        if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
+          for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
+            // sum3(time) += lgamma(ss_catch(time)*age_catch(a,time)+1);
+            // sum4(time) += lgamma(ss_catch(time)*age_catch(a,time) + phi_catch*ss_catch(time)*catch_acomp_f_est(time,a,fish_flt)) -
+            //   lgamma(phi_catch*ss_catch(time)*catch_acomp_f_est(time,a,fish_flt));
+          } // end ages
+          ans_catchcomp += lgamma(ss_catch(time)+1)-sum3(time)+lgamma(phi_catch*ss_catch(time))-lgamma(ss_catch(time)+phi_catch*ss_catch(time))+sum4(time);
+        } // end catch flag 
+      } // end if catches > 0
+    } // end time
+  } // end fish fleets 
+
   Type ans_SDR = 0.0;
   
   for(int time=0;time<(tEnd-1);time++){ // Start time loop

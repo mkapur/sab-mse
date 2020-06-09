@@ -61,7 +61,7 @@ create_TMB_data <- function(sim.data, df,
                   year_sel = df$year_sel,
                   #  Input parameters
                   Msel = msel,
-                  Matsel= mat,
+                  mat_age = mat,
                   nage = nage,
                   age = age,
                   selYear = df$selidx,

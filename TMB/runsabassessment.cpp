@@ -46,7 +46,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nage); // Plus group
   DATA_VECTOR(age); // ages
   DATA_VECTOR(Msel); // How mortality scales with age
-  DATA_VECTOR(Matsel); // Maturity ogive
+  DATA_VECTOR(mat_age); // Maturity ogive
   PARAMETER(logMinit); // Natural mortality
   // biology storage
   array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
@@ -170,15 +170,15 @@ Type objective_function<Type>::operator() ()
   
   
   //  END DATA & PARS, BEGIN MODEL //
+  
+  // recdevs placeholder
   for(int k=0;k<(nstocks);k++){
     for(int time=0;time<(tEnd-1);time++){
-      // logR(time)= Rin(time);
       tildeR_yk(time,k) =0;
-      
     }
     tildeR_yk(tEnd-1,k) =0;
   }
-  // logR(tEnd-1) = 0;
+
   
   /// LIKELY MOVE THIS OUT FOR DIFF SELEX HANDLING ----
   
@@ -227,12 +227,8 @@ Type objective_function<Type>::operator() ()
       }
     }
   }
-  // Run the initial distribution
-  for(int k=0;k<(nstocks);k++){ 
-    for(int a=0;a<nage;a++){ // Loop over ages
-      SSB_0k(k) += phi_ik(k,i)*Matsel(a)*N_0ai(a,i)*0.5;
-    } 
-  }
+
+  
   // vector<Type> Nzero(nage); // Numbers with no fishing
   //vector<Type>Meq = cumsum(M);
   //vector<Type>Fpope(tEnd);
@@ -246,17 +242,28 @@ Type objective_function<Type>::operator() ()
   N_0ai.setZero();   
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ // there are nspace+1 slots, the last one is for total
-      N_0ai(0,i) = R_0k(k)*tau_ik(k,i);
       for(int a=1;a<(nage-1);a++){
-        N_0ai(a,i) =  R_0k(k)*tau_ik(k,i) * exp(-(M(a)*age(a)));
+        N_0ai(a,i) = omega_ij(i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a)));
+        // N_0ai(a,i) =  R_0k(k)*tau_ik(k,i) * exp(-(M(a)*age(a)));
       }
-      N_0ai(nage-1,i) = ( R_0k(k)*tau_ik(k,i)*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // note the A+ will be in slot A-1
+      // note the A+ group will be in slot A-1
+      N_0ai(nage-1,i) = omega_ij(i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-1))) /(Type(1.0)-exp(-M(nage-1)));
+      // N_0ai(nage-1,i) = ( omega_ij(i) * R_0k(k)*tau_ik(k,i)*exp(-(M(nage-2)*age(nage-1))))/(Type(1.0)-exp(-M(nage-1))); // 
     } // end subareas
   } // end stocks
 
+  
+  // Unfished Equilibrium Distribution
+  // note that N_0 already has omega built in
+  for(int k=0;k<(nstocks);k++){ 
+    for(int i=0;i<(nspace);i++){ 
+      for(int a=0;a<nage;a++){ // Loop over ages
+        SSB_0k(k) += phi_ik(k,i)*mat_age(a)*N_0ai(a,i)*0.5;
+      } // end ages
+    } // end space
+  } // end stocks
+  
   for(int time=0;time<(tEnd);time++){ // Start time loop
-    
-    Type Ntot_survey = 0;
     
     pmax_catch_save(time) = pmax_catch;
     // Take care of selectivity
@@ -306,11 +313,13 @@ Type objective_function<Type>::operator() ()
     } // end time == 0
     
     // calculate SSB using time at beginning of year
-    for(int k=0;k<(nstocks);k++){     
-      for(int a=0;a<nage;a++){ // Loop over ages
-        SSB_yk(time,k) += phi_ik(k,i)*N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
-      }
-    }
+    for(int k=0;k<(nstocks);k++){  
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<nage;a++){ // Loop over ages
+          SSB_yk(time,k) += phi_ik(k,i)*N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
+        } // end ages
+      } // end space
+    } // end stocks
     
     for(int a=0;a<(nage);a++){ // Loop over other ages
       Freal(a) = Fyear(time)*catchselec(a);
@@ -321,7 +330,7 @@ Type objective_function<Type>::operator() ()
     
     // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
-      for(int k=0;k<(nstocks);k++){
+      for(int k=0;k<(nstocks);k++){  
         R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yk(time,k)/(SSB_0k(k)*(1-h_k(k))+ 
           SSB_yk(time,k)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
         R_yi(time,i) = R_yk(time,k)*tau_ik(k,i); // downscale to subarea
@@ -336,7 +345,6 @@ Type objective_function<Type>::operator() ()
       for(int a=0;a<(nage-1);a++){ // Loop over other ages
         N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-Z(a)*smul);
         N_yai_beg(time+1,a+1,i) =  N_yai_beg(time,a,i)*exp(-Z(a));
-        
       }
       // Plus group
       N_yai_mid(time,nage-1,i) =  N_yai_beg(time,nage-2,i)*exp(-Z(nage-2)*0.5)+ N_yai_beg(time,nage-1,i)*exp(-Z(nage-1)*smul);

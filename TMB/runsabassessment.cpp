@@ -351,21 +351,19 @@ Type objective_function<Type>::operator() ()
     
     
     
-    // for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
-    //   if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
-    //     for(int i=0;i<(nspace);i++){
-    //       for(int a=0;a<(nage-1);a++){ // Loop over other ages
-    //         if(a< age_maxage){
-    //           survey_acomp_f_est(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
-    //           
-    //         }else{
-    //           survey_acomp_f_est(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // placeholder note the indexing on ntot might be off
-    //           
-    //         } // end else
-    //       } // end ages
-    //     } // end nspace
-    //   }  // end flag
-    // } // end acomp survey fleets
+    for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
+      if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
+        for(int i=0;i<(nspace);i++){
+          for(int a=0;a<(nage-1);a++){ // Loop over other ages
+            if(a< age_maxage){
+              survey_acomp_f_est(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
+            }else{
+              survey_acomp_f_est(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // placeholder note the indexing on ntot might be off
+            } // end else
+          } // end ages
+        } // end nspace
+      }  // end flag
+    } // end acomp survey fleets
     
     // if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
     //   

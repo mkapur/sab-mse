@@ -17,7 +17,7 @@ getParameters_OM <- function(trueparms = TRUE,df){
     
     PSEL <- matrix(0,5, length(1991:df$years[length(df$years)]))
     initN <- rep(0,df$nage-1)
-    Ninit_ai <- matrix(0, df$nage, df$nspace)
+    Ninit_Aai <- array(rep(0, df$nage*df$nage*df$nspace),c(df$nage,df$nage,df$nspace)) ## init model by running for A years
     
     F0 <- rep(0.01, df$tEnd)
     Rdev <- rep(0, df$tEnd-1)
@@ -40,7 +40,7 @@ getParameters_OM <- function(trueparms = TRUE,df){
       psel_fish = c(2.486490, 0.928255,0.392144,0.214365,0.475473),
       psel_surv = c(0.568618,-0.216172,0.305286 ,0.373829),
       initN = initN,
-      Ninit_ai = Ninit_ai,
+      Ninit_Aai = Ninit_Aai,
       Rin = Rdev,
       # Rin2 = Rdev,
       F0 = F0,

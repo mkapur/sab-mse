@@ -65,7 +65,7 @@ Type objective_function<Type>::operator() ()
   
   // repro //
   PARAMETER_VECTOR(omega_ij); // eigenvect of movement between subareas
-  PARAMETER(logRinit); // Recruitment at equil
+  // PARAMETER(logRinit); // Recruitment at equil
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
   PARAMETER_VECTOR(logh_k); // Steepness by stock
@@ -152,7 +152,7 @@ Type objective_function<Type>::operator() ()
   Type SDsurv = exp(logSDsurv);
   Type SDcatch = exp(logSDcatch);
   Type SDR = exp(logSDR);
-  Type Rinit = exp(logRinit);
+  // Type Rinit = exp(logRinit);
   vector<Type> R_0k = exp(logR_0k);
   Type h = exp(logh);
   vector<Type> h_k = exp(logh_k);
@@ -167,21 +167,21 @@ Type objective_function<Type>::operator() ()
   vector<Type> Myear = M*Msel; // Natural mortality (if we want to change it later)
   vector<Type> Zzero = M;
   vector<Type> logF(tEnd);
-  vector<Type> logR(tEnd);
-  array<Type> logR_yk(tEnd,nstocks);
+  // vector<Type> logR(tEnd);
+  array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   
   
   
   //  END DATA & PARS, BEGIN MODEL //
   for(int k=0;k<(nstocks);k++){
     for(int time=0;time<(tEnd-1);time++){
-      logR(time)= Rin(time);
-      logR_yk(time,k) =0;
+      // logR(time)= Rin(time);
+      tildeR_yk(time,k) =0;
       
     }
-    logR_yk(tEnd-1,k) =0;
+    tildeR_yk(tEnd-1,k) =0;
   }
-  logR(tEnd-1) = 0;
+  // logR(tEnd-1) = 0;
   
   /// LIKELY MOVE THIS OUT FOR DIFF SELEX HANDLING ----
   
@@ -324,7 +324,7 @@ Type objective_function<Type>::operator() ()
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){
         R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yi(time,i)/(SSB_0i(i)*(1-h_k(k))+ 
-          SSB_yi(time,i)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+logR_yk(time,i));
+          SSB_yi(time,i)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
         R_yi(time,i) = R_yk(time,k)*tau_ik(k,i); // downscale to subarea
       } // end stocks
       N_yai_beg(time,0,i) =  R_yi(time,i);
@@ -465,7 +465,7 @@ Type objective_function<Type>::operator() ()
   Type ans_SDR = 0.0;
   for(int k=0;k<(nstocks);k++){
     for(int time=0;time<(tEnd-1);time++){ // Start time loop
-      ans_SDR += Type(0.5)*(logR_yk(time,k)*logR_yk(time,k))/(SDR*SDR)+b(time)*log(SDR*SDR);
+      ans_SDR += Type(0.5)*(tildeR_yk(time,k)*tildeR_yk(time,k))/(SDR*SDR)+b(time)*log(SDR*SDR);
     }
   }
   
@@ -496,8 +496,11 @@ Type objective_function<Type>::operator() ()
   ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
   
   if(sum_zero == 1){
-    ans_priors += ((Type(0.0)-sum(logR))*(Type(0.0)-sum(logR)))/Type(0.01);
-  }
+    // for(int k=0;k<(nstocks);k++){
+      
+    ans_priors += ((Type(0.0)-sum(tildeR_yk))*(Type(0.0)-sum(tildeR_yk)))/Type(0.01);
+    }
+  
   
   // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
   ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);

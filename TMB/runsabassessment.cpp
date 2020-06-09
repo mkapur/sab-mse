@@ -400,7 +400,7 @@ Type objective_function<Type>::operator() ()
     // Ztuned_yf
     array<Type> F1_yf(tEnd,nfleets_fish); // for F guesses
     array<Type> Z1_yai(tEnd,nage,nfleets_fish); // for intermediate Z
-    // array<Type> fished_bio(tEnd,age,nspace); // for fished biomass
+    array<Type> fished_bio(tEnd,nage,nspace); // for fished biomass
     // array<Type> scaled_mort(tEnd,age,nfleets_fish); // for fished biomass
     
  
@@ -420,7 +420,7 @@ Type objective_function<Type>::operator() ()
               // temp Z given F1
               Z1_yai(time,a,fish_flt) = M(a) + F1_yf(time,fish_flt);
               // // Baranov for predicted catch  
-              // fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,age,fish_flt)));
+              fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,a,fish_flt)));
               // // need to add retention function to this
               // scaled_mort(time,a,i) =   selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,age,fish_flt);
               // Catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i)*wage_catch(a,time)* scaled_mort(time,a,i);

@@ -41,9 +41,6 @@ load_data_seasons <- function(nseason = 4,
       
     }
   }
-  
-  
-
 
   years <- 1966:(myear+yr_future)
   nyear <- length(years)
@@ -421,18 +418,18 @@ load_data_seasons <- function(nseason = 4,
                   movesouth = movesouth,
                   moveout = moveout,
                   moveslope = moveslope,
-                 # F0 = Fin,
+                  # F0 = Fin,
                   psel = psel,
                   parms = parms,
                   Fnseason = Fnseason,
                   selectivity_change = selectivity_change,
                   Catch = catch,
-                 Catch2 = catch2,
-                 phi_if_surv = phi_if_surv,
-                 phi_if_fish = phi_if_fish,
-                 phi_ik = phi_ik,
-                 tau_ik = tau_ik,
-                 nstocks = nrow(phi_ik)
+                  Catch2 = catch2,
+                  phi_if_surv = phi_if_surv,
+                  phi_if_fish = phi_if_fish,
+                  phi_ik = phi_ik,
+                  tau_ik = tau_ik,
+                  nstocks = nrow(phi_ik)
                   # Parameters from the estimation model 
               
   )

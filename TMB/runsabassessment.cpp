@@ -393,8 +393,9 @@ Type objective_function<Type>::operator() ()
     // Type v1=0.95;
     Type v2=30;
     Type F_no_inc=7;
+    Type term0 = 0.0;
     Type term1 = 0.0;
-    Type term2 = 0.0
+    Type term2 = 0.0;
     
     array<Type> F1_yf(tEnd,nfleets_fish);
     
@@ -405,13 +406,16 @@ Type objective_function<Type>::operator() ()
             // make an initial guess for F using obs catch - need to update selex
             F1_yf(time,fish_flt) = catch_yf_obs(time, fish_flt)/
               (phi_if_fish(fish_flt, i) * N_yai_beg(time,a,i)*wage_catch(a,time) *  selectivity_save(a,time) + catch_yf_obs(time, fish_flt));
-            // modify the guess (overwrite)
-            term0 = 1/(1+exp(v2*( F1_yf(time,fish_flt) - v1));
-            term1 = F1_yf(time,fish_flt)*term0;
-            term2 = v1*(1-term0);
-            F1_yf(time,fish_flt) = -log(1-(term1+term2))
-            // for(fiter=0; fiter<10;fiter++{
-            // } // end hybrid F iterations
+            
+            for(int fiter=0; fiter<10;fiter++){
+              // modify the guess (overwrite)
+              
+              term0 = 1/(1+exp(v2*( F1_yf(time,fish_flt) - v1)));
+              term1 = F1_yf(time,fish_flt)*term0;
+              term2 = v1*(1-term0);
+              F1_yf(time,fish_flt) = -log(1-(term1+term2));
+              
+            } // end hybrid F iterations
             Catch_yaf_est(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
             CatchN_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i);// Calculate the catch in kg
             Catch_yf_est(time,fish_flt) += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age 

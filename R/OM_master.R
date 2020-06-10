@@ -75,7 +75,7 @@ obj <- MakeADFun(df.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
 
-
+reps$F1_yf
 
 ## simulate and re-estimate from OM https://kaskr.github.io/adcomp/Simulation.html
 sim <- replicate(5, {

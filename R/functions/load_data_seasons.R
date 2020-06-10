@@ -191,10 +191,10 @@ load_data_seasons <- function(nseason = 4,
     tau_ik[2,2:3] <-  tau_ik[3,4:5] <-  0.5 ## split 50/50 for now
     # phi_if_fish[1,1:2] <-  phi_if_fish[2,1:2] <-  phi_if_fish[3,3:4]<-  phi_if_fish[4,3:4] <-  phi_if_fish[5,5:6] <- 1
   } else {
-    phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
-    phi_if_fish <- matrix(rbinom(nfleets_fish*nspace,1,0.5), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
+    phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
+    phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
     phi_ik <- matrix(rbinom(4*nspace,1,0.5), nrow = 4, ncol = nspace) ## placeholder for alternative spatial stratifications
-    tau_ik <- matrix(runif(4*nspace,0,1), nrow = 4, ncol = nspace) ## placeholder for alternative spatial stratifications
+    tau_ik <- matrix(c(0.25,0.75,0.9,0.1,0.1,0.9,0.5,0.5), nrow = 4, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
     
     
   }

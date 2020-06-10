@@ -12,7 +12,6 @@ source(here("R","functions",'load_files_OM.R'))
 compile(here("TMB","runsabassessment.cpp"))
 dyn.load(dynlib(here("TMB","runsabassessment")))
 
-
 ## OM MODEL INIT ----
 # Initialize the model parameters. Make a version with movement and no seasons (simple)
 # df.simple <- load_data_seasons(nseason = 1, 

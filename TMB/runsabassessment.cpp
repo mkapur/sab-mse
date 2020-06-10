@@ -136,9 +136,9 @@ Type objective_function<Type>::operator() ()
   array<Type> catch_acomp_f_est(tEnd, age_maxage, nfleets_fish); // estimated catch comps; uses derived quants
   
   // Catch storage
-  array<Type> Catch_yaf_est(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
+  array<Type> catch_yaf_est(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
-  array<Type> Catch_yf_est(tEnd,nfleets_fish); // estimated total catches by fleet
+  array<Type> catch_yf_est(tEnd,nfleets_fish); // estimated total catches by fleet
   array<Type> CatchN(tEnd,nfleets_fish);
   
   // F tuning storage
@@ -324,7 +324,7 @@ Type objective_function<Type>::operator() ()
     }
     
     for(int fish_flt=0;fish_flt<(nfleets_fish);fish_flt++){
-      Catch_yf_est(time,fish_flt) = 0;
+      catch_yf_est(time,fish_flt) = 0;
     }
     
     Fyear(time) = F0(time);
@@ -417,10 +417,10 @@ Type objective_function<Type>::operator() ()
    
             for(int fiter=0; fiter<10; fiter++){
               // set estimates to zero
-              Catch_yaf_est(time,a,fish_flt) = 0;
-              Catch_yf_est(time,fish_flt) = 0;
-              Type Catch_yaf_est_1 = 0.0;
-              Type Catch_yf_est_1 = 0.0;
+              catch_yaf_est(time,a,fish_flt) = 0;
+              catch_yf_est(time,fish_flt) = 0;
+              Type catch_yaf_est_1 = 0.0;
+              Type catch_yf_est_1 = 0.0;
               // modify the guess (overwrite)
               term0 = 1/(1+exp(v2*( F1_yf(time,fish_flt) - v1)));
               term1 = F1_yf(time,fish_flt)*term0;
@@ -433,24 +433,24 @@ Type objective_function<Type>::operator() ()
               // Type fished_bio1 = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,a,i)));
               scaled_mort(time,a,i) =   selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,a,i); // need to add retention function to this
               // Type scaled_mort1 = selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,a,i); // need to add retention function to this
-              // Catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio1(time,a,i) * scaled_mort1(time,a,i);
-              // Catch_yf_est(time,fish_flt) += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
-              Catch_yaf_est_1 += phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i);
-              Catch_yf_est_1 += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
+              // catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio1(time,a,i) * scaled_mort1(time,a,i);
+              // catch_yf_est(time,fish_flt) += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
+              catch_yaf_est_1 += phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i);
+              catch_yf_est_1 += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
               // calculate adj at subarea
-              adj_yi(time,i) = phi_if_fish(fish_flt,i)*catch_yf_obs(time, fish_flt)/Catch_yf_est_1;
+              adj_yi(time,i) = phi_if_fish(fish_flt,i)*catch_yf_obs(time, fish_flt)/catch_yf_est_1;
               // re-scale Z (overwrite what was done previously) need to add selex and discard
               Z2_yai(time,a,i) = M(a) +  adj_yi(time,i)*F1_yf(time,fish_flt);
               fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z2_yai(time,a,i)));
-              // scaled_mort(time,a,i) = selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z2_yai(time,a,i); // need to add retention function to this
-              // // // update F guess with new mortality
-              // Catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio2(time,a,i) * scaled_mort2(time,a,i);
-              // Catch_yf_est(time,fish_flt) += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
-              // F1_yf(time,fish_flt) =  catch_yf_obs(time, fish_flt)/  Catch_yf_est(time,a,fish_flt); // this gets used in next iter
+              scaled_mort(time,a,i) = selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z2_yai(time,a,i); // need to add retention function to this
+              // update F guess with new mortality
+              catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i);
+              catch_yf_est(time,fish_flt) += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
+              F1_yf(time,fish_flt) =  catch_yf_obs(time, fish_flt)/  catch_yf_est(time,fish_flt); // this gets used in next iter
             } // end hybrid F iterations
-            // Ftuned_yf(time,fish_flt) =  F1_yf(time,fish_flt); // once iters done
+            Ftuned_yf(time,fish_flt) =  F1_yf(time,fish_flt); // once iters done
             // Ftuned_ym(time,fish_flt) += phi_fm(fish_flt,m)*F1_yf(time,fish_flt) // not ready yet
-            // Ztuned_yai(time,a,i) = Z1_yai(time,a,i); // once iters done
+            Ztuned_yai(time,a,i) = Z2_yai(time,a,i); // once iters done
             // CatchN_yaf(time,a,fish_flt) = phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i)/wage_catch(a,time);
             // CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
           } // end fishery fleets
@@ -515,7 +515,7 @@ Type objective_function<Type>::operator() ()
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int time=0;time<tEnd;time++){ // Total Catches
-      ans_catch += -dnorm(log(Catch_yf_est(time,fish_flt)+1e-6), log(catch_yf_obs(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+      ans_catch += -dnorm(log(catch_yf_est(time,fish_flt)+1e-6), log(catch_yf_obs(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
       
     }
   }
@@ -644,13 +644,15 @@ Type objective_function<Type>::operator() ()
     REPORT(SSB_yk)
     REPORT(Ninit_Aai)
     REPORT(Fyear)
+    REPORT(Ftuned_yf)
+    REPORT(Ztuned_yai)
     REPORT(R_yk)
     REPORT(R_yi)
     REPORT(R_0k)
     REPORT(tildeR_yk)
     REPORT(tildeR_initk)
     REPORT(N_0ai)
-    REPORT(Catch_yaf_est)
+    REPORT(catch_yaf_est)
     REPORT(CatchN_yaf)
     REPORT(ans_tot)
     REPORT(Zsave)

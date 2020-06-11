@@ -16,14 +16,11 @@ vector<Type> cumsum(vector<Type> x) {
 // add in growth and movement properly
 // make selex fleet specific
 // introduce tuning of F
-// consolidate some loops
 // need error on tau
 // M vs myear -- at age or what?
 // estimate SDR (currently parameter)
 // double check some indexing
-// need omega ij to also be age spec 
 // consider not making arrays for temporary clacs eg adj
-// ninit should not be estimated, but instead calculated for A years using eq 29
 // on pause: make master flag_fleet matrix
 
 template<class Type>
@@ -54,10 +51,9 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(Msel); // How mortality scales with age
   DATA_VECTOR(mat_age); // Maturity ogive
   PARAMETER(logMinit); // Natural mortality
+ 
   // biology storage
-  
   array<Type> Ninit_Aai(nage,nage,nspace); // initial numbers at age in subarea, calculated for A years
-  
   array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
   vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
   array<Type> N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
@@ -72,8 +68,12 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(wage_survey); // Weight in survey
   DATA_ARRAY(wage_mid); // Weight in the middle of the year
   
+  // movement //
+  DATA_ARRAY(X_ija) // transition matrix at age (placeholder)
+  DATA_ARRAY(omega_ai); // eigenvect X_ija, by age x subarea
+  PARAMETER_VECTOR(omega_0ij) // estimated age-0 transition matrix
+    
   // repro //
-  PARAMETER_VECTOR(omega_ij); // eigenvect of movement between subareas
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
   PARAMETER_VECTOR(logh_k); // Steepness by stock
@@ -149,7 +149,7 @@ Type objective_function<Type>::operator() ()
   array<Type> Ztuned_yai(tEnd, nage, nspace); // final tuned subarea and yr specific Z
   array<Type> F1_yf(tEnd,nfleets_fish); // for F guesses
   array<Type> F2_yf(tEnd,nfleets_fish); // for F guesses
-  
+  vector<Type> F_tilde(nfleets_fish);
   array<Type> Z1_yai(tEnd,nage,nspace); // for intermediate Z
   array<Type> Z2_yai(tEnd,nage,nspace); // for intermediate Z
   array<Type> fished_bio(tEnd,nage,nspace); // for fished biomass
@@ -198,7 +198,7 @@ Type objective_function<Type>::operator() ()
   
   //  END DATA & PARS, BEGIN MODEL //
   
-  // recdevs placeholder
+  // recdevs placeholder for main period and inits
   for(int k=0;k<(nstocks);k++){
     for(int time=0;time<(tEnd-1);time++){
       tildeR_yk(time,k) =0;
@@ -275,10 +275,10 @@ Type objective_function<Type>::operator() ()
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ 
       for(int a=1;a<(nage-1);a++){
-        N_0ai(a,i) = omega_ij(i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a)));
+        N_0ai(a,i) = 0.5*omega_0ij(i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a)));
       }
       // note the A+ group will be in slot A-1
-      N_0ai(nage-1,i) = omega_ij(i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-1))) /(Type(1.0)-exp(-M(nage-1)));
+      N_0ai(nage-1,i) = omega_0ij(i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-1))) /(Type(1.0)-exp(-M(nage-1)));
     } // end subareas
   } // end stocks
 
@@ -296,15 +296,20 @@ Type objective_function<Type>::operator() ()
   for(int time=0;time<(nage);time++){ // note that x,y dims are identical
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
+        // age zero use estimated transition matrix
+        Ninit_Aai(time,0,i) = 0.5* omega_0ij(i) * tau_ik(k,i) * R_0k(k)* exp(-Myear(0)*age(0)) * exp(-0.5*SDR*SDR+tildeR_initk(time,k));
         for(int a=1;a<(nage-1);a++){
-          Ninit_Aai(time,a,i) = 0.5* omega_ij(i) * tau_ik(k,i) * R_0k(k)* exp(-Myear(a)*age(a)) * exp(-0.5*SDR*SDR+tildeR_initk(time,k));
+          // use eigenvector for other ages
+          Ninit_Aai(time,a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-Myear(a)*age(a)) * exp(-0.5*SDR*SDR+tildeR_initk(time,k));
         } // end ages
-        Ninit_Aai(time,nage-1,i) = (omega_ij(i) * Ninit_Aai(time,nage-2,i) * exp(-M(nage-1)*age(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(time,k)))/(Type(1.0)-exp(-M(nage-1)));
+        Ninit_Aai(time,nage-1,i) = (omega_ai(i) * Ninit_Aai(time,nage-2,i) * exp(-M(nage-1)*age(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(time,k)))/(Type(1.0)-exp(-M(nage-1)));
 
       } // end space
     } // end stocks
   } // end init years (nage)
   
+  
+  // MAIN MODEL PERIOD
   for(int time=0;time<(tEnd);time++){ // Start time loop
     
     pmax_catch_save(time) = pmax_catch;
@@ -349,16 +354,19 @@ Type objective_function<Type>::operator() ()
       Zsave(a,time) = Z(a);
     }
 
-        
+
     // model year zero, use last year of Ninit_Aai, and equil movement (omega) and downscaling (tau)
+    // right now this is per sex (50%)
     if (time == 0){  
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){ 
-          N_yai_beg(time,0,i) =  R_0k(k) * tau_ik(k,i) * omega_ij(i); // first recruits
+          N_yai_beg(time,0,i) =  0.5 *R_0k(k) * tau_ik(k,i) * omega_ai(i); // first recruits
           for(int a=1;a<(nage-1);a++){
-            N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ij(i)* exp(-Myear(i)*age(i));
+            // N_yai_beg(time,a,i) =  N_yai_beg(time,a-1,i)*
+            
+            N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ai(i)* exp(-Myear(i)*age(i));
           } // end ages
-          N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ij(i)* exp(-Myear(nage-1) * age(nage-1)) /
+          N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ai(i)* exp(-Myear(nage-1) * age(nage-1)) /
             (1 - exp(-Myear(nage-1)));
         } // end subareas
       } // end stocks
@@ -372,9 +380,7 @@ Type objective_function<Type>::operator() ()
         } // end ages
       } // end space
     } // end stocks
-    
 
-    
     // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){  
@@ -406,82 +412,133 @@ Type objective_function<Type>::operator() ()
     // Type v1=0.865; //corresponds to an Fmax of 2
     // Type v1=0.95;
     Type v2=30;
-    vector<Type> F_tilde(nfleets_fish);
+
     // term0.setZero();term1.setZero();term2.setZero();
     // Ztuned_yai
 
     // SA Approach
     //Compute total catches by age per increment
     //Initial guess
-    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(time, fish_flt)>0){
-        for(int i=0;i<(nspace);i++){
-          for(int a=0;a<nage;a++){
-            F_tilde(0) += catch_yf_obs(time, fish_flt)/
-              phi_if_fish(fish_flt, i) * N_yai_beg(time,a,i)*wage_catch(a,time) *  selectivity_save(a,time) + catch_yf_obs(time, fish_flt);
-          } // end space 
-        } // end ages
-        if(1/(1+exp(v2*(F_tilde(0)-v1)))<4e-26){ //the smallest number seems to be 4.37826e-27 - can conflict if F_tilde is bi0 enou0h
-          F1_yf(time,fish_flt) = -log(1-(F_tilde(0)*0.+v1*(1-0.)));
-        }else{
-          F1_yf(time,fish_flt) = -log(1-(F_tilde(0)*(1/(1+exp(v2*(F_tilde(0)-v1))))+v1*(1-(1/(1+exp(v2*(F_tilde(0)-v1)))))));
-        }
-        F2_yf(time,fish_flt) = F1_yf(time,fish_flt); // fill start guess
-      }else{
-        F1_yf(time,fish_flt)=0;
-        F2_yf(time,fish_flt)=0;
-      }
-    } // end fish fleet
-    
-    
-    // MK APPROACH
-    // for(int i=0;i<(nspace);i++){
-    //   for(int a=0;a<nage;a++){
-    //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //       // make an initial guess for F using obs catch - need to update selex
-    //       F1_yf(time,fish_flt) = catch_yf_obs(time, fish_flt)/
-    //         (phi_if_fish(fish_flt, i) * N_yai_beg(time,a,i)*wage_catch(a,time) *  selectivity_save(a,time) + catch_yf_obs(time, fish_flt));
-    //       
+    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    //   F_tilde = 0.0; // reset for each fleet
+    //   if(catch_yf_obs(time, fish_flt)>0){
+    //     for(int i=0;i<(nspace);i++){
+    //       for(int a=0;a<nage;a++){
+    //         F_tilde(0) += catch_yf_obs(time, fish_flt)/
+    //           (phi_if_fish(fish_flt, i) * N_yai_beg(time,a,i)*wage_catch(a,time) *  selectivity_save(a,time) + catch_yf_obs(time, fish_flt));
+    //       } // end space
+    //     } // end ages
+    //     if(1/(1+exp(v2*(F_tilde(0)-v1)))<4e-26){ //the smallest number seems to be 4.37826e-27 - can conflict if F_tilde is bi0 enou0h
+    //       F1_yf(time,fish_flt) = -log(1-(F_tilde(0)*0.+v1*(1-0.)));
+    //     }else{
+    //       F1_yf(time,fish_flt) = -log(1-(F_tilde(0)*(1/(1+exp(v2*(F_tilde(0)-v1))))+v1*(1-(1/(1+exp(v2*(F_tilde(0)-v1)))))));
+    //     }
+    //     F2_yf(time,fish_flt) = F1_yf(time,fish_flt); // fill start guess
+    //   }else{
+    //     F1_yf(time,fish_flt)=0;
+    //     F2_yf(time,fish_flt)=0;
+    //   }
+    // } // end fish fleet
+    // 
+    // //Compute the model-predicted catches, adjustment factor and next F
     //       for(int fiter=0; fiter<10; fiter++){
-    //         // set estimates to zero
-    //         catch_yaf_est(time,a,fish_flt) = 0;
-    //         catch_yf_est(time,fish_flt) = 0;
-    //         Type catch_yaf_est_1 = 0.0; Type catch_yf_est_1 = 0.0;
-    //         // modify the guess (overwrite)
-    //         term0 = 1/(1+exp(v2*( F1_yf(time,fish_flt) - v1)));
-    //         term1 = F1_yf(time,fish_flt)*term0;
-    //         term2 = v1*(1-term0);
-    //         F1_yf(time,fish_flt) = -log(1-(term1+term2));
-    //         // temp Z given F1; need to add selex and discard
-    //         Z1_yai(time,a,i) = M(a)*age(a) + F1_yf(time,fish_flt);
-    //         // // Baranov for predicted catch
-    //         fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,a,i)));
-    //         // Type fished_bio1 = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,a,i)));
-    //         scaled_mort(time,a,i) =   selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,a,i); // need to add retention function to this
-    //         // Type scaled_mort1 = selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,a,i); // need to add retention function to this
-    //         // catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio1(time,a,i) * scaled_mort1(time,a,i);
-    //         // catch_yf_est(time,fish_flt) += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
-    //         catch_yaf_est_1 += phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i);
-    //         catch_yf_est_1 += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
-    //         // calculate adj at subarea
-    //         adj_yi(time,i) = phi_if_fish(fish_flt,i)*catch_yf_obs(time, fish_flt)/catch_yf_est_1;
-    //         // re-scale Z (overwrite what was done previously) need to add selex and discard
-    //         Z2_yai(time,a,i) = M(a)*age(a) +  adj_yi(time,i)*F1_yf(time,fish_flt);
-    //         fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z2_yai(time,a,i)));
-    //         scaled_mort(time,a,i) = selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z2_yai(time,a,i); // need to add retention function to this
-    //         // update F guess with new mortality
-    //         catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i);
-    //         catch_yf_est(time,fish_flt) += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
-    //         F1_yf(time,fish_flt) =  catch_yf_obs(time, fish_flt)/  catch_yf_est(time,fish_flt); // this gets used in next iter
-    //       } // end hybrid F iterations
-    //       Ftuned_yf(time,fish_flt) =  F1_yf(time,fish_flt); // once iters done
-    //       /////// Ftuned_ym(time,fish_flt) += phi_fm(fish_flt,m)*F1_yf(time,fish_flt) // not ready yet
-    //       Ztuned_yai(time,a,i) = Z2_yai(time,a,i); // once iters done
-    //       CatchN_yaf(time,a,fish_flt) = phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i)/wage_catch(a,time);
-    //       CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
-    //     } // end fishery fleets
-    //   } // end ages
-    // } // end nspace
+    //         for(int i=0;i<(nspace);i++){
+    //           for(int a=0;a<nage;a++){
+    // //Compute Z
+    //   // for(g=1;g<=2;g++)Z(s,g,y)=F(s,g,y)*Sa(s,g,y)+M(a);
+    //   Z1_yai(time,a,i) =    M(a)*age(a) + F1_yf(time,fish_flt)*  selectivity_save(a,time)
+    //   // Model-precited catches and adjustment factor
+    //   adj_yi(time,i)=0.0;
+    //   Den=0.;
+    //   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    //     for(g=1;g<=2;g++){
+    //       Den += F1_yf(time,fish_flt)*
+    // 
+    //         Sa(s,g,y,fish_flt),WSa(s,g,y,fish_flt)),elem_prod(N(s,g,y),elem_div(1-mfexp(-Z(s,g,y)),Z(s,g,y)))));
+    //     }
+    //   }
+    //   F_adjust=sum(obs_catch(0))/(Den+0.0001);
+
+    //   //Adjust Z
+    //   for(g=1;g<=2;g++)Z(s,g,y)=F_adjust*F(s,g,y)*Sa(s,g,y)+M(s,g);
+    //   
+    //   //Next F_tilde
+    //   for(k=1;k<=nfleet;k++){
+    //     if(obs_ct(s,k,y)>0){
+    //       g=0;
+    //       F_tilde(g)=obs_catch(g,k)/(sum(elem_prod(Sa(s,1,y,k),elem_prod(WSa(s,1,y,k),elem_prod(N(s,1,y),elem_div(1.-mfexp(-Z(s,1,y)),Z(s,1,y))))))
+    //                                    +sum(elem_prod(Sa(s,2,y,k),elem_prod(WSa(s,2,y,k),elem_prod(N(s,2,y),elem_div(1.-mfexp(-Z(s,2,y)),Z(s,2,y))))))+0.00001);
+    //       if(1./(1.+mfexp(v2*(F_tilde(g)-v1)))<4.37826e-27){//the smallest number seems to be 4.37826e-27 - can conflict if F_tilde is big enough
+    //         F(s,1,y,k)=F_tilde(0)*(0.)+Fmax*(1.-0.);
+    //       }else{
+    //         F(s,1,y,k)=F_tilde(0)*(1./(1.+mfexp(v2*(F_tilde(0)-v1*Fmax))))+Fmax*(1.-1./(1+mfexp(v2*(F_tilde(0)-v1*Fmax))));
+    //       }
+    //       F(s,2,y,k)=F(s,1,y,k);
+    //       g=1;
+    //     }else{
+    //       F(s,1,y,k)=0.;
+    //       F(s,2,y,k)=0.;
+    //     }
+    //   }
+    // 
+    // }
+
+    // for(g=1;g<=2;g++){
+    //   Z(s,g,y)=F(s,g,y)*Sa(s,g,y)+M(s,g);
+    // }
+    // MK APPROACH
+//     for(int i=0;i<(nspace);i++){
+//       for(int a=0;a<nage;a++){
+//         for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+//           // make an initial guess for F using obs catch - need to update selex
+//           F1_yf(time,fish_flt) = 0;
+//           F1_yf(time,fish_flt) += catch_yf_obs(time, fish_flt)/
+//             (phi_if_fish(fish_flt, i) * N_yai_beg(time,a,i)*wage_catch(a,time) *  selectivity_save(a,time) + catch_yf_obs(time, fish_flt));
+// 
+//           for(int fiter=0; fiter<10; fiter++){
+//             // set estimates to zero
+//             catch_yaf_est(time,a,fish_flt) = 0;
+//             catch_yf_est(time,fish_flt) = 0;
+//             Type catch_yaf_est_1 = 0.0; Type catch_yf_est_1 = 0.0;
+//             // modify the guess (overwrite)
+//             term0 = 1/(1+exp(v2*( F1_yf(time,fish_flt) - v1)));
+//             if(term0<4e-26){ //the smallest number seems to be 4.37826e-27 - can conflict if F_tilde is big enough
+//                     F1_yf(time,fish_flt) = -log(1-v1);
+//               } else{
+//                 term1 = F1_yf(time,fish_flt)*term0;
+//                 term2 = v1*(1-term0);
+//                 F1_yf(time,fish_flt) = -log(1-(term1+term2));
+//               }// end if statement to avoid log neg
+// //             // temp Z given F1; need to add selex and discard
+//             Z1_yai(time,a,i) = M(a)*age(a) + F1_yf(time,fish_flt);
+// //             // // Baranov for predicted catch
+//             fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,a,i)));
+//             // Type fished_bio1 = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z1_yai(time,a,i)));
+//             scaled_mort(time,a,i) =   selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,a,i); // need to add retention function to this
+//             // Type scaled_mort1 = selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z1_yai(time,a,i); // need to add retention function to this
+//             // catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio1(time,a,i) * scaled_mort1(time,a,i);
+// //             // catch_yf_est(time,fish_flt) += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
+//             catch_yaf_est_1 += phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i);
+//             catch_yf_est_1 += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
+// //             // calculate adj at subarea
+//             adj_yi(time,i) = phi_if_fish(fish_flt,i)*catch_yf_obs(time, fish_flt)/catch_yf_est_1;
+// //             // re-scale Z (overwrite what was done previously) need to add selex and discard
+//             Z2_yai(time,a,i) = M(a)*age(a) +  adj_yi(time,i)*F1_yf(time,fish_flt);
+//             fished_bio(time,a,i) = wage_catch(a,time)*N_yai_beg(time,a,i)*(1-exp(-Z2_yai(time,a,i)));
+//             scaled_mort(time,a,i) = selectivity_save(a,time)* F1_yf(time,fish_flt)/ Z2_yai(time,a,i); // need to add retention function to this
+// //             // update F guess with new mortality
+//             catch_yaf_est(time,a,fish_flt) += phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i);
+//             catch_yf_est(time,fish_flt) += catch_yaf_est(time,a,fish_flt); // sum over the current catch at age
+//             F1_yf(time,fish_flt) =  catch_yf_obs(time, fish_flt)/  catch_yf_est(time,fish_flt); // this gets used in next iter
+//           } // end hybrid F iterations
+//           Ftuned_yf(time,fish_flt) =  F1_yf(time,fish_flt); // once iters done
+//           /////// Ftuned_ym(time,fish_flt) += phi_fm(fish_flt,m)*F1_yf(time,fish_flt) // not ready yet
+//           Ztuned_yai(time,a,i) = Z2_yai(time,a,i); // once iters done
+//           CatchN_yaf(time,a,fish_flt) = phi_if_fish(fish_flt,i) *  fished_bio(time,a,i) * scaled_mort(time,a,i)/wage_catch(a,time);
+//           CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
+//         } // end fishery fleets
+//       } // end ages
+//     } // end nspace
     
     
     // Estimate survey biomass at midyear
@@ -688,6 +745,7 @@ Type objective_function<Type>::operator() ()
     REPORT(term0)
     REPORT(term1)
     REPORT(term2)
+      REPORT(F_tilde)
     // recruitment & recdevs
     REPORT(R_yk)
     REPORT(R_yi)

@@ -86,7 +86,7 @@ create_TMB_data <- function(sim.data, df,
                   
                   age_maxage = df$age_maxage, # Max age for age comps 
                   # Catch
-                  catch_yf_obs = df$Catch2,
+                  catch_yf_obs = df$Catch2[,2:4], ## first col is yrs
                   ss_catch = df$ss_catch,
                   flag_catch =df$flag_catch,
                   age_catch = sim.data$age_catch,
@@ -109,7 +109,9 @@ create_TMB_data <- function(sim.data, df,
                   phi_if_surv = df$phi_if_surv,
                   phi_if_fish = df$phi_if_fish,
                   phi_ik = df$phi_ik,
-                  tau_ik = df$tau_ik
+                  tau_ik = df$tau_ik,
+                  X_ija = df$X_ija,
+                  omega_ai = df$omega_ai
                 
   )
   

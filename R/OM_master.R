@@ -76,6 +76,7 @@ obj <- MakeADFun(df.new,
 reps <- obj$report()
 
 reps$F1_yf
+reps$term0; reps$term1;reps$term2
 
 ## simulate and re-estimate from OM https://kaskr.github.io/adcomp/Simulation.html
 sim <- replicate(5, {

@@ -105,8 +105,29 @@ load_data_seasons <- function(nseason = 4,
     move.init <- 1
   }
   
+  ## placeholder for X_ija -this will need to get converted from length
+  if(move == FALSE) X_ija <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage))
+  if(move == TRUE) {
+    X_ija <- array(runif( nspace*nspace*nage, 0,0.05),  c(nspace,nspace,nage))
+    
+    ## for placeholder; if the rows are summing to greater than one set to zero
+    for(n in 1:nage){
+      for(i in 1:nspace){
+        for(j in 1:nspace){
+          if(sum(X_ija[i,1:j,n]) >= 1)  X_ija[i,j:nspace,n] <- 0
+        }
+      }
+    }
+  } 
+
+
   
-  
+  omega_ai <- matrix(rep(0, nage*nspace), c(nage,nspace))## eigenvector for stable spatial distribution at age
+  for(a in 1:nage){
+    omega_ai[a,] <- eigen(X_ija[,,a])$values
+    omega_ai[omega_ai < 0] <- 0
+    }
+
   
   # weight at age 
   wage_ss <- read.csv(here("input","data",'wage_ss.csv'))
@@ -429,7 +450,9 @@ load_data_seasons <- function(nseason = 4,
                   phi_if_fish = phi_if_fish,
                   phi_ik = phi_ik,
                   tau_ik = tau_ik,
-                  nstocks = nrow(phi_ik)
+                  nstocks = nrow(phi_ik),
+                  X_ija = X_ija,
+                  omega_ai = omega_ai
                   # Parameters from the estimation model 
               
   )

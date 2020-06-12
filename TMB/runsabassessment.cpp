@@ -181,7 +181,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> Zzero = M; // total mortality without fishing
   vector<Type> logF(tEnd);
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
-  array<Type> tildeR_initk(nage,nstocks); // recdevs for early (init) years
+  vector<Type> tildeR_initk(nstocks); // recdevs for init
   
   
   
@@ -195,10 +195,7 @@ Type objective_function<Type>::operator() ()
     tildeR_yk(tEnd-1,k) =0;
   }
   for(int k=0;k<(nstocks);k++){
-    for(int time=0;time<(nage-1);time++){
-      tildeR_initk(time,k) =0;
-    }
-    tildeR_initk(nage-1,k) =0;
+      tildeR_initk(k) =0;
   }
   
   /// LIKELY MOVE THIS OUT FOR DIFF SELEX HANDLING ----
@@ -287,10 +284,10 @@ Type objective_function<Type>::operator() ()
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){
-          Ninit_ai(a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(1,k));
+          Ninit_ai(a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(k));
         } // end ages
         Ninit_ai(nage-1,i) = (omega_ai(nage-1,i) * Ninit_ai(nage-2,i) *
-          exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(1,k)))/(Type(1.0)-exp(-M(nage-1)));
+          exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(k)))/(Type(1.0)-exp(-M(nage-1)));
       } // end space
     } // end stocks
   // } // end init years (nage)

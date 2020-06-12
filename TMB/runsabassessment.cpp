@@ -74,6 +74,10 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(Linf_yk); // sex, stock, year specific
   DATA_ARRAY(kappa_yk);
   DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
+  DATA_ARRAY(phi_ij); // matrix of whether i,j share stock
+  
+  array<Type> Length_beg_yai(tEnd,nage,nspace); // placeholder for true lengths-at-age
+  array<Type> Length_mid_yai(tEnd,nage,nspace); // placeholder for true lengths-at-age
   
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch

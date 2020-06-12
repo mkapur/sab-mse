@@ -264,7 +264,7 @@ Type objective_function<Type>::operator() ()
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ 
       for(int a=1;a<(nage-1);a++){
-        N_0ai(a,i) = omega_ai(a,i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a)));
+        N_0ai(a,i) = 0.5*omega_ai(a,i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a)));
       }
       // note the A+ group will be in slot A-1
       N_0ai(nage-1,i) = omega_ai(nage-1,i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-1))) /(Type(1.0)-exp(-M(nage-1)));

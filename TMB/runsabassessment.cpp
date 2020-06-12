@@ -339,10 +339,10 @@ Type objective_function<Type>::operator() ()
     if (time == 0){  
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){ 
-          Type pLeave = 0.0;
-          Type NCome = 0.0;
+
           for(int j=0;j<(nspace);j++){ 
             for(int a=1;a<(nage-1);a++){ // we will fill recruits later
+              Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
               if(i != j){
                 pLeave += X_ija(i,j,a); // will do 1-this for proportion which stay
                 NCome += X_ija(j,i,a)*Ninit_ai(a,j); // actual numbers incoming
@@ -351,8 +351,16 @@ Type objective_function<Type>::operator() ()
               
               // N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ai(a,i) * exp(-0.5*0*SDR*SDR+Ninit_ai(a-1,i))*exp(-Myear(a)*age(a));
             } // end ages
-            N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ai(nage-1,i) * exp(-0.5*0*SDR*SDR+Ninit_ai(nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / 
-              (1 - exp(-Myear(nage-1)));
+            // N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ai(nage-1,i) * exp(-0.5*0*SDR*SDR+Ninit_ai(nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / 
+            //   (1 - exp(-Myear(nage-1)));
+            Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
+            // plus group includes those already at A AND age into A
+            if(i != j){
+              pLeave += X_ija(i,j,nage-1); 
+              NCome += X_ija(j,i,nage-1)*(N_yai_beg(0,nage-1,j) + N_yai_beg(0,nage-2,j)) ; // if M becomes spatial use M_aj here
+            }
+
+            N_yai_beg(time,nage-1,i) =   ((1-pLeave)*(N_yai_beg(0,nage-1,i)+N_yai_beg(0,nage-2,i)) + NCome)*exp(-M(nage-1));
           } // end subareas j
         } // end subareas i
       } // end stocks

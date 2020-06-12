@@ -422,28 +422,21 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
       
       // determine length-at-age
-      // 
+      for(int i=0;i<(nspace);i++){
+       //need to make a Linit for first year and age 0 year to replace 5 AND CONFIRM TIME STEP ON PARS
+        for(int a=1;a<(nage-1);a++){
+          Length_beg_yai(time,a,i) =  5 + (Linf_yk(1,1)-5)*(1-exp(-kappa_yk(1,1)));
+        } // end ages
+        //     // plus group weighted average (we already have the numbers at age)
+        //     Length_beg_yai(time,nage-1,i) = N_yai_beg(time-1,nage-2,i)*
+        //       (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))) +
+        //       N_yai_beg(time-1,nage-1,i)*
+        //       (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i)))))/
+        //         (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
+        //   } // end subareas j
+      } // end subareas i
 
-      // for(int time = 1;time<(tEnd);time++){
-      //   for(int i=0;i<(nspace);i++){
-      //     Length_beg_yai(0,0,i) = 5; //need to make a Linit for first year to replace 5 AND CONFIRM TIME STEP ON PARS
-      //     for(int a=1;a<(nage-1);a++){
-      //       
-      //       Length_beg_yai(time+1,a,i) =  5 + (Linf_yk(1,phi_ik2(i))-5)*(1-exp(-kappa_yk(1,phi_ik2(i))));
-      //       Leng_mid_yai(time,a,i) =   Length_beg_yai(time,a,i)  + (Linf_yk(1,phi_ik2(i)) -  Length_beg_yai(time,a,i) )*(1-exp(-0.5*kappa_yk(1,phi_ik2(i))));
-      //     } // end ages
-      //     // plus group weighted average (we already have the numbers at age)
-      //     Length_beg_yai(time,nage-1,i) = N_yai_beg(time-1,nage-2,i)*
-      //       (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))) +
-      //       N_yai_beg(time-1,nage-1,i)*
-      //       (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i)))))/
-      //         (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
-      //     
-      //     
-      //   } // end subareas j
-      // } // end subareas i
-      // } // END SPECIAL TIME LOOP
-    
+  
     // Catch at beginning of year
     // Hybrid F tuning inputs
     Type Fmax = 3.5;

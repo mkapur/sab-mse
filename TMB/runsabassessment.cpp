@@ -54,7 +54,7 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(mat_age); // Maturity ogive
   PARAMETER(logMinit); // Natural mortality
   // biology storage
-  array<Type> Ninit_Aai(nage,nage,nspace); // initial numbers at age in subarea, calculated for A years
+  array<Type> Ninit_Aai(nage,nspace); // initial numbers at age in subarea, just once
   array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
   vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
   array<Type> N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
@@ -260,6 +260,7 @@ Type objective_function<Type>::operator() ()
   //array<Type> PSEL_save(5,)
   
   // Equilibrium Unfished numbers-at-age, subarea (outside of time loop)
+  // identical to Ninit except no recdevs
   N_0ai.setZero();   
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ 
@@ -281,18 +282,18 @@ Type objective_function<Type>::operator() ()
     } // end space
   } // end stocks
   
-  // Run nage years for Ninit_Aai pre-model
-  for(int time=0;time<(nage);time++){ // note that x,y dims are identical
+  // The first year of the simulation is  initialized with the following age distribution 
+  // for(int time=1;time<(nage);time++){ // note that x,y dims are identical
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage-1);a++){
-          Ninit_Aai(time,a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(time,k));
+        for(int a=0;a<(nage-1);a++){
+          Ninit_Aai(a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(1,k));
         } // end ages
-        Ninit_Aai(time,nage-1,i) = (omega_ai(nage-1,i) * Ninit_Aai(time,nage-2,i) * exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(time,k)))/(Type(1.0)-exp(-M(nage-1)));
-        
+        Ninit_Aai(nage-1,i) = (omega_ai(nage-1,i) * Ninit_Aai(nage-2,i) *
+          exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(1,k)))/(Type(1.0)-exp(-M(nage-1)));
       } // end space
     } // end stocks
-  } // end init years (nage)
+  // } // end init years (nage)
   
   for(int time=0;time<(tEnd);time++){ // Start time loop
     
@@ -344,9 +345,9 @@ Type objective_function<Type>::operator() ()
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){ 
           for(int a=1;a<(nage-1);a++){
-            N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ai(a,i) * exp(-0.5*0*SDR*SDR+Ninit_Aai(nage-1,a-1,i))*exp(-Myear(a)*age(a));
+            N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ai(a,i) * exp(-0.5*0*SDR*SDR+Ninit_Aai(a-1,i))*exp(-Myear(a)*age(a));
           } // end ages
-          N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ai(nage-1,i) * exp(-0.5*0*SDR*SDR+Ninit_Aai(nage-1,nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / 
+          N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ai(nage-1,i) * exp(-0.5*0*SDR*SDR+Ninit_Aai(nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / 
             (1 - exp(-Myear(nage-1)));
         } // end subareas
       } // end stocks
@@ -564,7 +565,7 @@ Type objective_function<Type>::operator() ()
   for(int time=0;time<(nage);time++){ // Start time loop
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
-        ans_priors += Type(0.5)*(Ninit_Aai(time,a,i)*Ninit_Aai(time,a,i))/(SDR*SDR);
+        ans_priors += Type(0.5)*(Ninit_Aai(a,i)*Ninit_Aai(a,i))/(SDR*SDR);
       } // end ages
     } // end space
   } // end time

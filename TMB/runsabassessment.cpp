@@ -41,7 +41,9 @@ Type objective_function<Type>::operator() ()
   
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
-  DATA_ARRAY(phi_ik); // nesting of subareas i into stocks k (rows)
+  DATA_ARRAY(phi_ik); // 0/1 nesting of subareas i into stocks k (rows)
+  DATA_VECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
+  
   DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
   
   // biology // 
@@ -350,6 +352,7 @@ Type objective_function<Type>::operator() ()
     
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
+    // add length at age initial here so that time loop can be removed
     if (time == 0){  
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){ 
@@ -419,22 +422,27 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
       
       // determine length-at-age
-      // need to make a Linit for first year to replace 5 AND CONFIRM TIME STEP ON PARS
-      for(int time = 1;time<(tEnd);time++){
-        for(int k=0;k<(nstocks);k++){
-        for(int i=0;i<(nspace);i++){
-          for(int a=1;a<(nage-1);a++){
-            Length_beg_yai(time,a,i) = 5 + (Linf_yk(1,k)-5)*(1-exp(-kappa_yk(1,k)));
-          } // end ages
-          // plus group weighted average (we already have the numbers at age)
-          Length_beg_yai(time,nage-1,i) = N_yai_beg(time-1,nage-2,i)*
-            (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(time,k)-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,k)))) +
-            N_yai_beg(time-1,nage-1,i)*
-            (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(time,k)-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(time,k))))/
-              (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
-        } // end subareas j
-      } // end subareas i
-      } // END SPECIAL TIME LOOP
+      // 
+
+      // for(int time = 1;time<(tEnd);time++){
+      //   for(int i=0;i<(nspace);i++){
+      //     Length_beg_yai(0,0,i) = 5; //need to make a Linit for first year to replace 5 AND CONFIRM TIME STEP ON PARS
+      //     for(int a=1;a<(nage-1);a++){
+      //       
+      //       Length_beg_yai(time+1,a,i) =  5 + (Linf_yk(1,phi_ik2(i))-5)*(1-exp(-kappa_yk(1,phi_ik2(i))));
+      //       Leng_mid_yai(time,a,i) =   Length_beg_yai(time,a,i)  + (Linf_yk(1,phi_ik2(i)) -  Length_beg_yai(time,a,i) )*(1-exp(-0.5*kappa_yk(1,phi_ik2(i))));
+      //     } // end ages
+      //     // plus group weighted average (we already have the numbers at age)
+      //     Length_beg_yai(time,nage-1,i) = N_yai_beg(time-1,nage-2,i)*
+      //       (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))) +
+      //       N_yai_beg(time-1,nage-1,i)*
+      //       (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i)))))/
+      //         (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
+      //     
+      //     
+      //   } // end subareas j
+      // } // end subareas i
+      // } // END SPECIAL TIME LOOP
     
     // Catch at beginning of year
     // Hybrid F tuning inputs

@@ -223,7 +223,7 @@ load_data_seasons <- function(nseason = 4,
     
     phi_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     phi_ik[1,1] <-  phi_ik[2,2:3] <-  phi_ik[3,4:5]<-  phi_ik[4,6]  <- 1
-    
+    phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
     phi_ij <-  matrix(0, ncol = nspace, nrow = nspace) ## indicates if subareas comprise DISTINCT stocks
     phi_ij[1,2:nspace] <- phi_ij[2,c(1,3:nspace)] <- phi_ij[3,c(1:2,4:nspace)] <- phi_ij[4,c(1:3,nspace)]<- phi_ij[5,c(1:3,nspace)] <- phi_ij[6,c(1:4)] <- 1
       
@@ -236,6 +236,8 @@ load_data_seasons <- function(nseason = 4,
     phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
     phi_ik <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
+    phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
+    
     phi_ij <-  matrix(c(1,1,0,1), byrow = TRUE, ncol = nspace, nrow = nspace) ## indicates if subareas comprise DISTINCT stocks
     
     tau_ik <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
@@ -470,6 +472,7 @@ load_data_seasons <- function(nseason = 4,
                   phi_if_surv = phi_if_surv,
                   phi_if_fish = phi_if_fish,
                   phi_ik = phi_ik,
+                  phi_ik2 = phi_ik2,
                   tau_ik = tau_ik,
                   nstocks = nrow(phi_ik),
                   X_ija = X_ija,

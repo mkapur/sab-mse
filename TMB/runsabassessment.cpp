@@ -74,7 +74,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(Linf_yk); // sex, stock, year specific
   DATA_ARRAY(kappa_yk);
   DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
-  DATA_ARRAY(phi_ij); // matrix of whether i,j share stock
+  DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
   
   array<Type> Length_beg_yai(tEnd,nage,nspace); // placeholder for true lengths-at-age
   array<Type> Length_mid_yai(tEnd,nage,nspace); // placeholder for true lengths-at-age
@@ -419,8 +419,21 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
       
       // determine length-at-age
-      
-      
+      // need to make a Linit for first year to replace 5
+      for(int k=0;k<(nstocks);k++){
+        for(int i=0;i<(nspace);i++){
+          for(int a=1;a<(nage-1);a++){
+            // Length_beg_yai(time+1,a,i) = 5 + (Linf_yk(time,k)-5)*(1-exp(-kappa_yk(time,k)));
+          } // end ages
+      //     // plus group weighted average (we already have the numbers at age)
+      //     Length_beg_yai(time+1,nage-1,i) = N_yai_beg(time+1,nage-2,i)*
+      //       (Length_beg_yai(time,nage-2,i)+(Linf_yk(time,k)-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,k))) +
+      //       N_yai_beg(time+1,nage-1,i)*
+      //       (Length_beg_yai(time,nage-1,i)+(Linf_yk(time,k)-Length_beg_yai(time,nage-1,i))*(1-exp(-kappa_yk(time,k))/
+      //         (N_yai_beg(time+1,nage-2,i) + N_yai_beg(time+1,nage-1,i))
+      //     
+        } // end subareas j
+      } // end subareas i
     
     // Catch at beginning of year
     // Hybrid F tuning inputs

@@ -69,6 +69,8 @@ Rdev <- parms$Rin
 parms.new$F0 <- F0
 parms.new$Rin <- Rdev
 
+## testing without omega
+df.new$omega_ai[,] <- 1
 
 obj <- MakeADFun(df.new,
                  parms.new,

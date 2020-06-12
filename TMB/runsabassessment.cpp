@@ -182,9 +182,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> logF(tEnd);
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
-  
-  
-  
+ 
   //  END DATA & PARS, BEGIN MODEL //
   
   // recdevs placeholder
@@ -368,7 +366,7 @@ Type objective_function<Type>::operator() ()
           SSB_yk(time,k)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
         R_yi(time,i) = R_yk(time,k)*tau_ik(k,i); // downscale to subarea
       } // end stocks
-      N_yai_beg(time,0,i) =  R_yi(time,i);
+      N_yai_beg(time,0,i) =  R_yi(time,i); //
     } // end space
     
     // N-at-age for the middle of this year and beginning of next

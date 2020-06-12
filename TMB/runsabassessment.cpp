@@ -57,9 +57,12 @@ Type objective_function<Type>::operator() ()
   array<Type> Ninit_ai(nage,nspace); // initial numbers at age in subarea, just once
   array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
   vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
+  vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
+  
   array<Type> N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
   array<Type> N_yai_mid( tEnd+1, nage, nspace); N_yai_mid.setZero(); 
   array<Type> SSB_yk(tEnd,nstocks);
+  array<Type> SSB_yi(tEnd,nspace);
   array<Type> survey_bio_f_est(tEnd,nfleets_surv); // this is actually predicted
   array<Type> Zsave(nage,tEnd);
   
@@ -75,12 +78,12 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(wage_mid); // Weight in the middle of the year
   
   // repro //
-
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER(logh); // Steepness
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   DATA_INTEGER(sum_zero); // should rec dev's sum to zero?
   DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
+  
   // repro storage
   vector<Type> R(tEnd);
   array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
@@ -270,13 +273,16 @@ Type objective_function<Type>::operator() ()
   
   
   // Equilibrium Unfished SSB, stock (outside of time loop)
-  for(int k=0;k<(nstocks);k++){ 
-    for(int i=0;i<(nspace);i++){ 
-      for(int a=0;a<nage;a++){ // Loop over ages
+
+  for(int i=0;i<(nspace);i++){ 
+    for(int a=0;a<nage;a++){ // Loop over ages
+      SSB_0i(i) += mat_age(a)*N_0ai(a,i)*0.5;
+      for(int k=0;k<(nstocks);k++){ 
         SSB_0k(k) += phi_ik(k,i)*mat_age(a)*N_0ai(a,i)*0.5;
-      } // end ages
-    } // end space
-  } // end stocks
+      } // end stocks
+    } // end ages
+  } // end space
+  
   
   // The first year of the simulation is initialized with the following age distribution 
   for(int k=0;k<(nstocks);k++){
@@ -362,14 +368,17 @@ Type objective_function<Type>::operator() ()
     } // end time == 0
     
     // calculate SSB using N at beginning of year
-    for(int k=0;k<(nstocks);k++){  
-      for(int i=0;i<(nspace);i++){
-        for(int a=0;a<nage;a++){ // Loop over ages
-          SSB_yk(time,k) += phi_ik(k,i)*N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
-        } // end ages
-      } // end space
-    } // end stocks
 
+    for(int i=0;i<(nspace);i++){
+      for(int a=0;a<nage;a++){ // Loop over ages
+        SSB_yi(time,i) += N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // for storage
+        for(int k=0;k<(nstocks);k++){  
+          SSB_yk(time,k) += phi_ik(k,i)*N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
+        } // end stocks
+      } // end ages
+    } // end space
+    
+    
     // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){  
@@ -627,13 +636,16 @@ Type objective_function<Type>::operator() ()
   // ADREPORT(age_survey)
   // ADREPORT(age_survey_est)
   // ADREPORT(ans_tot)
-  REPORT(SSB_0k)
+   REPORT(SSB_0k)
     REPORT(SSB_yk)
+    REPORT(SSB_0i)
+    REPORT(SSB_yi)
     REPORT(Ninit_ai)
     REPORT(Fyear)
     REPORT(R_yk)
     REPORT(R_yi)
     REPORT(R_0k)
+    REPORT(logR_0k)
     REPORT(omega_0ij)
     REPORT(tildeR_yk)
     REPORT(tildeR_initk)

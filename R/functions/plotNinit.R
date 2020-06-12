@@ -14,11 +14,7 @@ require(ggplot2)
     ggplot(., aes(x = Yr, y = value, color = variable )) +
     geom_line(lwd = 2) + labs(x = 'Initializing Year',y = 'Numbers', color = 'subarea') +
     ggsidekick::theme_sleek()
-  
-  
 
-  
-  
   Nzero = reps$N_0ai
   Nzero %>% data.frame() %>%
     mutate('Yr' = 1:21) %>%

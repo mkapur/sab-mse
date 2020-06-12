@@ -419,21 +419,22 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
       
       // determine length-at-age
-      // need to make a Linit for first year to replace 5
-      for(int k=0;k<(nstocks);k++){
+      // need to make a Linit for first year to replace 5 AND CONFIRM TIME STEP ON PARS
+      for(int time = 1;time<(tEnd);time++){
+        for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){
           for(int a=1;a<(nage-1);a++){
-            // Length_beg_yai(time+1,a,i) = 5 + (Linf_yk(time,k)-5)*(1-exp(-kappa_yk(time,k)));
+            Length_beg_yai(time,a,i) = 5 + (Linf_yk(1,k)-5)*(1-exp(-kappa_yk(1,k)));
           } // end ages
-      //     // plus group weighted average (we already have the numbers at age)
-      //     Length_beg_yai(time+1,nage-1,i) = N_yai_beg(time+1,nage-2,i)*
-      //       (Length_beg_yai(time,nage-2,i)+(Linf_yk(time,k)-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,k))) +
-      //       N_yai_beg(time+1,nage-1,i)*
-      //       (Length_beg_yai(time,nage-1,i)+(Linf_yk(time,k)-Length_beg_yai(time,nage-1,i))*(1-exp(-kappa_yk(time,k))/
-      //         (N_yai_beg(time+1,nage-2,i) + N_yai_beg(time+1,nage-1,i))
-      //     
+          // plus group weighted average (we already have the numbers at age)
+          Length_beg_yai(time,nage-1,i) = N_yai_beg(time-1,nage-2,i)*
+            (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(time,k)-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,k)))) +
+            N_yai_beg(time-1,nage-1,i)*
+            (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(time,k)-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(time,k))))/
+              (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
         } // end subareas j
       } // end subareas i
+      } // END SPECIAL TIME LOOP
     
     // Catch at beginning of year
     // Hybrid F tuning inputs
@@ -681,6 +682,7 @@ Type objective_function<Type>::operator() ()
     REPORT(PSEL.cols())
     REPORT(selectivity_save)
     REPORT(surveyselc)
+     REPORT(Length_beg_yai)
     REPORT(N_yai_beg)
     REPORT(survey_bio_f_est)
     REPORT(survey_bio_f_obs)

@@ -66,7 +66,7 @@ Type objective_function<Type>::operator() ()
   // movement //
   PARAMETER_VECTOR(omega_ij); // eigenvect of movement between subareas
   DATA_ARRAY(omega_ai); // eigenvect of movement between subareas
-  
+  DATA_ARRAY(X_ija); // prob trans between subareas at age
   // growth //
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch
@@ -340,11 +340,12 @@ Type objective_function<Type>::operator() ()
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){ 
           Type NLeave = 0.0;
-          Type NStay = 0.0;
+          Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){ 
             for(int a=1;a<(nage-1);a++){
               if(i != j){
-                
+                NLeave += X_ija(i,j,a); // will do 1-this for Nstay
+                NCome += X_ija(j,i,a);
                 
               }
               N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ai(a,i) * exp(-0.5*0*SDR*SDR+Ninit_ai(a-1,i))*exp(-Myear(a)*age(a));

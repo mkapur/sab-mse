@@ -45,14 +45,13 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
   
   // biology // 
-  // PARAMETER_VECTOR(initN);
-  
-  PARAMETER_VECTOR(Rin); // Time varying stuff
+  // PARAMETER_VECTOR(Rin); // Time varying stuff
   DATA_INTEGER(nage); // Plus group
   DATA_VECTOR(age); // ages
   DATA_VECTOR(Msel); // How mortality scales with age
   DATA_VECTOR(mat_age); // Maturity ogive
   PARAMETER(logMinit); // Natural mortality
+  
   // biology storage
   array<Type> Ninit_ai(nage,nspace); // initial numbers at age in subarea, just once
   array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
@@ -72,6 +71,10 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(X_ija); // prob trans between subareas at age
   
   // growth //
+  DATA_ARRAY(Linf_yk); // sex, stock, year specific
+  DATA_ARRAY(kappa_yk);
+  DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
+  
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch
   DATA_ARRAY(wage_survey); // Weight in survey
@@ -390,7 +393,6 @@ Type objective_function<Type>::operator() ()
     } // end space
     
     // N-at-age for the middle of this year and beginning of next
-    // movement and growth need to happen here
       for(int i=0;i<(nspace);i++){ 
         for(int j=0;j<(nspace);j++){ 
           for(int a=1;a<(nage-1);a++){
@@ -411,8 +413,10 @@ Type objective_function<Type>::operator() ()
           N_yai_beg(time+1,nage-1,i) =   ((1-pLeave)*(N_yai_beg(time,nage-1,i)+N_yai_beg(time,nage-2,i)) + NCome)*exp(-0.4);
         } // end subareas j
       } // end subareas i
-
-    
+      
+      // determine length-at-age
+      
+      
     
     // Catch at beginning of year
     // Hybrid F tuning inputs

@@ -85,6 +85,7 @@ reps$term0; reps$term1;reps$term2
 sim <- replicate(5, {
   simdata <- obj$simulate(par=obj$par, complete=TRUE)
   obj2 <- MakeADFun(simdata, parms.new, DLL="runsabassessment", silent=TRUE) ## use original start pars
+  reps2 <- obj2$report()
   nlminb(obj2$par, obj2$fn, obj2$gr)$par
 })
 

@@ -2,6 +2,7 @@
 # year and age input 
 load_data_seasons <- function(nseason = 4, 
                               nspace = 2, 
+                              nstocks = 2,
                               myear = 2018,
                               movemaxinit = 0.35, 
                               movefiftyinit = 6,
@@ -196,6 +197,22 @@ load_data_seasons <- function(nseason = 4,
   survey_x2[5:length(survey_x2)] <- -2## a -2 if no survey, 2 if survey occured
   nfleets_surv <- ncol(survey2) 
   
+  ## load growth params
+  growPar <- read.csv(here("input","raw","Table3_2020-05-06phase2.csv"))
+  growPar %>%
+    filter(Period == 'early') %>%
+    select(Linf)
+  
+  ## parameter placeholders
+  Linf_yk <- kappa_yk <- sigmaG_yk <- matrix(NA, nrow = length(years), ncol = nstocks)
+  Linf_yk[1:(2009-1966),1:nstocks] <-  growPar$Linf[growPar$Period == 'early'][1:nstocks]
+  Linf_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Linf[growPar$Period == 'late'][1:nstocks]
+  
+  kappa_yk[1:(2009-1966),1:nstocks] <-  growPar$k[growPar$Period == 'early'][1:nstocks]
+  kappa_yk[(2009-1966):nrow(kappa_yk),1:nstocks] <-  growPar$k[growPar$Period == 'late'][1:nstocks]
+  
+  sigmaG_yk[1:(2009-1966),1:nstocks] <-  growPar$Sigma[growPar$Period == 'early'][1:nstocks]
+  sigmaG_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Sigma[growPar$Period == 'late'][1:nstocks]
   
   ## setup phi (matching matrix) depending on spatial setup
   if(nspace == 6){ ## OM
@@ -204,20 +221,18 @@ load_data_seasons <- function(nseason = 4,
     
     phi_if_fish <- matrix(1, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
     
-    phi_ik <-  matrix(0, ncol = nspace, nrow = 4) ## nesting of subareas within stocks, for recruitment purposes
+    phi_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     phi_ik[1,1] <-  phi_ik[2,2:3] <-  phi_ik[3,4:5]<-  phi_ik[4,6]  <- 1
     
-    tau_ik <-  matrix(0, ncol = nspace, nrow = 4) ## nesting of subareas within stocks, for recruitment purposes
+    tau_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     tau_ik[1,1] <-   tau_ik[4,6]  <- 1 ## 100% of recruitment in stock
     tau_ik[2,2:3] <-  tau_ik[3,4:5] <-  0.5 ## split 50/50 for now
     # phi_if_fish[1,1:2] <-  phi_if_fish[2,1:2] <-  phi_if_fish[3,3:4]<-  phi_if_fish[4,3:4] <-  phi_if_fish[5,5:6] <- 1
   } else {
     phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
-    phi_ik <- matrix(c(1,0,0,1), byrow = TRUE, nrow = 2, ncol = nspace) ## placeholder for alternative spatial stratifications
-    tau_ik <- matrix(c(0.25,0.75,0.9,0.1), nrow = 2, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
-    
-    
+    phi_ik <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
+    tau_ik <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
   }
   # Load the age comps 
   age_survey.tmp <- read.csv(here("input","data",'age_survey_ss.csv'))
@@ -452,7 +467,10 @@ load_data_seasons <- function(nseason = 4,
                   tau_ik = tau_ik,
                   nstocks = nrow(phi_ik),
                   X_ija = X_ija,
-                  omega_ai = omega_ai
+                  omega_ai = omega_ai,
+                  Linf_yk = Linf_yk,
+                  kappa_yk = kappa_yk,
+                  sigmaG_yk = sigmaG_yk
                   # Parameters from the estimation model 
               
   )

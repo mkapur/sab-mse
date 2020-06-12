@@ -111,7 +111,10 @@ create_TMB_data <- function(sim.data, df,
                   phi_ik = df$phi_ik,
                   tau_ik = df$tau_ik,
                   X_ija = df$X_ija,
-                  omega_ai = df$omega_ai
+                  omega_ai = df$omega_ai,
+                  Linf_yk = df$Linf_yk,
+                  kappa_yk = df$kappa_yk,
+                  sigmaG_yk = df$sigmaG_yk
   )
   
   

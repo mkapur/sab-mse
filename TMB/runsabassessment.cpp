@@ -278,18 +278,17 @@ Type objective_function<Type>::operator() ()
     } // end space
   } // end stocks
   
-  // The first year of the simulation is  initialized with the following age distribution 
-  // for(int time=1;time<(nage);time++){ // note that x,y dims are identical
-    for(int k=0;k<(nstocks);k++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=0;a<(nage-1);a++){
-          Ninit_ai(a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(k));
-        } // end ages
-        Ninit_ai(nage-1,i) = (omega_ai(nage-1,i) * Ninit_ai(nage-2,i) *
-          exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(k)))/(Type(1.0)-exp(-M(nage-1)));
-      } // end space
-    } // end stocks
-  // } // end init years (nage)
+  // The first year of the simulation is initialized with the following age distribution 
+  for(int k=0;k<(nstocks);k++){
+    for(int i=0;i<(nspace);i++){
+      for(int a=0;a<(nage-1);a++){
+        Ninit_ai(a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(k));
+      } // end ages
+      Ninit_ai(nage-1,i) = (omega_ai(nage-1,i) * Ninit_ai(nage-2,i) *
+        exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(k)))/(Type(1.0)-exp(-M(nage-1)));
+    } // end space
+  } // end stocks
+  
   
   for(int time=0;time<(tEnd);time++){ // Start time loop
     
@@ -337,10 +336,10 @@ Type objective_function<Type>::operator() ()
     
     
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
+    // note we are assuming unfished here as the exponent is M only
     if (time == 0){  
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){ 
-
           for(int j=0;j<(nspace);j++){ 
             for(int a=1;a<(nage-1);a++){ // we will fill recruits later
               Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
@@ -370,9 +369,7 @@ Type objective_function<Type>::operator() ()
         } // end ages
       } // end space
     } // end stocks
-    
-    
-    
+
     // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){  
@@ -385,16 +382,27 @@ Type objective_function<Type>::operator() ()
     
     // N-at-age for the middle of this year and beginning of next
     // movement and growth need to happen here
-    for(int i=0;i<(nspace);i++){
-      // Catch(time,i) = 0;
-      for(int a=0;a<(nage-1);a++){ // Loop over other ages
-        N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-Z(a)*smul);
-        N_yai_beg(time+1,a+1,i) =  N_yai_beg(time,a,i)*exp(-Z(a));
-      }
-      // Plus group
-      N_yai_mid(time,nage-1,i) =  N_yai_beg(time,nage-2,i)*exp(-Z(nage-2)*0.5)+ N_yai_beg(time,nage-1,i)*exp(-Z(nage-1)*smul);
-      N_yai_beg(time+1,nage-1,i) =  N_yai_beg(time,nage-2,i)*exp(-Z(nage-2))+ N_yai_beg(time,nage-1,i)*exp(-Z(nage-1));
-    }
+      for(int i=0;i<(nspace);i++){ 
+        for(int j=0;j<(nspace);j++){ 
+          for(int a=1;a<(nage-1);a++){
+            Type pLeave = 0.0; Type NCome = 0.0; 
+            if(i != j){
+              pLeave += X_ija(i,j,a); 
+              NCome += X_ija(j,i,a)*N_yai_beg(time,a,j); 
+            }
+            N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-0.4); // this exponent needs to be Ztuned eventually
+            N_yai_beg(time+1,a,i) = ((1-pLeave)*N_yai_beg(time,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
+          } // end ages
+          Type pLeave = 0.0; Type NCome = 0.0; 
+          if(i != j){
+            pLeave += X_ija(i,j,nage-1); 
+            NCome += X_ija(j,i,nage-1)*(N_yai_beg(time,nage-1,j) + N_yai_beg(time,nage-2,j)); 
+          }
+          N_yai_mid(time,nage-1,i) = N_yai_beg(time,nage-1,i)*exp(-0.4);
+          N_yai_beg(time+1,nage-1,i) =   ((1-pLeave)*(N_yai_beg(time,nage-1,i)+N_yai_beg(time,nage-2,i)) + NCome)*exp(-0.4);
+        } // end subareas j
+      } // end subareas i
+
     
     
     // Catch at beginning of year
@@ -626,6 +634,7 @@ Type objective_function<Type>::operator() ()
     REPORT(R_yk)
     REPORT(R_yi)
     REPORT(R_0k)
+    REPORT(omega_0ij)
     REPORT(tildeR_yk)
     REPORT(tildeR_initk)
     REPORT(N_0ai)

@@ -29,9 +29,10 @@ dyn.load(dynlib(here("TMB","runsabassessment")))
 #   melt(id = 'year') %>%
 #   ggplot(., aes(x = year, y = value, color = variable)) + 
 #   geom_line(size =2 ) +  theme_sleek()
+
   
 ## OM MODEL CONDITIONING ----
-  # runomem and run om condition
+# code from runomem and run om condition
 set.seed(731)
 plot.figures = FALSE # Set true for printing to file 
 # Run the simulation model

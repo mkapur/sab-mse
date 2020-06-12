@@ -26,10 +26,11 @@ getParameters_OM <- function(trueparms = TRUE,df){
     
     parms <- list( # Just start all the simluations with the same initial conditions 
       logRinit = 16,
-      logR_0k = rep(16, df$nstocks),
       logh = log(0.7),
-      logh_k = rep(0.7, df$nstocks),
-      omega_ij = rep(0.02, df$nspace),
+      logh_k = rep(log(0.7), df$nstocks),
+      logR_0k = rep(log(16), df$nstocks),
+      omega_0ij = rep(0.02,df$nspace),
+      omega_ij = c(0.2,0.2), ## placeholder
       logMinit = log(0.3),
       logSDsurv = log(0.3),
       # logSDR = log(1.4),
@@ -40,13 +41,10 @@ getParameters_OM <- function(trueparms = TRUE,df){
       psel_fish = c(2.486490, 0.928255,0.392144,0.214365,0.475473),
       psel_surv = c(0.568618,-0.216172,0.305286 ,0.373829),
       initN = initN,
-      Ninit_Aai = Ninit_Aai,
       Rin = Rdev,
-      # Rin2 = Rdev,
       F0 = F0,
       PSEL = PSEL
     )
-    
     
   }
   return(parms) 

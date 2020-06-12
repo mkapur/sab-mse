@@ -1,5 +1,5 @@
 
-source('R/functions/getParameters.R')
+# source('R/functions/getParameters.R')
 source('R/functions/getParameters_OM.R')
 source('R/functions/Check_Identifiable_vs2.R')
 #source('R/functions/getParms_noAge.R')

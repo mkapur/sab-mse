@@ -339,16 +339,17 @@ Type objective_function<Type>::operator() ()
     if (time == 0){  
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){ 
-          Type NLeave = 0.0;
+          Type pLeave = 0.0;
           Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){ 
-            for(int a=1;a<(nage-1);a++){
+            for(int a=1;a<(nage-1);a++){ // we will fill recruits later
               if(i != j){
-                NLeave += X_ija(i,j,a); // will do 1-this for Nstay
-                NCome += X_ija(j,i,a);
-                
+                pLeave += X_ija(i,j,a); // will do 1-this for proportion which stay
+                NCome += X_ija(j,i,a)*Ninit_ai(a,j); // actual numbers incoming
               }
-              N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ai(a,i) * exp(-0.5*0*SDR*SDR+Ninit_ai(a-1,i))*exp(-Myear(a)*age(a));
+              N_yai_beg(time,a,i) = ((1-pLeave)*Ninit_ai(a,i) + NCome)*exp(-M(a));
+              
+              // N_yai_beg(time,a,i) = R_0k(k) * tau_ik(k,i) * omega_ai(a,i) * exp(-0.5*0*SDR*SDR+Ninit_ai(a-1,i))*exp(-Myear(a)*age(a));
             } // end ages
             N_yai_beg(time,nage-1,i) =   R_0k(k) * tau_ik(k,i) * omega_ai(nage-1,i) * exp(-0.5*0*SDR*SDR+Ninit_ai(nage-2,i)) * exp(-Myear(nage-1) * age(nage-1)) / 
               (1 - exp(-Myear(nage-1)));

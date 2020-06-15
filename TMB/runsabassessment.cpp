@@ -422,8 +422,9 @@ Type objective_function<Type>::operator() ()
             }
             N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-0.4); // this exponent needs to be Ztuned eventually
             N_yai_beg(time+1,a,i) = ((1-pLeave)*N_yai_beg(time,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
-            Length_yai_beg(time+1,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(1,1)-Length_yai_beg(time,a,i))*(1-exp(-kappa_yk(1,1)));
-            Length_yai_mid(time,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(1,1)-Length_yai_beg(time,a,i))*(1-exp(-0.5*kappa_yk(1,1)));
+           
+            Length_yai_beg(time+1,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a,i))*(1-exp(-kappa_yk(time,phi_ik2(i))));
+            Length_yai_mid(time,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))));
           } // end ages
           // plus groups
           Type pLeave = 0.0; Type NCome = 0.0; 
@@ -435,32 +436,33 @@ Type objective_function<Type>::operator() ()
           N_yai_beg(time+1,nage-1,i) =   ((1-pLeave)*(N_yai_beg(time,nage-1,i)+N_yai_beg(time,nage-2,i)) + NCome)*exp(-0.4);
           // plus group weighted average (we already have the numbers at age)
           Length_yai_beg(time+1,nage-1,i) = (N_yai_beg(time,nage-2,i)*
-            (Length_yai_beg(time,nage-2,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-2,i)*(1-exp(-kappa_yk(1,1))))) +
+            (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-kappa_yk(time,phi_ik2(i)))))) +
             N_yai_beg(time,nage-1,i)*
-            (Length_yai_beg(time,nage-1,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-1,i))*(1-exp(-kappa_yk(1,1)))))/
+            (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))))/
               (N_yai_beg(time,nage-2,i) + N_yai_beg(time,nage-1,i));
           
           Length_yai_beg(time+1,nage-1,i) = (N_yai_beg(time,nage-2,i)*
-            (Length_yai_beg(time,nage-2,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-2,i)*(1-exp(-0.5*kappa_yk(1,1))))) +
+            (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-0.5*kappa_yk(time,phi_ik2(i)))))) +
             N_yai_beg(time,nage-1,i)*
-            (Length_yai_beg(time,nage-1,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-1,i))*(1-exp(-0.5*kappa_yk(1,1)))))/
+            (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))))))/
               (N_yai_beg(time,nage-2,i) + N_yai_beg(time,nage-1,i));
         } // end subareas j
       } // end subareas i
       
-      // reweight length-at-age
+      // reweight length-at-age based on movement from other stocks
       for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage-1);a++){
-
-        } // end ages
-      //      
-      //       Length_beg_yai(time,nage-1,i) = (N_yai_beg(time-1,nage-2,i)*
-      //         (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(1,1)-Length_beg_yai(time,nage-2,i)*(1-exp(-kappa_yk(1,1))))) +
-      //         N_yai_beg(time-1,nage-1,i)*
-      //         (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(1,1)-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(1,1)))))/
-      //           (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
+        for(int j=0;j<(nspace);j++){
+          for(int a=1;a<(nage-1);a++){
+            Type LCome = 0.0; Type NCome = 0.0; 
+            if(i != j){
+              LCome += phi_ij(i,j)*N_yai_beg(time,a,j)*Length_yai_beg(time,a,j); // for numerator
+              NCome += phi_ij(i,j)*N_yai_beg(time,a,j); // for denom
+            }
+            Length_yai_beg(time+1,nage-1,i) += (N_yai_beg(time+1,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time+1,a,i)+NCome);
+          } // end ages
+        } // end subareas j
       } // end subareas i
-
+        
   
     // Catch at beginning of year
     // Hybrid F tuning inputs
@@ -708,7 +710,8 @@ Type objective_function<Type>::operator() ()
     REPORT(PSEL.cols())
     REPORT(selectivity_save)
     REPORT(surveyselc)
-     REPORT(Length_yai_beg)
+    REPORT(Length_yai_beg)
+    REPORT(Length_yai_mid)
     REPORT(N_yai_beg)
     REPORT(survey_bio_f_est)
     REPORT(survey_bio_f_obs)

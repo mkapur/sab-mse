@@ -79,6 +79,8 @@ obj <- MakeADFun(df.new,
 reps <- obj$report()
 
 plot(reps$Length_yai_beg[1,,1]) ## init l at age
+points(reps$Length_yai_mid[1,,1],pch = 19, add = TRUE) ## init l at age
+
 reps$F1_yf
 reps$term0; reps$term1;reps$term2
 

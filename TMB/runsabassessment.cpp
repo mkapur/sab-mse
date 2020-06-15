@@ -42,7 +42,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   DATA_ARRAY(phi_ik); // 0/1 nesting of subareas i into stocks k (rows)
-  DATA_VECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
+  DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
   
   DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
   
@@ -78,8 +78,8 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
   DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
   
-  array<Type> Length_beg_yai(tEnd,nage,nspace); // placeholder for true lengths-at-age
-  array<Type> Length_mid_yai(tEnd,nage,nspace); // placeholder for true lengths-at-age
+  array<Type> Length_yai_beg(tEnd,nage,nspace); // placeholder for true lengths-at-age
+  array<Type> Length_yai_mid(tEnd,nage,nspace); // placeholder for true lengths-at-age
   
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch
@@ -363,6 +363,8 @@ Type objective_function<Type>::operator() ()
                 pLeave += X_ija(i,j,a); // will do 1-this for proportion which stay
                 NCome += X_ija(j,i,a)*Ninit_ai(a,j); // actual numbers incoming
               }
+              // in year zero use raw vonB
+              Length_yai_beg(time,a,i) = Linf_yk(0,phi_ik2(i));
               N_yai_beg(time,a,i) = ((1-pLeave)*Ninit_ai(a,i) + NCome)*exp(-M(a));
             } // end ages
             Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
@@ -422,19 +424,19 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
       
       // determine length-at-age
-      for(int i=0;i<(nspace);i++){
-       //need to make a Linit for first year and age 0 year to replace 5 AND CONFIRM TIME STEP ON PARS
-        for(int a=1;a<(nage-1);a++){
-          Length_beg_yai(time,a,i) =  5 + (Linf_yk(1,1)-5)*(1-exp(-kappa_yk(1,1)));
-        } // end ages
-        //     // plus group weighted average (we already have the numbers at age)
-        //     Length_beg_yai(time,nage-1,i) = N_yai_beg(time-1,nage-2,i)*
-        //       (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time,nage-2,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))) +
-        //       N_yai_beg(time-1,nage-1,i)*
-        //       (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i)))))/
-        //         (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
-        //   } // end subareas j
-      } // end subareas i
+      // for(int i=0;i<(nspace);i++){
+      //  //need to make a Linit for first year and age 0 year to replace 5 AND CONFIRM TIME STEP ON PARS
+      //   for(int a=1;a<(nage-1);a++){
+      //     Length_beg_yai(time,a,i) =  5 + (Linf_yk(1,1)-5)*(1-exp(-kappa_yk(1,1)));
+      //   } // end ages
+      //       // plus group weighted average (we already have the numbers at age)
+      //       Length_beg_yai(time,nage-1,i) = (N_yai_beg(time-1,nage-2,i)*
+      //         (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(1,1)-Length_beg_yai(time,nage-2,i)*(1-exp(-kappa_yk(1,1))))) +
+      //         N_yai_beg(time-1,nage-1,i)*
+      //         (Length_beg_yai(time-1,nage-1,i)+(Linf_yk(1,1)-Length_beg_yai(time-1,nage-1,i))*(1-exp(-kappa_yk(1,1)))))/
+      //           (N_yai_beg(time-1,nage-2,i) + N_yai_beg(time-1,nage-1,i));
+      //   //   } // end subareas j
+      // } // end subareas i
 
   
     // Catch at beginning of year
@@ -683,7 +685,7 @@ Type objective_function<Type>::operator() ()
     REPORT(PSEL.cols())
     REPORT(selectivity_save)
     REPORT(surveyselc)
-     REPORT(Length_beg_yai)
+     REPORT(Length_yai_beg)
     REPORT(N_yai_beg)
     REPORT(survey_bio_f_est)
     REPORT(survey_bio_f_obs)

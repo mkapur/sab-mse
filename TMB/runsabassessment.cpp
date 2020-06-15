@@ -364,7 +364,13 @@ Type objective_function<Type>::operator() ()
                 NCome += X_ija(j,i,a)*Ninit_ai(a,j); // actual numbers incoming
               }
               // in year zero use raw vonB
-              Length_yai_beg(time,a,i) = Linf_yk(0,phi_ik2(i));
+              // 10 needs to be L1? by stock?
+              Length_yai_beg(time,a,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
+                exp(-kappa_yk(0,phi_ik2(i))*a);
+              
+              Length_yai_mid(time,a,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
+                exp(-0.5*kappa_yk(0,phi_ik2(i))*a);
+              // Linf + (lmin - Linf)*exp(-k*((seq(a.linear+2, ages,1)-1)-a3))
               N_yai_beg(time,a,i) = ((1-pLeave)*Ninit_ai(a,i) + NCome)*exp(-M(a));
             } // end ages
             Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
@@ -373,7 +379,11 @@ Type objective_function<Type>::operator() ()
               pLeave += X_ija(i,j,nage-1); 
               NCome += X_ija(j,i,nage-1)*(N_yai_beg(0,nage-1,j) + N_yai_beg(0,nage-2,j)) ; // if M becomes spatial use M_aj here
             }
-            N_yai_beg(time,nage-1,i) =   ((1-pLeave)*(N_yai_beg(0,nage-1,i)+N_yai_beg(0,nage-2,i)) + NCome)*exp(-M(nage-1));
+            N_yai_beg(time,nage-1,i) =  ((1-pLeave)*(N_yai_beg(0,nage-1,i)+N_yai_beg(0,nage-2,i)) + NCome)*exp(-M(nage-1));
+            Length_yai_beg(time,nage-1,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
+              exp(-kappa_yk(0,phi_ik2(i))*nage-1);
+            Length_yai_mid(time,nage-1,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
+              exp(-0.5*kappa_yk(0,phi_ik2(i))*nage-1);
           } // end subareas j
         } // end subareas i
       } // end stocks

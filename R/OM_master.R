@@ -78,6 +78,7 @@ obj <- MakeADFun(df.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
 
+plot(reps$Length_yai_beg[1,,1]) ## init l at age
 reps$F1_yf
 reps$term0; reps$term1;reps$term2
 

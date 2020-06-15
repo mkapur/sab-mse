@@ -411,7 +411,7 @@ Type objective_function<Type>::operator() ()
       N_yai_beg(time,0,i) =  R_yi(time,i); // fill age-0 recruits
     } // end space
     
-    // N- and Length - at-age for the middle of this year and beginning of next
+    // N- and Nominal Length - at-age for the middle of this year and beginning of next
       for(int i=0;i<(nspace);i++){ 
         for(int j=0;j<(nspace);j++){ 
           for(int a=1;a<(nage-1);a++){
@@ -422,6 +422,8 @@ Type objective_function<Type>::operator() ()
             }
             N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-0.4); // this exponent needs to be Ztuned eventually
             N_yai_beg(time+1,a,i) = ((1-pLeave)*N_yai_beg(time,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
+            Length_yai_beg(time+1,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(1,1)-Length_yai_beg(time,a,i))*(1-exp(-kappa_yk(1,1)));
+            Length_yai_mid(time,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(1,1)-Length_yai_beg(time,a,i))*(1-exp(-0.5*kappa_yk(1,1)));
           } // end ages
           // plus groups
           Type pLeave = 0.0; Type NCome = 0.0; 
@@ -431,16 +433,27 @@ Type objective_function<Type>::operator() ()
           }
           N_yai_mid(time,nage-1,i) = N_yai_beg(time,nage-1,i)*exp(-0.4);
           N_yai_beg(time+1,nage-1,i) =   ((1-pLeave)*(N_yai_beg(time,nage-1,i)+N_yai_beg(time,nage-2,i)) + NCome)*exp(-0.4);
+          // plus group weighted average (we already have the numbers at age)
+          Length_yai_beg(time+1,nage-1,i) = (N_yai_beg(time,nage-2,i)*
+            (Length_yai_beg(time,nage-2,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-2,i)*(1-exp(-kappa_yk(1,1))))) +
+            N_yai_beg(time,nage-1,i)*
+            (Length_yai_beg(time,nage-1,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-1,i))*(1-exp(-kappa_yk(1,1)))))/
+              (N_yai_beg(time,nage-2,i) + N_yai_beg(time,nage-1,i));
+          
+          Length_yai_beg(time+1,nage-1,i) = (N_yai_beg(time,nage-2,i)*
+            (Length_yai_beg(time,nage-2,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-2,i)*(1-exp(-0.5*kappa_yk(1,1))))) +
+            N_yai_beg(time,nage-1,i)*
+            (Length_yai_beg(time,nage-1,i)+(Linf_yk(1,1)-Length_yai_beg(time,nage-1,i))*(1-exp(-0.5*kappa_yk(1,1)))))/
+              (N_yai_beg(time,nage-2,i) + N_yai_beg(time,nage-1,i));
         } // end subareas j
       } // end subareas i
       
-      // determine length-at-age
+      // reweight length-at-age
       for(int i=0;i<(nspace);i++){
         for(int a=1;a<(nage-1);a++){
-          Length_yai_beg(time+1,a,i) =     Length_yai_beg(time,a,i) +
-            (Linf_yk(1,1)-Length_yai_beg(time,a,i))*(1-exp(-kappa_yk(1,1)));
+
         } // end ages
-      //       // plus group weighted average (we already have the numbers at age)
+      //      
       //       Length_beg_yai(time,nage-1,i) = (N_yai_beg(time-1,nage-2,i)*
       //         (Length_beg_yai(time-1,nage-2,i)+(Linf_yk(1,1)-Length_beg_yai(time,nage-2,i)*(1-exp(-kappa_yk(1,1))))) +
       //         N_yai_beg(time-1,nage-1,i)*

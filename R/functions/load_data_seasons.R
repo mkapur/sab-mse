@@ -4,6 +4,7 @@ load_data_seasons <- function(nseason = 4,
                               nspace = 2, 
                               nstocks = 2,
                               myear = 2018,
+                              LBins = 60,
                               movemaxinit = 0.35, 
                               movefiftyinit = 6,
                               nsurvey = 2, 
@@ -205,8 +206,14 @@ load_data_seasons <- function(nseason = 4,
   
   ## parameter placeholders
   Linf_yk <- kappa_yk <- sigmaG_yk <- matrix(NA, nrow = length(years), ncol = nstocks)
-  Linf_yk[1:(2009-1966),1:nstocks] <-  growPar$Linf[growPar$Period == 'early'][1:nstocks]
-  Linf_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Linf[growPar$Period == 'late'][1:nstocks]
+  # Linf_yk[1:(2009-1966),1:nstocks] <-  growPar$Linf[growPar$Period == 'early'][1:nstocks]
+  # Linf_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Linf[growPar$Period == 'late'][1:nstocks]
+  
+  Linf_yk[1:(2009-1966),1] <-  growPar$Linf[growPar$Period == 'early'][1]
+  Linf_yk[(2009-1966):nrow(Linf_yk),1] <-  growPar$Linf[growPar$Period == 'late'][1]
+  
+  Linf_yk[1:(2009-1966),2] <-  growPar$Linf[growPar$Period == 'early'][2]
+  Linf_yk[(2009-1966):nrow(Linf_yk),2] <-  growPar$Linf[growPar$Period == 'late'][2]
   
   kappa_yk[1:(2009-1966),1:nstocks] <-  growPar$k[growPar$Period == 'early'][1:nstocks]
   kappa_yk[(2009-1966):nrow(kappa_yk),1:nstocks] <-  growPar$k[growPar$Period == 'late'][1:nstocks]
@@ -480,7 +487,8 @@ load_data_seasons <- function(nseason = 4,
                   Linf_yk = Linf_yk,
                   kappa_yk = kappa_yk,
                   sigmaG_yk = sigmaG_yk,
-                  phi_ij = phi_ij
+                  phi_ij = phi_ij,
+                  LBins = LBins
                   # Parameters from the estimation model 
               
   )

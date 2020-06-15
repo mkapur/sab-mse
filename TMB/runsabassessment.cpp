@@ -77,9 +77,12 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(kappa_yk);
   DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
   DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
+  DATA_INTEGER(LBins); // maximum length bin in CM
   
   array<Type> Length_yai_beg(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
   array<Type> Length_yai_mid(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
+  array<Type> LengthAge_alyi_beg(nage,LBins,tEnd+1,nspace); // placeholder for true age-length dist
+  array<Type> LengthAge_alyi_mid(nage,LBins,tEnd+1,nspace); // placeholder for true age-length dist
   
   DATA_ARRAY(wage_ssb); // Weight in the beginning of the year
   DATA_ARRAY(wage_catch); // Weight in catch
@@ -463,20 +466,36 @@ Type objective_function<Type>::operator() ()
         } // end subareas j
       } // end subareas i
         
-  
+        
+    // prob of length-at-age
+    
+    for(int i=0;i<(nspace);i++){
+      for(int a=1;a<(nage-1);a++){  
+        LengthAge_alyi_beg(a,0,time,i) = 2.0; //pnorm(0.5, Length_yai_beg(time,a,i),sigmaG_yk(time,phi_ik2(i)));
+        // LengthAge_alyi_mid(a,0,time,i) = pnorm(0.5, Length_yai_mid(time,a,i),sigmaG_yk(time,phi_ik2(i)));
+        // for(int l=1;l<(LBins-1);l++){
+        //   LengthAge_alyi_beg(a,l,time,i) = 2
+        //   LengthAge_alyi_mid(a,l,time,i) = 2
+        // } // end Lbins
+        // LengthAge_alyi_beg(a,LBins-1,time,i) = 2
+        // LengthAge_alyi_mid(a,LBins-1,time,i) = 2
+      } // end ages
+    } // end nspace
+    
+    
     // Catch at beginning of year
     // Hybrid F tuning inputs
-    Type Fmax = 3.5;
-    Type v1=0.99; //corresponds to an Fmax of 3
+    // Type Fmax = 3.5;
+    // Type v1=0.99; //corresponds to an Fmax of 3
     // Type v1=0.865; //corresponds to an Fmax of 2
     // Type v1=0.95;
-    Type v2=30;
-    Type F_no_inc=7;
-    Type term0 = 0.0;
-    Type term1 = 0.0;
-    Type term2 = 0.0;
+    // Type v2=30;
+    // Type F_no_inc=7;
+    // Type term0 = 0.0;
+    // Type term1 = 0.0;
+    // Type term2 = 0.0;
     
-    array<Type> F1_yf(tEnd,nfleets_fish);
+    // array<Type> F1_yf(tEnd,nfleets_fish);
     
     
     // for(int i=0;i<(nspace);i++){
@@ -516,6 +535,7 @@ Type objective_function<Type>::operator() ()
     
     
     // estimate age comps in surveys
+    // need to include error here
     for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
       if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
         for(int i=0;i<(nspace);i++){
@@ -531,6 +551,7 @@ Type objective_function<Type>::operator() ()
     } // end acomp survey fleets
     
     // estimate age comps in catches
+    // need to include error here
     if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
         for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp

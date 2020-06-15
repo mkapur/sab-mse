@@ -470,13 +470,13 @@ Type objective_function<Type>::operator() ()
     // prob of length-at-age
     
     for(int i=0;i<(nspace);i++){
-      for(int a=1;a<(nage-1);a++){  
-        LengthAge_alyi_beg(a,0,time,i) = 2.0; //pnorm(0.5, Length_yai_beg(time,a,i),sigmaG_yk(time,phi_ik2(i)));
+      for(int a=1;a<(nage);a++){  
+        LengthAge_alyi_beg(a,0,time,i) = pnorm(Type(0.5),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
         // LengthAge_alyi_mid(a,0,time,i) = pnorm(0.5, Length_yai_mid(time,a,i),sigmaG_yk(time,phi_ik2(i)));
         // for(int l=1;l<(LBins-1);l++){
         //   LengthAge_alyi_beg(a,l,time,i) = 2
         //   LengthAge_alyi_mid(a,l,time,i) = 2
-        // } // end Lbins
+        // } // end LBins
         // LengthAge_alyi_beg(a,LBins-1,time,i) = 2
         // LengthAge_alyi_mid(a,LBins-1,time,i) = 2
       } // end ages

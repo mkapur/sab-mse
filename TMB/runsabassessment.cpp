@@ -13,16 +13,13 @@ vector<Type> cumsum(vector<Type> x) {
 }
 
 // TO DO
-// add in growth and movement properly
+// correct growth for early ages
 // make selex fleet specific
-// introduce tuning of F
-// consolidate some loops
+// introduce selectivity estimation
+// introduce tuning of F and use Ztuned in Natage
 // need error on tau
 // M vs myear -- at age or what?
 // estimate SDR (currently parameter)
-// double check some indexing
-// need omega ij to also be age spec 
-// ninit should not be estimated, but instead calculated for A years using eq 29
 // on pause: make master flag_fleet matrix
 
 template<class Type>
@@ -367,8 +364,9 @@ Type objective_function<Type>::operator() ()
                 pLeave += X_ija(i,j,a); // will do 1-this for proportion which stay
                 NCome += X_ija(j,i,a)*Ninit_ai(a,j); // actual numbers incoming
               }
-              // 10 is placeholder for now
-              // this is the synthesis syntax
+              
+              // this is the synthesis syntax; 10 is placeholder for LMIN
+              // likely need a lower L1 at age stock-specific and linear before that age
               Length_yai_beg(time,a,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
                 exp(-kappa_yk(0,phi_ik2(i))*a);
               Length_yai_mid(time,a,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
@@ -574,6 +572,8 @@ Type objective_function<Type>::operator() ()
   // using namespace density;
   Type ans_survey=0.0;
   ////Save the observation model estimates
+  
+  // Likelihood: survey biomass
   for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
     for(int time=1;time<tEnd;time++){ // Survey Surveyobs
       if(flag_surv_bio(time) == 2){
@@ -582,19 +582,21 @@ Type objective_function<Type>::operator() ()
       
     } // end time
   } // end surv_flt
+
   
+  // Likelihood: catches
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int time=0;time<tEnd;time++){ // Total Catches
-      ans_catch += -dnorm(log(Catch_yf_est(time,fish_flt)+1e-6), log(catch_yf_obs(time,fish_flt)+1e-6), SDcatch, TRUE); // this likelihood needs to be by fleet, not space
+      ans_catch += -dnorm(log(Catch_yf_est(time,fish_flt)+1e-6), log(catch_yf_obs(time,fish_flt)+1e-6), SDcatch, TRUE); 
       
     }
   }
   
   REPORT(ans_catch)
     
-    // LIKELIHOOD: age comp in survey
-    Type ans_survcomp = 0.0;
+  // Likelihood: age comps in survey
+  Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
   
   
@@ -625,43 +627,41 @@ Type objective_function<Type>::operator() ()
   sum3.setZero();
   sum4.setZero();
   
-  // the obs catch acomps need to be fleet specific
+  // Likelihood: age comps in catches
+  // need to remove/change this phi_Catch thing
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ 
     for(int time=1;time<tEnd;time++){ // Loop over available years
       if(catch_yf_obs(time,fish_flt)>0){ // only bother if we caught something
         if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
           for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
-            // sum3(time) += lgamma(ss_catch(time)*age_catch(a,time)+1);
-            // sum4(time) += lgamma(ss_catch(time)*age_catch(a,time) + phi_catch*ss_catch(time)*catch_acomp_f_est(time,a,fish_flt)) -
-            //   lgamma(phi_catch*ss_catch(time)*catch_acomp_f_est(time,a,fish_flt));
+            // sum3(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time)+1);
+            // sum4(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time) + phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt)) -
+            //   lgamma(phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt));
           } // end ages
-          ans_catchcomp += lgamma(ss_catch(time)+1)-sum3(time)+lgamma(phi_catch*ss_catch(time))-lgamma(ss_catch(time)+phi_catch*ss_catch(time))+sum4(time);
+          ans_catchcomp += lgamma(catch_yf_obs(time,fish_flt)+1)-sum3(time)+lgamma(phi_catch*catch_yf_obs(time,fish_flt))
+            -lgamma(catch_yf_obs(time,fish_flt)+phi_catch*catch_yf_obs(time,fish_flt))+sum4(time);
         } // end catch flag 
       } // end if catches > 0
     } // end time
   } // end fish fleets 
   
+  // Likelihood: SD Recruitment (hyperprior)
   Type ans_SDR = 0.0;
   for(int k=0;k<(nstocks);k++){
     for(int time=0;time<(tEnd-1);time++){ // Start time loop
       ans_SDR += Type(0.5)*(tildeR_yk(time,k)*tildeR_yk(time,k))/(SDR*SDR)+b(time)*log(SDR*SDR);
     }
   }
-  
-  
-  
-  
-  
-  // Error for Selectivity
+
+  // Likelihood: Error for Selectivity
   Type ans_psel = 0.0;
-  //
   for(int time=0;time<year_sel;time++){ // Start time loop
     for(int i=0;i<psel_fish.size();i++){ // Start time loop
       ans_psel += Type(0.5)*(PSEL(i,time)*PSEL(i,time))/(sigma_psel*sigma_psel);
     }
   }
   
-  // Priors on h and M
+  // Likelihood: Priors on h and M
   Type ans_priors = 0.0;
   for(int time=0;time<(nage);time++){ // Start time loop
     for(int i=0;i<(nspace);i++){
@@ -673,7 +673,7 @@ Type objective_function<Type>::operator() ()
   
   // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
   
-  // Prior on h
+  // Likelihood: Prior on h
   ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
   
   if(sum_zero == 1){
@@ -694,6 +694,7 @@ Type objective_function<Type>::operator() ()
   ans_tot(5) = ans_catchcomp;
   ans_tot(6) = ans_priors;
   
+  // Likelihood: TOTAL
   Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
   //
   

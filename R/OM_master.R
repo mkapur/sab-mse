@@ -82,6 +82,7 @@ reps <- obj$report()
 
 plot(reps$N_yai_beg[1,,1]) ## init l at age
 points(reps$N_yai_beg[5,,1],pch = 19) ## init l at age
+points(reps$N_yai_beg[53,,1],pch = 19) ## init l at age
 
 
 plot(reps$Length_yai_beg[1,,1], pch = 19, ylim = c(0,200), main = 'L @ AGE, filled points are midyr, cols are yrs', col = 'blue') ## init l at age

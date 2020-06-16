@@ -628,13 +628,15 @@ Type objective_function<Type>::operator() ()
   sum4.setZero();
   
   // Likelihood: age comps in catches
-  // need to remove/change this phi_Catch thing
+  // need to remove/change this phi_Catch thing and provide fish catch comps by fleet
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ 
     for(int time=1;time<tEnd;time++){ // Loop over available years
       if(catch_yf_obs(time,fish_flt)>0){ // only bother if we caught something
         if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
           for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
             // sum3(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time)+1);
+            sum3(time) += lgamma(catch_yf_obs(time,fish_flt)+1);
+            
             // sum4(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time) + phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt)) -
             //   lgamma(phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt));
           } // end ages

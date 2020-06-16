@@ -78,6 +78,7 @@ obj <- MakeADFun(df.new,
                  parms.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
+source(here("R","functions","plotNinit.R"))
 
 plot(reps$N_0ai[,1]) ## init l at age
 points(reps$N_0ai[,2],pch = 19) ## init l at age

@@ -274,10 +274,10 @@ Type objective_function<Type>::operator() ()
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ 
       for(int a=0;a<(nage-1);a++){
-        N_0ai(a,i) = 0.5*omega_ai(a,i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a)));
+        N_0ai(a,i) = 0.5*omega_ai(a,i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a))); // compound multiply duh
       }
       // note the A+ group will be in slot A-1
-      N_0ai(nage-1,i) = omega_ai(nage-1,i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-1))) 
+      N_0ai(nage-1,i) = omega_ai(nage-1,i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-2))) 
         /(Type(1.0)-exp(-M(nage-1)*age(nage-1)));
     } // end subareas
   } // end stocks
@@ -298,10 +298,10 @@ Type objective_function<Type>::operator() ()
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<(nage-1);a++){
-        Ninit_ai(a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-M(a)) * exp(-0.5*SDR*SDR+tildeR_initk(k));
+        Ninit_ai(a,i) = 0.5* omega_ai(a,i) * tau_ik(k,i) * R_0k(k)* exp(-(M(a)*age(a))) * exp(-0.5*SDR*SDR+tildeR_initk(k));
       } // end ages
       Ninit_ai(nage-1,i) = (omega_ai(nage-1,i) * Ninit_ai(nage-2,i) *
-        exp(-M(nage-1)) *exp(-0.5*SDR*SDR+tildeR_initk(k)))/(Type(1.0)-exp(-M(nage-1)));
+        exp(-M(nage-1)*age(nage-1)))/(Type(1.0)-exp(-(M(nage-1)*age(nage-1)))* exp(-0.5*SDR*SDR+tildeR_initk(k)));
     } // end space
   } // end stocks
   
@@ -406,10 +406,11 @@ Type objective_function<Type>::operator() ()
     // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){  
-        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yk(time,k)/(SSB_0k(k)*(1-h_k(k))+ 
+        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yk(time,k)
+                                       /(SSB_0k(k)*(1-h_k(k))+ 
           SSB_yk(time,k)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
-        R_yi(time,i) = R_yk(time,k)*tau_ik(k,i)*omega_0ij(i); // downscale to subarea including age-0 movement
       } // end stocks
+      R_yi(time,i) = R_yk(time,phi_ik2(i))*0.5; //tau_ik(k,i)*omega_0ij(i); // downscale to subarea including age-0 movement
       N_yai_beg(time,0,i) =  R_yi(time,i); // fill age-0 recruits
     } // end space
     

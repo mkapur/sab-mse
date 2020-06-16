@@ -109,7 +109,7 @@ points(reps$Length_yai_beg[3,,1],pch = 19) ## init l at age
 points(reps$Length_yai_beg[6,,1],pch = 19) ## init l at age
 
 a1 <- 
-  reps$LengthAge_alyi_beg[,,,2] %>%
+  reps$LengthAge_alyi_beg[,,1,2] %>%
   melt() %>%
   group_by(Var2) %>% 
   mutate(sumP = sum(value), pbin = value/sumP)

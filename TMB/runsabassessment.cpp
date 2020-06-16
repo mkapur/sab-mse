@@ -465,26 +465,26 @@ Type objective_function<Type>::operator() ()
               NCome += phi_ij(i,j)*N_yai_beg(time,a,j); // for denom
             }
           } // end subareas j
-          Length_yai_beg(time,a,i) = (N_yai_beg(time,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time,a,i)+NCome);
+          Length_yai_beg(time+1,a,i) = (N_yai_beg(time,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time,a,i)+NCome);
         } // end ages
       } // end subareas i
       
         
     // prob of length-at-age
-    // for(int i=0;i<(nspace);i++){
-    //   for(int a=1;a<(nage);a++){  
-    //     LengthAge_alyi_beg(a,0,time,i) = pnorm(Type(0.5),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-    //     LengthAge_alyi_mid(a,0,time,i) = pnorm(Type(0.5),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-    //     for(int l=1;l<(LBins-1);l++){
-    //       LengthAge_alyi_beg(a,l,time,i) = pnorm(Type(l+1),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i))) - 
-    //         pnorm(Type(l),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-    //       LengthAge_alyi_mid(a,l,time,i) = pnorm(Type(l+1),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i))) - 
-    //         pnorm(Type(l),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-    //       } // end LBins
-    //     LengthAge_alyi_beg(a,LBins-1,time,i) = 1-pnorm(Type(LBins-1), Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-    //     LengthAge_alyi_mid(a,LBins-1,time,i) = 1-pnorm(Type(LBins-1), Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-    //   } // end ages
-    // } // end nspace
+    for(int i=0;i<(nspace);i++){
+      for(int a=1;a<(nage);a++){
+        LengthAge_alyi_beg(a,0,time,i) = pnorm(Type(1.0),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+        LengthAge_alyi_mid(a,0,time,i) = pnorm(Type(1.0),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+        for(int l=1;l<(LBins-1);l++){
+          LengthAge_alyi_beg(a,l,time,i) = pnorm(Type(l+1),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i))) -
+            pnorm(Type(l),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+          LengthAge_alyi_mid(a,l,time,i) = pnorm(Type(l+1),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i))) -
+            pnorm(Type(l),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+          } // end LBins
+        LengthAge_alyi_beg(a,LBins-1,time,i) = 1-pnorm(Type(LBins-1), Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+        LengthAge_alyi_mid(a,LBins-1,time,i) = 1-pnorm(Type(LBins-1), Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+      } // end ages
+    } // end nspace
     
     
     // Catch at beginning of year

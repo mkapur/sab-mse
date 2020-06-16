@@ -80,11 +80,41 @@ pRyk <- reps$R_yk %>% data.frame() %>%
   labs(x = 'Model Year',y = 'Recruits', color = 'stock') +
   ggsidekick::theme_sleek()
 
-(pNinit  | pNzero)/(pNage1  | pNage2)
-(pRyi | pRyk)/(pSSByi  | pSSByk)
+
+pSRR <- cbind(reps$R_yk, reps$SSB_yk) %>% data.frame() %>%
+  mutate('Yr' = 1:nrow(.), RECS1 = X1, RECS2 = X2, SSBS1 = X3, SSBS2 = X4) %>%
+  select(-X1,-X2,-X3,-X4) %>%
+  reshape2::melt(id = c('Yr')) %>%
+  mutate(variable2 = substr(variable,1,3), stock = substr(variable,4,5)) %>%
+  select(-variable) %>%
+  tidyr::pivot_wider(names_from = variable2) %>%
+  ggplot(., aes(x = SSB, y = REC, color = Yr )) +
+  geom_point() +
+  labs(x = 'SSB',y = 'Recruits #', color = 'Y') +
+  ggsidekick::theme_sleek() +
+  facet_wrap(~ stock, scales = 'free')
 
 
-# 
+
+pLAA1 <- reps$Length_yai_beg[,,1] %>% data.frame() %>%
+  mutate('Yr' = 1:nrow(.)) %>%
+  reshape2::melt(id = c('Yr')) %>%
+  ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value, color = Yr )) +
+  geom_point() +
+  labs(x = 'Age',y = 'Length', color = 'Year') +
+  ggsidekick::theme_sleek()
+
+pLAA2 <- reps$Length_yai_beg[,,2] %>% data.frame() %>%
+  mutate('Yr' = 1:nrow(.)) %>%
+  reshape2::melt(id = c('Yr')) %>%
+  ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value, color = Yr )) +
+  geom_point() +
+  labs(x = 'Age',y = 'Length', color = 'Year') +
+  ggsidekick::theme_sleek()
+  
+
+
+
 
 # 
 # simdata$SSB_yk %>% 

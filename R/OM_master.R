@@ -78,7 +78,12 @@ obj <- MakeADFun(df.new,
                  parms.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
-source(here("R","functions","plotNinit.R"))
+source(here("R","functions","plotChecks.R"))
+
+# plots returned from plotChecks.R
+(pNinit  | pNzero)/(pNage1  | pNage2)
+pSRR
+pLAA1  | pLAA2
 
 plot(reps$N_0ai[,1]) ## init l at age
 points(reps$N_0ai[,2],pch = 19) ## init l at age
@@ -98,12 +103,7 @@ surv0 %>%
   facet_wrap(~FLEET)
 
 
-plot(reps$Length_yai_beg[1,,1], pch = 19, ylim = c(0,200), main = 'L @ AGE, filled points are midyr, cols are yrs', col = 'blue') ## init l at age
-points(reps$Length_yai_mid[1,,1], col = 'blue') ## init l at age
-points(reps$Length_yai_beg[2,,1],pch = 19, col = 'red') ## init l at age
-points(reps$Length_yai_mid[2,,1], col = 'red') ## init l at age
-points(reps$Length_yai_beg[53,,1],pch = 19, col = 'green') ## init l at age
-points(reps$Length_yai_mid[53,,1], col = 'green') ## init l at age
+
 
 points(reps$Length_yai_beg[3,,1],pch = 19) ## init l at age
 points(reps$Length_yai_beg[6,,1],pch = 19) ## init l at age

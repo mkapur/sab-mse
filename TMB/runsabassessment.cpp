@@ -414,58 +414,59 @@ Type objective_function<Type>::operator() ()
     } // end space
     
     // N- and Nominal Length - at-age for the middle of this year and beginning of next
-      for(int i=0;i<(nspace);i++){ 
+    for(int i=0;i<(nspace);i++){ 
+      for(int a=1;a<(nage-1);a++){
+        Type pLeave = 0.0; Type NCome = 0.0; 
         for(int j=0;j<(nspace);j++){ 
-          for(int a=1;a<(nage-1);a++){
-            Type pLeave = 0.0; Type NCome = 0.0; 
-            if(i != j){
-              pLeave += X_ija(i,j,a); 
-              NCome += X_ija(j,i,a)*N_yai_beg(time,a,j); 
-            }
-            N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-0.4); // no movement?
-            N_yai_beg(time+1,a,i) = ((1-pLeave)*N_yai_beg(time,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
-           
-           // as in document: next year A1 == this year A0 plus growth
-            Length_yai_beg(time+1,a,i) = Length_yai_beg(time,a-1,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i))));
-            Length_yai_mid(time,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))));
-          } // end ages
-          // plus groups
-          Type pLeave = 0.0; Type NCome = 0.0; 
           if(i != j){
-            pLeave += X_ija(i,j,nage-1); 
-            NCome += X_ija(j,i,nage-1)*(N_yai_beg(time,nage-1,j) + N_yai_beg(time,nage-2,j)); 
-          }
-          N_yai_mid(time,nage-1,i) = N_yai_beg(time,nage-1,i)*exp(-0.4);
-          N_yai_beg(time+1,nage-1,i) =   ((1-pLeave)*(N_yai_beg(time,nage-1,i)+N_yai_beg(time,nage-2,i)) + NCome)*exp(-0.4);
-          // plus group weighted average (we already have the numbers at age)
-          Length_yai_beg(time,nage-1,i) = (N_yai_beg(time,nage-2,i)*
-            (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-kappa_yk(time,phi_ik2(i)))))) +
-            N_yai_beg(time,nage-1,i)*
-            (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))))/
-              (N_yai_beg(time,nage-2,i) + N_yai_beg(time,nage-1,i));
-          
-          Length_yai_mid(time,nage-1,i) = (N_yai_mid(time,nage-2,i)*
-            (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-0.5*kappa_yk(time,phi_ik2(i)))))) +
-            N_yai_mid(time,nage-1,i)*
-            (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))))))/
-              (N_yai_mid(time,nage-2,i) + N_yai_mid(time,nage-1,i));
-        } // end subareas j
-      } // end subareas i
+            pLeave += X_ija(i,j,a); 
+            NCome += X_ija(j,i,a)*N_yai_beg(time,a,j); 
+          } // end i != j
+        } // end subareas j            
+        N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-0.4); // no movement?
+        N_yai_beg(time+1,a,i) = ((1-pLeave)*N_yai_beg(time,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
+        // as in document: next year A1 == this year A0 plus growth
+        Length_yai_beg(time+1,a,i) = Length_yai_beg(time,a-1,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i))));
+        Length_yai_mid(time,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))));
+      } // end ages
+      // plus groups
+      Type pLeave = 0.0; Type NCome = 0.0; 
+      for(int j=0;j<(nspace);j++){ 
+        if(i != j){
+          pLeave += X_ija(i,j,nage-1); 
+          NCome += X_ija(j,i,nage-1)*(N_yai_beg(time,nage-1,j) + N_yai_beg(time,nage-2,j)); 
+        } // end i != j
+      } // end subareas j
+      N_yai_mid(time,nage-1,i) = N_yai_beg(time,nage-1,i)*exp(-0.4);
+      N_yai_beg(time+1,nage-1,i) =   ((1-pLeave)*(N_yai_beg(time,nage-1,i)+N_yai_beg(time,nage-2,i)) + NCome)*exp(-0.4);
+      // plus group weighted average (we already have the numbers at age)
+      Length_yai_beg(time,nage-1,i) = (N_yai_beg(time,nage-2,i)*
+        (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-kappa_yk(time,phi_ik2(i)))))) +
+        N_yai_beg(time,nage-1,i)*
+        (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))))/
+          (N_yai_beg(time,nage-2,i) + N_yai_beg(time,nage-1,i));
+      
+      Length_yai_mid(time,nage-1,i) = (N_yai_mid(time,nage-2,i)*
+        (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-0.5*kappa_yk(time,phi_ik2(i)))))) +
+        N_yai_mid(time,nage-1,i)*
+        (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))))))/
+          (N_yai_mid(time,nage-2,i) + N_yai_mid(time,nage-1,i));
+    } // end subareas i
       
       // reweight length-at-age based on movement from other stocks
-      for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage);a++){
-          Type LCome = 0.0; Type NCome = 0.0;
-          for(int j=0;j<(nspace);j++){
-            // sum up other areas applicable to this subarea + age
-            if(i != j){
-              LCome += phi_ij(i,j)*N_yai_beg(time,a,j)*Length_yai_beg(time,a,j); // for numerator
-              NCome += phi_ij(i,j)*N_yai_beg(time,a,j); // for denom
-            }
-          } // end subareas j
-          Length_yai_beg(time+1,a,i) = (N_yai_beg(time,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time,a,i)+NCome);
-        } // end ages
-      } // end subareas i
+      // for(int i=0;i<(nspace);i++){
+      //   for(int a=1;a<(nage);a++){
+      //     Type LCome = 0.0; Type NCome = 0.0;
+      //     for(int j=0;j<(nspace);j++){
+      //       // sum up other areas applicable to this subarea + age
+      //       if(i != j){
+      //         LCome += phi_ij(i,j)*N_yai_beg(time,a,j)*Length_yai_beg(time,a,j); // for numerator
+      //         NCome += phi_ij(i,j)*N_yai_beg(time,a,j); // for denom
+      //       }
+      //     } // end subareas j
+      //     Length_yai_beg(time+1,a,i) = (N_yai_beg(time,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time,a,i)+NCome);
+      //   } // end ages
+      // } // end subareas i
       
         
     // prob of length-at-age

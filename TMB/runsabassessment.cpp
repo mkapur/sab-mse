@@ -89,7 +89,6 @@ Type objective_function<Type>::operator() ()
   
   // repro //
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  PARAMETER(logh); // Steepness
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   DATA_INTEGER(sum_zero); // should rec dev's sum to zero?
   DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
@@ -181,7 +180,6 @@ Type objective_function<Type>::operator() ()
   Type SDcatch = exp(logSDcatch);
   Type SDR = exp(logSDR);
   vector<Type> R_0k = exp(logR_0k);
-  Type h = exp(logh);
   vector<Type> h_k = exp(logh_k);
   
   Type Minit = exp(logMinit);
@@ -406,11 +404,12 @@ Type objective_function<Type>::operator() ()
     // generate recruits (N age = 0) this year based on present SSB
     for(int i=0;i<(nspace);i++){
       for(int k=0;k<(nstocks);k++){  
-        R_yk(time,k) += phi_ik(k,i)*(4*h_k(k)*R_0k(k)*SSB_yk(time,k)
+        // SSB_yk already has summation
+        R_yk(time,k) = (4*h_k(k)*R_0k(k)*SSB_yk(time,k)
                                        /(SSB_0k(k)*(1-h_k(k))+ 
           SSB_yk(time,k)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
       } // end stocks
-      R_yi(time,i) = R_yk(time,phi_ik2(i))*0.5; //tau_ik(k,i)*omega_0ij(i); // downscale to subarea including age-0 movement
+      R_yi(time,i) = R_yk(time,phi_ik2(i))*tau_ik(phi_ik2(i),i)*omega_0ij(i); // downscale to subarea including age-0 movement
       N_yai_beg(time,0,i) =  R_yi(time,i); // fill age-0 recruits
     } // end space
     
@@ -678,7 +677,7 @@ Type objective_function<Type>::operator() ()
   // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
   
   // Likelihood: Prior on h
-  ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
+  // ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
   
   if(sum_zero == 1){
     ans_priors += ((Type(0.0)-sum(tildeR_yk))*(Type(0.0)-sum(tildeR_yk)))/Type(0.01);

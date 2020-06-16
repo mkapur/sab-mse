@@ -247,9 +247,14 @@ load_data_seasons <- function(nseason = 4,
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
     phi_ik <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
-    
-    phi_ij <-  matrix(c(1,0,1,0), byrow = TRUE, ncol = nspace, nrow = nspace) ## indicates if subareas comprise DISTINCT stocks
-    
+   
+     ## autogenerate stock-distinction matrix
+    phi_ij <-  matrix(NA, byrow = TRUE, ncol = nspace, nrow = nspace)
+    for(i in 1:nspace){
+      for(j in 1:nspace){
+        phi_ij[i,j] = ifelse(phi_ik2[i] == phi_ik2[j],0,1)
+      }
+    }
     tau_ik <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
   }
   # Load the age comps 

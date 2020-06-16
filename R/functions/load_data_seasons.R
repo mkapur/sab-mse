@@ -205,7 +205,7 @@ load_data_seasons <- function(nseason = 4,
     select(Linf)
   
   ## parameter placeholders
-  Linf_yk <- kappa_yk <- sigmaG_yk <- matrix(NA, nrow = length(years), ncol = nstocks)
+  Linf_yk <-L1_yk <- kappa_yk <- sigmaG_yk <- matrix(NA, nrow = length(years), ncol = nstocks)
   # Linf_yk[1:(2009-1966),1:nstocks] <-  growPar$Linf[growPar$Period == 'early'][1:nstocks]
   # Linf_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Linf[growPar$Period == 'late'][1:nstocks]
   
@@ -217,6 +217,9 @@ load_data_seasons <- function(nseason = 4,
   
   kappa_yk[1:(2009-1966),1:nstocks] <-  growPar$k[growPar$Period == 'early'][1:nstocks]
   kappa_yk[(2009-1966):nrow(kappa_yk),1:nstocks] <-  growPar$k[growPar$Period == 'late'][1:nstocks]
+  
+  L1_yk[1:(2009-1966),1:nstocks] <-  growPar$L1[growPar$Period == 'early'][1:nstocks]
+  L1_yk[(2009-1966):nrow(L1_yk),1:nstocks] <-  growPar$L1[growPar$Period == 'late'][1:nstocks]
   
   sigmaG_yk[1:(2009-1966),1:nstocks] <-  growPar$Sigma[growPar$Period == 'early'][1:nstocks]
   sigmaG_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Sigma[growPar$Period == 'late'][1:nstocks]
@@ -488,7 +491,8 @@ load_data_seasons <- function(nseason = 4,
                   kappa_yk = kappa_yk,
                   sigmaG_yk = sigmaG_yk,
                   phi_ij = phi_ij,
-                  LBins = LBins
+                  LBins = LBins,
+                  L1_yk = L1_yk
                   # Parameters from the estimation model 
               
   )

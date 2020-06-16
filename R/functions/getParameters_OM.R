@@ -27,7 +27,7 @@ getParameters_OM <- function(trueparms = TRUE,df){
     parms <- list( # Just start all the simluations with the same initial conditions 
       logRinit = 16,
       logh = log(0.7),
-      logh_k = rep(log(0.7), df$nstocks),
+      logh_k = rep(log(1.0), df$nstocks),
       logR_0k = rep(log(16), df$nstocks),
       omega_0ij = rep(0.02,df$nspace),
       omega_ij = c(0.2,0.2), ## placeholder

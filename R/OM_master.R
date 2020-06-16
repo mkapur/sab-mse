@@ -78,8 +78,26 @@ obj <- MakeADFun(df.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
 
-plot(reps$Length_yai_beg[1,,1]) ## init l at age
-points(reps$Length_yai_mid[1,,1],pch = 19, add = TRUE) ## init l at age
+
+plot(reps$N_yai_beg[1,,1]) ## init l at age
+points(reps$N_yai_beg[5,,1],pch = 19) ## init l at age
+
+
+plot(reps$Length_yai_beg[1,,1], pch = 19, ylim = c(0,200), main = 'L @ AGE, filled points are midyr, cols are yrs', col = 'blue') ## init l at age
+points(reps$Length_yai_mid[1,,1], col = 'blue') ## init l at age
+points(reps$Length_yai_beg[2,,1],pch = 19, col = 'red') ## init l at age
+points(reps$Length_yai_mid[2,,1], col = 'red') ## init l at age
+points(reps$Length_yai_beg[53,,1],pch = 19, col = 'green') ## init l at age
+points(reps$Length_yai_mid[53,,1], col = 'green') ## init l at age
+
+points(reps$Length_yai_beg[3,,1],pch = 19) ## init l at age
+points(reps$Length_yai_beg[6,,1],pch = 19) ## init l at age
+
+a1 <- 
+  reps$LengthAge_alyi_beg[,,,1] %>%
+  melt()
+  ggplot(a1,aes(x = Var1, y = Var2, fill = value)) +
+           geom_tile()
 
 reps$F1_yf
 reps$term0; reps$term1;reps$term2

@@ -70,8 +70,9 @@ Rdev <- parms$Rin
 parms.new$F0 <- F0
 parms.new$Rin <- Rdev
 
-## testing without omega
-# df.new$omega_ai[,] <- 1
+## testing without movement
+# df.new$omega_ai[,] <- 1 ## stationary dist
+# df.new$X_ija[,] <- 
 
 obj <- MakeADFun(df.new,
                  parms.new,

@@ -455,19 +455,19 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
       
       // reweight length-at-age based on movement from other stocks
-      // for(int i=0;i<(nspace);i++){
-      //   for(int a=1;a<(nage);a++){
-      //     Type LCome = 0.0; Type NCome = 0.0; 
-      //     for(int j=0;j<(nspace);j++){
-      //       // sum up other areas applicable to this subarea + age
-      //       if(i != j){
-      //         LCome += phi_ij(i,j)*N_yai_beg(time,a,j)*Length_yai_beg(time,a,j); // for numerator
-      //         NCome += phi_ij(i,j)*N_yai_beg(time,a,j); // for denom
-      //       }
-      //     } // end subareas j
-      //     Length_yai_beg(time,a,i) = (N_yai_beg(time,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time,a,i)+NCome);
-      //   } // end ages
-      // } // end subareas i
+      for(int i=0;i<(nspace);i++){
+        for(int a=1;a<(nage);a++){
+          Type LCome = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            // sum up other areas applicable to this subarea + age
+            if(i != j){
+              LCome += phi_ij(i,j)*N_yai_beg(time,a,j)*Length_yai_beg(time,a,j); // for numerator
+              NCome += phi_ij(i,j)*N_yai_beg(time,a,j); // for denom
+            }
+          } // end subareas j
+          Length_yai_beg(time,a,i) = (N_yai_beg(time,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time,a,i)+NCome);
+        } // end ages
+      } // end subareas i
       
         
     // prob of length-at-age

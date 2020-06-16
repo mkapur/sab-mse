@@ -116,7 +116,7 @@ load_data_seasons <- function(nseason = 4,
     for(n in 1:nage){
       for(i in 1:nspace){
         for(j in 1:nspace){
-          if(sum(X_ija[i,1:j,n]) >= 1)  X_ija[i,j:nspace,n] <- 0
+          if(sum(X_ija[i,1:j,n]) > 1)  X_ija[i,j:nspace,n] <- 0
         }
       }
     }

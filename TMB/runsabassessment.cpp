@@ -273,17 +273,17 @@ Type objective_function<Type>::operator() ()
   N_0ai.setZero();   
   for(int k=0;k<(nstocks);k++){
     for(int i=0;i<(nspace);i++){ 
-      for(int a=1;a<(nage-1);a++){
+      for(int a=0;a<(nage-1);a++){
         N_0ai(a,i) = 0.5*omega_ai(a,i)*R_0k(k)*tau_ik(k,i)*exp(-(M(a)*age(a)));
       }
       // note the A+ group will be in slot A-1
-      N_0ai(nage-1,i) = omega_ai(nage-1,i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-1))) /(Type(1.0)-exp(-M(nage-1)));
+      N_0ai(nage-1,i) = omega_ai(nage-1,i)* N_0ai(nage-2,i)*exp(-(M(nage-2)*age(nage-1))) 
+        /(Type(1.0)-exp(-M(nage-1)*age(nage-1)));
     } // end subareas
   } // end stocks
   
   
   // Equilibrium Unfished SSB, stock (outside of time loop)
-
   for(int i=0;i<(nspace);i++){ 
     for(int a=0;a<nage;a++){ // Loop over ages
       SSB_0i(i) += mat_age(a)*N_0ai(a,i)*0.5;
@@ -577,12 +577,14 @@ Type objective_function<Type>::operator() ()
   for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
     for(int time=1;time<tEnd;time++){ // Survey Surveyobs
       if(flag_surv_bio(time) == 2){
-        ans_survey += -dnorm(log(survey_bio_f_est(time,surv_flt)), log(survey_bio_f_obs(time,surv_flt)), SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
+        ans_survey += -dnorm(log(survey_bio_f_est(time,surv_flt)), 
+                             log(survey_bio_f_obs(time,surv_flt)), 
+                             SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
       } // end survey flag
       
     } // end time
   } // end surv_flt
-
+  
   
   // Likelihood: catches
   Type ans_catch = 0.0;
@@ -611,6 +613,7 @@ Type objective_function<Type>::operator() ()
       if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
         for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
           // NOTE THAT THE survey_acomp_f_obs ARE IN A X TIME X FLEET, which is not the typical ordering
+          // need to replace SS_survey(time) with the number of samples from each year x fleet
           sum1(time) += lgamma(ss_survey(time)*survey_acomp_f_obs(a,time,surv_flt_acomp)+1);
           sum2(time) += lgamma(ss_survey(time)*survey_acomp_f_obs(a,time,surv_flt_acomp) + phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp)) -
             lgamma(phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp));
@@ -635,10 +638,8 @@ Type objective_function<Type>::operator() ()
         if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
           for(int a=0;a<(age_catch.rows()-1);a++){ // Loop over ages for catch comp (there are only 15 in obs)
             sum3(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time)+1);
-            // sum3(time) += lgamma(catch_yf_obs(time,fish_flt)+1);
-            
-            // sum4(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time) + phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt)) -
-            //   lgamma(phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt));
+            sum4(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time) + phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt)) -
+              lgamma(phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt));
           } // end ages
           ans_catchcomp += lgamma(catch_yf_obs(time,fish_flt)+1)-sum3(time)+lgamma(phi_catch*catch_yf_obs(time,fish_flt))
             -lgamma(catch_yf_obs(time,fish_flt)+phi_catch*catch_yf_obs(time,fish_flt))+sum4(time);
@@ -685,8 +686,7 @@ Type objective_function<Type>::operator() ()
   
   // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
   ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
-  
-  
+
   vector<Type>ans_tot(7);
   ans_tot(0) = ans_SDR;
   ans_tot(1) = ans_psel;
@@ -698,9 +698,7 @@ Type objective_function<Type>::operator() ()
   
   // Likelihood: TOTAL
   Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
-  //
-  
-  
+
   // Later Fix F in the likelihood and age comp in catch
   // Type ans = 0.0;
   // Report calculations

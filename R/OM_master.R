@@ -71,7 +71,7 @@ parms.new$F0 <- F0
 parms.new$Rin <- Rdev
 
 ## testing without movement
-# df.new$omega_ai[,] <- 1 ## stationary dist
+df.new$omega_ai[,] <- 0.5 ## stationary dist
 # df.new$X_ija[,] <- 
 
 obj <- MakeADFun(df.new,
@@ -79,10 +79,22 @@ obj <- MakeADFun(df.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
 
+plot(reps$N_0ai[,1]) ## init l at age
+points(reps$N_0ai[,2],pch = 19) ## init l at age
 
 plot(reps$N_yai_beg[1,,1]) ## init l at age
 points(reps$N_yai_beg[5,,1],pch = 19) ## init l at age
 points(reps$N_yai_beg[53,,1],pch = 19) ## init l at age
+
+reps$survey_bio_f_obs
+surv0 <- data.frame(cbind(reps$survey_bio_f_est, 1966:2018)) %>% filter(X6 >1978) %>% cbind(.,reps$survey_bio_f_obs)
+names(surv0) = c(paste('EST_',1:5),'Year',paste('OBS_',1:5))
+surv0 %>%
+  melt(id = 'Year') %>%
+  mutate(TYPE = substr(variable,1,3), FLEET = substr(variable,6,6)) %>%
+  ggplot(., aes(x = Year, y = value, color = TYPE)) +
+  geom_line() + theme_sleek() +
+  facet_wrap(~FLEET)
 
 
 plot(reps$Length_yai_beg[1,,1], pch = 19, ylim = c(0,200), main = 'L @ AGE, filled points are midyr, cols are yrs', col = 'blue') ## init l at age

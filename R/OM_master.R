@@ -114,7 +114,9 @@ a1 <-
   group_by(Var2) %>% 
   mutate(sumP = sum(value), pbin = value/sumP)
 ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
-           geom_tile()
+           geom_tile() +
+  labs(x = 'age', y = 'len', title = 'year 1', subtitle= 'subarea 2')
+
 
 reps$F1_yf
 reps$term0; reps$term1;reps$term2

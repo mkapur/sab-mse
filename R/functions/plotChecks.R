@@ -33,18 +33,23 @@ data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   mutate(age = as.numeric(substr(variable,2,2))-1) %>%
-  ggplot(., aes(x = age, y = value, color = factor(Yr), group = Yr )) +
-  geom_point() + geom_line() +
+  ggplot(., aes(x = age, y = value,  group = Yr )) +
+  # geom_point() +
+  geom_boxplot() +
+  # geom_line() +
   labs(x = 'Age in Year',y = 'Numbers',  title = "AREA1") +
   ggsidekick::theme_sleek() + theme(legend.position = 'none') 
+
 
 pNage2 <- reps$N_yai_beg[,,2] %>%
   data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   mutate(age = as.numeric(substr(variable,2,2))-1) %>%
-  ggplot(., aes(x = age, y = value, color = factor(Yr), group = Yr )) +
-  geom_point() + geom_line()  +
+  ggplot(., aes(x = age, y = value, group = Yr )) +
+  # geom_point() + 
+  # geom_line()  +
+  geom_boxplot() +
   labs(x = 'Age in Year',y = 'Numbers', title = "AREA2") +
   ggsidekick::theme_sleek()+ theme(legend.position = 'none')
 
@@ -111,9 +116,45 @@ pLAA2 <- reps$Length_yai_beg[,,2] %>% data.frame() %>%
   geom_point() +
   labs(x = 'Age',y = 'Length', color = 'Year') +
   ggsidekick::theme_sleek()
-  
 
 
+## distributions
+library(gridExtra)
+pA1 <- list() ## for area 1
+for(i in 1:10){ #45:dim(reps$LengthAge_alyi_beg)[3]){ ## loop years
+  a1 <- 
+    reps$LengthAge_alyi_beg[,,i,2] %>%
+    melt() %>%
+    group_by(Var2) %>% 
+    mutate(sumP = sum(value), pbin = value/sumP)
+  pA1[[i]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
+    geom_tile() +
+    labs(x = 'age', y = 'len', 
+         title = paste("year ",i), 
+         subtitle= 'subarea 1') +
+    theme_sleek()
+  rm(a1)
+  # p[[i]] <- qplot(1:10,10:1,main=i)
+}
+
+pA2 <- list() ## for area 1
+for(i in 1:10){ #45:dim(reps$LengthAge_alyi_beg)[3]){ ## loop years
+  a1 <- 
+    reps$LengthAge_alyi_beg[,,i,2] %>%
+    melt() %>%
+    group_by(Var2) %>% 
+    mutate(sumP = sum(value), pbin = value/sumP)
+  pA2[[i]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
+    geom_tile() +
+    labs(x = 'age', y = 'len', 
+         title = paste("year ",i), 
+         subtitle= 'subarea 2') +
+    theme_sleek()
+  rm(a1)
+  # p[[i]] <- qplot(1:10,10:1,main=i)
+}
+do.call(grid.arrange,pA1)
+do.call(grid.arrange,pA2)
 
 
 # 

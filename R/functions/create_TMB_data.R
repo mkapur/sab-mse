@@ -118,7 +118,8 @@ create_TMB_data <- function(sim.data, df,
                   sigmaG_yk = df$sigmaG_yk,
                   phi_ij = df$phi_ij,
                   LBins = df$LBins,
-                  L1_yk = df$L1_yk
+                  L1_yk = df$L1_yk,
+                  age_error = df$age_error
   )
   
   

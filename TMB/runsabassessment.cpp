@@ -128,8 +128,11 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(ss_survey); // Age comp sample size
   DATA_VECTOR(flag_surv_acomp); // Were ages sampled this year
   DATA_ARRAY(age_survey); // Age compositions, age x year
+  DATA_ARRAY(age_error); // Age compositions, age x fleet (row 1 = true age, row 2= biased age, row 3 = sd)
+  
   DATA_ARRAY(survey_acomp_f_obs); // Observed survey compositions, age x year x nfleets_acomp {right now just survnfleets}
-  array<Type> survey_acomp_f_est(tEnd, age_maxage, nfleets_acomp); 
+  array<Type> acomp_yaf_temp(tEnd, age_maxage, nfleets_acomp); // placeholder for aging error calcs
+  array<Type> survey_acomp_f_est(tEnd, age_maxage, nfleets_acomp); //when error multiplied by Nage
   vector<Type> Nsamp_acomp_f(nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   
   // Survey Selex
@@ -537,6 +540,8 @@ Type objective_function<Type>::operator() ()
     } // end nspace
     
     
+    
+    
     // estimate age comps in surveys
     // need to include error here
     for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
@@ -544,6 +549,8 @@ Type objective_function<Type>::operator() ()
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage-1);a++){ // Loop over other ages
             if(a< age_maxage){
+              // first determine aging error offset
+              
               survey_acomp_f_est(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
             }else{
               survey_acomp_f_est(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // placeholder note the indexing on ntot might be off

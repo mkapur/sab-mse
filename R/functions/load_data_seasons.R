@@ -53,6 +53,7 @@ load_data_seasons <- function(nseason = 4,
   nage <- length(age)
   msel <- rep(1,nage)
   
+
   ## for later use
   recruitmat <- matrix(0, nspace) # 4 is seasonality 
   recruitmat[1] <- 1 # 10 percent change of spawning north
@@ -164,6 +165,7 @@ load_data_seasons <- function(nseason = 4,
   nfleets_fish <- ncol(catch2)-1 
   
   
+
  
   
   
@@ -197,6 +199,18 @@ load_data_seasons <- function(nseason = 4,
   survey_x2  <- rep(-2, length(years)) ## we have obs from 1970+
   survey_x2[5:length(survey_x2)] <- -2## a -2 if no survey, 2 if survey occured
   nfleets_surv <- ncol(survey2) 
+  
+  ## build aging error
+  ageErr0 <- read.csv(here("input","raw","Age_Error_Example_ToMaia.csv"))[,1:nage]
+  names(ageErr0) <- 0:(ncol(ageErr0)-1)
+  ## fill in addl ages
+  ageErr0[,ncol(ageErr0):nage] <-   ageErr0[,ncol(ageErr0)]
+  age_error <- array(0, dim = c(2,nage,nfleets_surv))  ## later this should be nfleets_acomp
+  
+  ## placeholder (just copy for each)
+  for(i in 1:nfleets_surv){
+    age_error[,,i] <- as.matrix(ageErr0)
+  }
   
   ## load growth params
   growPar <- read.csv(here("input","raw","Table3_2020-05-06phase2.csv"))
@@ -497,7 +511,8 @@ load_data_seasons <- function(nseason = 4,
                   sigmaG_yk = sigmaG_yk,
                   phi_ij = phi_ij,
                   LBins = LBins,
-                  L1_yk = L1_yk
+                  L1_yk = L1_yk,
+                  age_error = age_error
                   # Parameters from the estimation model 
               
   )

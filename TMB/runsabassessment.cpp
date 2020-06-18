@@ -18,7 +18,10 @@ vector<Type> cumsum(vector<Type> x) {
 // introduce selectivity estimation
 // introduce tuning of F and use Ztuned in Natage
 // need error on tau
+// everything sex specific
+// calculate reference points
 // M vs myear -- at age or what?
+// clean way of remapping fleets (acomp, fish etc) back to actual names
 // estimate SDR (currently parameter)
 // on pause: make master flag_fleet matrix
 
@@ -552,14 +555,11 @@ Type objective_function<Type>::operator() ()
               // first determine aging error offset
               // note that the first row has the a-tilde, the second row has the SD by fleet
               acomp_yaf_temp(time,a,surv_flt_acomp) = pnorm(age(a),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp));
-              
+
             } else if(a< age_maxage){
               acomp_yaf_temp(time,a,surv_flt_acomp) = pnorm(Type(a+1),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp)) -
                 pnorm(age(a),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp));
-              // 
-              // 
               // survey_acomp_f_est(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
-              // 
             } // end else
           } // end ages
             acomp_yaf_temp(time,age_maxage-1,surv_flt_acomp) = Type(1.0) -

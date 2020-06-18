@@ -78,6 +78,7 @@ obj <- MakeADFun(df.new,
                  parms.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()
+
 source(here("R","functions","plotChecks.R"))
 
 # plots returned from plotChecks.R

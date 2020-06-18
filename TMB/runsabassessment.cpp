@@ -548,14 +548,28 @@ Type objective_function<Type>::operator() ()
       if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage-1);a++){ // Loop over other ages
-            if(a< age_maxage){
+            if(a == 1){
               // first determine aging error offset
+              // note that the first row has the a-tilde, the second row has the SD by fleet
+              acomp_yaf_temp(time,a,surv_flt_acomp) = pnorm(age(a),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp));
               
-              survey_acomp_f_est(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
-            }else{
-              survey_acomp_f_est(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // placeholder note the indexing on ntot might be off
+            } else if(a< age_maxage){
+              // acomp_yaf_temp(time,a,surv_flt_acomp) = pnorm(Type(a+1),  age_error(1,a,surv_flt_acomp), age_error(2,a,surv_flt_acomp)) -
+              //   pnorm(age(a),  age_error(1,a,surv_flt_acomp), age_error(2,a,surv_flt_acomp));
+              // 
+              // 
+              // survey_acomp_f_est(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
+              // 
             } // end else
           } // end ages
+            // acomp_yaf_temp(time,a,surv_flt_acomp) = Type(1.0) - 
+            //   pnorm(age_maxage-1, age_error(1,age_maxage-1,surv_flt_acomp), age_error(2,age_maxage-1,surv_flt_acomp) );
+            //   
+            //   survey_acomp_f_est(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // placeholder note the indexing on ntot might be off
+            // 
+            // 
+            
+
         } // end nspace
       }  // end flag
     } // end acomp survey fleets

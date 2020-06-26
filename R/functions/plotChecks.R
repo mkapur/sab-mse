@@ -1,7 +1,7 @@
 require(ggplot2)
 require(patchwork)
 ## SANITY CHECK PLOTS
-nspace <- dim(reps$Ninit_Aai)[3]
+nspace <- dim(Ninit_Aai)[3]
 
 
 # data.frame(matrix(Ninits, ncol=nspace, byrow=FALSE))
@@ -9,7 +9,7 @@ nspace <- dim(reps$Ninit_Aai)[3]
 
 
 
-pNinit <- reps$Ninit_ai %>%
+pNinit <- Ninit_ai %>%
   data.frame() %>%
   mutate('Yr' = 1:21) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -18,7 +18,7 @@ pNinit <- reps$Ninit_ai %>%
   labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
   ggsidekick::theme_sleek()
 
-Nzero = reps$N_0ai
+Nzero = N_0ai
 pNzero <- Nzero %>% data.frame() %>%
   mutate('Yr' = 1:21) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -28,20 +28,20 @@ pNzero <- Nzero %>% data.frame() %>%
   ggsidekick::theme_sleek()
 
 
-pNage1 <- reps$N_yai_beg[,,1] %>%
+pNage1 <- N_yai_beg[,,1] %>%
 data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   mutate(age = as.numeric(substr(variable,2,2))-1) %>%
   ggplot(., aes(x = age, y = value,  group = Yr )) +
-  # geom_point() +
-  geom_boxplot() +
+  geom_point() +
+  # geom_boxplot() +
   # geom_line() +
   labs(x = 'Age in Year',y = 'Numbers',  title = "AREA1") +
   ggsidekick::theme_sleek() + theme(legend.position = 'none') 
 
 
-pNage2 <- reps$N_yai_beg[,,2] %>%
+pNage2 <- N_yai_beg[,,2] %>%
   data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -53,7 +53,7 @@ pNage2 <- reps$N_yai_beg[,,2] %>%
   labs(x = 'Age in Year',y = 'Numbers', title = "AREA2") +
   ggsidekick::theme_sleek()+ theme(legend.position = 'none')
 
-pSSByi <- reps$SSB_yi %>%
+pSSByi <- SSB_yi %>%
   data.frame() %>%
   mutate('Yr' = 1:53) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -61,7 +61,7 @@ pSSByi <- reps$SSB_yi %>%
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'subarea') +
   ggsidekick::theme_sleek()
 
-pSSByk <- reps$SSB_yk %>%
+pSSByk <- SSB_yk %>%
   data.frame() %>%
   mutate('Yr' = 1:53) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -69,7 +69,7 @@ pSSByk <- reps$SSB_yk %>%
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
   ggsidekick::theme_sleek()
 
-pRyi <- reps$R_yi %>% data.frame() %>%
+pRyi <- R_yi %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
@@ -77,7 +77,7 @@ pRyi <- reps$R_yi %>% data.frame() %>%
   labs(x = 'Model Year',y = 'Recruits', color = 'subarea') +
   ggsidekick::theme_sleek()
 
-pRyk <- reps$R_yk %>% data.frame() %>%
+pRyk <- R_yk %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
@@ -86,7 +86,7 @@ pRyk <- reps$R_yk %>% data.frame() %>%
   ggsidekick::theme_sleek()
 
 
-pSRR <- cbind(reps$R_yk, reps$SSB_yk) %>% data.frame() %>%
+pSRR <- cbind(R_yk, SSB_yk) %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.), RECS1 = X1, RECS2 = X2, SSBS1 = X3, SSBS2 = X4) %>%
   select(-X1,-X2,-X3,-X4) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -101,7 +101,7 @@ pSRR <- cbind(reps$R_yk, reps$SSB_yk) %>% data.frame() %>%
 
 
 
-pLAA1 <- reps$Length_yai_beg[,,1] %>% data.frame() %>%
+pLAA1 <- Length_yai_beg[,,1] %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value, color = Yr )) +
@@ -109,7 +109,7 @@ pLAA1 <- reps$Length_yai_beg[,,1] %>% data.frame() %>%
   labs(x = 'Age',y = 'Length', color = 'Year') +
   ggsidekick::theme_sleek()
 
-pLAA2 <- reps$Length_yai_beg[,,2] %>% data.frame() %>%
+pLAA2 <- Length_yai_beg[,,2] %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value, color = Yr )) +
@@ -121,9 +121,9 @@ pLAA2 <- reps$Length_yai_beg[,,2] %>% data.frame() %>%
 ## distributions
 library(gridExtra)
 pA1 <- list() ## for area 1
-for(i in 1:10){ #45:dim(reps$LengthAge_alyi_beg)[3]){ ## loop years
+for(i in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   a1 <- 
-    reps$LengthAge_alyi_beg[,,i,2] %>%
+    LengthAge_alyi_beg[,,i,2] %>%
     melt() %>%
     group_by(Var2) %>% 
     mutate(sumP = sum(value), pbin = value/sumP)
@@ -138,9 +138,9 @@ for(i in 1:10){ #45:dim(reps$LengthAge_alyi_beg)[3]){ ## loop years
 }
 
 pA2 <- list() ## for area 1
-for(i in 1:10){ #45:dim(reps$LengthAge_alyi_beg)[3]){ ## loop years
+for(i in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   a1 <- 
-    reps$LengthAge_alyi_beg[,,i,2] %>%
+    LengthAge_alyi_beg[,,i,2] %>%
     melt() %>%
     group_by(Var2) %>% 
     mutate(sumP = sum(value), pbin = value/sumP)

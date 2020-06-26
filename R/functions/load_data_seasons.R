@@ -127,8 +127,8 @@ load_data_seasons <- function(nseason = 4,
   
   omega_ai <- matrix(rep(0, nage*nspace), c(nage,nspace))## eigenvector for stable spatial distribution at age
   for(a in 1:nage){
-    omega_ai[a,] <- eigen(X_ija[,,a])$values
-    omega_ai[omega_ai < 0] <- 0
+    omega_ai[a,] <- eigen(X_ija[,,a])$values 
+    omega_ai[omega_ai < 0] <- 0.05
     }
 
   
@@ -166,17 +166,17 @@ load_data_seasons <- function(nseason = 4,
   
   ## nfleets should be input
   ## auto-read nfleets_surv etc from this
-  flag_fleets <- matrix(NA, dim = c(4,8,years) ) 
+  flag_fleets <- array(NA, dim = c(4,8,nyear) ) 
   ## row 1 = catch, row 2 = survey biomass, row 3 = acomp, row 4 = lcomp
   
   ## populate catch fleets [needs to be yearly; perhaps automate upon readin of CSV
-  flag_fleets[,1:4] <- c(1,0,0,0)
+  flag_fleets[,1:4,] <- c(1,0,0,0)
   ## populate survey fleets
-  flag_fleets[,5:7] <- c(0,1,0,0)
+  flag_fleets[,5:7,] <- c(0,1,0,0)
   ## who has acomps?
-  flag_fleets[,8] <- c(1,0,0,0)
+  flag_fleets[,8,] <- c(1,0,0,0)
   ## who has lcomps?
-  flag_fleets[,1] <- c(1,0,0,0)
+  flag_fleets[,1,] <- c(1,0,0,0)
   
   # nfleets_fish <- sum(flag_fleets[1,] == 1) -1 ## zero-indexed
   # nfleets_surv <- sum(flag_fleets[2,] == 1) -1 ## zero-indexed
@@ -187,26 +187,26 @@ load_data_seasons <- function(nseason = 4,
   ## make phi objects (which column corresponds to which fleet)
   phi_fleet_catch <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
   for(i in 1:ncol(flag_fleets)){
-    if(flag_fleets[1,i] == 1){
+    if(flag_fleets[1,i,] == 1){
       phi_fleet_catch[i] <- idx; idx = idx+1 ## up counter
     }
   }
    phi_fleet_surv <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
   for(i in 1:ncol(flag_fleets)){
-    if(flag_fleets[2,i] == 1){
+    if(flag_fleets[2,i,] == 1){
       phi_fleet_surv[i] <- idx; idx = idx+1 ## up counter
     }
   }
 
   phi_fleet_acomp <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
   for(i in 3:ncol(flag_fleets)){
-    if(flag_fleets[1,i] == 1){
+    if(flag_fleets[3,i,] == 1){
       phi_fleet_acomp[i] <- idx; idx = idx+1 ## up counter
     }
   }
   phi_fleet_lcomp <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
   for(i in 4:ncol(flag_fleets)){
-    if(flag_fleets[1,i] == 1){
+    if(flag_fleets[4,i,] == 1){
       phi_fleet_lcomp[i] <- idx; idx = idx+1 ## up counter
     }
   }
@@ -217,7 +217,7 @@ load_data_seasons <- function(nseason = 4,
   # Catch
   catch <- read.csv(here("input","data",'hake_totcatch.csv'))
   catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
-
+  nfleets_fish <- ncol(catch2)-1
 
   # Survey abundance
   df.survey <- read.csv(here("input","data",'acoustic survey.csv'))

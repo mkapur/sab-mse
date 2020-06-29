@@ -1,5 +1,7 @@
 require(ggplot2)
 require(patchwork)
+library(gridExtra)
+
 ## SANITY CHECK PLOTS
 nspace <- dim(Ninit_Aai)[3]
 
@@ -119,41 +121,43 @@ pLAA2 <- Length_yai_beg[,,2] %>% data.frame() %>%
 
 
 ## distributions
-library(gridExtra)
+
 pA1 <- list() ## for area 1
-for(i in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
+for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   a1 <- 
-    LengthAge_alyi_beg[,,i,2] %>%
+    LengthAge_alyi_beg[,,y,1] %>%
     melt() %>%
     group_by(Var2) %>% 
     mutate(sumP = sum(value), pbin = value/sumP)
-  pA1[[i]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
+  pA1[[y]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
     geom_tile() +
     labs(x = 'age', y = 'len', 
-         title = paste("year ",i), 
+         title = paste("year ",y), 
          subtitle= 'subarea 1') +
     theme_sleek()
   rm(a1)
   # p[[i]] <- qplot(1:10,10:1,main=i)
 }
+do.call(grid.arrange,pA1)
+
 
 pA2 <- list() ## for area 1
-for(i in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
+for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   a1 <- 
-    LengthAge_alyi_beg[,,i,2] %>%
+    LengthAge_alyi_beg[,,y,2] %>%
     melt() %>%
     group_by(Var2) %>% 
     mutate(sumP = sum(value), pbin = value/sumP)
-  pA2[[i]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
+  pA2[[y]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
     geom_tile() +
     labs(x = 'age', y = 'len', 
-         title = paste("year ",i), 
+         title = paste("year ",y), 
          subtitle= 'subarea 2') +
     theme_sleek()
   rm(a1)
   # p[[i]] <- qplot(1:10,10:1,main=i)
 }
-do.call(grid.arrange,pA1)
+
 do.call(grid.arrange,pA2)
 
 

@@ -12,9 +12,10 @@ runOM_datagen <- function(df, seed = 731){
   nfleets_fish <- df$nfleets_fish
   
   df$tEnd <- length(df$years)*nseason
-  nyear <-df$tEnd/df$nseason # 
+  nyear <- df$tEnd/df$nseason # 
   year <- df$years
-  tEnd <- nyear*nseason
+  tEnd <- length(df$years)#nyear*nseason
+  
   ## these are TMB-ready; need to add one for indexing to work
   phi_if_surv <- df$phi_if_surv + 1
   phi_if_fish <- df$phi_if_fish + 1
@@ -167,15 +168,17 @@ runOM_datagen <- function(df, seed = 731){
     } #// end space
   } #// end stocks
   
-  Length_yai_beg <- Length_yai_mid <- N_yai_beg <- N_yai_mid<- array(NA, dim = c(tEnd, nage, nspace))
+  Length_yai_beg <- Length_yai_mid <- N_yai_beg <- N_yai_mid <- array(NA, dim = c(tEnd, nage, nspace))
+  LengthAge_alyi_beg <- LengthAge_alyi_mid <- array(NA,dim = c(nage,LBins,tEnd,nspace))
   
   ## start year loop ----
-  for(y in 1:tEnd){
-    
+  for(y in 1:(tEnd-1)){
+    cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
       # for(k in 1:nstocks){   
         for(i in 1:nspace){
+          Length_yai_beg[1,1,i] <- 10
           for(a in 2:(nage-1)){ ## fill A0 in position 1 later
             for(j in 1:nspace){           
               pLeave = 0.0;  NCome = 0.0; # // reset for new age
@@ -186,6 +189,7 @@ runOM_datagen <- function(df, seed = 731){
             } #// end subareas j
             # // this is the synthesis syntax; 10 is placeholder for LMIN
             # // likely need a lower L1 at age stock-specific and linear before that age
+         
             Length_yai_beg[y,a,i] = Linf_yk[1,phi_ik2[i]]+(10-Linf_yk[1,phi_ik2[i]])*
               exp(-kappa_yk[1,phi_ik2[i]]*a)
             Length_yai_mid[y,a,i] = Linf_yk[1,phi_ik2[i]]+(10-Linf_yk[1,phi_ik2[i]])*
@@ -212,7 +216,7 @@ runOM_datagen <- function(df, seed = 731){
         } #// end subareas i
       # } #// end stocks
     } ## end y == 1
-  }
+  
   
   
   ## SSB_y ----
@@ -258,7 +262,7 @@ runOM_datagen <- function(df, seed = 731){
       N_yai_mid[y,a,i] = N_yai_beg[y,a,i]*exp(-0.4) 
       N_yai_beg[y+1,a,i] = ((1-pLeave)*N_yai_beg[y,a,i] + NCome)*exp(-0.4) ## this exponent needs to be Ztuned eventually
       
-      
+      Length_yai_beg[y,1,i] <- 10 ## another LMIN placeholder
       ## as in document: next year A1 == this year A0 plus growth
       Length_yai_beg[y+1,a,i] = Length_yai_beg[y,a-1,i] + (Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,a-1,i])*(1-exp(-kappa_yk[y,phi_ik2[i]]))
       Length_yai_mid[y,a,i] = Length_yai_beg[y,a,i] + (Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,a,i]*
@@ -275,15 +279,17 @@ runOM_datagen <- function(df, seed = 731){
     N_yai_mid[y,nage,i] = N_yai_beg[y,nage,i]*exp(-0.4)
     N_yai_beg[y+1,nage,i] =   ((1-pLeave)*( N_yai_beg[y,nage,i]+ N_yai_beg[y,nage-1,i]) + NCome)*exp(-0.4);
     ## plus group weighted average (we already have the numbers at age)
-    Length_yai_beg[y,nage,i] = ( N_yai_beg[y,nage-1,i]*
-                                       (Length_yai_beg[y,nage-1,i]+(Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,nage-1,i]*(1-exp(-kappa_yk[y,phi_ik2[i]])))) +
-                                       N_yai_beg[y,nage-1,i]*
-                                       (Length_yai_beg[y,nage,i]+(Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,nage,i])*(1-exp(-kappa_yk[y,phi_ik2[i]]))))/
-      (N_yai_beg[y,nage-1,i] + N_yai_beg[y,nage,i])
-    
-    Length_yai_mid[y,nage-1,i] = (N_yai_mid[y,nage-1,i]*
+    Length_yai_beg[y+1,nage,i] = ( N_yai_beg[y+1,nage-1,i]*
+                                       (Length_yai_beg[y,nage-1,i]+
+                                          (Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,nage-1,i]*(1-exp(-kappa_yk[y,phi_ik2[i]])))) +
+                                       N_yai_beg[y+1,nage-1,i]*
+                                       (Length_yai_beg[y,nage,i]+
+                                          (Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,nage,i])*(1-exp(-kappa_yk[y,phi_ik2[i]]))))/
+      (N_yai_beg[y+1,nage-1,i] + N_yai_beg[y+1,nage,i])
+    # 
+    Length_yai_mid[y+1,nage,i] = (N_yai_mid[y+1,nage-1,i]*
                                        (Length_yai_beg[y,nage-1,i]+(Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,nage-1,i]*(1-exp(-0.5*kappa_yk[y,phi_ik2[i]])))) +
-                                       N_yai_mid[y,nage,i]*
+                                       N_yai_mid[y+1,nage,i]*
                                        (Length_yai_beg[y,nage,i]+(Linf_yk[y,phi_ik2[i]]-Length_yai_beg[y,nage,i])*(1-exp(-0.5*kappa_yk[y,phi_ik2[i]]))))/
       (N_yai_mid[y,nage-1,i] + N_yai_mid[y,nage,i])
   } ## end subareas i
@@ -303,15 +309,13 @@ runOM_datagen <- function(df, seed = 731){
       Length_yai_beg[y+1,a,i] = (N_yai_beg[y,a,i]*Length_yai_beg[y,a,i] + LCome)/(N_yai_beg[y,a,i]+NCome)
     } ## end ages
   } ## end subareas i
-  
-  LengthAge_alyi_beg <- LengthAge_alyi_mid <- array(NA,dim = c(nage,LBins,tEnd,nspace))
-  
+
   ## prob of length-at-age
   for(i in 1:nspace){  
-    for(a in 2:(nage)){
-      LengthAge_alyi_beg[a,0,y,i] = pnorm(1,  Length_yai_beg[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
-      LengthAge_alyi_mid[a,0,y,i] = pnorm(1,  Length_yai_mid[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
-      for(l in 1:(LBins-1)){
+    for(a in 1:(nage)){
+      LengthAge_alyi_beg[a,1,y,i] = pnorm(1,  Length_yai_beg[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
+      LengthAge_alyi_mid[a,1,y,i] = pnorm(1,  Length_yai_mid[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
+      for(l in 2:(LBins-1)){
         LengthAge_alyi_beg[a,l,y,i] = pnorm(l+1,  Length_yai_beg[y,a,i], sigmaG_yk[y,phi_ik2[i]]) -
           pnorm(l,  Length_yai_beg[y,a,i], sigmaG_yk[y,phi_ik2[i]])
         LengthAge_alyi_mid[a,l,y,i] = pnorm(l+1,  Length_yai_mid[y,a,i], sigmaG_yk[y,phi_ik2[i]]) -
@@ -319,8 +323,13 @@ runOM_datagen <- function(df, seed = 731){
       } ## end LBins
       LengthAge_alyi_beg[a,LBins,y,i] = 1-pnorm(LBins, Length_yai_beg[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
       LengthAge_alyi_mid[a,LBins,y,i] = 1-pnorm(LBins, Length_yai_mid[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
+      if(is.na(   LengthAge_alyi_beg[a,LBins,y,i])) stop('NA ON ', a,l,y,i,"\n")
     } ## end ages
   } ## end nspace
+  
+  } ## END YEARS
+  
+} ## END FUNC
   
   # Ninit <- rep(NA,nage)
   # Ninit_dev <- (df$parms$initN)

@@ -21,6 +21,8 @@ pNinit <- Ninit_ai %>%
   ggsidekick::theme_sleek()
 
 
+
+
 pNzero <- Nzero %>% data.frame() %>%
   mutate('Yr' = 1:21) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -29,6 +31,11 @@ pNzero <- Nzero %>% data.frame() %>%
   labs(x = 'Age in Year 0',y = 'Unfished Numbers', color = 'subarea') +
   ggsidekick::theme_sleek()
 
+ggsave(pNzero,
+       file = here('figs',
+                   "NZero_noOmega.png"),
+       width = 6, height = 4, unit = 'in',
+       dpi = 420)
 
 pNage1 <- N_yai_beg[,,1] %>%
 data.frame() %>%
@@ -36,7 +43,7 @@ data.frame() %>%
   reshape2::melt(id = c('Yr')) %>%
   mutate(age = as.numeric(substr(variable,2,2))-1) %>%
   ggplot(., aes(x = age, y = value,  group = Yr )) +
-  geom_point() +
+  # geom_point() +
   # geom_boxplot() +
   geom_line() +
   labs(x = 'Age in Year',y = 'Numbers',  title = "AREA1") +
@@ -69,9 +76,9 @@ pSSByi <- SSB_yi[1:52,] %>%
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'subarea') +
   ggsidekick::theme_sleek()
 
-pSSByk <- SSB_yk %>%
+pSSByk <- SSB_yk[1:52,] %>%
   data.frame() %>%
-  mutate('Yr' = 1:53) %>%
+  mutate('Yr' = 1:52) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
@@ -144,7 +151,10 @@ for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   rm(a1)
   # p[[i]] <- qplot(1:10,10:1,main=i)
 }
+png(here("figs","LAA_Dist_A1.png"), 
+    height = 10, width = 10, unit = 'in', res = 420)
 do.call(grid.arrange,pA1)
+dev.off()
 
 
 pA2 <- list() ## for area 1
@@ -163,8 +173,10 @@ for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   rm(a1)
   # p[[i]] <- qplot(1:10,10:1,main=i)
 }
-
+png(here("figs","LAA_Dist_A2.png"), 
+    height = 10, width = 10, unit = 'in', res = 420)
 do.call(grid.arrange,pA2)
+dev.off()
 
 ## catches post F tuning
 catch_yf_predt <- data.frame(catch_yf_pred)[1:(tEnd-1),] 
@@ -181,18 +193,26 @@ names(catch_yf_obst) <- paste('Fleet',1:3)
 catch_yf_obst <- catch_yf_obst %>%
   mutate(Year = 1:52) %>%
   melt(id = 'Year') %>%
+  ## convert CV to SD via CV = mean/sd
   mutate(Type = 'OBS', 
-         lci = value - 1.96*0.01,
-         uci = value +1.96*0.01) 
+         lci = value - 1.96*(0.1*value),
+         uci = value + 1.96*(0.1*value)) 
 
 ggplot(data = catch_yf_obst, aes(x = Year, y = value, color = variable)) +
-  geom_point(pch = 1, fill = NA) +
-  geom_line(data = catch_yf_predt) +
-  geom_errorbar(aes(ymin = lci, ymax = uci)) +
-  theme_sleek() +
-  labs(y = 'Catch (lbs)', color = 'Fishing Fleet')
-  # facet_wrap(~Type, scales = "free_y")
+  geom_line(data = catch_yf_predt, lwd = 0.75) +
+  scale_color_manual(values = c('blue','blue1','blue2')) +
+  geom_point(pch = 1, fill = NA, col = 'black') +
+  geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
+  theme_sleek() + theme(legend.position = 'none')+
+  labs(y = 'Catch (lbs)', color = 'Fishing Fleet') +
+  facet_wrap(~variable, scales = "free_y")
 
+ggsave(last_plot(),
+       file = here('figs',
+                   paste0('catch_fits_',
+                   'v1=',v1,'.png')),
+       width = 10, height = 6, unit = 'in',
+       dpi = 420)
 # 
 # simdata$SSB_yk %>% 
 #   data.frame() %>%

@@ -17,17 +17,20 @@ runOM_datagen <- function(df, seed = 731){
   tEnd <- length(df$years)#nyear*nseason
   
   ## these are TMB-ready; need to add one for indexing to work
-  phi_if_surv <- df$phi_if_surv + 1
-  phi_if_fish <- df$phi_if_fish + 1
-  phi_ik <- df$phi_ik + 1
+  phi_if_surv <- df$phi_if_surv 
+  phi_if_fish <- df$phi_if_fish 
+  phi_ik <- df$phi_ik 
   phi_ik2 <- df$phi_ik2 + 1
-  tau_ik <- df$tau_ik + 1
+  tau_ik <- df$tau_ik 
   
   ## Biology
   nage <- df$nage
   age <- df$age
   mat_age <- df$Matsel
 
+  
+  ## Obs
+  catch_yf_obs <- df$Catch2/100
 
   # array<Type> Ninit_ai(nage,nspace); // initial numbers at age in subarea, just once
   # array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
@@ -43,6 +46,8 @@ runOM_datagen <- function(df, seed = 731){
   
   # // movement //
   omega_ai <- df$omega_ai
+  omega_ai[,] <- 0.5
+
   X_ija <- df$X_ija
 
   # // growth //
@@ -170,6 +175,17 @@ runOM_datagen <- function(df, seed = 731){
   
   Length_yai_beg <- Length_yai_mid <- N_yai_beg <- N_yai_mid <- array(NA, dim = c(tEnd, nage, nspace))
   LengthAge_alyi_beg <- LengthAge_alyi_mid <- array(NA,dim = c(nage,LBins,tEnd,nspace))
+
+  SSB_yi <- matrix(0, nrow = tEnd, ncol = nspace)
+  SSB_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
+  
+  R_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
+  R_yi <- matrix(0, nrow = tEnd, ncol = nspace)
+  
+  F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1)) ## storage for intermediate guesses
+  Freal <- matrix(0, nrow = tEnd, ncol = nfleets_fish) ## storage for final guess
+  Catch_yf_est <- array(0, dim = c(tEnd,nage,nfleets_fish))
+  CatchN <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
   
   ## start year loop ----
   for(y in 1:(tEnd-1)){
@@ -179,6 +195,7 @@ runOM_datagen <- function(df, seed = 731){
       # for(k in 1:nstocks){   
         for(i in 1:nspace){
           Length_yai_beg[1,1,i] <- 10
+          N_yai_beg[1,1,i] <- Ninit_ai[1,i]
           for(a in 2:(nage-1)){ ## fill A0 in position 1 later
             for(j in 1:nspace){           
               pLeave = 0.0;  NCome = 0.0; # // reset for new age
@@ -220,8 +237,7 @@ runOM_datagen <- function(df, seed = 731){
   
   
   ## SSB_y ----
-  SSB_yi <- matrix(0, nrow = tEnd, ncol = nspace)
-  SSB_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
+
   
   for(i in 1:nspace){
     for(a in 1:(nage)){
@@ -231,11 +247,9 @@ runOM_datagen <- function(df, seed = 731){
       } # // end stocks
     } #// end ages
   } #// end space
-  
+    
   ## A0 Recruits ----
-  # this year based on present SSB
-  R_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
-  R_yi <- matrix(0, nrow = tEnd, ncol = nspace)
+  # next year based on present SSB
   omega_0ij <- rep(1, nspace)
   for(i in 1:nspace){
     for(k in 1:nstocks){
@@ -243,9 +257,10 @@ runOM_datagen <- function(df, seed = 731){
       R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k]
                       /(SSB_0k[k]*(1-h_k[k])+ 
                           SSB_yk[y,k]*(5*h_k[k]-1)))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+      # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
     } # // end stocks
     R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ik[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
-    N_yai_beg[y,1,i] =  R_yi[y,i] #// fill age-0 recruits
+    N_yai_beg[y+1,1,i] =  R_yi[y,i] #// fill age-0 recruits
   } ### end space
  
   #N- and Nominal Length ----
@@ -327,7 +342,101 @@ runOM_datagen <- function(df, seed = 731){
     } ## end ages
   } ## end nspace
   
+
+  
+  ## Catch at beginning of year ----
+  ## Hybrid F tuning inputs
+  Fmax <- 3.5;
+  niter = 7 ## F iterations
+  v1 <- 0.99; ##corresponds to an Fmax of 3
+  ## Type v1=0.865; ##corresponds to an Fmax of 2
+  ## Type v1=0.95;
+  v2 <- 30;
+  ## Type F_no_inc=7;
+  ## Type term0 = 0.0;
+  ## Type term1 = 0.0;
+  ## Type term2 = 0.0;
+  
+  ## array<Type> F1_yf(tEnd,nfleets_fish);
+  
+  
+
+  catch_afk_TEMP <- array(0, dim = c(nage, nfleets_fish, niter+1)) ## storage for intermediate guesses
+
+  Adj <- NULL; Z_a_TEMP <- Z_a_TEMP2 <- NULL
+  
+  for(fish_flt in 1:nfleets_fish){
+    ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now
+    denom = 0
+    for(i in 1:nspace){ 
+      denom <- denom +   (phi_if_fish[fish_flt, i] * 
+                            sum(N_yai_beg[y,,i])*
+                            sum(wage_catch[,y]) * 1.0 + catch_yf_obs[y, fish_flt+1])
+    }
+    F1_yf[y, fish_flt, 1] <-     F1_yf[y, fish_flt, 1] + catch_yf_obs[y, fish_flt+1]/denom
+    
+    ## iterative tuning
+    for(k in 2:(niter+1)){
+      ## modify the guess Eq 20
+      term0 = 1/(1+exp(v2*( F1_yf[y,fish_flt,k-1] - v1)));
+      term1 = F1_yf[y,fish_flt,k-1]*term0;
+      term2 = v1*(1-term0);
+      F1_yf[y,fish_flt,k] = -log(1-(term1+term2))
+      
+      # Predicted catches @ F Eq 21; need to add SELEX
+      for(i in 1:nspace){ 
+        for(a in 1:nage){
+          Z_a_TEMP[a] <- F1_yf[y,fish_flt,k] + M[a]
+
+          catch_afk_TEMP[a,fish_flt,k] <-     catch_afk_TEMP[a,fish_flt,k] +
+            (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*(1-exp(-Z_a_TEMP[a]))*
+                                            phi_if_fish[fish_flt, i]* 
+                                            N_yai_beg[y,a,i]*1.0*
+                                            wage_catch[a,i]
+          
+        } ## end ages
+      } ## end space
+      
+      ## Calc Adj Eq 22
+      Adj[k] <- catch_yf_obs[y, fish_flt+1]/sum(catch_afk_TEMP[,fish_flt,k])
+      
+      ## Get new Z given ADJ - need to add discard and selex here
+      for(a in 1:nage) Z_a_TEMP2[a] <-  Adj[k]*F1_yf[y,fish_flt,k] +  M[a]
+      
+      ## Second Guess for F (EQ 24)
+      denom = 0
+      for(i in 1:nspace){ 
+        for(a in 1:nage){
+        denom <- denom + phi_if_fish[fish_flt, i] * 
+             sum(N_yai_beg[y,a,i])*
+             sum(wage_catch[a,y]) * 1.0 *(1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
+        }
+      }
+      F2_yf[y, fish_flt, k] <- F2_yf[y, fish_flt, k-1] + catch_yf_obs[y, fish_flt+1]/denom
+      
+      ## Modify the guess again Eq 25
+      term0 = 1/(1+exp(v2*( F2_yf[y,fish_flt,k-1] - v1)));
+      term1 = F2_yf[y,fish_flt,k-1]*term0;
+      term2 = v1*(1-term0);
+      F2_yf[y,fish_flt,k] = -log(1-(term1+term2))
+      # cat(F2_yf[y,fish_flt,k],"\n")
+      
+    } ## end hybrid F iterations
+    Freal[y, fish_flt] <- F2_yf[y,fish_flt,niter] ## final as Freal
+    cat( Freal[y, fish_flt],fish_flt,"\n")
+    
+    
+    # Catch_yaf_est(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))*
+    #   phi_if_fish(fish_flt, i)* N_yai_beg(y,a,i)*wage_catch(a,y); ## do this by fleet with phi
+    # CatchN_yaf(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(y,a,i);## Calculate the catch in kg
+        # Catch_yf_est(y,fish_flt)= Catch_yf_est[y,a,fish_flt] + Catch_yaf_est(y,a,fish_flt); ## sum over the current catch at age
+        # CatchN(y,fish_flt) <- CatchN_yaf[y,a,] CatchN_yaf(y,a,fish_flt);
+  } ## end fishery fleets
+
+  
   } ## END YEARS
+  
+  
   
 } ## END FUNC
   
@@ -346,7 +455,7 @@ runOM_datagen <- function(df, seed = 731){
   # 
   
   
-  ## observation component ----
+
   
   ## true survey biomass
   

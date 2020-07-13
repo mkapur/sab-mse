@@ -1,5 +1,5 @@
 
-# Hi Maia, here's how I added the breakpoint lines, by building each one up in steps
+# here's how I added the breakpoint lines, by building each one up in steps
 # - First as a tibble
 # - Then as a st_linestring
 # - Then as a st_sfc
@@ -92,9 +92,34 @@ xdif = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[2]]
 int = splitLat(sample_x = 25, xmin, xmax, ymin, ymax)[[3]]
 blues <- colorRampPalette(c("red","purple","blue",
                             "cadetblue1","white"))
-BCbath <- getNOAA.bathy(lon1 = -140, lon2 = -120,
-                        lat1 = 45, lat2 = 65, resolution = 4)
+# BCbath <- getNOAA.bathy(lon1 = -140, lon2 = -120,
+#                         lat1 = 45, lat2 = 65, resolution = 4)
 
+
+## plotting example
+
+usa <- map_data("world") 
+require(ggplot2)
+require(dplyr)
+
+ggplot() + geom_polygon(data = usa, aes(x = long, y = lat, group = group), 
+                        fill = 'grey22') +
+  theme(axis.title =element_blank()) +
+  scale_x_continuous(expand = c(0,0), limits = c(-180,-110), breaks = seq(-180,-120,10), labels = paste(seq(-180,-120,10), "°W")) +
+  scale_y_continuous(expand = c(0,0), limits = c(30,75), breaks = seq(30,60,10), 
+                     labels =  paste(seq(30,60,10), "°N"))  +
+  
+  ## CURRENT MGMT BOUNDARIES
+  mgmtLims <- data.frame(ymax = c(65, 65, 49),
+                         ymin = c(49, 49, 30), 
+                         xmax = c(-180, -115, -115), 
+                         xmin = c(-132, -132, -132))
+  geom_rect(data = mgmtLims, aes(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax),
+            fill =NA, size = 1, colour = 'red') +
+
+  
+  labs(x = "", y = "") +
+  coord_quickmap()  
 # https://stackoverflow.com/questions/27214282/add-bathymetry-lines-to-ggplot-using-marmap-package-and-getnoaa-bathy
 
 # BCangle <- tibble(X = xdomain,

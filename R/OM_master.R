@@ -9,6 +9,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 source(here("R","functions",'load_files_OM.R'))
+
 compile(here("TMB","runsabassessment.cpp"))
 dyn.load(dynlib(here("TMB","runsabassessment")))
 

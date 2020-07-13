@@ -179,11 +179,33 @@ do.call(grid.arrange,pA2)
 dev.off()
 
 ## catches post F tuning
-catch_yf_predt <- data.frame(catch_yf_pred)[1:(tEnd-1),] 
+
+## new option - by area weighted Fs
+catch_yf_predt <- data.frame(matrix(NA, nrow = tEnd, ncol = nfleets_fish))
+for(flt in 1:nfleets_fish){
+  for(y in 1:(tEnd-1)){
+  catch_yf_predt[y,flt] <- sum(catch_yfi_pred[y,flt,])
+  }
+}
+
+## old option -- fleet -specific
+# catch_yf_predt <- data.frame(catch_yf_pred)[1:(tEnd-1),]
+
+## comparing options
+plot(Freal_yf[,2] ~ rowSums(F_area_yfi[,2,]), 
+     xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
+abline(0,1,col = 'red',add = TRUE)
+
+plot(catch_yf_pred[,2] ~   catch_yf_predt[,2], 
+     xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
+abline(0,1,col = 'red',add = TRUE)
+
+
+
 names(catch_yf_predt) <- paste('Fleet',1:3)
 
 catch_yf_predt <- catch_yf_predt %>%
-  mutate(Year = 1:52) %>%
+  mutate(Year = 1:nrow(catch_yf_predt)) %>%
   melt(id = 'Year') %>%
   mutate(Type = 'PRED')
 
@@ -207,12 +229,16 @@ ggplot(data = catch_yf_obst, aes(x = Year, y = value, color = variable)) +
   labs(y = 'Catch (lbs)', color = 'Fishing Fleet') +
   facet_wrap(~variable, scales = "free_y")
 
-ggsave(last_plot(),
-       file = here('figs',
-                   paste0('catch_fits_',
-                   'v1=',v1,'.png')),
-       width = 10, height = 6, unit = 'in',
-       dpi = 420)
+# ggsave(last_plot(),
+       # file = here('figs',
+       #             paste0('catch_fits_',
+       #             'v1=',v1,'.png')),
+       # width = 10, height = 6, unit = 'in',
+       # dpi = 420)
+
+
+
+
 # 
 # simdata$SSB_yk %>% 
 #   data.frame() %>%

@@ -115,13 +115,14 @@ pSRR <- cbind(R_yk, SSB_yk) %>% data.frame() %>%
   facet_wrap(~ stock, scales = 'free')
 
 
-
+## deterministic/expected length at ages
 pLAA1 <- Length_yai_beg[,,1] %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value, color = Yr )) +
   geom_point() +
   labs(x = 'Age',y = 'Length', color = 'Year') +
+  geom_hline(yintercept = c(40,50,65)*0.95, col = 'red') +
   ggsidekick::theme_sleek()
 
 pLAA2 <- Length_yai_beg[,,2] %>% data.frame() %>%
@@ -134,7 +135,6 @@ pLAA2 <- Length_yai_beg[,,2] %>% data.frame() %>%
 
 
 ## distributions
-
 pA1 <- list() ## for area 1
 for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   a1 <- 
@@ -142,6 +142,28 @@ for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
     melt() %>%
     group_by(Var2) %>% 
     mutate(sumP = sum(value), pbin = value/sumP)
+  
+
+  ggplot(a1,aes( x = Var2, y = pbin, color = factor(Var1))) +
+    # geom_histogram(stat ='identity', position = 'stack') +
+    geom_line() + 
+    geom_area(aes(fill=factor(Var1))) +
+    # geom_density( )+
+    labs(x = 'len', y = 'prob(Bin)', fill = 'age', 
+         title = paste("year ",y), 
+         subtitle= 'subarea 1') +
+    theme_sleek()
+  
+  ggplot(a1,aes( x = Var1, y = pbin, color = factor(Var2))) +
+    # geom_histogram(stat ='identity', position = 'stack') +
+    geom_line() + 
+    # geom_area(aes(fill=factor(Var2))) +
+    # geom_density( )+
+    labs(x = 'age', y = 'prob(Bin)', fill = 'len', 
+         title = paste("year ",y), 
+         subtitle= 'subarea 1') +
+    theme_sleek()
+  
   pA1[[y]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
     geom_tile() +
     labs(x = 'age', y = 'len', 
@@ -189,16 +211,16 @@ for(flt in 1:nfleets_fish){
 }
 
 ## old option -- fleet -specific
-# catch_yf_predt <- data.frame(catch_yf_pred)[1:(tEnd-1),]
+catch_yf_predt <- data.frame(catch_yf_pred)[1:(tEnd-1),]
 
 ## comparing options
-plot(Freal_yf[,2] ~ rowSums(F_area_yfi[,2,]), 
-     xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
-abline(0,1,col = 'red',add = TRUE)
-
-plot(catch_yf_pred[,2] ~   catch_yf_predt[,2], 
-     xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
-abline(0,1,col = 'red',add = TRUE)
+# plot(Freal_yf[,2] ~ rowSums(F_area_yfi[,2,]), 
+#      xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
+# abline(0,1,col = 'red',add = TRUE)
+# 
+# plot(catch_yf_pred[,2] ~   catch_yf_predt[,2], 
+#      xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
+# abline(0,1,col = 'red',add = TRUE)
 
 
 
@@ -229,12 +251,12 @@ ggplot(data = catch_yf_obst, aes(x = Year, y = value, color = variable)) +
   labs(y = 'Catch (lbs)', color = 'Fishing Fleet') +
   facet_wrap(~variable, scales = "free_y")
 
-# ggsave(last_plot(),
-       # file = here('figs',
-       #             paste0('catch_fits_',
-       #             'v1=',v1,'.png')),
-       # width = 10, height = 6, unit = 'in',
-       # dpi = 420)
+ggsave(last_plot(),
+       file = here('figs',
+                   paste0('catch_fits_',
+                          'v1=',v1,Sys.Date(),'.png')),
+       width = 10, height = 6, unit = 'in',
+       dpi = 420)
 
 
 

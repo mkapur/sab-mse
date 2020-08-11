@@ -158,7 +158,93 @@ surveys <- read.csv("./input/raw/Indices_SS3_2020-01-23v3.csv")  %>% ## VAST std
 save(surveys, file = paste0("input/temp/cc_surv_",Sys.Date(),".Rdata"))
 
 
-## Comps -- would be great to get these @ subarea if possible ----
+## Comps ----
+
+bcdat <- read.csv(here('input','raw','BC_LWMSO_1970-present.csv')) ## slow
+
+## calculate raw comp values
+bcgears <- c("TRAP","LONGLINE","BOTTOM TRAWL")
+bc_lencomps_female <- bc_lencomps_male <- array(NA, dim = c(length(1978:2018), length(1:88), length(bcgears)),
+                                            dimnames = list(paste(1978:2018), paste(1:88),  bcgears))
+
+bc_lencomps_yearN_female <-bc_lencomps_yearN_male <- array(NA, dim = c(length(1978:2018), 2 , length(bcgears)),
+                        dimnames = list(paste(1978:2018), c('YEAR','n'),  bcgears))
+
+for(i in 1:length(bcgears)){
+  bc_lencomps0 <-  bcdat %>%
+    filter(GEAR_DESC == bcgears[i] & 
+             TRIP_TYPE == 'OBSERVED COMMERCIAL' &
+             !is.na(SPECIMEN_AGE) & SPECIMEN_SEX_CODE != 3) %>% 
+    select(TRIP_TYPE, GEAR_DESC, NS_AREA, YEAR, SPECIMEN_SEX_CODE, SPECIMEN_AGE) %>%
+    group_by(YEAR,SPECIMEN_SEX_CODE,SPECIMEN_AGE) %>%
+    summarise(total = n() )%>%   mutate(freq = total/sum(total))  %>%
+    tidyr::complete(., SPECIMEN_AGE = 1:88, 
+                    SPECIMEN_SEX_CODE = factor(1:2), 
+                    YEAR = factor(1978:2018),
+                    fill = list(TRIP_TYPE = 'OBSERVED COMMERCIAL',
+                                GEAR_DESC ='BOTTOM TRAWL', 
+                                total = 0)) 
+  
+  
+  bc_lencomps0$SPECIMEN_AGE <- as.numeric(bc_lencomps0$SPECIMEN_AGE)
+  bc_lencomps0$YEAR <- as.numeric(bc_lencomps0$YEAR)
+  bc_lencomps0$SPECIMEN_SEX_CODE <- as.factor(bc_lencomps0$SPECIMEN_SEX_CODE)
+  
+  bc_lencomps0$freq[bc_lencomps0$total==0] <- 0 ## if no real samples, overwrite nan to zero
+  
+  
+  bc_lencomps1 <- bc_lencomps0 %>% distinct() ## rm duplicates created via complete()
+  
+  ## sanity check - sum freq for every year-sex combo should be 1 or 0 (no samples at all)
+  bc_lencomps1 %>% group_by(YEAR, SPECIMEN_SEX_CODE) %>% summarise(sumf = sum(freq))
+  bc_lencomps1 %>% filter(YEAR == 1978 & SPECIMEN_SEX_CODE == 1 ) %>% summarise(sum(freq))
+  bc_lencomps0 %>% filter(YEAR == 1978 & SPECIMEN_SEX_CODE == 1 ) 
+  
+  ## should be in the low 100s
+  bc_lencomps_yearN_female[,,i] <- bc_lencomps1 %>%     filter(SPECIMEN_SEX_CODE == 1) %>% group_by(YEAR) %>% summarise(n = sum(total)) %>% as.matrix()
+  bc_lencomps_yearN_male[,,i] <- bc_lencomps1 %>%     filter(SPECIMEN_SEX_CODE == 2) %>%group_by(YEAR) %>% summarise(n = sum(total)) %>% as.matrix
+  
+  
+  bc_lencomps_female[,,i] <- bc_lencomps1 %>%
+    ungroup() %>%
+    filter(SPECIMEN_SEX_CODE == 1) %>%
+    select(-SPECIMEN_SEX_CODE, -total) %>% #View()
+    tidyr::pivot_wider(., values_from = freq, names_from = SPECIMEN_AGE) %>% 
+    select(-YEAR) %>%
+    as.matrix()
+  
+  bc_lencomps_male[,,i] <- bc_lencomps1 %>%
+    ungroup() %>%
+    filter(SPECIMEN_SEX_CODE == 2) %>%
+    select(-SPECIMEN_SEX_CODE, -total) %>% #View()
+    tidyr::pivot_wider(., values_from = freq, names_from = SPECIMEN_AGE) %>%
+    select(-YEAR) %>%
+    as.matrix()
+}
+
+plist = list(); idx = 1
+
+for(i in 1:length(bcgears)){
+  # par(mfrow = c(3, ceiling(sum(bc_lencomps_yearN_female[,2,i] != 0)/3)))
+  for(y in 1:length(1978:2018)){
+    if(all(bc_lencomps_female[y,,i] == 0) & all(bc_lencomps_male[y,,i] == 0) ) next()
+    plist[[idx]] <- bc_lencomps_female[y,,i] %>%
+      melt() %>%
+    ggplot(., aes(x = 1:88, y = value)) +
+      geom_line(color = 'red', lwd = 1.1, alpha = 0.5) +
+      geom_line(data = melt(bc_lencomps_male[y,,i]), 
+                color = 'blue', lwd = 1.1, alpha = 0.5) +
+      ggsidekick::theme_sleek() +
+      labs(x = 'Length CM', title = paste0(1978+y," ",bcgears[i]))
+    idx = idx+1
+  }
+}
+
+
+Rmisc::multiplot(plotlist = plist, cols = 4)
+save(bc_lencomps_female, here('input',"cleaned","bc_Lcomps_FEMALE.rdata"))
+save(bc_lencomps_male, paste(here('input',"cleaned","bc_Lcomps_MALE.rdata")))
+
 ccdat <- SS_readdat(file = "./input/raw/CC_2019_100.00/data.ss")
 ccdat$agecomp$fleet <-   ccdat$fleetnames[ccdat$agecomp$FltSvy ] ## rename fleets
 ccdat$lencomp$fleet <-   ccdat$fleetnames[ccdat$lencomp$FltSvy ] ## rename fleets

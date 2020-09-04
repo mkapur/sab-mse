@@ -241,6 +241,8 @@ load_data_seasons <- function(nseason = 1,
   # Len comps [these are arrays by fleet]
   load(here("input","input_data",'OM_lencomps_female.rdata'))
   load(here("input","input_data",'OM_lencomps_male.rdata'))
+  
+  
   # age_survey.df <- read.csv(here("input","data",'agecomps_survey.csv'))
   # age_survey.df$flag <- 1
   # age_catch.df <- read.csv(here("input","data",'agecomps_fishery.csv'))
@@ -257,54 +259,53 @@ load_data_seasons <- function(nseason = 1,
   # if(nseason == 1){
   #   surveyseason = 1
   # }
-  
 
-  ## build aging error
-  ageErr0 <- read.csv(here("input","raw","Age_Error_Example_ToMaia.csv"))[,1:nage]
-  names(ageErr0) <- 0:(ncol(ageErr0)-1)
-  ## fill in addl ages
-  ageErr0[,ncol(ageErr0):nage] <-   ageErr0[,ncol(ageErr0)]
-  age_error <- array(0, dim = c(2,nage,nfleets_surv))  ## later this should be nfleets_acomp
-  
-  ## placeholder (just copy for each)
-  for(i in 1:nfleets_surv){
-    age_error[,,i] <- as.matrix(ageErr0)
-  }
-  
-  # Load the age comps 
-  age_survey.tmp <- read.csv(here("input","data",'age_survey_ss.csv'))
-  age_survey.tmp2 <- array(NA, dim = c(nrow(age_survey.tmp),ncol(age_survey.tmp), nfleets_surv)) ## placeholder; the last term should be nfleets-acomp
-  age_survey.tmp2[,,1] <- age_survey.tmp2[,,2] <- as.matrix(age_survey.tmp)
-  age_catch.tmp <- read.csv(here("input","data",'age_catch_ss.csv'))
-  ac.data <- read.csv(here("input","data",'ac_data.csv'))
-  
-
-  
-  
-  
- 
-  
-  ## setup phi (matching matrix) depending on spatial setup
+  ## Phi objects ----
+  ## setup phi (spatial matching matrix) depending on spatial setup
   if(nspace == 6){ ## OM
+    
+    ## phi_survy
     phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
-    phi_if_surv[1,1:2] <-  phi_if_surv[2,1:2] <-  phi_if_surv[3,3:4]<-  phi_if_surv[4,3:4] <-  phi_if_surv[5,5:6] <- 1
     
-    phi_if_fish <- matrix(1, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
+    rownames(phi_if_surv) <- names(df.survey)
+    colnames(phi_if_surv) <- rev(spmat$subarea)
     
+    phi_if_surv[1,1:2] <-  phi_if_surv[2,3:4] <-  
+      phi_if_surv[3,3:4]<-  phi_if_surv[4,5] <-  phi_if_surv[5,6] <- 1
+    
+    ## phi_fish
+    phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
+    rownames(phi_if_fish) <- names(catch)[2:ncol(catch)]
+    colnames(phi_if_fish) <- rev(spmat$subarea)
+    
+    phi_if_fish[1:2,1:2] <-  phi_if_fish[3:5,3:4] <-  
+      phi_if_fish[c(6,8),5] <-        phi_if_fish[c(7,9),6] <- 1
+    
+  
+    ## phi_ik
     phi_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
+    rownames(phi_ik) <- unique(rev(spmat$stock))
+    colnames(phi_ik) <- rev(spmat$subarea)
+    
     phi_ik[1,1] <-  phi_ik[2,2:3] <-  phi_ik[3,4:5]<-  phi_ik[4,6]  <- 1
     phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
+    
+    ## phi_ij
     phi_ij <-  matrix(0, ncol = nspace, nrow = nspace) ## 1 indicates if subareas comprise DISTINCT stocks
+    rownames(phi_ij) = colnames(phi_ij) = rev(spmat$subarea)
     phi_ij[1,2:nspace] <- phi_ij[2,c(1,3:nspace)] <- phi_ij[3,c(1:2,4:nspace)] <- phi_ij[4,c(1:3,nspace)]<- phi_ij[5,c(1:3,nspace)] <- phi_ij[6,c(1:4)] <- 1
       
-    
+    ## phi_fm
     phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
-    phi_fm[1:2,1] <- phi_fm[3,3]  <- 1
+    rownames(phi_fm) = names(catch)[2:ncol(catch)]
+    phi_fm[1:2,1] <- phi_fm[3:5,2]  <- phi_fm[6:9,3]  <- 1
     
+    ## tau_ik
     tau_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
+    rownames(tau_ik) <- unique(rev(spmat$stock))
+    colnames(tau_ik) <- rev(spmat$subarea)
     tau_ik[1,1] <-   tau_ik[4,6]  <- 1 ## 100% of recruitment in stock
     tau_ik[2,2:3] <-  tau_ik[3,4:5] <-  0.5 ## split 50/50 for now
-    # phi_if_fish[1,1:2] <-  phi_if_fish[2,1:2] <-  phi_if_fish[3,3:4]<-  phi_if_fish[4,3:4] <-  phi_if_fish[5,5:6] <- 1
   } else {
     phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
@@ -346,9 +347,9 @@ load_data_seasons <- function(nseason = 1,
   # }
   
   # Load parameters from the assessment 
-  initN <- rev(read.csv(here("input","data",'Ninit_MLE.csv')))[,1]
-  Rdev <- read.csv(here("input","data",'Rdev_MLE.csv'))[,1]
-  PSEL <- as.matrix(read.csv(here("input","data",'p_MLE.csv'))) ## time varying selex pars for fihsery(?)
+  # initN <- rev(read.csv(here("input","data",'Ninit_MLE.csv')))[,1]
+  # Rdev <- read.csv(here("input","data",'Rdev_MLE.csv'))[,1]
+  # PSEL <- as.matrix(read.csv(here("input","data",'p_MLE.csv'))) ## time varying selex pars for fihsery(?)
   #Fin <- assessment$F0
   
   # b <- matrix(NA, nyear)
@@ -386,7 +387,7 @@ load_data_seasons <- function(nseason = 1,
   # }  
   # 
   #b <- matrix(1, tEnd)
-  b <- as.matrix(read.csv(here("input","data",'b_input.csv'))) ## this is rec penalty
+  # b <- as.matrix(read.csv(here("input","data",'b_input.csv'))) ## this is rec penalty
  
   
   # if(move == TRUE){
@@ -396,41 +397,41 @@ load_data_seasons <- function(nseason = 1,
   #  }
 
   # load parameters specifically for hake 
-  parms.scalar <- read.csv(here("input","data","parms_scalar.csv"))
-  parms.sel <- read.csv(here("input","data",'selectivity.csv'))
-  initN <- as.matrix(read.table(here("input","data",'initN.csv'))) ## initial n at age?
+  # parms.scalar <- read.csv(here("input","data","parms_scalar.csv"))
+  # parms.sel <- read.csv(here("input","data",'selectivity.csv'))
+  # initN <- as.matrix(read.table(here("input","data",'initN.csv'))) ## initial n at age?
   
-  Rdev <- as.matrix(read.csv(here("input","data",'Rdev.csv')))
-  
-  
-  if(sel_hist == 1){
-  PSEL <- as.matrix(read.csv(here("input","data",'PSEL.csv')))
-  }else{
-  PSEL <- matrix(0, 5, 28)
-  }
+  # Rdev <- as.matrix(read.csv(here("input","data",'Rdev.csv')))
   
   
-  if(nseason == 4 & nspace == 2){
-  Fnseason <- matrix(NA, 2,4)
+  # if(sel_hist == 1){
+  # PSEL <- as.matrix(read.csv(here("input","data",'PSEL.csv')))
+  # }else{
+  # PSEL <- matrix(0, 5, 28)
+  # }
   
-  #Fnseason[1,] <- c(0.0,0.4,0.50,0.1) # Must add to one 
-  Fnseason[1,] <- c(0.001,0.188,0.603,0.208)
-  #Fnseason[2,] <- c(0.0,0.4,0.50,0.1) # Must add to onec
-  Fnseason[2,] <- c(0.000,0.317,0.382,0.302)/sum(c(0.000,0.317,0.382,0.302)) # Divide by sum to sum to 1 
-    
-  }else{
-    Fnseason <- matrix(NA, nspace, nseason)
-    Fnseason[1:nspace,] <- 1/nseason # Equally distributed catch
-    
-    
-  }
+  
+  # if(nseason == 4 & nspace == 2){
+  # Fnseason <- matrix(NA, 2,4)
+  # 
+  # #Fnseason[1,] <- c(0.0,0.4,0.50,0.1) # Must add to one 
+  # Fnseason[1,] <- c(0.001,0.188,0.603,0.208)
+  # #Fnseason[2,] <- c(0.0,0.4,0.50,0.1) # Must add to onec
+  # Fnseason[2,] <- c(0.000,0.317,0.382,0.302)/sum(c(0.000,0.317,0.382,0.302)) # Divide by sum to sum to 1 
+  #   
+  # }else{
+  #   Fnseason <- matrix(NA, nspace, nseason)
+  #   Fnseason[1:nspace,] <- 1/nseason # Equally distributed catch
+  #   
+  #   
+  # }
 
 
-  rmul <-1
-  
-  if(nspace == 2){
-    rmul <- 1.1
-  }
+  # rmul <-1
+  # 
+  # if(nspace == 2){
+  #   rmul <- 1.1
+  # }
   
   
   

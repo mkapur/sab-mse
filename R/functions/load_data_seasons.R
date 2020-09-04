@@ -218,13 +218,13 @@ load_data_seasons <- function(nseason = 1,
  
 
   
-  # Catch
+  # Catch ----
   # catch <- read.csv(here("input","data",'hake_totcatch.csv'))
   # catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
   nfleets_fish <- ncol(catch)-1
 
-  # Survey abundance
+  # Survey ----
   # df.survey <- read.csv(here("input","data",'acoustic survey.csv'))
   df.survey <- read.csv(here("input","input_data",'OM_indices.csv'))
   # survey <- read.csv(here("input","data",'survey.csv'))
@@ -235,26 +235,28 @@ load_data_seasons <- function(nseason = 1,
   
   
   # Maturity
-  mat <- read.csv(here("input","data",'maturity.csv'))
-  mat <- wage_ssb[1,]
+  # mat <- read.csv(here("input","data",'maturity.csv'))
+  # mat <- wage_ssb[1,]
 
-  # Age comps
-  age_survey.df <- read.csv(here("input","data",'agecomps_survey.csv'))
-  age_survey.df$flag <- 1
-  age_catch.df <- read.csv(here("input","data",'agecomps_fishery.csv'))
-  age_catch.df$flag <- 1
+  # Len comps [these are arrays by fleet]
+  load(here("input","input_data",'OM_lencomps_female.rdata'))
+  load(here("input","input_data",'OM_lencomps_male.rdata'))
+  # age_survey.df <- read.csv(here("input","data",'agecomps_survey.csv'))
+  # age_survey.df$flag <- 1
+  # age_catch.df <- read.csv(here("input","data",'agecomps_fishery.csv'))
+  # age_catch.df$flag <- 1
   
-  if(nseason == 4){
-  surveyseason <- 3
-  
-  }else{
-    surveyseason <- floor(nseason/2)
-  }
-  
-  
-  if(nseason == 1){
-    surveyseason = 1
-  }
+  # if(nseason == 4){
+  # surveyseason <- 3
+  # 
+  # }else{
+  #   surveyseason <- floor(nseason/2)
+  # }
+  # 
+  # 
+  # if(nseason == 1){
+  #   surveyseason = 1
+  # }
   
 
   ## build aging error

@@ -21,6 +21,7 @@ runOM_datagen <- function(df, seed = 731){
   phi_if_surv <- df$phi_if_surv 
   phi_if_fish <- df$phi_if_fish 
   phi_im <- df$phi_im
+  phi_fm <- df$phi_fm
   phi_ik <- df$phi_ik 
   phi_ik2 <- df$phi_ik2 + 1 ## zero-indexed, add one
   tau_ik <- df$tau_ik 
@@ -320,9 +321,6 @@ runOM_datagen <- function(df, seed = 731){
     } ## end subareas i
   
 
-
- 
-
   
   
   
@@ -354,9 +352,12 @@ runOM_datagen <- function(df, seed = 731){
       LengthAge_alyi_beg[a,LBins,y,i] = 1-pnorm(LBins, Length_yai_beg[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
       LengthAge_alyi_mid[a,LBins,y,i] = 1-pnorm(LBins, Length_yai_mid[y,a,i], sigmaG_yk[y,phi_ik2[i]]);
       if(is.na(   LengthAge_alyi_beg[a,LBins,y,i])) stop('NA ON ', a,l,y,i,"\n")
-    } ## end ages
+  
+      } ## end ages
   } ## end nspace
   
+
+    
 
   
   ## Hybrid F tuning  ----

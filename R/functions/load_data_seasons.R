@@ -4,7 +4,7 @@ load_data_seasons <- function(nseason = 4,
                               nspace = 2, 
                               nstocks = 2,
                               myear = 2018,
-                              LBins = 60,
+                              LBins = 81,
                               movemaxinit = 0.35, 
                               movefiftyinit = 6,
                               nsurvey = 2, 
@@ -47,7 +47,7 @@ load_data_seasons <- function(nseason = 4,
   years <- 1966:(myear+yr_future)
   nyear <- length(years)
   tEnd <- length(years)*nseason
-  age <- 0:20
+  age <- 0:20 # 0:95
   
   ## Age stuff
   nage <- length(age)
@@ -272,31 +272,7 @@ load_data_seasons <- function(nseason = 4,
   
   
   
-  ## load growth params
-  growPar <- read.csv(here("input","raw","Table3_2020-05-06phase2.csv"))
-  growPar %>%
-    filter(Period == 'early') %>%
-    select(Linf)
-  
-  ## parameter placeholders
-  Linf_yk <-L1_yk <- kappa_yk <- sigmaG_yk <- matrix(NA, nrow = length(years), ncol = nstocks)
-  # Linf_yk[1:(2009-1966),1:nstocks] <-  growPar$Linf[growPar$Period == 'early'][1:nstocks]
-  # Linf_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Linf[growPar$Period == 'late'][1:nstocks]
-  
-  Linf_yk[1:(2009-1966),1] <-  growPar$Linf[growPar$Period == 'early'][1]
-  Linf_yk[(2009-1966):nrow(Linf_yk),1] <-  growPar$Linf[growPar$Period == 'late'][1]
-  
-  Linf_yk[1:(2009-1966),2] <-  growPar$Linf[growPar$Period == 'early'][2]
-  Linf_yk[(2009-1966):nrow(Linf_yk),2] <-  growPar$Linf[growPar$Period == 'late'][2]
-  
-  kappa_yk[1:(2009-1966),1:nstocks] <-  growPar$k[growPar$Period == 'early'][1:nstocks]
-  kappa_yk[(2009-1966):nrow(kappa_yk),1:nstocks] <-  growPar$k[growPar$Period == 'late'][1:nstocks]
-  
-  L1_yk[1:(2009-1966),1:nstocks] <-  growPar$L1[growPar$Period == 'early'][1:nstocks]
-  L1_yk[(2009-1966):nrow(L1_yk),1:nstocks] <-  growPar$L1[growPar$Period == 'late'][1:nstocks]
-  
-  sigmaG_yk[1:(2009-1966),1:nstocks] <-  growPar$Sigma[growPar$Period == 'early'][1:nstocks]
-  sigmaG_yk[(2009-1966):nrow(Linf_yk),1:nstocks] <-  growPar$Sigma[growPar$Period == 'late'][1:nstocks]
+ 
   
   ## setup phi (matching matrix) depending on spatial setup
   if(nspace == 6){ ## OM
@@ -325,9 +301,10 @@ load_data_seasons <- function(nseason = 4,
     phi_ik <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
    
-    phi_fm <- matrix(0, nrow = nspace, ncol = 2)
-    phi_fm[1,1] <- phi_fm[2,2] <- 1
-    
+    # phi_fm <- matrix(0, nrow = nspace, ncol = 2)
+    # phi_fm[1,1] <- phi_fm[2,2] <- 1
+    phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
+    phi_fm[1:2,1] <- phi_fm[3,3]  <- 1
      ## autogenerate stock-distinction matrix
     phi_ij <-  matrix(NA, byrow = TRUE, ncol = nspace, nrow = nspace)
     for(i in 1:nspace){

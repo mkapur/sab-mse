@@ -121,31 +121,27 @@ load_data_seasons <- function(nseason = 1,
       for(i in 1:nspace){
         for(j in 1:nspace){
           if(sum(X_ija[i,1:j,n]) > 1)  X_ija[i,j:nspace,n] <- 0
-        }
-      }
-    }
-  } 
+        } ## end j space
+      } ## end i space
+    } ## end n ages
+  } ## end move == TRUE
 
-
-  
   omega_ai <- matrix(rep(0, nage*nspace), c(nage,nspace))## eigenvector for stable spatial distribution at age
   for(a in 1:nage){
     omega_ai[a,] <- eigen(X_ija[,,a])$values 
     omega_ai[omega_ai < 0] <- 0.05
-    }
+  }
 
   
   # weight at age 
-  wage_ss <- read.csv(here("input","data",'wage_ss.csv'))
-  wage_ss <- wage_ss[wage_ss$Yr %in% years,]
-  wage_unfished <- read.csv(here("input","data",'unfished_waa.csv'))
-
-  
-  wage_ssb <- wage_ss[wage_ss$Fleet == -2,paste('X',age, sep = '')]
-  wage_ssb[[1]] <- unname(wage_ssb[[1]])
-  wage_catch <- wage_ss[wage_ss$Fleet == 1 ,paste('X',age, sep = '')]
-  wage_survey <- wage_ss[wage_ss$Fleet == 2,paste('X',age, sep = '')]
-  wage_mid <- wage_ss[wage_ss$Fleet == -1,paste('X',age, sep = '')]
+  # wage_ss <- read.csv(here("input","data",'wage_ss.csv'))
+  # wage_ss <- wage_ss[wage_ss$Yr %in% years,]
+  # wage_unfished <- read.csv(here("input","data",'unfished_waa.csv'))
+  # wage_ssb <- wage_ss[wage_ss$Fleet == -2,paste('X',age, sep = '')]
+  # wage_ssb[[1]] <- unname(wage_ssb[[1]])
+  # wage_catch <- wage_ss[wage_ss$Fleet == 1 ,paste('X',age, sep = '')]
+  # wage_survey <- wage_ss[wage_ss$Fleet == 2,paste('X',age, sep = '')]
+  # wage_mid <- wage_ss[wage_ss$Fleet == -1,paste('X',age, sep = '')]
   
   # if(yr_future>0){ // Namiong issues here, fix in later update
   #   tmp_ssb <- matrix(rep(wage_ssb[1,], each = yr_future), nrow = yr_future)

@@ -1,8 +1,8 @@
 ## Load the hake data
 # year and age input 
-load_data_seasons <- function(nseason = 4, 
-                              nspace = 2, 
-                              nstocks = 2,
+load_data_seasons <- function(nseason = 1, 
+                              nspace = 6, 
+                              nstocks = 4,
                               myear = 2018,
                               LBins = 81,
                               movemaxinit = 0.35, 
@@ -44,10 +44,10 @@ load_data_seasons <- function(nseason = 4,
     }
   }
 
-  years <- 1966:(myear+yr_future)
+  years <- 1960:(myear+yr_future)
   nyear <- length(years)
   tEnd <- length(years)*nseason
-  age <- 0:20 # 0:95
+  age <- 0:70 # 0:95
   
   ## Age stuff
   nage <- length(age)
@@ -60,53 +60,56 @@ load_data_seasons <- function(nseason = 4,
   recruitmat[2] <- 1 # 90 percent of spawning south
   
   
-  # Maturity
-  
-  movefifty <- movefiftyinit
-  
-  movemax <- rep(movemaxinit,nseason)
-  
-  movemat <- array(0, dim = c(nspace, nage, nseason, nyear)) # Chances of moving in to the other grid cell 
+  # Maturity ----
+  load(here("input","input_data","OM_maturity_ak.rdata")) ## ak is age, stock
   
   
-  if(nspace == 1){
-    move = FALSE
-  }else{
-    move = TRUE
-  }
-  
-  if(move == TRUE){
-    for(j in 1:nspace){
-      for(i in 1:nseason){
-        movemat[j,,i,] <- movemax[i]/(1+exp(-moveslope*(age-movefifty))) ## saturation for movement, may fix instead
-        
-      }
-    }
+  ## Movement ----
+  # movefifty <- movefiftyinit
+  # 
+  # movemax <- rep(movemaxinit,nseason)
+  # 
+  # movemat <- array(0, dim = c(nspace, nage, nseason, nyear)) # Chances of moving in to the other grid cell 
+  # 
+  # 
+  # if(nspace == 1){
+  #   move = FALSE
+  # }else{
+  #   move = TRUE
+  # }
+  # 
+  # if(move == TRUE){
+  #   for(j in 1:nspace){
+  #     for(i in 1:nseason){
+  #       movemat[j,,i,] <- movemax[i]/(1+exp(-moveslope*(age-movefifty))) ## saturation for movement, may fix instead
+  #       
+  #     }
+  #   }
+  #   
+  #   movemat[,1:2,,] <- 0 # Recruits and 1 year olds don't move
+  #   
+  #   if(nseason == 4){ # For the standard model
+  #     
+  #     movemat[1,3:nage,2:3,] <- movesouth # Don't move south during the year
+  #     movemat[1,3:nage,1,] <- moveout*0.5 # continuing south movement at spawning time
+  #     
+  #     movemat[1,3:nage,nseason,] <- moveout
+  #     movemat[2,3:nage,nseason,] <- movesouth
+  #   }
+  #   # movemat[1,11:nage,nseason] <- 0
+  #   # movemat[2,11:nage,nseason] <- 0
+  #   
+  #   
+  #   
+  #   # move.init <- array(0.5, dim = c(nspace, nage))
+  #   # 
+  #   # move.init[1,] <- 0.3
+  #   # move.init[2,] <- 0.7
+  #   move.init <- moveinit
     
-    movemat[,1:2,,] <- 0 # Recruits and 1 year olds don't move
-    
-    if(nseason == 4){ # For the standard model
-      
-      movemat[1,3:nage,2:3,] <- movesouth # Don't move south during the year
-      movemat[1,3:nage,1,] <- moveout*0.5 # continuing south movement at spawning time
-      
-      movemat[1,3:nage,nseason,] <- moveout
-      movemat[2,3:nage,nseason,] <- movesouth
-    }
-    # movemat[1,11:nage,nseason] <- 0
-    # movemat[2,11:nage,nseason] <- 0
-    
-    
-    
-    # move.init <- array(0.5, dim = c(nspace, nage))
-    # 
-    # move.init[1,] <- 0.3
-    # move.init[2,] <- 0.7
-    move.init <- moveinit
-    
-  }else{
-    move.init <- 1
-  }
+  # }else{
+  #   move.init <- 1
+  # }
   
   ## placeholder for X_ija -this will need to get converted from length
   if(move == FALSE) X_ija <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage))

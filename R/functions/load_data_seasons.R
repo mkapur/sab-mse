@@ -133,7 +133,10 @@ load_data_seasons <- function(nseason = 1,
   }
 
   
-  # weight at age 
+  # Weight at length ----
+  load(here("input","input_data","OM_wtatlen_kab.rdata")) ## a and be are pars of al^b
+  
+  
   # wage_ss <- read.csv(here("input","data",'wage_ss.csv'))
   # wage_ss <- wage_ss[wage_ss$Yr %in% years,]
   # wage_unfished <- read.csv(here("input","data",'unfished_waa.csv'))
@@ -158,24 +161,26 @@ load_data_seasons <- function(nseason = 1,
   # }
   # 
   
-  ## FLEETS ----
+  ## Fleets ----
   ## build fleets
   ## makes the master flag_fleets matrix
   ## and attendant indices for subsetting
+  fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE)
+  
   
   ## nfleets should be input
   ## auto-read nfleets_surv etc from this
-  flag_fleets <- array(NA, dim = c(4,8,nyear) ) 
+  # flag_fleets <- array(NA, dim = c(4,8,nyear) ) 
   ## row 1 = catch, row 2 = survey biomass, row 3 = acomp, row 4 = lcomp
   
-  ## populate catch fleets [needs to be yearly; perhaps automate upon readin of CSV
-  flag_fleets[,1:4,] <- c(1,0,0,0)
-  ## populate survey fleets
-  flag_fleets[,5:7,] <- c(0,1,0,0)
-  ## who has acomps?
-  flag_fleets[,8,] <- c(1,0,0,0)
-  ## who has lcomps?
-  flag_fleets[,1,] <- c(1,0,0,0)
+  # ## populate catch fleets [needs to be yearly; perhaps automate upon readin of CSV
+  # flag_fleets[,1:4,] <- c(1,0,0,0)
+  # ## populate survey fleets
+  # flag_fleets[,5:7,] <- c(0,1,0,0)
+  # ## who has acomps?
+  # flag_fleets[,8,] <- c(1,0,0,0)
+  # ## who has lcomps?
+  # flag_fleets[,1,] <- c(1,0,0,0)
   
   # nfleets_fish <- sum(flag_fleets[1,] == 1) -1 ## zero-indexed
   # nfleets_surv <- sum(flag_fleets[2,] == 1) -1 ## zero-indexed
@@ -184,42 +189,51 @@ load_data_seasons <- function(nseason = 1,
   
   
   ## make phi objects (which column corresponds to which fleet)
-  phi_fleet_catch <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
-  for(i in 1:ncol(flag_fleets)){
-    if(flag_fleets[1,i,] == 1){
-      phi_fleet_catch[i] <- idx; idx = idx+1 ## up counter
-    }
-  }
-   phi_fleet_surv <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
-  for(i in 1:ncol(flag_fleets)){
-    if(flag_fleets[2,i,] == 1){
-      phi_fleet_surv[i] <- idx; idx = idx+1 ## up counter
-    }
-  }
-
-  phi_fleet_acomp <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
-  for(i in 3:ncol(flag_fleets)){
-    if(flag_fleets[3,i,] == 1){
-      phi_fleet_acomp[i] <- idx; idx = idx+1 ## up counter
-    }
-  }
-  phi_fleet_lcomp <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
-  for(i in 4:ncol(flag_fleets)){
-    if(flag_fleets[4,i,] == 1){
-      phi_fleet_lcomp[i] <- idx; idx = idx+1 ## up counter
-    }
-  }
+  # phi_fleet_catch <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
+  # for(i in 1:ncol(flag_fleets)){
+  #   if(flag_fleets[1,i,] == 1){
+  #     phi_fleet_catch[i] <- idx; idx = idx+1 ## up counter
+  #   }
+  # }
+  #  phi_fleet_surv <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
+  # for(i in 1:ncol(flag_fleets)){
+  #   if(flag_fleets[2,i,] == 1){
+  #     phi_fleet_surv[i] <- idx; idx = idx+1 ## up counter
+  #   }
+  # }
+  # 
+  # phi_fleet_acomp <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
+  # for(i in 3:ncol(flag_fleets)){
+  #   if(flag_fleets[3,i,] == 1){
+  #     phi_fleet_acomp[i] <- idx; idx = idx+1 ## up counter
+  #   }
+  # }
+  # phi_fleet_lcomp <- matrix(NA, ncol = ncol(flag_fleets));   idx = 0 
+  # for(i in 4:ncol(flag_fleets)){
+  #   if(flag_fleets[4,i,] == 1){
+  #     phi_fleet_lcomp[i] <- idx; idx = idx+1 ## up counter
+  #   }
+  # }
   
  
 
   
   # Catch
-  catch <- read.csv(here("input","data",'hake_totcatch.csv'))
-  catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
-  nfleets_fish <- ncol(catch2)-1
+  # catch <- read.csv(here("input","data",'hake_totcatch.csv'))
+  # catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
+  catch <- read.csv(here("input","input_data","OM_catch.csv"))
+  nfleets_fish <- ncol(catch)-1
 
   # Survey abundance
-  df.survey <- read.csv(here("input","data",'acoustic survey.csv'))
+  # df.survey <- read.csv(here("input","data",'acoustic survey.csv'))
+  df.survey <- read.csv(here("input","input_data",'OM_indices.csv'))
+  # survey <- read.csv(here("input","data",'survey.csv'))
+  # survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
+  survey_x2  <- rep(2, length(years)) ## we have obs from 1970+
+  survey_x2[1:10] <- -2 ## a -2 if no survey, 2 if survey occured
+  nfleets_surv <- ncol(df.survey) 
+  
+  
   # Maturity
   mat <- read.csv(here("input","data",'maturity.csv'))
   mat <- wage_ssb[1,]
@@ -242,12 +256,7 @@ load_data_seasons <- function(nseason = 1,
     surveyseason = 1
   }
   
-  survey <- read.csv(here("input","data",'survey.csv'))
-  survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
-  survey_x2  <- rep(-2, length(years)) ## we have obs from 1970+
-  survey_x2[5:length(survey_x2)] <- -2## a -2 if no survey, 2 if survey occured
-  nfleets_surv <- ncol(survey2) 
-  
+
   ## build aging error
   ageErr0 <- read.csv(here("input","raw","Age_Error_Example_ToMaia.csv"))[,1:nage]
   names(ageErr0) <- 0:(ncol(ageErr0)-1)

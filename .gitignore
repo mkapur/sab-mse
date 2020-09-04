@@ -2,6 +2,7 @@
 *Rdata
 *.docx
 *input*
+*-deprecated*
 *_examples*
 *_presentations*
 *_writing*

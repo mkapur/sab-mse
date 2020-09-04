@@ -6,6 +6,10 @@ library(tibble)
 require(ggplot2)
 require(dplyr)
 require(patchwork)
+require(ggsidekick)
+require(rgdal)
+library(marmap)
+
 
 cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
                 "#0072B2", "#D55E00", "#CC79A7", "navy", "#F0E442" )
@@ -27,55 +31,74 @@ load("./input/cleaned/sub_area_clips_50N.Rdata")
 ## default clips for original 7 areas
 # load("./input/cleaned/sub_area_clips.Rdata") 
 
-ggplot(data = regions) +
-  kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
-  # theme_classic(base_size = 14) +
-  
 
-  
-  # geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
-  # geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
+## ocean currents
+shape <- readOGR(dsn = "C:/Users/MKapur/Dropbox/UW/sab-growth/raw_data/Major_Ocean_Currents_arrowPolys_30m_8", 
+                 layer = 'Major_Ocean_Currents_arrowPolys_30m_8')
+
+shapefile_df <- fortify(shape)
+shapefile_df$long <- shapefile_df$long+360
+currents.col <- c("#000000", "#009E73", "#0072B2","#e79f00","#e79f00")
+x1 <- rep(180, 4); x1end <- rep(190, 4)
+y1 <- rev(seq(30,35,length.out = 4))
+
+
+
+ggplot(data = regions) +
+  # kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
+  theme_classic(base_size = 14) +
+  geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
+  geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
   
   ## for orthogonal
   # geom_sf(data = B1, fill = 'dodgerblue4', alpha = 0.9, color = NA) +
   # geom_sf(data = B2, fill = 'gold', alpha = 0.9, color = NA) +
   
-  ## for 50 only
-  # geom_sf(data = n50_shape, fill = 'dodgerblue4', alpha = 0.9, color = NA) +
-  # geom_sf(data = n36_shape, fill = 'gold', alpha = 0.9, color = NA) +
-  # geom_sf(data = clips[[3]], fill = demPal[3], alpha = 0.9, color = NA) +
-  # geom_sf(data = clips[[4]], fill = demPal[4], alpha = 0.9, color = NA ) +
-  # geom_sf(data = clips[[5]], fill = demPal[5], alpha = 0.9, color = NA) +
-  # geom_sf(data = clips[[6]], fill = demPal[6], alpha = 0.9,color = NA) +
+  ## OM strata with 50N Break
+  geom_sf(data = n50_shape, fill = 'dodgerblue4', alpha = 0.9, color = NA) +
+  geom_sf(data = n36_shape, fill = 'gold', alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[3]], fill = demPal[3], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[4]], fill = demPal[4], alpha = 0.9, color = NA ) +
+  geom_sf(data = clips[[5]], fill = demPal[5], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[6]], fill = demPal[6], alpha = 0.9,color = NA) +
   
+  ## OM strata labels
+  geom_label(data = data.frame(), aes( x = c(238, 233, 232, 225, 220, 200),
+    y = c(33, 40, 49, 52, 57, 53)),
+    label = c("C1", "C2", "B1","B2","A2", "A1") ,
+    fill = demPal[c(6:1)],
+    color = c("grey88", rep('black',3), rep('black',2))) +
 
-  ## show demography
+  ## show demography from growth paper
   ##R3
-  # geom_sf(data =   st_union(x=clips[[2]],y=clips[[3]])  , 
+  # geom_sf(data =   st_union(x=clips[[2]],y=clips[[3]])  ,
   #         fill = NA, lwd = 1.1,color = 'red', linetype = 'dashed') +
-  # ##r2
-  # geom_sf(data =   st_union(x=clips[[4]],y=clips[[5]])  , 
+  # # ##r2
+  # geom_sf(data =   st_union(x=clips[[4]],y=clips[[5]])  ,
   #         fill = NA, lwd = 1.1,  color = 'red', linetype = 'dashed') +
+  
+  ## show major currents
+  # geom_polygon(data = shapefile_df,
+  #              aes(x = long, y = lat, group = group, fill = id),
+  #              fill = rep(currents.col,
+  #                         length(shapefile_df$id)/5), size = 0.2) +
+  # annotate("segment", x = x1, xend = x1end, y = y1, yend = y1,
+  #          colour = currents.col[1:4], size = 1.1) +
+  # annotate("text", x = x1+20, y = y1,
+  #          label =  c('Alaskan Current',
+  #                     'N. Pacific Current', 
+  #                     'S. California Bight',
+  #                     'California Current')) +
 
   ## EEZ
-  geom_sf(lwd = 1, col = 'grey88', fill = NA) +
-  # geom_label(data = data.frame(), aes(
-  #   # x = c(238, 233, 232, 233, 225, 220, 200),
-  #   # y = c(33, 40, 49, 51, 52, 57, 53)),
-  #   x = c(238, 233, 232, 225, 220, 200),
-  #   y = c(33, 40, 49, 52, 57, 53)),
-  #   label = c("C1", "C2", "B1","B2","A2", "A1") ,
-  # 
-  #   # label = c("C1", "C2", "B1","B2", "B3", "A2", "A1") ,
-  #   # size = 5,
-  #   fill = demPal[c(6:1)],
-  #   color = c("grey88", rep('black',3), rep('black',2))) +
-  coord_sf(xlim = c(165, 245), ylim = c(30, 65)) +
+  geom_sf(lwd = 1, col = '#173028', fill = 'grey88',alpha = 0.2) +
+
+  coord_sf(xlim = c(165, 245), ylim = c(26, 65)) +
   labs(x ="",y="")
 
 # Save
 
-ggsave(here::here("_writing","figures", "map-demog_50n_full_dark.png"), 
+ggsave(here::here("figs", "map-EEZ_strata_lab.png"), 
        width = 10, height = 8)
 
 ggsave(last_plot(),

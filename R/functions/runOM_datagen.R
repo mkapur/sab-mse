@@ -78,11 +78,11 @@ runOM_datagen <- function(df, seed = 731){
 
 
   recruitmat <- df$recruitmat
-  if(df$move == FALSE){
-    recruitmat <- 1
-  }
+  # if(df$move == FALSE){
+  #   recruitmat <- 1
+  # }
   
-  movemat <- df$movemat ## array of subarea x age, x season x year
+  movemat <- df$X_ija #df$movemat ## array of subarea x age, x season x year
   move.init <- df$move.init
 
 

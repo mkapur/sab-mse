@@ -105,7 +105,13 @@ load_data_seasons <- function(nspace = 6,
   # }
   
   ## placeholder for X_ija -this will need to get converted from length
-  if(move == FALSE) X_ija <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage))
+  if(move == FALSE){
+    
+    X_ija <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage))
+    for(a in 1:dim(X_ija)[[3]]){
+      diag(X_ija[,,a]) <- 1
+    }
+  }
   if(move == TRUE) {
     X_ija <- array(runif( nspace*nspace*nage, 0.01,0.05),  c(nspace,nspace,nage))
     
@@ -500,6 +506,7 @@ load_data_seasons <- function(nspace = 6,
     nstocks = nstocks,
     nspace = nspace,
     LBins = LBins,
+    move = move,
     
     #* FLEETS STRUCTURE ----
     nfleets_surv = nfleets_surv,

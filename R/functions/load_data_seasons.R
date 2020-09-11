@@ -7,16 +7,16 @@ load_data_seasons <- function(nseason = 1,
                               LBins = 81,
                               movemaxinit = 0.35, 
                               movefiftyinit = 6,
-                              nsurvey = 2, 
+                              # nsurvey = 2, 
                               logSDR = 1.4, 
                               bfuture = 0.5,
-                              moveout = 0.85, 
-                              movesouth = 0.05,
-                              moveinit = NA, 
-                              moveslope = 0.9,
-                              selectivity_change = 0,
+                              # moveout = 0.85, 
+                              # movesouth = 0.05,
+                              # moveinit = NA, 
+                              # moveslope = 0.9,
+                              # selectivity_change = 0,
                               yr_future  = 0,
-                              sel_hist = 1
+                              # sel_hist = 1
                               ){
   
   #' @nseason = number of seasons 
@@ -35,14 +35,14 @@ load_data_seasons <- function(nseason = 1,
   #' @yr_future Create dummy data for future years
   
   
-  if(is.na(moveinit)){
-    if(nspace == 2){
-    moveinit <-  c(0.25,0.75)
-    } else if(nspace > 2){
-      moveinit <- c(runif(nspace, 0.01, 0.45)) ## placeholder movement rates (random)
-      
-    }
-  }
+  # if(is.na(moveinit)){
+  #   if(nspace == 2){
+  #   moveinit <-  c(0.25,0.75)
+  #   } else if(nspace > 2){
+  #     moveinit <- c(runif(nspace, 0.01, 0.45)) ## placeholder movement rates (random)
+  #     
+  #   }
+  # }
 
   years <- 1960:(myear+yr_future)
   nyear <- length(years)
@@ -51,13 +51,12 @@ load_data_seasons <- function(nseason = 1,
   
   ## Age stuff
   nage <- length(age)
-  msel <- rep(1,nage)
-  
+  # msel <- rep(1,nage)
 
   ## for later use
-  recruitmat <- matrix(0, nspace) # 4 is seasonality 
-  recruitmat[1] <- 1 # 10 percent change of spawning north
-  recruitmat[2] <- 1 # 90 percent of spawning south
+  # recruitmat <- matrix(0, nspace) # 4 is seasonality 
+  # recruitmat[1] <- 1 # 10 percent change of spawning north
+  # recruitmat[2] <- 1 # 90 percent of spawning south
   
   
   # Maturity ----
@@ -161,12 +160,21 @@ load_data_seasons <- function(nseason = 1,
   # }
   # 
   
-  ## Fleets ----
+  ## Fleet [names and nfleets] ----
   ## build fleets
   ## makes the master flag_fleets matrix
   ## and attendant indices for subsetting
-  fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE)
+  fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE) ## this is like flag_fleets
   
+  fltnames_fish <- fltnames$NAME[fltnames$COMM]
+  fltnames_surv <- fltnames$NAME[fltnames$SURV]
+  fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
+  fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
+  
+  nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
+  nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
+  nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
+  nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
   
   ## nfleets should be input
   ## auto-read nfleets_surv etc from this
@@ -222,31 +230,31 @@ load_data_seasons <- function(nseason = 1,
   # catch <- read.csv(here("input","data",'hake_totcatch.csv'))
   # catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
-  nfleets_fish <- ncol(catch)-1
 
   # Survey ----
-  # df.survey <- read.csv(here("input","data",'acoustic survey.csv'))
-  df.survey <- read.csv(here("input","input_data",'OM_indices.csv'))
+  # survey <- read.csv(here("input","data",'acoustic survey.csv'))
+  survey <- read.csv(here("input","input_data",'OM_indices.csv'))
   # survey <- read.csv(here("input","data",'survey.csv'))
   # survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
-  survey_x2  <- rep(2, length(years)) ## we have obs from 1970+
-  survey_x2[1:10] <- -2 ## a -2 if no survey, 2 if survey occured
-  nfleets_surv <- ncol(df.survey) 
-  
-  
-  # Maturity
-  # mat <- read.csv(here("input","data",'maturity.csv'))
-  # mat <- wage_ssb[1,]
+  # survey_x2  <- rep(2, length(years)) ## we have obs from 1970+
+  # survey_x2[1:10] <- -2 ## a -2 if no survey, 2 if survey occured
+  # nfleets_surv <- ncol(survey) 
 
+  ## Comps ----
   # Len comps [these are arrays by fleet]
   load(here("input","input_data",'OM_lencomps_female.rdata'))
   load(here("input","input_data",'OM_lencomps_male.rdata'))
   
+  ## Age comps. Note that AK is not sex-specific, and therefore duplicatd
+  load(here("input","input_data",'OM_agecomps_female.rdata'))
+  load(here("input","input_data",'OM_agecomps_male.rdata'))
   
-  # age_survey.df <- read.csv(here("input","data",'agecomps_survey.csv'))
-  # age_survey.df$flag <- 1
-  # age_catch.df <- read.csv(here("input","data",'agecomps_fishery.csv'))
-  # age_catch.df$flag <- 1
+  
+  ## Aging Error ----
+  ## M X age
+  load(here("input","input_data",'ageerr_ExpAge.rdata'))
+  load(here("input","input_data",'ageerr_SD.rdata'))
+
   
   # if(nseason == 4){
   # surveyseason <- 3
@@ -262,12 +270,15 @@ load_data_seasons <- function(nseason = 1,
 
   ## Phi objects ----
   ## setup phi (spatial matching matrix) depending on spatial setup
+  spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
+                      stock = c("R4","R3","R3","R2","R2","R1"),
+                      mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
   if(nspace == 6){ ## OM
     
     ## phi_survy
     phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
     
-    rownames(phi_if_surv) <- names(df.survey)
+    rownames(phi_if_surv) <- names(survey)
     colnames(phi_if_surv) <- rev(spmat$subarea)
     
     phi_if_surv[1,1:2] <-  phi_if_surv[2,3:4] <-  
@@ -437,67 +448,67 @@ load_data_seasons <- function(nseason = 1,
   
   
 
-  parms <- list( # Just start all the simluations with the same initial conditions 
-       logRinit = parms.scalar$logRinit+log(rmul),
-       logh = parms.scalar$logh,
-       logMinit = parms.scalar$logMinit,
-       logSDsurv = parms.scalar$logSDsurv,
-       #logSDR = log(1.4),
-       logphi_catch = parms.scalar$logphi_catch,
-       #logphi_survey = log(11.33),
-       # logSDF = log(0.1),
-       # Selectivity parameters 
-       psel_fish = parms.sel$value[parms.sel$source == 'fish'],
-       psel_surv = parms.sel$value[parms.sel$source == 'survey'],
-       initN = initN,
-       Rin = Rdev,
-       PSEL = PSEL
-     )
-     
-     psel<- matrix(NA,nspace, 5) 
-     
-     for(i in 1:nspace){
-       #psel[i,] <- c(2.8476, 0.973,0.3861,0.1775,0.5048) # USA selectivity 
-       psel[i,] <- parms$psel_fish
-       
-     }
-    
-     if(nspace == 2){
-     psel[1,] <- c(1,1,1,1,1)
-     
-     }
+  # parms <- list( # Just start all the simluations with the same initial conditions 
+  #      logRinit = parms.scalar$logRinit+log(rmul),
+  #      logh = parms.scalar$logh,
+  #      logMinit = parms.scalar$logMinit,
+  #      logSDsurv = parms.scalar$logSDsurv,
+  #      #logSDR = log(1.4),
+  #      logphi_catch = parms.scalar$logphi_catch,
+  #      #logphi_survey = log(11.33),
+  #      # logSDF = log(0.1),
+  #      # Selectivity parameters 
+  #      psel_fish = parms.sel$value[parms.sel$source == 'fish'],
+  #      psel_surv = parms.sel$value[parms.sel$source == 'survey'],
+  #      initN = initN,
+  #      Rin = Rdev,
+  #      PSEL = PSEL
+  #    )
+  #    
+  #    psel<- matrix(NA,nspace, 5) 
+  #    
+  #    for(i in 1:nspace){
+  #      #psel[i,] <- c(2.8476, 0.973,0.3861,0.1775,0.5048) # USA selectivity 
+  #      psel[i,] <- parms$psel_fish
+  #      
+  #    }
+  #   
+  #    if(nspace == 2){
+  #    psel[1,] <- c(1,1,1,1,1)
+  #    
+  #    }
        
        
 # Flag if there's a selectivity change in that year     
-     selYear <- 1991
+     # selYear <- 1991
+     # 
+     # flag_sel <- rep(0,nyear)
+     # flag_sel[which(years == selYear):which(years == myear)] <- 1
      
-     flag_sel <- rep(0,nyear)
-     flag_sel[which(years == selYear):which(years == myear)] <- 1
      
-     
-     
-  df <-list(      #### Parameters #####
-                  wage_ssb = t(wage_ssb),
-                  wage_catch = t(wage_catch),
-                  wage_survey = t(wage_survey),
-                  wage_mid = t(wage_mid),
+ ## Return df ----
+  df <-list(     
+                  # wage_ssb = t(wage_ssb),
+                  # wage_catch = t(wage_catch),
+                  # wage_survey = t(wage_survey),
+                  # wage_mid = t(wage_mid),
                   selidx = which(years == selYear),
                   #  Input parameters
-                  year_sel = length(1991:max(years)), # Years to model time varying sel
-                  Msel = msel,
-                  Matsel= as.numeric(mat),
+                  # year_sel = length(1991:max(years)), # Years to model time varying sel
+                  # Msel = msel,
+                  # Matsel= as.numeric(mat),
                   nage = nage,
                   age = age,
                   nseason = nseason,
                   nyear = nyear,
                   tEnd = tEnd, # The extra year is to initialize 
-                  logQ = log(1.14135),   # Analytical solution
+                  # logQ = log(1.14135),   # Analytical solution
                   # Selectivity 
-                  Smin = 1,
-                  Smin_survey = 2,
-                  Smax = 6,
-                  Smax_survey = 6,
-                  flag_sel = flag_sel,
+                  # Smin = 1,
+                  # Smin_survey = 2,
+                  # Smax = 6,
+                  # Smax_survey = 6,
+                  # flag_sel = flag_sel,
                   surveyseason = surveyseason,
                   nsurvey = nsurvey, # Frequency of survey years (e.g., 2 is every second year)
                   # survey

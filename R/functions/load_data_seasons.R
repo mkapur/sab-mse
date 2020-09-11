@@ -1,12 +1,13 @@
 ## Load the hake data
 # year and age input 
-load_data_seasons <- function(nseason = 1, 
-                              nspace = 6, 
+load_data_seasons <- function(nspace = 6, 
                               nstocks = 4,
                               myear = 2018,
+                              move = TRUE, 
                               LBins = 81,
-                              movemaxinit = 0.35, 
-                              movefiftyinit = 6,
+
+                              # movemaxinit = 0.35, 
+                              # movefiftyinit = 6,
                               # nsurvey = 2, 
                               logSDR = 1.4, 
                               bfuture = 0.5,
@@ -15,23 +16,16 @@ load_data_seasons <- function(nseason = 1,
                               # moveinit = NA, 
                               # moveslope = 0.9,
                               # selectivity_change = 0,
-                              yr_future  = 0,
+                              yr_future  = 0
                               # sel_hist = 1
                               ){
   
-  #' @nseason = number of seasons 
   #' @nspace = Spatial areas
+  #' @nstocks = demographic stocks
   #' @myear = Final year that contains empirical data
-  #' @movemaxinit = max movement rate 
-  #' @movefiftyinit = age at 50% movement rate
-  #' @nsurvey survey frequency, i.e., 2 = every second year
+  #' @move = do you want to enable movement among spaces?
   #' @logSDR Standard deviation of recruitment
   #' @bfuture recruitment bias adjustment in the future - scalar
-  #' @moveout fraction of individuals that travel south in the last season
-  #' @movesouth fraction of individuals that move south during the year
-  #' @moveinit Initial distribution of fish
-  #' @moveslope Slope of the movement function
-  #' @selectivity_change flag for selectivity changing in the future 0
   #' @yr_future Create dummy data for future years
   
   
@@ -113,7 +107,7 @@ load_data_seasons <- function(nseason = 1,
   ## placeholder for X_ija -this will need to get converted from length
   if(move == FALSE) X_ija <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage))
   if(move == TRUE) {
-    X_ija <- array(runif( nspace*nspace*nage, 0,0.05),  c(nspace,nspace,nage))
+    X_ija <- array(runif( nspace*nspace*nage, 0.01,0.05),  c(nspace,nspace,nage))
     
     ## for placeholder; if the rows are summing to greater than one set to zero
     for(n in 1:nage){
@@ -128,14 +122,18 @@ load_data_seasons <- function(nseason = 1,
   omega_ai <- matrix(rep(0, nage*nspace), c(nage,nspace))## eigenvector for stable spatial distribution at age
   for(a in 1:nage){
     omega_ai[a,] <- eigen(X_ija[,,a])$values 
-    omega_ai[omega_ai < 0] <- 0.05
+    omega_ai[a,][which(omega_ai[a,] < 0)] <- 0.05
   }
 
   
   # Weight at length ----
   load(here("input","input_data","OM_wtatlen_kab.rdata")) ## a and be are pars of al^b
   
+  # Growth ----
+  load(here("input","input_data","OM_growthPars.rdata")) 
   
+  ## Mortality ----
+  load(here('input','input_data','M_k.rdata'))
   # wage_ss <- read.csv(here("input","data",'wage_ss.csv'))
   # wage_ss <- wage_ss[wage_ss$Yr %in% years,]
   # wage_unfished <- read.csv(here("input","data",'unfished_waa.csv'))
@@ -234,6 +232,8 @@ load_data_seasons <- function(nseason = 1,
   # Survey ----
   # survey <- read.csv(here("input","data",'acoustic survey.csv'))
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
+  survey_err <- read.csv(here("input","input_data",'OM_indices_sigma.csv'))
+  
   # survey <- read.csv(here("input","data",'survey.csv'))
   # survey2 <- as.matrix(read.csv("input/cleaned/clean_survey.csv"))## this needs to be built into load_data_seasons
   # survey_x2  <- rep(2, length(years)) ## we have obs from 1970+
@@ -241,15 +241,14 @@ load_data_seasons <- function(nseason = 1,
   # nfleets_surv <- ncol(survey) 
 
   ## Comps ----
-  # Len comps [these are arrays by fleet]
+  ## Len comps [these are arrays by fleet]
   load(here("input","input_data",'OM_lencomps_female.rdata'))
   load(here("input","input_data",'OM_lencomps_male.rdata'))
   
   ## Age comps. Note that AK is not sex-specific, and therefore duplicatd
   load(here("input","input_data",'OM_agecomps_female.rdata'))
   load(here("input","input_data",'OM_agecomps_male.rdata'))
-  
-  
+
   ## Aging Error ----
   ## M X age
   load(here("input","input_data",'ageerr_ExpAge.rdata'))
@@ -444,8 +443,12 @@ load_data_seasons <- function(nseason = 1,
   #   rmul <- 1.1
   # }
   
-  
-  
+  ## Parms List ----
+  ## things that will get estimated later on, everthing else is FIXED
+  parms <- list(
+    logh_k = rep(0.2, 4),
+    logRinit = 1e7
+  )
   
 
   # parms <- list( # Just start all the simluations with the same initial conditions 
@@ -487,21 +490,61 @@ load_data_seasons <- function(nseason = 1,
      
      
  ## Return df ----
-  df <-list(     
+  df <-list(    
+    #* MODEL STRUCTURE ----
+    nage = nage,
+    age = age,
+    nyear = nyear,
+    tEnd = tEnd, # The extra year is to initialize 
+    years = years,
+    nstocks = nstocks,
+    nspace = nspace,
+    LBins = LBins,
+    
+    #* FLEETS STRUCTURE ----
+    nfleets_surv = nfleets_surv,
+    nfleets_fish = nfleets_fish,
+    phi_if_surv = phi_if_surv,
+    phi_if_fish = phi_if_fish,
+    phi_ik = phi_ik,
+    phi_ik2 = phi_ik2,
+    phi_ij = phi_ij,
+    phi_fm = phi_fm,
+    tau_ik = tau_ik,
+    
+    #* DEMOG ----
+    X_ija = X_ija,
+    omega_ai = omega_ai,
+    Linf_yk = growthPars$Linf_yk,
+    kappa_yk = growthPars$kappa_yk,
+    sigmaG_yk = growthPars$sigmaG_yk,
+    
+    #* DATA ----
+    survey = survey, # Make sure the survey has the same length as the catch time series
+    survey_err = survey_err, #ac.data$ss.error, # Make sure the survey has the same length as the catch time series
+    survey = survey, #ac.data$ss.survey,
+    age_error = ageerr_ExpAge,
+    age_error_sd = ageerr_SD,
+    L1_yk = L1_yk,
+    catch = catch,
+    
+    #* ADDL PARS ----
+    parms = parms,
+    b = b,
+    bfuture = bfuture,
+    logSDR = logSDR
+    # survey2 = survey2,
+    # flag_surv_bio = survey_x2, #ac.data$survey_x, # Is there a survey in that year?
                   # wage_ssb = t(wage_ssb),
                   # wage_catch = t(wage_catch),
                   # wage_survey = t(wage_survey),
                   # wage_mid = t(wage_mid),
-                  selidx = which(years == selYear),
+                  # selidx = which(years == selYear),
                   #  Input parameters
                   # year_sel = length(1991:max(years)), # Years to model time varying sel
                   # Msel = msel,
                   # Matsel= as.numeric(mat),
-                  nage = nage,
-                  age = age,
-                  nseason = nseason,
-                  nyear = nyear,
-                  tEnd = tEnd, # The extra year is to initialize 
+          
                   # logQ = log(1.14135),   # Analytical solution
                   # Selectivity 
                   # Smin = 1,
@@ -509,93 +552,72 @@ load_data_seasons <- function(nseason = 1,
                   # Smax = 6,
                   # Smax_survey = 6,
                   # flag_sel = flag_sel,
-                  surveyseason = surveyseason,
-                  nsurvey = nsurvey, # Frequency of survey years (e.g., 2 is every second year)
+                  # surveyseason = surveyseason,
+                  # nsurvey = nsurvey, # Frequency of survey years (e.g., 2 is every second year)
                   # survey
-                  survey = survey, # Make sure the survey has the same length as the catch time series
-                  survey2 = survey2,
-                  nfleets_surv = nfleets_surv,
-                  flag_surv_bio = survey_x2, #ac.data$survey_x, # Is there a survey in that year?
-                  survey_err = ac.data$ss.error, # Make sure the survey has the same length as the catch time series
-                  ss_survey = ac.data$ss.survey,
-                  flag_surv_acomp =ac.data$sflag,
-                  age_survey = age_survey.tmp,
-                  age_survey2 = age_survey.tmp2,
-                  age_maxage = 15, # Max age for age comps 
+
+                  # flag_surv_acomp =ac.data$sflag,
+                  # acomp
+                  # age_survey = age_survey.tmp,
+                  # age_survey2 = age_survey.tmp2,
+                  # age_maxage = 15, # Max age for age comps 
                   # Catch
                   #                Catchobs = catch$Fishery, # Convert to kg
-                  ss_catch = ac.data$ss.catch,
-                  flag_catch =ac.data$cflag,
-                  age_catch = age_catch.tmp,
-                  nfleets_fish = nfleets_fish,
+                  # ss_catch = ac.data$ss.catch,
+                  # flag_catch =ac.data$cflag,
+                  # age_catch = age_catch.tmp,
                   # variance parameters
-                  logSDcatch = log(0.01),
-                  logSDR = log(logSDR), # Fixed in stock assessment ,
-                  logphi_survey = log(11.46),
-                  years = years,
-                  b = b,
-                  bfuture = bfuture,
+                  # logSDcatch = log(0.01),
+           
+                  # logphi_survey = log(11.46),
+
+
                   #logh = log(0.8),
                   # Space parameters 
-                  smul = 0.5, # Annual survey timing 
-                  sigma_psel = 1.4,
-                  sum_zero = 0,
-                  nspace = nspace,
+                  # smul = 0.5, # Annual survey timing 
+                  # sigma_psel = 1.4,
+                  # sum_zero = 0,
+
                   #TAC = TAC,
-                  movemat = movemat,
-                  move = move,
-                  recruitmat = recruitmat,
-                  move.init = move.init,
-                  movefifty = movefifty,
-                  movemax = movemax,
-                  movesouth = movesouth,
-                  moveout = moveout,
-                  moveslope = moveslope,
+                  # movemat = movemat,
+                  # move = move,
+                  # recruitmat = recruitmat,
+                  # move.init = move.init,
+                  # movefifty = movefifty,
+                  # movemax = movemax,
+                  # movesouth = movesouth,
+                  # moveout = moveout,
+                  # moveslope = moveslope,
                   # F0 = Fin,
-                  psel = psel,
-                  parms = parms,
-                  Fnseason = Fnseason,
-                  selectivity_change = selectivity_change,
-                  Catch = catch,
-                  Catch2 = catch2,
-                  phi_if_surv = phi_if_surv,
-                  phi_if_fish = phi_if_fish,
-                  phi_ik = phi_ik,
-                  phi_ik2 = phi_ik2,
-                  phi_fm = phi_fm,
-                  tau_ik = tau_ik,
-                  nstocks = nrow(phi_ik),
-                  X_ija = X_ija,
-                  omega_ai = omega_ai,
-                  Linf_yk = Linf_yk,
-                  kappa_yk = kappa_yk,
-                  sigmaG_yk = sigmaG_yk,
-                  phi_ij = phi_ij,
-                  LBins = LBins,
-                  L1_yk = L1_yk,
-                  age_error = age_error
+                  # psel = psel,
+                  # parms = parms,
+                  # Fnseason = Fnseason,
+                  # selectivity_change = selectivity_change,
+                  # Catch2 = catch2,
+
+
                   # Parameters from the estimation model 
               
   )
   
  
   
-  Catch.country <- read.csv(here("input","data",'catch_per_country.csv'))
-  df$Catch.country <- as.matrix(Catch.country[,2:3])[,c(2,1)]
+  # Catch.country <- read.csv(here("input","data",'catch_per_country.csv'))
+  # df$Catch.country <- as.matrix(Catch.country[,2:3])[,c(2,1)]
   
-  df$Catch <- rowSums(df$Catch.country)
+  # df$Catch <- rowSums(df$Catch.country)
   
-  if(nyear > length(df$Catch)){
-
-    
-    df$Catch <- c(df$Catch,rep(mean(df$Catch), nyear-length(df$Catch)))
-
-    
-  }
+  # if(nyear > length(df$Catch)){
+  # 
+  #   
+  #   df$Catch <- c(df$Catch,rep(mean(df$Catch), nyear-length(df$Catch)))
+  # 
+  #   
+  # }
   
-  if(nyear >nrow(df$Catch.country)){
-    df$Catch.country <- rbind(df$Catch.country,t(replicate(nyear-nrow(Catch.country),colMeans(df$Catch.country))))
-  }
+  # if(nyear >nrow(df$Catch.country)){
+  #   df$Catch.country <- rbind(df$Catch.country,t(replicate(nyear-nrow(Catch.country),colMeans(df$Catch.country))))
+  # }
   
   if(yr_future > 0){
     

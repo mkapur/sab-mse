@@ -11,33 +11,38 @@ nspace <- dim(Ninit_Aai)[3]
 
 
 
-pNinit <- Ninit_ai %>%
+pNinit <- Ninit_ais[,,1] %>%
   data.frame() %>%
-  mutate('Yr' = 1:21) %>%
-  reshape2::melt(id = c('Yr')) %>%
-  ggplot(., aes(x = Yr, y = value, color = variable )) +
+  mutate('Age' = 1:71) %>%
+  reshape2::melt(id = c('Age')) %>%
+  ggplot(., aes(x = Age, y = value, color = variable )) +
   geom_line(lwd = 2) + 
   labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
   ggsidekick::theme_sleek()
 
 
-
-
-pNzero <- Nzero %>% data.frame() %>%
-  mutate('Yr' = 1:21) %>%
-  reshape2::melt(id = c('Yr')) %>%
-  ggplot(., aes(x = Yr, y = value, color = variable )) +
+pNzeroF <- N_0ais[,,1] %>% data.frame() %>%
+  mutate('Age' = 1:71) %>%
+  reshape2::melt(id = c('Age')) %>%
+  ggplot(., aes(x = Age, y = value, color = variable )) +
   geom_line(lwd = 2) + 
   labs(x = 'Age in Year 0',y = 'Unfished Numbers', color = 'subarea') +
-  ggsidekick::theme_sleek()
+  ggsidekick::theme_sleek()+theme(legend.position = 'none')
+pNzeroM <- N_0ais[,,2] %>% data.frame() %>%
+  mutate('Age' = 1:71) %>%
+  reshape2::melt(id = c('Age')) %>%
+  ggplot(., aes(x = Age, y = value, color = variable )) +
+  geom_line(lwd = 2) + 
+  labs(x = 'Age in Year 0',y = 'Unfished Numbers', color = 'subarea') +
+  ggsidekick::theme_sleek() 
 
-ggsave(pNzero,
+ggsave(pNzeroF  | pNzeroM,
        file = here('figs',
-                   "NZero_noOmega.png"),
+                   "NZero_noMove_2Sex.png"),
        width = 6, height = 4, unit = 'in',
        dpi = 420)
 
-pNage1 <- N_yai_beg[,,1] %>%
+pNage1 <- N_yais_beg[1,,1,1] %>%
 data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -50,9 +55,9 @@ data.frame() %>%
   ggsidekick::theme_sleek() + theme(legend.position = 'none') 
 
 
-plot(N_yai_beg[1,,1],type = 'l') #, ylim = c(0,20e5))
+plot(N_yais_beg[1,,1,1],type = 'l') #, ylim = c(0,20e5))
 for(i in 1:10){
-  lines(N_yai_beg[i,,1], col = grey((i+0.2)/10), lwd =2)
+  lines(N_yais_beg[i,,1,1], col = grey((i)/10), lwd =2)
 }
 
 pNage2 <- N_yai_beg[,,2] %>%

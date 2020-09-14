@@ -454,7 +454,7 @@ load_data_seasons <- function(nspace = 6,
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
     logh_k = rep(0.2, 4),
-    logRinit = 1e7
+    logRinit = log(1e7)
   )
   
 

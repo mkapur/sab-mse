@@ -7,7 +7,9 @@ runOM_datagen <- function(df, seed = 731){
   ## Load data & define structure ----
   nspace <- df$nspace
   nstocks <- df$nstocks
-
+  nage <- df$nage
+  age <- df$age
+  
   nfleets_surv <- df$nfleets_surv
   nfleets_fish <- df$nfleets_fish
   nfleets_acomp <- df$nfleets_acomp
@@ -27,12 +29,9 @@ runOM_datagen <- function(df, seed = 731){
   tau_ik <- df$tau_ik 
   
   ## Biology
-  nage <- df$nage
-  age <- df$age
   M_k <- df$M_k
   mat_age <- rep(0.2, nage)
 
-  
   ## Obs
   # catch_yf_obs <- df$Catch2
   catch_yf_obs <- df$catch
@@ -64,81 +63,32 @@ runOM_datagen <- function(df, seed = 731){
 
   
   # M selectivity 
-  Msel <- df$Msel # no difference between males and females
+  # Msel <- df$Msel # no difference between males and females
   # M0 <- exp(df$parms$logMinit)
-  M <- 0.2 #M0*Msel # Naural mortality at age
+  M <- rep(0.2,nage) #M0*Msel # Naural mortality at age
   SDR <- exp(df$logSDR)
   b <- rep(1, tEnd)
-  # Survey selectivity 
-  # surv.sel <- getSelec(df$age,df$parms$psel_surv, df$Smin_survey, df$Smax_survey) # Constant over time
-  
+
   # True values 
   M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
-  # F0 <- df$F0
-  
+  # recruitmat <- df$recruitmat
 
-
-  recruitmat <- df$recruitmat
-  # if(df$move == FALSE){
-  #   recruitmat <- 1
-  # }
-  
   movemat <- df$X_ija #df$movemat ## array of subarea x age, x season x year
-  # move.init <- df$move.init
 
-
-  # Catchability 
-  # q <- 1 #exp(df$logQ) # Constant over time
-  # surv.sd <- exp(df$parms$logSDsurv) # Survey error
-  
-  # Maturity 
-  # Mat.sel <- df$Matsel # Fecundity
   h_k <- exp(df$parms$logh_k)
-  # Age 
-  nage <- df$nage
-  age <- df$age
-  
   R_0k <- rep(exp(df$parms$logRinit), nspace) ## change this to better value
-  
-  # Mage <- c(0,cumsum(M[1:(nage-1)]))
-  
-  # Calculate N0 based on R0
-  # mage <- max(df$age) # Max age
-  # agetmp <- 0:(mage*3)
-  # nagetmp <- length(agetmp)
-  # 
-  # N0tmp <- rep(NA,nagetmp)
-  # 
-  # N0tmp[1:(nagetmp-1)] = R0*exp(-agetmp[1:(nagetmp-1)]*M0)
-  # N0tmp[nagetmp] =  R0*exp(-M0*agetmp[nagetmp])/(1-exp(-M0))
-  # 
-  # N0 <- matrix(NA,nage)
-  # N0[1:(nage-1)] <- N0tmp[1:(nage-1)]
-  # N0[nage] <- sum(N0tmp[nage:nagetmp])
-  # 
-  # SSB_0 <- NA
-  # 
-  # for(i in 1:nspace){
-  #   #SSB_0[i] <- sum(df$Matsel*N0*move.init[i])
-  #   SSB_0[i] <- sum(N0*move.init[i]*df$wage_ssb[,1])*0.5
-  # }
-  # names(SSB_0) <- paste(rep('space',each = df$nspace),1:nspace)
-  # 
-  # R_0 <- R0*move.init  # Used the inital recruitment devs to get a start
-  
+
   ## Unfished Naa and SB0 ----
   ## note that omega makes this non-smooth
-  # N_0ai <- matrix(NA, nrow = nage, ncol = nspace)
-  N_0ai <- array(NA, dim = c(nage, nspace, 2))
-  SSB_0i <- rep(0, nspace) 
+  N_0ais <- array(0, dim = c(nage, nspace, 2))
   for(s in 1:2){ ## 1 is female, 2 is male
     for(k in 1:nstocks){
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
-          N_0ai[a,i,s] = 0.5*omega_ai[a,i]*R_0k[k]*tau_ik[k,i]*exp(-(M[a]*age[a]))
-        }
+          N_0ais[a,i,s] =  N_0ais[a,i,s]+0.5*omega_ai[a,i]*R_0k[k]*tau_ik[k,i]*exp(-(M[a]*age[a]))
+        } ## end age < plus
         # // note the A+ group will be in slot A-1
-        N_0ai[nage,i,s] = omega_ai[nage,i]* N_0ai[nage-1,i]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
+        N_0ais[nage,i,s] = omega_ai[nage,i]* N_0ais[nage-1,i,s]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
       } ## // end subareas
     }  ## // end stocks
   } ## end sexes
@@ -147,32 +97,35 @@ runOM_datagen <- function(df, seed = 731){
   SSB_0i <- rep(0, nspace);  SSB_0k <- rep(0, nstocks);
   for(i in 1:nspace){
     for(a in 1:(nage)){
-      SSB_0i[i] = SSB_0i[i] + mat_age[a]*N_0ai[a,i,1];
+      SSB_0i[i] = SSB_0i[i] + mat_age[a]*N_0ais[a,i,1];
       for(k in 1:nstocks){
-        SSB_0k[k] = SSB_0k[k] + phi_ik[k,i]*mat_age[a]*N_0ai[a,i,1];
+        SSB_0k[k] = SSB_0k[k] + phi_ik[k,i]*mat_age[a]*N_0ais[a,i,1];
       } #// end stocks
     } #// end ages
   } # // end space
   
   ## Ninit ----
-  Ninit_ai <- matrix(NA, nrow = nage, ncol = nspace)
+  # Ninit_ais <- matrix(NA, nrow = nage, ncol = nspace)
+  Ninit_ais <- array(0, dim = c(nage, nspace, 2))
   tildeR_initk <-  rep(1, nstocks)
   tildeR_yk <- matrix(1, nrow = tEnd, ncol = nstocks)
   
-  for(k in 1:nstocks){   
-    for(i in 1:nspace){
-      for(a in 1:(nage-1)){
-        Ninit_ai[a,i] = 0.5* omega_ai[a,i] * tau_ik[k,i] * R_0k[k]*
-          exp(-(M[a]*age[a])) * exp(-0.5*SDR*SDR+tildeR_initk[k])
-      } #// end ages
-      Ninit_ai[nage,i] = (omega_ai[nage,i] * Ninit_ai[nage-1,i] *
-                            exp(-M[nage]*age[nage-1]))/(1-exp(-(M[nage]*age[nage]))* 
-                                                          exp(-0.5*SDR*SDR+tildeR_initk[k]))
-    } #// end space
-  } #// end stocks
+  for(s in 1:2){
+    for(k in 1:nstocks){   
+      for(i in 1:nspace){
+        for(a in 1:(nage-1)){
+          Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+0.5* omega_ai[a,i] * tau_ik[k,i] * R_0k[k]*
+            exp(-(M[a]*age[a])) * exp(-0.5*SDR*SDR+tildeR_initk[k])
+        } #// end ages
+        Ninit_ais[nage,i,s] = (omega_ai[nage,i] * Ninit_ais[nage-1,i,s] *
+                              exp(-M[nage]*age[nage-1]))/(1-exp(-(M[nage]*age[nage]))* 
+                                                            exp(-0.5*SDR*SDR+tildeR_initk[k]))
+      } #// end space
+    } #// end stocks
+  } # end sex
   
-  Length_yai_beg <- Length_yai_mid <- N_yai_beg <- N_yai_mid <- array(NA, dim = c(tEnd, nage, nspace))
-  LengthAge_alyi_beg <- LengthAge_alyi_mid <- array(NA,dim = c(nage,LBins,tEnd,nspace))
+  Length_yais_beg <- Length_yais_mid <- N_yais_beg <- N_yais_mid <- array(NA, dim = c(tEnd, nage, nspace, 2))
+  LengthAge_alyi_beg <- LengthAge_alyis_mid <- array(NA,dim = c(nage,LBins,tEnd,nspace,2))
 
   SSB_yi <- matrix(0, nrow = tEnd, ncol = nspace)
   SSB_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
@@ -203,43 +156,41 @@ runOM_datagen <- function(df, seed = 731){
     if(y == 1){
       # for(k in 1:nstocks){   
         for(i in 1:nspace){
-          # for(s in 1:2){ ## sexes
-          Length_yai_beg[1,1,i] <- 10
-          N_yai_beg[1,1,i] <- Ninit_ai[1,i]
-          N_yai_mid[1,1,i] <- N_yai_beg[1,1,i]*exp(-0.15)
+          for(s in 1:2){ ## sexes
+          Length_yais_beg[1,1,i,s] <- 10
+          N_yais_beg[1,1,i,s] <- Ninit_ais[1,i,s]
+          N_yais_mid[1,1,i,s] <- N_yais_beg[1,1,i,s]*exp(-M[1])
           for(a in 2:(nage-1)){ ## fill A0 in position 1 later
             for(j in 1:nspace){           
               pLeave = 0.0;  NCome = 0.0; # // reset for new age
               if(i != j){
                 pLeave = pLeave + X_ija[i,j,a]; #// will do 1-this for proportion which stay
-                NCome = NCome + X_ija[j,i,a]*Ninit_ai[a,j]; #// actual numbers incoming
+                NCome = NCome + X_ija[j,i,a]*Ninit_ais[a,j,s]; #// actual numbers incoming
               }
             } #// end subareas j
             # // this is the synthesis syntax; 10 is placeholder for LMIN
             # // likely need a lower L1 at age stock-specific and linear before that age
          
-            Length_yai_beg[y,a,i] = Linf_yk[1,phi_ik2[i]]+(10-Linf_yk[1,phi_ik2[i]])*
-              exp(-kappa_yk[1,phi_ik2[i]]*a)
-            Length_yai_mid[y,a,i] = Linf_yk[1,phi_ik2[i]]+(10-Linf_yk[1,phi_ik2[i]])*
-              exp(-0.5*kappa_yk[1,phi_ik2[i]]*a)
-            N_yai_beg[y,a,i] = ((1-pLeave)*Ninit_ai[a,i] + NCome)*exp(-M[a])
+            Length_yais_beg[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(10-Linf_yk[1,phi_ik2[i],s])*
+              exp(-kappa_yk[1,phi_ik2[i],s]*a)
+            Length_yais_mid[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(10-Linf_yk[1,phi_ik2[i],s])*
+              exp(-0.5*kappa_yk[1,phi_ik2[i],s]*a)
+            N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-M[a])
           } #// end ages
+          ## // plus group includes those already at A AND age into A
           for(j in 1:nspace){   
             pLeave = 0.0;  NCome = 0.0; # // reset for new age
-            #   #// plus group includes those already at A AND age into A
             if(i != j){
               pLeave = pLeave + X_ija[i,j,nage]
-              # NCome = NCome + X_ija[j,i,nage]*(N_yai_beg[1,nage-1,j] + N_yai_beg[1,nage-1,j])  #// if M becomes spatial use M_aj here
-              NCome = NCome + X_ija[j,i,nage]*(Ninit_ai[nage,j] + Ninit_ai[nage-1,j])  #// if M becomes spatial use M_aj here
-              
-              }
+              NCome = NCome + X_ija[j,i,nage]*(Ninit_ais[nage,j,s] + Ninit_ais[nage-1,j,s])  #// if M becomes spatial use M_aj here
+            }
           } #// end subareas j
-          N_yai_beg[y,nage,i] =  ((1-pLeave)*(Ninit_ai[nage,i] + Ninit_ai[nage-1,i]) +  NCome)*exp(-M[nage])
+          N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-M[nage])
           
-          Length_yai_beg[y,nage,i] = Linf_yk[1,phi_ik2[i]]+(10-Linf_yk[1,phi_ik2[i]])*
-            exp(-kappa_yk[1,phi_ik2[i]]*nage-1)
-          Length_yai_mid[y,nage,i]  = Linf_yk[1,phi_ik2[i]]+(10-Linf_yk[1,phi_ik2[i]])*
-            exp(-0.5*kappa_yk[1,phi_ik2[i]]*nage-1)
+          Length_yais_beg[y,nage,i,s] = Linf_yk[1,phi_ik2[i],s]+(10-Linf_yk[1,phi_ik2[i],s])*
+            exp(-kappa_yk[1,phi_ik2[i],s]*nage-1)
+          Length_yais_mid[y,nage,i,s]  = Linf_yk[1,phi_ik2[i],s]+(10-Linf_yk[1,phi_ik2[i],s])*
+            exp(-0.5*kappa_yk[1,phi_ik2[i],s]*nage-1)
           
         } #// end subareas i
       # } #// end stocks
@@ -249,11 +200,11 @@ runOM_datagen <- function(df, seed = 731){
     for(i in 1:nspace){
       # SSB_yi[y,i] = 0;SSB_yk[y,] = 0
       for(a in 1:(nage)){
-        SSB_yi[y,i] <- SSB_yi[y,i] +  N_yai_beg[y,a,i]*wage_ssb[a,y]*0.5
+        SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_beg[y,a,i,1]*wage_ssb[a,y]
         # cat(  SSB_yi[y,i] +  N_yai_beg[y,a,i]*wage_ssb[a,y]*0.5,"\n")
         # cat( SSB_yi[y,i],"\n")
         for(k in 1:nstocks){
-          SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*N_yai_beg[y,a,i]*wage_ssb[a,y]*0.5
+          SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*N_yais_beg[y,a,i,1]*wage_ssb[a,y]
         } # // end stocks
       } #// end ages
     } #// end space

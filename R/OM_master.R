@@ -36,13 +36,12 @@ dyn.load(dynlib(here("TMB","runsabassessment")))
 # code from runomem and run om condition
 set.seed(731)
 plot.figures = FALSE # Set true for printing to file 
-# Run the simulation model
-assessment <- read.csv(here("input","data",'assessment_MLE.csv')) ## I believe this comes from SS3
-assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
-Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
-df <- load_data_seasons(nspace = 2) ## data that works with OM
-df$Catch <- Catch.obs$Fishery
 
+# Run the simulation model
+# assessment <- read.csv(here("input","data",'assessment_MLE.csv')) ## I believe this comes from SS3
+# assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
+# Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
+df <- load_data_seasons(nspace = 6, move = FALSE) ## data that works with OM
 
 time <- 1
 yrinit <- df$nyear
@@ -55,7 +54,7 @@ simyears <- 25 # Project 30 years into the future (2048 that year)
 year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
 N0 <- NA
 sim.data <- runOM_datagen(df)
-sim.data <- run.agebased.true.catch(df)
+# sim.data <- run.agebased.true.catch(df)
 
 simdata0 <- sim.data # The other one is gonna get overwritten. 
 

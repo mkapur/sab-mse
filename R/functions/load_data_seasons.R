@@ -16,7 +16,8 @@ load_data_seasons <- function(nspace = 6,
                               # moveinit = NA, 
                               # moveslope = 0.9,
                               # selectivity_change = 0,
-                              yr_future  = 0
+                              yr_future  = 0,
+                              b = 0.5
                               # sel_hist = 1
                               ){
   
@@ -40,7 +41,7 @@ load_data_seasons <- function(nspace = 6,
 
   years <- 1960:(myear+yr_future)
   nyear <- length(years)
-  tEnd <- length(years)*nseason
+  tEnd <- length(years)
   age <- 0:70 # 0:95
   
   ## Age stuff
@@ -511,6 +512,8 @@ load_data_seasons <- function(nspace = 6,
     #* FLEETS STRUCTURE ----
     nfleets_surv = nfleets_surv,
     nfleets_fish = nfleets_fish,
+    nfleets_acomp = nfleets_acomp,
+    nfleets_lcomp = nfleets_lcomp,
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
     phi_ik = phi_ik,
@@ -525,14 +528,13 @@ load_data_seasons <- function(nspace = 6,
     Linf_yk = growthPars$Linf_yk,
     kappa_yk = growthPars$kappa_yk,
     sigmaG_yk = growthPars$sigmaG_yk,
-    
+    L1_yk = growthPars$L1_yk,
     #* DATA ----
     survey = survey, # Make sure the survey has the same length as the catch time series
     survey_err = survey_err, #ac.data$ss.error, # Make sure the survey has the same length as the catch time series
     survey = survey, #ac.data$ss.survey,
     age_error = ageerr_ExpAge,
     age_error_sd = ageerr_SD,
-    L1_yk = L1_yk,
     catch = catch,
     
     #* ADDL PARS ----

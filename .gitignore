@@ -1,11 +1,13 @@
 *.Rproj.*
 *Rdata
 *.docx
-*input*
+*.xlsx
+*.RDataTmp
+input_data/
+raw_data/
+downloads
 *-deprecated*
 *_examples*
 *_presentations*
 *_writing*
-*figures/*
 
-.RDataTmp

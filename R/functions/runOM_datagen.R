@@ -7,20 +7,20 @@ runOM_datagen <- function(df, seed = 731){
   ## Load data & define structure ----
   nspace <- df$nspace
   nstocks <- df$nstocks
-  nseason <- 1# df$nseason
+
   nfleets_surv <- df$nfleets_surv
   nfleets_fish <- df$nfleets_fish
+  nfleets_acomp <- df$nfleets_acomp
+  nfleets_lcomp <- df$nfleets_lcomp
   nmgmt_reg <- ncol(df$phi_fm)
   
-  df$tEnd <- length(df$years)*nseason
-  nyear <- df$tEnd/df$nseason # 
+  nyear <- df$tEnd
   year <- df$years
-  tEnd <- length(df$years)#nyear*nseason
+  tEnd <- length(df$years)
   
   ## these are TMB-ready; need to add one for indexing to work
   phi_if_surv <- df$phi_if_surv 
   phi_if_fish <- df$phi_if_fish 
-  phi_im <- df$phi_im
   phi_fm <- df$phi_fm
   phi_ik <- df$phi_ik 
   phi_ik2 <- df$phi_ik2 + 1 ## zero-indexed, add one
@@ -30,6 +30,7 @@ runOM_datagen <- function(df, seed = 731){
   nage <- df$nage
   age <- df$age
   M_k <- df$M_k
+  mat_age <- rep(0.2, nage)
 
   
   ## Obs
@@ -83,24 +84,23 @@ runOM_datagen <- function(df, seed = 731){
   # }
   
   movemat <- df$X_ija #df$movemat ## array of subarea x age, x season x year
-  move.init <- df$move.init
+  # move.init <- df$move.init
 
 
   # Catchability 
-  q <- 1 #exp(df$logQ) # Constant over time
-  surv.sd <- exp(df$parms$logSDsurv) # Survey error
+  # q <- 1 #exp(df$logQ) # Constant over time
+  # surv.sd <- exp(df$parms$logSDsurv) # Survey error
   
   # Maturity 
-  Mat.sel <- df$Matsel # Fecundity
-  h <- exp(df$parms$logh)
-  h_k <- rep(h, nstocks)
+  # Mat.sel <- df$Matsel # Fecundity
+  h_k <- exp(df$parms$logh_k)
   # Age 
   nage <- df$nage
   age <- df$age
   
   R_0k <- rep(exp(df$parms$logRinit), nspace) ## change this to better value
   
-  Mage <- c(0,cumsum(M[1:(nage-1)]))
+  # Mage <- c(0,cumsum(M[1:(nage-1)]))
   
   # Calculate N0 based on R0
   # mage <- max(df$age) # Max age
@@ -128,24 +128,28 @@ runOM_datagen <- function(df, seed = 731){
   
   ## Unfished Naa and SB0 ----
   ## note that omega makes this non-smooth
-  N_0ai <- matrix(NA, nrow = nage, ncol = nspace)
-  SSB_0i <- rep(0, nspace)
-  for(k in 1:nstocks){
-    for(i in 1:nspace){
-      for(a in 1:(nage-1)){
-        N_0ai[a,i] = 0.5*omega_ai[a,i]*R_0k[k]*tau_ik[k,i]*exp(-(M[a]*age[a]))
-      }
-      # // note the A+ group will be in slot A-1
-      N_0ai[nage,i] = omega_ai[nage,i]* N_0ai[nage-1,i]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
-    } ## // end subareas
-  }  ## // end stocks
+  # N_0ai <- matrix(NA, nrow = nage, ncol = nspace)
+  N_0ai <- array(NA, dim = c(nage, nspace, 2))
+  SSB_0i <- rep(0, nspace) 
+  for(s in 1:2){ ## 1 is female, 2 is male
+    for(k in 1:nstocks){
+      for(i in 1:nspace){
+        for(a in 1:(nage-1)){
+          N_0ai[a,i,s] = 0.5*omega_ai[a,i]*R_0k[k]*tau_ik[k,i]*exp(-(M[a]*age[a]))
+        }
+        # // note the A+ group will be in slot A-1
+        N_0ai[nage,i,s] = omega_ai[nage,i]* N_0ai[nage-1,i]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
+      } ## // end subareas
+    }  ## // end stocks
+  } ## end sexes
   
+  ## females only
   SSB_0i <- rep(0, nspace);  SSB_0k <- rep(0, nstocks);
   for(i in 1:nspace){
     for(a in 1:(nage)){
-      SSB_0i[i] = SSB_0i[i] + mat_age[a]*N_0ai[a,i]*0.5;
+      SSB_0i[i] = SSB_0i[i] + mat_age[a]*N_0ai[a,i,1];
       for(k in 1:nstocks){
-        SSB_0k[k] = SSB_0k[k] + phi_ik[k,i]*mat_age[a]*N_0ai[a,i]*0.5;
+        SSB_0k[k] = SSB_0k[k] + phi_ik[k,i]*mat_age[a]*N_0ai[a,i,1];
       } #// end stocks
     } #// end ages
   } # // end space
@@ -199,6 +203,7 @@ runOM_datagen <- function(df, seed = 731){
     if(y == 1){
       # for(k in 1:nstocks){   
         for(i in 1:nspace){
+          # for(s in 1:2){ ## sexes
           Length_yai_beg[1,1,i] <- 10
           N_yai_beg[1,1,i] <- Ninit_ai[1,i]
           N_yai_mid[1,1,i] <- N_yai_beg[1,1,i]*exp(-0.15)

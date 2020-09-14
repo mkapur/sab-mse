@@ -447,6 +447,10 @@ save(OM_agecomps_female, file = here('input','input_data',"OM_agecomps_female.rd
 save(OM_agecomps_male, file = here('input','input_data',"OM_agecomps_male.rdata"))
 
 
+## mortality ----
+## keeping this simple, just one value for each R
+M_k <- c(0.7,rep(0.2,3))
+save(M_k, file = here('input','input_data','M_k.rdata'))
 ## growth ----
 ## load growth params - this used to happen in load_data_seasons
 growPar <- read.csv(here("input","raw_data","demography","Table3_2020-05-06phase2.csv"))
@@ -483,8 +487,9 @@ for(s in 1:2){
     sigmaG_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$Sigma[temp$Period == 'late']
   }
 }
-omgp <- list(Linf_yk, L1_yk,kappa_yk, sigmaG_yk)
-save(omgp, 
+growthPars <- list("Linf_yk"=Linf_yk, "L1_yk"=L1_yk,
+             "kappa_yk"=kappa_yk, "sigmaG_yk"=sigmaG_yk)
+save(growthPars, 
      file = here('input','input_data',"OM_growthPars.rdata"))
 
 
@@ -551,7 +556,7 @@ ggsave(last_plot(),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
 ## movement ----
-## see demography/movement/movement-estimates-toAge.R
+## see raw_data/demography/movement/movement-estimates-toAge.R
 ## the mod needs to be run first to come up with the conversion factors --
 
 
@@ -663,26 +668,36 @@ save(OM_selex_female_yaf, file = here('input','input_data',"OM_selex_female_yaf.
 spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                     stock = c("R4","R3","R3","R2","R2","R1"),
                     mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
-
-read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
+bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
+  mutate(SE = 0.317, lci = nominal.Trap.CPUE-1.96*SE, uci =nominal.Trap.CPUE+1.96*SE, Fleet = "BC_early") %>%
+  select(YEAR, nominal.Trap.CPUE, SE, Fleet)
+names(bcnom) <- c('Year','value', 'sigma', 'fleet')
+#* survey error ----
+## reformat this and save            
+survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
-  filter(Fleet != "AllAreas") %>%
-  merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
+  filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
+  # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   mutate(value = Estimate_metric_tons,
          sigma = SD_log, 
          fleet = Fleet, 
          mgmt = fleet, 
          type = 'survey') %>%
-  select(Year, fleet, type, subarea, stock, mgmt, value, sigma) %>%
-  arrange(.,Year,fleet) %>%
-  write.csv(., here("input","raw_data","survey","reformatted_indices_with_sigma.csv"),row.names = FALSE)
+  select(Year, value, sigma, fleet) %>%
+  bind_rows(bcnom) %>%
+  select(-value) %>%
+  pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
+  merge(., data.frame('Year' = 1960:2018), all = TRUE) %>%
+  select(-Year) 
+
+  # arrange(.,Year,fleet) #%>%
+
+names(survsig) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,1,2,3)])
+write.csv(survsig[,c(4,3,2,5,1)],here("input","input_data","OM_indices_sigma.csv"),row.names = FALSE)
 
 ## make columns as fleets, include extra  bc surv
-bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
-  mutate(SE = 0.317, lci = nominal.Trap.CPUE-1.96*SE, uci =nominal.Trap.CPUE+1.96*SE, Fleet = "BC_early") %>%
-  select(YEAR, nominal.Trap.CPUE, SE, Fleet)
 names(bcnom) <- c('Year','value', 'sigma', 'Fleet')
-
+#* survey biomass ----
 vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
@@ -701,10 +716,10 @@ surv_vals <- vast0 %>%
   tidyr::pivot_wider(names_from= Fleet, values_from = value) %>%
   filter(Year > 1964 & Year < 2019)
 surv_vals[surv_vals == -1] <- NA
-names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,1,2,4,5)])
+names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) ## note that
 # row.names(surv_vals) <- surv_vals$Year
 
-write.csv(surv_vals[,c(6,5,2:4)], here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
+write.csv(surv_vals[,c(3,4,5,2,6)], here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
 
 surv_vals %>%
   # select(-BC_EARLY) %>%

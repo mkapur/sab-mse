@@ -1,7 +1,7 @@
 require(ggplot2)
 require(patchwork)
 library(gridExtra)
-
+require(colorblindr)
 ## SANITY CHECK PLOTS
 nspace <- dim(Ninit_Aai)[3]
 
@@ -81,9 +81,9 @@ pSSByi <- SSB_yi[1:52,] %>%
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'subarea') +
   ggsidekick::theme_sleek()
 
-pSSByk <- SSB_yk[1:52,] %>%
+pSSByk <- SSB_yk[1:nyear,] %>%
   data.frame() %>%
-  mutate('Yr' = 1:52) %>%
+  mutate('Yr' = 1:nyear) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
@@ -121,29 +121,52 @@ pSRR <- cbind(R_yk, SSB_yk) %>% data.frame() %>%
 
 
 ## deterministic/expected length at ages
-pLAA1 <- Length_yai_beg[,,1] %>% data.frame() %>%
+pLAA1F <- Length_yais_beg[,,,1] %>% 
+  data.frame() %>%
+  mutate('Yr' = 1:nrow(.)) %>%
+  reshape2::melt(id = c('Yr')) %>%
+  ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value)) +
+  geom_point(color = 'orange') +
+  labs(x = 'Age',y = 'Length') +
+  scale_y_continuous(limits = c(0,75))+
+  ggsidekick::theme_sleek()
+
+pLAA2F <- Length_yais_beg[,,2,1] %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value, color = Yr )) +
-  geom_point() +
-  labs(x = 'Age',y = 'Length', color = 'Year') +
-  geom_hline(yintercept = c(40,50,65)*0.95, col = 'red') +
+  geom_point(color = 'orange') +
+  labs(x = 'Age',y = 'Length', color = 'orange') +
+  scale_y_continuous(limits = c(0,75))+
+  
   ggsidekick::theme_sleek()
 
-pLAA2 <- Length_yai_beg[,,2] %>% data.frame() %>%
+pLAA1M <- Length_yais_beg[,,1,2] %>% data.frame() %>%
+  mutate('Yr' = 1:nrow(.)) %>%
+  reshape2::melt(id = c('Yr')) %>%
+  ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value)) +
+  geom_point(color = 'blue') +
+  labs(x = 'Age',y = 'Length', color = 'Year') +
+  scale_y_continuous(limits = c(0,75))+
+  ggsidekick::theme_sleek()
+
+pLAA2M <- Length_yais_beg[,,2,2] %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = as.numeric(substr(variable,2,3))-1, y = value, color = Yr )) +
-  geom_point() +
+  geom_point(color = 'blue') +
   labs(x = 'Age',y = 'Length', color = 'Year') +
+  scale_y_continuous(limits = c(0,75))+
   ggsidekick::theme_sleek()
 
+(pLAA1F  | pLAA1M) /
+  (pLAA2F  | pLAA2M)
 
 ## distributions
 pA1 <- list() ## for area 1
 for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   a1 <- 
-    LengthAge_alyi_beg[,,y,1] %>%
+    LengthAge_alyis_beg[,,y,1,1] %>%
     melt() %>%
     group_by(Var2) %>% 
     mutate(sumP = sum(value), pbin = value/sumP)
@@ -180,7 +203,7 @@ for(y in 1:10){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
 }
 png(here("figs","LAA_Dist_A1.png"), 
     height = 10, width = 10, unit = 'in', res = 420)
-do.call(grid.arrange,pA1)
+do.call(gridExtra::grid.arrange,pA1)
 dev.off()
 
 

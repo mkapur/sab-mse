@@ -108,19 +108,19 @@ load_data_seasons <- function(nspace = 6,
   ## placeholder for X_ija -this will need to get converted from length
   if(move == FALSE){
     
-    X_ija <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage))
+    X_ijas <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage,2))
     for(a in 1:dim(X_ija)[[3]]){
-      diag(X_ija[,,a]) <- 1
+      diag(X_ijas[,,a,]) <- 1
     }
   }
   if(move == TRUE) {
-    X_ija <- array(runif( nspace*nspace*nage, 0.01,0.05),  c(nspace,nspace,nage))
+    X_ijas <- array(runif( nspace*nspace*nage, 0.01,0.05),  c(nspace,nspace,nage,2))
     
     ## for placeholder; if the rows are summing to greater than one set to zero
     for(n in 1:nage){
       for(i in 1:nspace){
         for(j in 1:nspace){
-          if(sum(X_ija[i,1:j,n]) > 1)  X_ija[i,j:nspace,n] <- 0
+          if(sum(X_ijas[i,1:j,n]) > 1)  X_ijas[i,j:nspace,n] <- 0
         } ## end j space
       } ## end i space
     } ## end n ages
@@ -128,7 +128,7 @@ load_data_seasons <- function(nspace = 6,
 
   omega_ai <- matrix(rep(0, nage*nspace), c(nage,nspace))## eigenvector for stable spatial distribution at age
   for(a in 1:nage){
-    omega_ai[a,] <- eigen(X_ija[,,a])$values 
+    omega_ai[a,] <- eigen(X_ijas[,,a])$values 
     omega_ai[a,][which(omega_ai[a,] < 0)] <- 0.05
   }
 
@@ -235,7 +235,11 @@ load_data_seasons <- function(nspace = 6,
   # catch <- read.csv(here("input","data",'hake_totcatch.csv'))
   # catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
-
+  
+  ## Selex: note that these are comm + surv combined
+  load(here('input','input_data',"OM_selex_male_yaf.rdata"))
+  load(here('input','input_data',"OM_selex_female_yaf.rdata"))
+  
   # Survey ----
   # survey <- read.csv(here("input","data",'acoustic survey.csv'))
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
@@ -453,7 +457,7 @@ load_data_seasons <- function(nspace = 6,
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
-    logh_k = rep(0.2, 4),
+    logh_k = rep(log(0.25),4),
     logRinit = log(1e7)
   )
   
@@ -514,6 +518,12 @@ load_data_seasons <- function(nspace = 6,
     nfleets_fish = nfleets_fish,
     nfleets_acomp = nfleets_acomp,
     nfleets_lcomp = nfleets_lcomp,
+    
+    fltnames_surv = fltnames_surv,
+    fltnames_fish = fltnames_fish,
+    fltnames_acomp = fltnames_acomp,
+    fltnames_lcomp = fltnames_lcomp,
+
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
     phi_ik = phi_ik,
@@ -523,12 +533,13 @@ load_data_seasons <- function(nspace = 6,
     tau_ik = tau_ik,
     
     #* DEMOG ----
-    X_ija = X_ija,
+    X_ijas = X_ijas,
     omega_ai = omega_ai,
     Linf_yk = growthPars$Linf_yk,
     kappa_yk = growthPars$kappa_yk,
     sigmaG_yk = growthPars$sigmaG_yk,
     L1_yk = growthPars$L1_yk,
+    wtatlen_kab = wtatlen_kab,
     #* DATA ----
     survey = survey, # Make sure the survey has the same length as the catch time series
     survey_err = survey_err, #ac.data$ss.error, # Make sure the survey has the same length as the catch time series

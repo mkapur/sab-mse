@@ -9,7 +9,7 @@ runOM_datagen <- function(df, seed = 731){
   nstocks <- df$nstocks
   nage <- df$nage
   age <- df$age
-  inames <- colnames(phi_ik)
+
   
   nfleets_surv <- df$nfleets_surv
   nfleets_fish <- df$nfleets_fish
@@ -32,6 +32,7 @@ runOM_datagen <- function(df, seed = 731){
   phi_if_fish <- df$phi_if_fish 
   phi_fm <- df$phi_fm
   phi_ik <- df$phi_ik 
+  inames <- colnames(phi_ik)
   phi_ik2 <- df$phi_ik2 + 1 ## zero-indexed, add one
   tau_ik <- df$tau_ik 
   
@@ -46,10 +47,10 @@ runOM_datagen <- function(df, seed = 731){
   surv_yf_obs <- df$survey
   
   # // movement //
-  omega_ai <- df$omega_ai
-  omega_ai[,] <- 0.5
+  omega_ais <- df$omega_ais
+  # omega_ais[,] <- 0.5
 
-  X_ija <- df$X_ija
+  X_ijas <- df$X_ijas
 
   # // growth //
   Linf_yk <- df$Linf_yk
@@ -93,10 +94,10 @@ runOM_datagen <- function(df, seed = 731){
     for(k in 1:nstocks){
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
-          N_0ais[a,i,s] =  N_0ais[a,i,s]+0.5*omega_ai[a,i]*R_0k[k]*tau_ik[k,i]*exp(-(M[a]*age[a]))
+          N_0ais[a,i,s] =  N_0ais[a,i,s]+0.5*omega_ais[a,i,s]*R_0k[k]*tau_ik[k,i]*exp(-(M[a]*age[a]))
         } ## end age < plus
         # // note the A+ group will be in slot A-1
-        N_0ais[nage,i,s] = omega_ai[nage,i]* N_0ais[nage-1,i,s]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
+        N_0ais[nage,i,s] = omega_ais[nage,i,s]* N_0ais[nage-1,i,s]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
       } ## // end subareas
     }  ## // end stocks
   } ## end sexes
@@ -122,10 +123,10 @@ runOM_datagen <- function(df, seed = 731){
     for(k in 1:nstocks){   
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
-          Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+0.5* omega_ai[a,i] * tau_ik[k,i] * R_0k[k]*
+          Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+0.5* omega_ais[a,i,s] * tau_ik[k,i] * R_0k[k]*
             exp(-(M[a]*age[a])) * exp(-0.5*SDR*SDR+tildeR_initk[k])
         } #// end ages
-        Ninit_ais[nage,i,s] = (omega_ai[nage,i] * Ninit_ais[nage-1,i,s] *
+        Ninit_ais[nage,i,s] = (omega_ais[nage,i,s] * Ninit_ais[nage-1,i,s] *
                               exp(-M[nage]*age[nage-1]))/(1-exp(-(M[nage]*age[nage]))* 
                                                             exp(-0.5*SDR*SDR+tildeR_initk[k]))
       } #// end space
@@ -188,8 +189,8 @@ runOM_datagen <- function(df, seed = 731){
             for(j in 1:nspace){           
               pLeave = 0.0;  NCome = 0.0; # // reset for new age
               if(i != j){
-                pLeave = pLeave + X_ija[i,j,a]; #// will do 1-this for proportion which stay
-                NCome = NCome + X_ija[j,i,a]*Ninit_ais[a,j,s]; #// actual numbers incoming
+                pLeave = pLeave + X_ijas[i,j,a,s]; #// will do 1-this for proportion which stay
+                NCome = NCome + X_ijas[j,i,a,s]*Ninit_ais[a,j,s]; #// actual numbers incoming
               }
             } #// end subareas j
             # // this is the synthesis syntax; 10 is placeholder for LMIN
@@ -205,8 +206,8 @@ runOM_datagen <- function(df, seed = 731){
           for(j in 1:nspace){   
             pLeave = 0.0;  NCome = 0.0; # // reset for new age
             if(i != j){
-              pLeave = pLeave + X_ija[i,j,nage]
-              NCome = NCome + X_ija[j,i,nage]*(Ninit_ais[nage,j,s] + Ninit_ais[nage-1,j,s])  #// if M becomes spatial use M_aj here
+              pLeave = pLeave + X_ijas[i,j,nage,s]
+              NCome = NCome + X_ijas[j,i,nage,s]*(Ninit_ais[nage,j,s] + Ninit_ais[nage-1,j,s])  #// if M becomes spatial use M_aj here
             }
           } #// end subareas j
           N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-M[nage])
@@ -256,8 +257,8 @@ runOM_datagen <- function(df, seed = 731){
           pLeave = 0.0;  NCome = 0.0
           for(j in 1:nspace){           
             if(i != j){
-              pLeave = pLeave + X_ija[i,j,a]; ### will do 1-this for proportion which stay
-              NCome = NCome + X_ija[j,i,a]*N_yais_beg[y,a,j,s]; ### actual numbers incoming
+              pLeave = pLeave + X_ijas[i,j,a,s]; ### will do 1-this for proportion which stay
+              NCome = NCome + X_ijas[j,i,a,s]*N_yais_beg[y,a,j,s]; ### actual numbers incoming
             }
           } ### end subareas j         
           N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-M[a]) 
@@ -274,8 +275,8 @@ runOM_datagen <- function(df, seed = 731){
         pLeave = 0.0;  NCome = 0.0
         for(j in 1:nspace){           
           if(i != j){
-            pLeave <- pLeave + X_ija[i,j,nage-1] 
-            NCome <- NCome + X_ija[j,i,nage-1]*(N_yais_beg[y,nage,j,s] + N_yais_beg[y,nage-1,j,s]) 
+            pLeave <- pLeave + X_ijas[i,j,nage-1,s] 
+            NCome <- NCome + X_ijas[j,i,nage-1,s]*(N_yais_beg[y,nage,j,s] + N_yais_beg[y,nage-1,j,s]) 
           } ## end i != j
         } ## end subareas j
         N_yais_mid[y,nage,i,s] = N_yais_beg[y,nage,i,s]*exp(-M[nage])
@@ -392,7 +393,7 @@ runOM_datagen <- function(df, seed = 731){
           catch_afk_TEMP[a,fish_flt,k] <-     catch_afk_TEMP[a,fish_flt,k] +
             (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*(1-exp(-Z_a_TEMP[a]))*
                                             phi_if_fish[fish_flt, i]*
-                                            N_yai_beg[y,a,i]*1.0*
+                                            N_yais_beg[y,a,i,s]*1.0*
                                             wage_catch[a,i]
 
 
@@ -413,7 +414,7 @@ runOM_datagen <- function(df, seed = 731){
       for(i in 1:nspace){
         for(a in 1:nage){
         denom <- denom + phi_if_fish[fish_flt, i] *
-             N_yai_beg[y,a,i]*
+             N_yais_beg[y,a,i,s]*
              wage_catch[a,y] * 1.0 *(1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
         }
       }
@@ -439,12 +440,12 @@ runOM_datagen <- function(df, seed = 731){
     ## get total N exploitable by this fleet
     for(i in 1:nspace){
       N_avail_yf[y,fish_flt] <- N_avail_yf[y,fish_flt] + sum( phi_if_fish[fish_flt, i]*
-                                 N_yai_beg[y,,i])
+                                 N_yais_beg[y,,i])
     }
     ## get ratio of N in area & reweight F
     ## will just return Freal and 0 for single-area fisheries
     for(i in 1:nspace){
-      N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]*  N_yai_beg[y,,i])/
+      N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]*  N_yais_beg[y,,i])/
         N_avail_yf[y,fish_flt]
       F_area_yfi[y,fish_flt,i] <- Freal_yf[y, fish_flt]*N_weight_yfi[y,fish_flt, i]
       # Zreal_yai[y,a,i]  <- F_area_yfi[y,fish_flt,i] + M[a]
@@ -461,7 +462,7 @@ runOM_datagen <- function(df, seed = 731){
         catch_yaf_pred[y,a,fish_flt] <- catch_yaf_pred[y,a,fish_flt] +
           (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
           phi_if_fish[fish_flt, i]*
-          N_yai_beg[y,a,i]*
+          N_yais_beg[y,a,i,s]*
           1.0*
           wage_catch[a,i]
 
@@ -469,7 +470,7 @@ runOM_datagen <- function(df, seed = 731){
         catch_yaif_pred[y,a,i,fish_flt] <- (F_area_yfi[y,fish_flt,i]/
                                              (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
           phi_if_fish[fish_flt, i]*
-          N_yai_beg[y,a,i]*
+          N_yais_beg[y,a,i,s]*
           1.0*
           wage_catch[a,i]
       } ## end ages for predicted catch
@@ -1076,5 +1077,5 @@ runOM_datagen <- function(df, seed = 731){
   # 
   # return(df.out)
   
-# }
+}
 

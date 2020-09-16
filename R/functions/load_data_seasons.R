@@ -109,27 +109,32 @@ load_data_seasons <- function(nspace = 6,
   if(move == FALSE){
     
     X_ijas <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage,2))
-    for(a in 1:dim(X_ija)[[3]]){
-      diag(X_ijas[,,a,]) <- 1
-    }
-  }
+    for(s in 1:2){
+      for(a in 1:dim(X_ijas)[[3]]){
+        diag(X_ijas[,,a,s]) <- 1
+      }## end age
+    } ## end sex
+  }## end move == FALSE
   if(move == TRUE) {
-    X_ijas <- array(runif( nspace*nspace*nage, 0.01,0.05),  c(nspace,nspace,nage,2))
-    
+    # X_ijas <- array(runif( nspace*nspace*nage, 0.01,0.05),  c(nspace,nspace,nage,2))
+    # for(n in 1:nage){
+    #   for(i in 1:nspace){
+    #     for(j in 1:nspace){
+    #       if(sum(X_ijas[i,1:j,n]) > 1)  X_ijas[i,j:nspace,n] <- 0
+    #     } ## end j space
+    #   } ## end i space
+    # } ## end n ages
+    load(here("input","input_data","X_ijas.rdata"))
     ## for placeholder; if the rows are summing to greater than one set to zero
-    for(n in 1:nage){
-      for(i in 1:nspace){
-        for(j in 1:nspace){
-          if(sum(X_ijas[i,1:j,n]) > 1)  X_ijas[i,j:nspace,n] <- 0
-        } ## end j space
-      } ## end i space
-    } ## end n ages
+
   } ## end move == TRUE
 
-  omega_ai <- matrix(rep(0, nage*nspace), c(nage,nspace))## eigenvector for stable spatial distribution at age
-  for(a in 1:nage){
-    omega_ai[a,] <- eigen(X_ijas[,,a])$values 
-    omega_ai[a,][which(omega_ai[a,] < 0)] <- 0.05
+  omega_ais <- array(0, dim = c(nage,nspace,2))## eigenvector for stable spatial distribution at age
+  for(s in 1:2){
+    for(a in 1:nage){
+      omega_ais[a,,s] <- eigen(X_ijas[,,a,s])$values 
+      omega_ais[a,,s][which(omega_ais[a,,s] < 0)] <- 0.05
+    }
   }
 
   
@@ -534,7 +539,7 @@ load_data_seasons <- function(nspace = 6,
     
     #* DEMOG ----
     X_ijas = X_ijas,
-    omega_ai = omega_ai,
+    omega_ais = omega_ais,
     Linf_yk = growthPars$Linf_yk,
     kappa_yk = growthPars$kappa_yk,
     sigmaG_yk = growthPars$sigmaG_yk,

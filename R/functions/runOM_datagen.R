@@ -33,6 +33,7 @@ runOM_datagen <- function(df, seed = 731){
   phi_fm <- df$phi_fm
   phi_ik <- df$phi_ik 
   inames <- colnames(phi_ik)
+  knames <- rownames(phi_ik)
   mnames <- colnames(phi_fm)
   phi_ik2 <- df$phi_ik2 + 1 ## zero-indexed, add one
   tau_ik <- df$tau_ik 
@@ -61,10 +62,10 @@ runOM_datagen <- function(df, seed = 731){
   phi_ij <- df$phi_ij ##  matrix of whether i,j are from distinct stocks (0 otherwise)
   LBins <- df$LBins
   
-  wage_ssb <- df$wage_ssb
-  wage_catch <- df$wage_catch
-  wage_survey <- df$wage_survey
-  wage_mid <- df$wage_mid
+  # wage_ssb <- df$wage_ssb
+  # wage_catch <- df$wage_catch
+  # wage_survey <- df$wage_survey
+  # wage_mid <- df$wage_mid
   
   # array<Type> Length_yai_beg(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
   # array<Type> Length_yai_mid(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
@@ -81,24 +82,26 @@ runOM_datagen <- function(df, seed = 731){
   q = 0.5 ## placeholder
   # True values 
   M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
-  # recruitmat <- df$recruitmat
-
-  movemat <- df$X_ija #df$movemat ## array of subarea x age, x season x year
-
   h_k <- exp(df$parms$logh_k)
   R_0k <- rep(exp(df$parms$logRinit), nspace) ## change this to better value
 
   ## Unfished Naa and SB0 ----
   ## note that omega makes this non-smooth
-  N_0ais <- array(0, dim = c(nage, nspace, 2))
+  N_0ais <- array(0, dim = c(nage, nspace, 2), dimnames = list(c(age),c(inames),c('Fem','Mal')))
   for(s in 1:2){ ## 1 is female, 2 is male
     for(k in 1:nstocks){
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
-          N_0ais[a,i,s] =  N_0ais[a,i,s]+0.5*omega_ais[a,i,s]*R_0k[k]*tau_ik[k,i]*exp(-(M[a]*age[a]))
+          N_0ais[a,i,s] =  N_0ais[a,i,s]+
+            0.5* 
+            ifelse(omega_ais[a,i,s]==0,1,omega_ais[a,i,s]) *
+            R_0k[k]*
+            tau_ik[k,i]*
+            exp(-(M[a]*age[a]))
         } ## end age < plus
         # // note the A+ group will be in slot A-1
-        N_0ais[nage,i,s] = omega_ais[nage,i,s]* N_0ais[nage-1,i,s]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
+        N_0ais[nage,i,s] =  ifelse(omega_ais[nage,i,s]==0,1,omega_ais[nage,i,s]) *
+          N_0ais[nage-1,i,s]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
       } ## // end subareas
     }  ## // end stocks
   } ## end sexes
@@ -116,7 +119,7 @@ runOM_datagen <- function(df, seed = 731){
   
   ## Ninit ----
   # Ninit_ais <- matrix(NA, nrow = nage, ncol = nspace)
-  Ninit_ais <- array(0, dim = c(nage, nspace, 2))
+  Ninit_ais <- array(0, dim = c(nage, nspace, 2), dimnames = list(c(age),c(inames),c('Fem','Mal')))
   tildeR_initk <-  rep(1, nstocks)
   tildeR_yk <- matrix(1, nrow = tEnd, ncol = nstocks)
   
@@ -124,10 +127,15 @@ runOM_datagen <- function(df, seed = 731){
     for(k in 1:nstocks){   
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
-          Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+0.5* omega_ais[a,i,s] * tau_ik[k,i] * R_0k[k]*
-            exp(-(M[a]*age[a])) * exp(-0.5*SDR*SDR+tildeR_initk[k])
+          Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+
+            0.5*
+            ifelse(omega_ais[a,i,s]==0,1,omega_ais[a,i,s]) * ## omega is zero for non-movement years leading to weird shapes.
+            tau_ik[k,i] * 
+            R_0k[k]*
+            exp(-(M[a]*age[a])) * 
+            exp(-0.5*SDR*SDR+tildeR_initk[k])
         } #// end ages
-        Ninit_ais[nage,i,s] = (omega_ais[nage,i,s] * Ninit_ais[nage-1,i,s] *
+        Ninit_ais[nage,i,s] = (   ifelse(omega_ais[nage,i,s]==0,1,omega_ais[nage,i,s]) * #* Ninit_ais[nage-1,i,s] *
                               exp(-M[nage]*age[nage-1]))/(1-exp(-(M[nage]*age[nage]))* 
                                                             exp(-0.5*SDR*SDR+tildeR_initk[k]))
       } #// end space
@@ -143,14 +151,21 @@ runOM_datagen <- function(df, seed = 731){
                                                       dimnames = list(c(age),c(1:LBins), c(year),
                                                                       c(inames),c('Fem','Mal')))
 
-  SSB_yi <- matrix(0, nrow = tEnd, ncol = nspace)
+  SSB_yi <- matrix(0, nrow = tEnd, ncol = nspace); 
   SSB_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
-  
-  R_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
   R_yi <- matrix(0, nrow = tEnd, ncol = nspace)
+  R_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
 
+  colnames(SSB_yi) <- colnames(R_yi) <- inames
+  colnames(SSB_yk) <- colnames(R_yk) <- knames
+  rownames(SSB_yi) <- rownames(SSB_yk) <- rownames(R_yi) <- rownames(R_yk) <- year
+  
+  
   niter <- 100 ## F iterations
-  F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1)) ## storage for intermediate guesses
+  F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1),
+                          dimnames = list(c(year),
+                                          c(fltnames_fish),
+                                          c(1:(niter+1)))) ## storage for intermediate guesses
   Freal_yf <-  matrix(0, nrow = tEnd, ncol = nfleets_fish) ## storage for final guess
   Zreal_ya <- matrix(0, nrow = tEnd, ncol = nage) 
   Zreal_yai <- array(0, dim = c(tEnd, nage, nspace))
@@ -176,8 +191,9 @@ runOM_datagen <- function(df, seed = 731){
                                            dimnames = list(c(year), paste(fltnames_fish), c(inames)))
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
+  
   ## start year loop ----
-  for(y in 1:(tEnd-1)){
+  for(y in 1:5){#(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -219,20 +235,24 @@ runOM_datagen <- function(df, seed = 731){
           Length_yais_mid[y,nage,i,s]  = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
             exp(-0.5*kappa_yk[1,phi_ik2[i],s]*nage-1)
           
-        } #// end subareas i
-      # } #// end stocks
+        } #// end sexes
+      } #// end  subareas i
     } ## end y == 1
-    
+    # if(any(is.na(N_yais_beg[y,,,]))) stop('NA ON year', y,"\n")
     ## SSB_y ----
+
     for(i in 1:nspace){
+      SSB_yi[y,i] <- 0
       for(a in 1:(nage)){
         SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_beg[y,a,i,1]*wtatlen_kab[phi_ik2[i],1]*
           Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
-        for(k in 1:nstocks){
-          SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*N_yais_beg[y,a,i,1]*wtatlen_kab[k,1]*
-            Length_yais_beg[y,a,i,1]^wtatlen_kab[k,2]
-        } # // end stocks
       } #// end ages
+    } #// end space
+    for(k in 1:nstocks){
+      SSB_yk[y,k]<- 0
+      for(i in 1:nspace){
+        SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
+      } # // end stocks
     } #// end space
     
     ## A0 Recruits ----
@@ -249,6 +269,7 @@ runOM_datagen <- function(df, seed = 731){
       R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ik[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
       N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits
     } ### end space
+
     
     #N- and Nominal Length ----
     # at-age for the middle of this year and beginning of next 
@@ -342,14 +363,12 @@ runOM_datagen <- function(df, seed = 731){
       } ## end nspace
     } ## end sex
 
-    
+  } ## end years testing
 
   
   ## Hybrid F tuning  ----
-
-
-  v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
-  # v1 = 0.865; Fmax <- 2##corresponds to an Fmax of 2
+  # v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
+  v1 = 0.865; Fmax <- 2##corresponds to an Fmax of 2
   # v1 = 0.7; Fmax = 1.5
   # v1 = 0.65; Fmax <- 1.15
   # v1 = 0.25
@@ -419,7 +438,8 @@ runOM_datagen <- function(df, seed = 731){
       for(i in 1:nspace){
         for(a in 1:nage){
           denom <- denom + phi_if_fish[fish_flt, i] *
-            1.0*    sum(N_yais_beg[y,a,i,]*
+            1.0*   
+            sum(N_yais_beg[y,a,i,]*
                           wtatlen_kab[phi_ik2[i],1]*
                           Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])*
             (1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
@@ -436,12 +456,12 @@ runOM_datagen <- function(df, seed = 731){
       # cat(F2_yf[y,fish_flt,k],"\n")
       latest_guess <- F2_yf[y,fish_flt,k]
 
-
     } ## end hybrid F iterations
 
     ## Define F, Z and predicted catches ----
     Freal_yf[y, fish_flt] <- latest_guess ## final as Freal_yf
-
+    if(is.na(Freal_yf[y, fish_flt])) stop("NA F ON",y,"\t", fish_flt,"\n")
+    
     ## annoying multi-loops for F in area
     N_avail_yf[y,fish_flt] <- 0
     ## get total N exploitable by this fleet
@@ -527,40 +547,41 @@ runOM_datagen <- function(df, seed = 731){
 
 
   
+  
   } ## END YEARS
-  df.out   <- list(N.save = Nsave,
-                   SSB = SSB,
-                   N.save.age = N.save.age,
-                   R.save = R.save,
-                   V.save = V.save,
-                   SSB.all = SSB.all,
-                   Catch.save.age = Catch.save.age,
-                   CatchN.save.age = CatchN.save.age,
-                   Catch = Catch,
-                   Catch.age = Catch.age,
-                   Catch.quota = Catch.quota,
-                   Catch.quota.N = Catch.quota.N,
-                   Fout = Fout.save,
-                   age_comps_OM = age_comps_OM,
-                   age_catch = age_comps_catch,
-                   SSB_0 = SSB_0,
-                   N0 = N0,
-                   SSB.weight = SSB.weight,
-                   survey.true = survey.true,
-                   Z = Z.save,
-                   survey = as.numeric(survey),
-                   age_comps_surv = age_comps_surv,
-                   age_comps_country = age_comps_surv_space,
-                   age_comps_catch_space = age_comps_catch_space,
-                   Fseason = Fseason.save,
-                   Fsel = Fsel.save,
-                   Ninit = Ninit,
-                   SSB0 = SSB_0)
-
-  return(df.out)
+  # df.out   <- list(N.save = Nsave,
+  #                  SSB = SSB,
+  #                  N.save.age = N.save.age,
+  #                  R.save = R.save,
+  #                  V.save = V.save,
+  #                  SSB.all = SSB.all,
+  #                  Catch.save.age = Catch.save.age,
+  #                  CatchN.save.age = CatchN.save.age,
+  #                  Catch = Catch,
+  #                  Catch.age = Catch.age,
+  #                  Catch.quota = Catch.quota,
+  #                  Catch.quota.N = Catch.quota.N,
+  #                  Fout = Fout.save,
+  #                  age_comps_OM = age_comps_OM,
+  #                  age_catch = age_comps_catch,
+  #                  SSB_0 = SSB_0,
+  #                  N0 = N0,
+  #                  SSB.weight = SSB.weight,
+  #                  survey.true = survey.true,
+  #                  Z = Z.save,
+  #                  survey = as.numeric(survey),
+  #                  age_comps_surv = age_comps_surv,
+  #                  age_comps_country = age_comps_surv_space,
+  #                  age_comps_catch_space = age_comps_catch_space,
+  #                  Fseason = Fseason.save,
+  #                  Fsel = Fsel.save,
+  #                  Ninit = Ninit,
+  #                  SSB0 = SSB_0)
+  # 
+  # return(df.out)
   
   
-} ## END FUNC
+}  ## END FUNC
   
   # Ninit <- rep(NA,nage)
   # Ninit_dev <- (df$parms$initN)
@@ -1094,5 +1115,5 @@ runOM_datagen <- function(df, seed = 731){
   # 
   # return(df.out)
   
-}
+
 

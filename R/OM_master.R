@@ -41,7 +41,7 @@ plot.figures = FALSE # Set true for printing to file
 # assessment <- read.csv(here("input","data",'assessment_MLE.csv')) ## I believe this comes from SS3
 # assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
 # Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
-df <- load_data_seasons(nspace = 6, move = FALSE) ## data that works with OM
+df <- load_data_seasons(nspace = 6, move = TRUE) ## data that works with OM
 
 time <- 1
 yrinit <- df$nyear

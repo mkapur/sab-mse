@@ -107,8 +107,7 @@ load_data_seasons <- function(nspace = 6,
   
   ## placeholder for X_ija -this will need to get converted from length
   if(move == FALSE){
-    
-    X_ijas <- array(rep(0, nspace*nspace*nage), c(nspace,nspace,nage,2))
+    X_ijas <- array(0, dim = c(nspace,nspace,nage,2))
     for(s in 1:2){
       for(a in 1:dim(X_ijas)[[3]]){
         diag(X_ijas[,,a,s]) <- 1

@@ -361,6 +361,8 @@ runOM_datagen <- function(df, seed = 731){
   Adj <- Z_a_TEMP <- Z_a_TEMP2 <- NULL
 
   for(fish_flt in 1:nfleets_fish){
+    if(is.na(catch_yf_obs[y, fish_flt+1])) next()
+    
     catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <- 0
    
     ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now

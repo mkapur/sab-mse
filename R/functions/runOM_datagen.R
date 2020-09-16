@@ -154,7 +154,7 @@ runOM_datagen <- function(df, seed = 731){
   Zreal_ya <- matrix(0, nrow = tEnd, ncol = nage) 
   Zreal_yai <- array(0, dim = c(tEnd, nage, nspace))
   F_area_yfi <-  array(0, dim = c(tEnd, nfleets_fish, nspace))
-  F_m_y <- matrix(0, nrow = tEnd, ncol = nmgmt_reg)
+  F_ym <- matrix(0, nrow = tEnd, ncol = nmgmt_reg)
   # Catch_yf_est <- array(0, dim = c(tEnd,nage,nfleets_fish))
   # CatchN <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
   
@@ -399,12 +399,12 @@ runOM_datagen <- function(df, seed = 731){
           Z_a_TEMP[a] <- F1_yf[y,fish_flt,k] + M[a]
 
           catch_afk_TEMP[a,fish_flt,k] <-     catch_afk_TEMP[a,fish_flt,k] +
-            (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*(1-exp(-Z_a_TEMP[a]))*
-                                            phi_if_fish[fish_flt, i]*
-                                            N_yais_beg[y,a,i,s]*1.0*
-                                            wage_catch[a,i]
-
-
+            (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*
+            (1-exp(-Z_a_TEMP[a]))*
+            phi_if_fish[fish_flt, i]*1.0*
+            N_yais_beg[y,a,i,s]*
+            wtatlen_kab[phi_ik2[i],1]*
+            Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
 
         } ## end ages
       } ## end space
@@ -421,9 +421,12 @@ runOM_datagen <- function(df, seed = 731){
       denom = 0
       for(i in 1:nspace){
         for(a in 1:nage){
-        denom <- denom + phi_if_fish[fish_flt, i] *
-             N_yais_beg[y,a,i,s]*
-             wage_catch[a,y] * 1.0 *(1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
+          denom <- denom + phi_if_fish[fish_flt, i] *
+            1.0*
+            N_yais_beg[y,a,i,s]*
+            wtatlen_kab[phi_ik2[i],1]*
+            Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]*
+            (1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
         }
       }
       # F2_yf[y, fish_flt, k] <- F2_yf[y, fish_flt, k-1] + catch_yf_obs[y, fish_flt+1]/denom
@@ -448,12 +451,12 @@ runOM_datagen <- function(df, seed = 731){
     ## get total N exploitable by this fleet
     for(i in 1:nspace){
       N_avail_yf[y,fish_flt] <- N_avail_yf[y,fish_flt] + sum( phi_if_fish[fish_flt, i]*
-                                 N_yais_beg[y,,i])
+                                 N_yais_beg[y,,i,s])
     }
     ## get ratio of N in area & reweight F
     ## will just return Freal and 0 for single-area fisheries
     for(i in 1:nspace){
-      N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]*  N_yais_beg[y,,i])/
+      N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]*  N_yais_beg[y,,i,s])/
         N_avail_yf[y,fish_flt]
       F_area_yfi[y,fish_flt,i] <- Freal_yf[y, fish_flt]*N_weight_yfi[y,fish_flt, i]
       # Zreal_yai[y,a,i]  <- F_area_yfi[y,fish_flt,i] + M[a]
@@ -461,7 +464,7 @@ runOM_datagen <- function(df, seed = 731){
     
     ## add together for mgmt regions
     for(m in 1:nmgmt_reg){
-      F_m_y[y,m] <- F_m_y[y,m]+phi_fm[fish_flt,m]*Freal_yf[y, fish_flt]
+      F_ym[y,m] <- F_ym[y,m]+phi_fm[fish_flt,m]*Freal_yf[y, fish_flt]
     }
     
     for(i in 1:nspace){
@@ -470,17 +473,19 @@ runOM_datagen <- function(df, seed = 731){
         catch_yaf_pred[y,a,fish_flt] <- catch_yaf_pred[y,a,fish_flt] +
           (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
           phi_if_fish[fish_flt, i]*
-          N_yais_beg[y,a,i,s]*
           1.0*
-          wage_catch[a,i]
+          N_yais_beg[y,a,i,s]*
+          wtatlen_kab[phi_ik2[i],1]*
+          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
 
         Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + M[a]
         catch_yaif_pred[y,a,i,fish_flt] <- (F_area_yfi[y,fish_flt,i]/
                                              (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
           phi_if_fish[fish_flt, i]*
-          N_yais_beg[y,a,i,s]*
           1.0*
-          wage_catch[a,i]
+          N_yais_beg[y,a,i,s]*
+          wtatlen_kab[phi_ik2[i],1]*
+          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
       } ## end ages for predicted catch
       catch_yfi_pred[y,fish_flt,i] <- sum(catch_yaif_pred[y,,i,fish_flt])
     } ## end nspace for predicted catch

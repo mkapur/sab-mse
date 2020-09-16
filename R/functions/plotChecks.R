@@ -121,7 +121,7 @@ pSRR <- cbind(R_yk, SSB_yk) %>% data.frame() %>%
 
 
 ## deterministic/expected length at ages
-pLAA1F <- Length_yais_beg[,,,1] %>% 
+pLAA1F <- Length_yais_beg[,,1,1] %>% 
   data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -138,7 +138,6 @@ pLAA2F <- Length_yais_beg[,,2,1] %>% data.frame() %>%
   geom_point(color = 'orange') +
   labs(x = 'Age',y = 'Length', color = 'orange') +
   scale_y_continuous(limits = c(0,75))+
-  
   ggsidekick::theme_sleek()
 
 pLAA1M <- Length_yais_beg[,,1,2] %>% data.frame() %>%

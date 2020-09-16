@@ -33,6 +33,7 @@ runOM_datagen <- function(df, seed = 731){
   phi_fm <- df$phi_fm
   phi_ik <- df$phi_ik 
   inames <- colnames(phi_ik)
+  mnames <- colnames(phi_fm)
   phi_ik2 <- df$phi_ik2 + 1 ## zero-indexed, add one
   tau_ik <- df$tau_ik 
   
@@ -77,7 +78,7 @@ runOM_datagen <- function(df, seed = 731){
   M <- rep(0.2,nage) #M0*Msel # Naural mortality at age
   SDR <- exp(df$logSDR)
   b <- rep(1, tEnd)
-
+  q = 0.5 ## placeholder
   # True values 
   M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
   # recruitmat <- df$recruitmat
@@ -153,7 +154,9 @@ runOM_datagen <- function(df, seed = 731){
   Freal_yf <-  matrix(0, nrow = tEnd, ncol = nfleets_fish) ## storage for final guess
   Zreal_ya <- matrix(0, nrow = tEnd, ncol = nage) 
   Zreal_yai <- array(0, dim = c(tEnd, nage, nspace))
-  F_area_yfi <-  array(0, dim = c(tEnd, nfleets_fish, nspace))
+  F_area_yfi <-  array(0, dim = c(tEnd, nfleets_fish, nspace), dimnames = list(c(year),
+                                                                              c(fltnames_fish),
+                                                                              c(inames)))
   F_ym <- matrix(0, nrow = tEnd, ncol = nmgmt_reg)
   # Catch_yf_est <- array(0, dim = c(tEnd,nage,nfleets_fish))
   # CatchN <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
@@ -345,10 +348,10 @@ runOM_datagen <- function(df, seed = 731){
   ## Hybrid F tuning  ----
 
 
-  # v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
+  v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
   # v1 = 0.865; Fmax <- 2##corresponds to an Fmax of 2
   # v1 = 0.7; Fmax = 1.5
-  v1 = 0.65; Fmax <- 1.15
+  # v1 = 0.65; Fmax <- 1.15
   # v1 = 0.25
   v2 <- 30;
 
@@ -364,22 +367,18 @@ runOM_datagen <- function(df, seed = 731){
     if(is.na(catch_yf_obs[y, fish_flt+1])) next()
     
     catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <- 0
-   
-    ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now
+    ## putative biomass available
     denom = 0
     for(i in 1:nspace){
       # if(phi_im[i, m] == 0) next() ## skip area if not in mgmt reg
-      
-      ## this needs to deal accurately with sex-selex and use wtatlen to get biomass caught
-      for(s in 1:2)
+      ## this needs to deal accurately with sex-selex 
       denom <- denom + (phi_if_fish[fish_flt, i] *
-                          sum(N_yais_beg[y,,i,s])*
-                          sum(wage_catch[,y]) * 1.0 +
+                          1.0*    sum(N_yais_beg[y,a,i,]*
+                                        wtatlen_kab[phi_ik2[i],1]*
+                                        Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])+
                           catch_yf_obs[y, fish_flt+1])
     }
-    
-    # F1_yf[y, fish_flt, 1] <-    catch_yf_obs[y, fish_flt+1]/denom
-    
+    ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now
     ## make this guess by M, and sum over phi_im
     F1_yf[y, fish_flt, 1] <-    catch_yf_obs[y, fish_flt+1]/denom
     
@@ -401,31 +400,28 @@ runOM_datagen <- function(df, seed = 731){
           catch_afk_TEMP[a,fish_flt,k] <-     catch_afk_TEMP[a,fish_flt,k] +
             (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*
             (1-exp(-Z_a_TEMP[a]))*
-            phi_if_fish[fish_flt, i]*1.0*
-            N_yais_beg[y,a,i,s]*
-            wtatlen_kab[phi_ik2[i],1]*
-            Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
+            phi_if_fish[fish_flt, i]*
+            1.0*    sum(N_yais_beg[y,a,i,]*
+                          wtatlen_kab[phi_ik2[i],1]*
+                          Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
 
         } ## end ages
       } ## end space
-
-
 
       ## Calc Adj Eq 22
       Adj[k] <- catch_yf_obs[y, fish_flt+1]/sum(catch_afk_TEMP[,fish_flt,k])
 
       ## Get new Z given ADJ - need to add discard and selex here
-      for(a in 1:nage) Z_a_TEMP2[a] <-  Adj[k]*F1_yf[y,fish_flt,k] +  M[a]
+      for(a in 1:nage) Z_a_TEMP2[a] <-  Adj[k]*1.0*F1_yf[y,fish_flt,k] +  M[a]
 
       ## Second Guess for F (EQ 24)
       denom = 0
       for(i in 1:nspace){
         for(a in 1:nage){
           denom <- denom + phi_if_fish[fish_flt, i] *
-            1.0*
-            N_yais_beg[y,a,i,s]*
-            wtatlen_kab[phi_ik2[i],1]*
-            Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]*
+            1.0*    sum(N_yais_beg[y,a,i,]*
+                          wtatlen_kab[phi_ik2[i],1]*
+                          Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])*
             (1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
         }
       }
@@ -451,15 +447,13 @@ runOM_datagen <- function(df, seed = 731){
     ## get total N exploitable by this fleet
     for(i in 1:nspace){
       N_avail_yf[y,fish_flt] <- N_avail_yf[y,fish_flt] + sum( phi_if_fish[fish_flt, i]*
-                                 N_yais_beg[y,,i,s])
+                                 sum(N_yais_beg[y,,i,]))
     }
     ## get ratio of N in area & reweight F
-    ## will just return Freal and 0 for single-area fisheries
+    ## will just return Freal and 1 for single-area fisheries
     for(i in 1:nspace){
-      N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]*  N_yais_beg[y,,i,s])/
-        N_avail_yf[y,fish_flt]
+      N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]*   sum(N_yais_beg[y,,i,]))/ N_avail_yf[y,fish_flt]
       F_area_yfi[y,fish_flt,i] <- Freal_yf[y, fish_flt]*N_weight_yfi[y,fish_flt, i]
-      # Zreal_yai[y,a,i]  <- F_area_yfi[y,fish_flt,i] + M[a]
     }
     
     ## add together for mgmt regions
@@ -473,42 +467,52 @@ runOM_datagen <- function(df, seed = 731){
         catch_yaf_pred[y,a,fish_flt] <- catch_yaf_pred[y,a,fish_flt] +
           (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
           phi_if_fish[fish_flt, i]*
-          1.0*
-          N_yais_beg[y,a,i,s]*
-          wtatlen_kab[phi_ik2[i],1]*
-          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
+          1.0*  
+          sum(N_yais_beg[y,a,i,]*
+                        wtatlen_kab[phi_ik2[i],1]*
+                        Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
 
         Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + M[a]
         catch_yaif_pred[y,a,i,fish_flt] <- (F_area_yfi[y,fish_flt,i]/
                                              (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
           phi_if_fish[fish_flt, i]*
           1.0*
-          N_yais_beg[y,a,i,s]*
+          sum(N_yais_beg[y,a,i,]*
           wtatlen_kab[phi_ik2[i],1]*
-          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
+          Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
       } ## end ages for predicted catch
       catch_yfi_pred[y,fish_flt,i] <- sum(catch_yaif_pred[y,,i,fish_flt])
     } ## end nspace for predicted catch
     catch_yf_pred[y,fish_flt] <- sum(catch_yaf_pred[y,,fish_flt])
   } ## end fishery fleets
   cat( Freal_yf[y, fish_flt],fish_flt,"\n")
-  
+  head(catch_yf_pred)
   
   ## survey biomass ----
   ## Estimate survey biomass at midyear 
   for( sur_flt in 1:nfleets_surv){
+ 
     Nsamp_acomp_yf[y,sur_flt] <- survey_yf_pred[y,sur_flt] <- 0
     for(i in 1:nspace){ 
-      for(a in 1:nage){
-        ## need selex here
-        survey_yf_pred[y,sur_flt] <-  survey_yf_pred[y,sur_flt] + 
-          1.0*wage_survey[a,y]*phi_if_surv[sur_flt,i]*N_yai_mid[y,a,i]*q; ## need to include phi matrix to conditionally sum biomass over i 
-        Nsamp_acomp_yf[y,sur_flt] <-  Nsamp_acomp_yf[sur_flt]  + 
-          1.0*phi_if_surv[sur_flt,i]*N_yai_mid[y,a,i]; ## To use with age comps; may need to change phi to sum acomp surveys
-      } ## end surv fleets
-    } ## end ages
-  } ## end nspace
-  
+        for(a in 1:nage){
+          ## need selex here
+          survey_yf_pred[y,sur_flt] <-  survey_yf_pred[y,sur_flt] + 
+            q*
+            phi_if_surv[sur_flt,i]*
+            1.0*
+            sum(N_yais_mid[y,a,i,]*
+                  wtatlen_kab[phi_ik2[i],1]*
+                  Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
+          
+          Nsamp_acomp_yf[y,sur_flt] <-  
+            Nsamp_acomp_yf[sur_flt]  + 
+            phi_if_surv[sur_flt,i]
+          1.0*N_yais_mid[y,a,i,s]; ## To use with age comps; may need to change phi to sum acomp surveys
+        } ## end ages
+
+      
+    } ## end nspace
+  } ## end surv fleets
   
   ## survey age comps w error
   

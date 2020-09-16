@@ -147,8 +147,7 @@ runOM_datagen <- function(df, seed = 731){
   
   R_yk <- matrix(0, nrow = tEnd, ncol = nstocks)
   R_yi <- matrix(0, nrow = tEnd, ncol = nspace)
-  
-  
+
   niter <- 100 ## F iterations
   F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1)) ## storage for intermediate guesses
   Freal_yf <-  matrix(0, nrow = tEnd, ncol = nfleets_fish) ## storage for final guess
@@ -263,14 +262,21 @@ runOM_datagen <- function(df, seed = 731){
           } ### end subareas j         
           N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-M[a]) 
           N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-M[a]) ## this exponent needs to be Ztuned eventually
-          
-          Length_yais_beg[y,1,i,s] <- L1_yk[y,phi_ik2[i],s] ## another LMIN placeholder
+        } ## end ages for N
+        ## linear growth below A4 as in synthesis
+        len.step <- ifelse( L1_yk[y,phi_ik2[i],s] < 4,  L1_yk[y,phi_ik2[i],s], 4)  ## lmin is size at age 0 (?)
+        len.slope <- ( L1_yk[y,phi_ik2[i],s] - len.step) / 4 ## linear growth slope
+        # Length at the start of the year (cm)
+        Length_yais_beg[y,1:4,i,s] <- len.step[1]+len.slope*(seq(1, (4 + 1), 1) - 1)[1:4]  
+        Length_yais_beg[y,5,i,s] <- L1_yk[y,phi_ik2[i],s] ## L1 Corresponds to age 4 per analysis
+        
+        for(a in 6:nage-1){
           ## as in document: next year A1 == this year A0 plus growth
           Length_yais_beg[y+1,a,i,s] = Length_yais_beg[y,a-1,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a-1,i,s])*
             (1-exp(-kappa_yk[y,phi_ik2[i],s]))
           Length_yais_mid[y,a,i,s] = Length_yais_beg[y,a,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a,i,s]*
                                                                    (1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))
-        } ## end ages
+        } ## end ages for L
         # ## plus groups
         pLeave = 0.0;  NCome = 0.0
         for(j in 1:nspace){           

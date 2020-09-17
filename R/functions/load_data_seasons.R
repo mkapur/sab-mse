@@ -174,16 +174,20 @@ load_data_seasons <- function(nspace = 6,
   ## makes the master flag_fleets matrix
   ## and attendant indices for subsetting
   fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE) ## this is like flag_fleets
-  
   fltnames_fish <- fltnames$NAME[fltnames$COMM]
   fltnames_surv <- fltnames$NAME[fltnames$SURV]
   fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
   fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
   
+  selType_fish <- fltnames$SELTYPE[fltnames$COMM]
+  selType_surv <- fltnames$SELTYPE[fltnames$SURV]
+  
+  
   nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
   nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
   nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
   nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
+
   
   ## nfleets should be input
   ## auto-read nfleets_surv etc from this
@@ -240,9 +244,12 @@ load_data_seasons <- function(nspace = 6,
   # catch2 <- cbind(catch$year, catch$Fishery, catch$Fishery, catch$Fishery) ## multifleet placeholder
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
   
-  ## Selex: note that these are comm + surv combined
-  load(here('input','input_data',"OM_selex_male_yaf.rdata"))
-  load(here('input','input_data',"OM_selex_female_yaf.rdata"))
+  ## Discard ----
+  load(here("input","input_data","OM_discard.csv")) ## loads as omdis
+  
+  ## Selex: still need SURVEY ----
+  load(here('input','input_data',"OM_fish_selex_yafs.rdata"))
+  # load(here('input','input_data',"OM_survey_selex_yafs.rdata"))
   
   # Survey ----
   # survey <- read.csv(here("input","data",'acoustic survey.csv'))
@@ -293,15 +300,15 @@ load_data_seasons <- function(nspace = 6,
     phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
     
     rownames(phi_if_surv) <- names(survey)
-    colnames(phi_if_surv) <- rev(spmat$subarea)
-    
+    colnames(phi_if_surv) <- spmat$subarea
+
     phi_if_surv[1,1:2] <-  phi_if_surv[2,3:4] <-  
       phi_if_surv[3,3:4]<-  phi_if_surv[4,5] <-  phi_if_surv[5,6] <- 1
     
     ## phi_fish
     phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
     rownames(phi_if_fish) <- names(catch)[2:ncol(catch)]
-    colnames(phi_if_fish) <- rev(spmat$subarea)
+    colnames(phi_if_fish) <-  spmat$subarea
     
     phi_if_fish[1:2,1:2] <-  phi_if_fish[3:5,3:4] <-  
       phi_if_fish[c(6,8),5] <-        phi_if_fish[c(7,9),6] <- 1
@@ -309,20 +316,22 @@ load_data_seasons <- function(nspace = 6,
   
     ## phi_ik
     phi_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
-    rownames(phi_ik) <- unique(rev(spmat$stock))
-    colnames(phi_ik) <- rev(spmat$subarea)
+    rownames(phi_ik) <- unique(spmat$stock)
+    colnames(phi_ik) <- spmat$subarea
     
     phi_ik[1,1] <-  phi_ik[2,2:3] <-  phi_ik[3,4:5]<-  phi_ik[4,6]  <- 1
     phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
     
-    ## phi_ij
-    phi_ij <-  matrix(0, ncol = nspace, nrow = nspace) ## 1 indicates if subareas comprise DISTINCT stocks
-    rownames(phi_ij) = colnames(phi_ij) = rev(spmat$subarea)
-    phi_ij[1,2:nspace] <- phi_ij[2,c(1,3:nspace)] <- phi_ij[3,c(1:2,4:nspace)] <- phi_ij[4,c(1:3,nspace)]<- phi_ij[5,c(1:3,nspace)] <- phi_ij[6,c(1:4)] <- 1
+    ## phi_ij [eq 6]
+    phi_ij <-  matrix(1, ncol = nspace, nrow = nspace) ## 0 indicates  subareas comprise THE SAME stock
+    rownames(phi_ij) = colnames(phi_ij) = spmat$subarea
+    diag(phi_ij) <- phi_ij[4,5] <- phi_ij[5,4] <- 0
+    
       
     ## phi_fm
     phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
     rownames(phi_fm) = names(catch)[2:ncol(catch)]
+    colnames(phi_fm) = c('AK','BC','WC')
     phi_fm[1:2,1] <- phi_fm[3:5,2]  <- phi_fm[6:9,3]  <- 1
     
     ## tau_ik
@@ -462,7 +471,7 @@ load_data_seasons <- function(nspace = 6,
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
     logh_k = rep(log(0.25),4),
-    logRinit = log(1e7)
+    logRinit = log(1e5)
   )
   
 
@@ -522,6 +531,8 @@ load_data_seasons <- function(nspace = 6,
     nfleets_fish = nfleets_fish,
     nfleets_acomp = nfleets_acomp,
     nfleets_lcomp = nfleets_lcomp,
+    selType_fish = selType_fish,
+    selType_surv = selType_surv,
     
     fltnames_surv = fltnames_surv,
     fltnames_fish = fltnames_fish,
@@ -551,6 +562,9 @@ load_data_seasons <- function(nspace = 6,
     age_error = ageerr_ExpAge,
     age_error_sd = ageerr_SD,
     catch = catch,
+    discard = omdis,
+    fish_selex_yafs = OM_fish_selex_yafs,
+    surv_selex_yafs = OM_surv_selex_yafs,
     
     #* ADDL PARS ----
     parms = parms,

@@ -19,3 +19,4 @@ source('R/functions/plotUncertainty.R')
 source('R/functions/getUncertainty.R')
 source('R/functions/getSelec.R')
 
+source(here("input","input_data","colorPals.R"))

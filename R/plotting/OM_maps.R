@@ -13,9 +13,9 @@ library(marmap)
 
 cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
                 "#0072B2", "#D55E00", "#CC79A7", "navy", "#F0E442" )
-fullPal <- c('pink','dodgerblue2','skyblue','gold','goldenrod','grey22') ## six subareas
-demPal <- c('pink','dodgerblue','dodgerblue','goldenrod','goldenrod','grey22') ## 4 demographic regions
-regPal <- c('seagreen3','seagreen3','gold','gold','grey44','grey44') ## 3 mgmt areas
+# fullPal <- c('pink','dodgerblue2','skyblue','gold','goldenrod','grey22') ## six subareas
+# demPal <- c('pink','dodgerblue','dodgerblue','goldenrod','goldenrod','grey22') ## 4 demographic regions
+# regPal <- c('seagreen3','seagreen3','gold','gold','grey44','grey44') ## 3 mgmt areas
 ## Updated F1 map of strata using Luke's approach ----
 
 load("./input/raw/eez_nepac_regions.rda")
@@ -448,7 +448,7 @@ dat$AgeComp[dat$MR == 'AK' & dat$Year >= 1979 ] <- FleetNames[5]
 
 
 
-## Figure X input growth curves by OM ----
+## OM Growth Curves ----
 
 ## OM2 uses values from kapur et al. 2019
 
@@ -456,41 +456,61 @@ dat$AgeComp[dat$MR == 'AK' & dat$Year >= 1979 ] <- FleetNames[5]
 
 # https://github.com/mkapur/sab-growth/blob/master/SAB_plot_master.R L112
 
-ypreds <- read.csv("./input/raw/SAB_predicts_2020-05-06phase2.csv")
-# ypreds$gamREG <- ypreds$gamREG
-levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
-levels(ypreds$Sex) <- c('Females','Males')
-levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
-for(i in 1:nrow(ypreds)){
-  ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
-                              'All Years', paste(ypreds$Period[i]))
-}
-fd_summary_gamREG <- ypreds %>%
-  # filter(Age < 75) %>%
-  group_by(Age, Sex, gamREG,Period) %>%
-  dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
+# ypreds <- read.csv(here("input","raw_data","demography","SAB_predicts_2020-05-06phase2.csv"))
+# # ypreds$gamREG <- ypreds$gamREG
+# levels(ypreds$REG) <- c('Alaska','British Columbia','US West Coast')
+# levels(ypreds$Sex) <- c('Females','Males')
+# levels(ypreds$Period) <- c('pre-2010','2010-2018','All Years')
+# for(i in 1:nrow(ypreds)){
+#   ypreds$Period[i] <-  ifelse(length(grep('pool', ypreds$cREG[i])) == 1,
+#                               'All Years', paste(ypreds$Period[i]))
+# }
+# fd_summary_gamREG <- ypreds %>%
+#   # filter(Age < 75) %>%
+#   group_by(Age, Sex, gamREG,Period) %>%
+#   dplyr::summarise(meanL = mean(Length_cm), sdmeanL = sd(Length_cm), meanPred = mean(Predicted))
+# 
+# saveRDS(fd_summary_gamREG, file = paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".Rdata"))
+# saveRDS(fd_summary_gamREG, file =  here("input","raw_data","demography","OMGrowthCurves_",Sys.Date(),".Rdata"))
 
-saveRDS(fd_summary_gamREG, file = paste0("./_writing/figures/OMGrowthCurves_",Sys.Date(),".Rdata"))
-
-ggplot(readRDS(paste0("./_writing/figures/OMGrowthCurves_2020-05-01.Rdata")), 
+ ypred <- readRDS(here("input","raw_data","demography","OMGrowthCurves_2020-05-01.Rdata"))  
+ ypred$LCI <- ypred$UCI <- NULL
+ for(i in 1:nrow(ypred)){
+   rt <- ifelse(as.numeric(substr(ypred$gamREG[i],2,2)) <4,
+                as.numeric(substr(ypred$gamREG[i],2,2)) ,
+                as.numeric(substr(ypred$gamREG[i],2,2)) -2)
+   sex <- ifelse(ypred$Sex[i]=='Female',1,2)
+   ## if there is a time block indicating early, use first element of sigmag
+   ## otherwise use the last one (which will either be cosnistent throughout, or the latter block)
+   yr <- ifelse(ypred$Period[i] == "pre-2010", 1,59)
+   
+   ypred$LCI[i] <- ypred$meanPred[i] - sigmaG_yk[yr,rt,sex] ## are these already the straight values?
+   ypred$UCI[i] <- ypred$meanPred[i] + sigmaG_yk[yr,rt,sex]
+   
+ }   
+ 
+saveRDS(ypred, file =  here("input","raw_data","demography","OMGrowthCurves_withSigma.Rdata"))
+ 
+ggplot(ypred,
        aes(x = Age, col = gamREG, group = gamREG)) +
   # kaputils::theme_mk(base_size = 16) + 
   # kaplot::theme_black(base_size = 16)+
-  kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
+  # kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
+   ggsidekick::theme_sleek() +
   theme(legend.position = 'right',
         panel.grid = element_blank()) +
-  scale_color_manual(values =c('grey55','gold','dodgerblue3','pink'), 
+  scale_color_manual(values =demPal, 
                      labels = c('Stock R1 (South CC)',
-                                'Stock R2 (North CC/S BC (Van Isl))',
-                                # 'Stock R3 (BC)',
-                                'Stock R4 (N BC (Haida)/AK Gulf)',
-                                'Stock R5 (West Gulf/Aleutians)')) +
-  # scale_fill_manual(values = cbbPalette[c(1,2,4:7)],
-  #                   labels = c('Stock R1 (South CC)',
-  #                              'Stock R2 (North CC/South BC)',
-  #                              # 'Stock R3 (BC)',
-  #                              'Stock R4 (West BC/AK Gulf)',
-  #                              'Stock R5 (West Gulf/Aleutians)')) +  
+                                'Stock R2 (North CC/South BC)',
+                                'Stock R3 (West BC/AK Gulf)',
+                                'Stock R4 (West Gulf/Aleutians)')) +
+   scale_fill_manual(values = demPal,guide = 'none',
+                     labels = c('Stock R1 (South CC)',
+                                                             'Stock R2 (North CC/South BC)',
+                                                             'Stock R3 (West BC/AK Gulf)',
+                                                             'Stock R4 (West Gulf/Aleutians)')) +
+  
+  geom_ribbon(aes(ymin = LCI, ymax = UCI,  fill = gamREG, group = gamREG), alpha = 0.2) +                
   scale_alpha(guide = 'none') +
   scale_y_continuous(limits = c(0,110)) +
   scale_x_continuous(limits = c(0,65)) +
@@ -499,8 +519,8 @@ ggplot(readRDS(paste0("./_writing/figures/OMGrowthCurves_2020-05-01.Rdata")),
   facet_wrap(~Sex +Period, ncol = 4)
 
 ggsave(plot = last_plot(),
-       file = paste0("./_writing/figures/OMGrowthCurves_BLACK_",Sys.Date(),".PNG"),
-       height = 8, width = 10, unit = 'in')
+       file = here("input","input_data","input_figs","OMGrowthCurves_sigma.png"),
+       height = 8, width = 10, unit = 'in', dpi = 420)
 
 
  ## reshape survey datatable ----

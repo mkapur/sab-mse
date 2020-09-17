@@ -245,8 +245,10 @@ runOM_datagen <- function(df, seed = 731){
         SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
       } # // end stocks
     } #// end space
+    cat(sum(SSB_yk[y,]),"\n")
+    cat(sum(SSB_yi[y,]),"\n")
     
-    ## A0 Recruits ----
+    ## Ryi, Ryk Recruits ----
     # next year based on present SSB
     omega_0ij <- rep(1, nspace)
     for(i in 1:nspace){
@@ -261,7 +263,9 @@ runOM_datagen <- function(df, seed = 731){
       R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ik[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
       N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits
     } ### end space
-
+    cat(sum(R_yk[y,]),"\n")
+    cat(sum(R_yi[y,]),"\n")
+    cat(sum(N_yais_beg[y+1,1,,]),"\n")
     
     #N- and Nominal Length ----
     # at-age for the middle of this year and beginning of next 

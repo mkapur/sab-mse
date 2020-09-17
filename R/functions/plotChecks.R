@@ -1,8 +1,9 @@
 require(ggplot2)
 require(patchwork)
 library(gridExtra)
+require(dplyr)
 
-
+## N init and Nzero ----
 pNinit <- Ninit_ais[,,1] %>%
   data.frame() %>%
   mutate('Age' = age) %>%
@@ -37,7 +38,7 @@ ggsave(pNzeroF  | pNzeroM,
        width = 6, height = 4, unit = 'in',
        dpi = 420)
 
-## N at age by area by year (females)
+## N at age by area by year (females) ----
 png(file = here('figs','N_age_years1-5.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
@@ -58,67 +59,69 @@ for(i in 1:6){
 }
 dev.off()
 
-pNage2 <- N_yai_beg[,,2] %>%
-  data.frame() %>%
-  mutate('Yr' = 1:nrow(.)) %>%
-  reshape2::melt(id = c('Yr')) %>%
-  mutate(age = as.numeric(substr(variable,2,2))-1) %>%
-  ggplot(., aes(x = age, y = value, group = factor(Yr), color = factor(Yr))) +
-  geom_point() +
-  geom_line()  +
-  # geom_boxplot() +
-  scale_color_grey()+
-  labs(x = 'Age in Year',y = 'Numbers', title = "AREA2") +
-  ggsidekick::theme_sleek()+ theme(legend.position = 'none')
 
 pSSByi <- SSB_yi[1:52,] %>%
   data.frame() %>%
   mutate('Yr' = 1:52) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
+  scale_color_manual(values = subareaPal) +
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'subarea') +
-  ggsidekick::theme_sleek()
+  ggsidekick::theme_sleek() + theme( legend.position = c(0.8,0.8))
 
 pSSByk <- SSB_yk[1:nyear,] %>%
   data.frame() %>%
   mutate('Yr' = 1:nyear) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
+  scale_color_manual(values = demPal) +
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
-  ggsidekick::theme_sleek()
+  ggsidekick::theme_sleek() + theme( legend.position = c(0.8,0.8))
 
 pRyi <- R_yi %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
+  scale_color_manual(values = subareaPal) +
   geom_line(lwd = 2) + 
   labs(x = 'Model Year',y = 'Recruits', color = 'subarea') +
-  ggsidekick::theme_sleek()
+  ggsidekick::theme_sleek()+ theme( legend.position = c(0.8,0.8))
 
 pRyk <- R_yk %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
+  scale_color_manual(values = demPal) +
   geom_line(lwd = 2) + 
   labs(x = 'Model Year',y = 'Recruits', color = 'stock') +
-  ggsidekick::theme_sleek()
+  ggsidekick::theme_sleek()+ theme( legend.position = c(0.8,0.8))
 
 
-pSRR <- cbind(R_yk, SSB_yk) %>% 
+
+pSRR <- R_yk %>% 
   data.frame() %>%
-  mutate('Yr' = 1:nrow(.), 
-         RECS1 = X1, RECS2 = X2, SSBS1 = X3, SSBS2 = X4) %>%
-  select(-X1,-X2,-X3,-X4) %>%
-  reshape2::melt(id = c('Yr')) %>%
-  mutate(variable2 = substr(variable,1,3), stock = substr(variable,4,5)) %>%
-  select(-variable) %>%
-  tidyr::pivot_wider(names_from = variable2) %>%
-  ggplot(., aes(x = SSB, y = REC, color = Yr )) +
+  mutate('Yr' = 1:nrow(.))  %>%
+  reshape2::melt(.,id = c('Yr')) %>%
+  mutate(RYK = value) %>%
+  select(-value) %>%
+  bind_cols(.,
+            SSB_yk %>% 
+              data.frame() %>%
+              mutate('Yr' = 1:nrow(.))  %>%
+              reshape2::melt(.,id = c('Yr')) %>%
+              mutate(SSByk = value)%>%
+              select(-value,-variable)) %>%
+  ggplot(., aes(x = SSByk, y = RYK, color = variable,group = Yr )) +
+  scale_color_manual(values = demPal) +
   geom_point() +
-  labs(x = 'SSB',y = 'Recruits #', color = 'Y') +
+  labs(x = 'SSB',y = 'Recruits #', color = 'stock') +
   ggsidekick::theme_sleek() +
-  facet_wrap(~ stock, scales = 'free')
-
+  facet_wrap(~ variable, scales = 'free')
+ggsave(pSRR,
+       file = here('figs',
+                   "SRR.png"),
+       width = 6, height = 6, unit = 'in',
+       dpi = 420)
 
 ## deterministic/expected length at ages
 pLAA1F <- Length_yais_beg[,,1,1] %>% 

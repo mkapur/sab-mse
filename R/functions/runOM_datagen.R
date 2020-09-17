@@ -135,7 +135,7 @@ runOM_datagen <- function(df, seed = 731){
             exp(-(M[a]*age[a])) * 
             exp(-0.5*SDR*SDR+tildeR_initk[k])
         } #// end ages
-        Ninit_ais[nage,i,s] = (   ifelse(omega_ais[nage,i,s]==0,1,omega_ais[nage,i,s]) * #* Ninit_ais[nage-1,i,s] *
+        Ninit_ais[nage,i,s] = (ifelse(omega_ais[nage,i,s]==0,1,omega_ais[nage,i,s]) * 
                               exp(-M[nage]*age[nage-1]))/(1-exp(-(M[nage]*age[nage]))* 
                                                             exp(-0.5*SDR*SDR+tildeR_initk[k]))
       } #// end space
@@ -263,7 +263,8 @@ runOM_datagen <- function(df, seed = 731){
         # // SSB_yk already has summation
         R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k]
                      /(SSB_0k[k]*(1-h_k[k])+ 
-                         SSB_yk[y,k]*(5*h_k[k]-1)))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+                         SSB_yk[y,k]*(5*h_k[k]-1)))#*
+          # exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
         # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
       } # // end stocks
       R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ik[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement

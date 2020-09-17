@@ -229,7 +229,7 @@ dimnames(bc_lencomps_male)[[3]] <- dimnames(bc_lencomps_female)[[3]] <- fltnames
 save(bc_lencomps_female, file = here('input','raw_data',"comps","bc_lencomps_female_BINDME.rdata"))
 save(bc_lencomps_male, file = here('input','raw_data',"comps","bc_lencomps_male_BINDME.rdata"))
 
-# ## plot bc lcomps
+#* plot bc lcomps ----
 # plist = list(); idx = 1
 # for(i in 1:length(bcgears)){
 #   # par(mfrow = c(3, ceiling(sum(bc_lencomps_yearN_female[,2,i] != 0)/3)))
@@ -238,15 +238,14 @@ save(bc_lencomps_male, file = here('input','raw_data',"comps","bc_lencomps_male_
 #     plist[[idx]] <- bc_lencomps_female[y,,i] %>%
 #       melt() %>%
 #       ggplot(., aes(x = 1:88, y = value)) +
-#       geom_line(color = 'red', lwd = 1.1, alpha = 0.5) +
-#       geom_line(data = melt(bc_lencomps_male[y,,i]), 
-#                 color = 'blue', lwd = 1.1, alpha = 0.5) +
+#       geom_line(color = sexPal[1], lwd = 1.1, alpha = 0.5) +
+#       geom_line(data = melt(bc_lencomps_male[y,,i]),
+#                 color = sexPal[2], lwd = 1.1, alpha = 0.5) +
 #       ggsidekick::theme_sleek() +
 #       labs(x = 'Length (cm)', y = '', title = paste0(1978+y," ", dimnames(bc_lencomps_female)[[3]][i]))
 #     idx = idx+1
 #   }
 # }
-# 
 # ggsave(Rmisc::multiplot(plotlist = plist,  layout = matrix(1:24, ncol = 4, nrow = 6,byrow = TRUE)),
 #        file = here('input','input_data','input_figs','bc_lcomps_female.png'),
 #        height = 18, width = 12, unit = 'in', dpi = 420)
@@ -267,7 +266,6 @@ save(wc_lencomps_male, file  = here('input','raw_data',"comps","wc_lencomps_male
 ## now bind all and save
 OM_lencomps_female <- OM_lencomps_male <- list()
 
-
 list.files(here('input','raw_data','comps'), pattern = "BINDME", full.names = TRUE) %>%
   lapply(load,.GlobalEnv)
 
@@ -282,30 +280,49 @@ save(OM_lencomps_male, file = here('input','input_data',"OM_lencomps_male.rdata"
 #* ak agecomps ----
 ## fixed gear and GOA survey. note they are NOT sex specific.
 ak_agecomps  <- array(NA, dim = c(length(1960:2018),
-                                  31,
+                                  length(0:70),
                                   length(fltnames$NAME[fltnames$ACOMP & fltnames$M == 'AK']) ))
-dimnames(ak_agecomps)[[3]] <-  fltnames$NAME[fltnames$M == 'AK' & fltnames$ACOMP]
+dimnames(ak_agecomps) <-  list(c(1960:2018),
+                               c(0:70),
+                               c(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$ACOMP])))
 
 ## fix e, fixw, goasurv
-ak_agecomps[,,1] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+ak_agecomps[,c(1,3:31),1] <- as.matrix(merge(data.frame('Year' = 1960:2018),
                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
-                                    by = 'Year',all.x = TRUE))
-ak_agecomps[,,2] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+                                    by = 'Year',all.x = TRUE)%>% select(-Year))
+ak_agecomps[,c(1,3:31),2] <- as.matrix(merge(data.frame('Year' = 1960:2018),
                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_W_agecomp.csv")),
-                                    by = 'Year',all.x = TRUE))
+                                    by = 'Year',all.x = TRUE) %>% select(-Year))
 
 # ak_agecomps[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2018),
 #                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
 #                                     by = 'Year',all.x = TRUE))
-# 
-# goa_agecomps_Nsamp <-  read.csv(here("input","raw_data","comps","GOA Age Composition Totals.csv")) %>%
-#   select(Survey, Year,Sex, Age..years.) %>%
-#   # group_by(Survey, Year, Sex, Age..years.) %>%
-#   # dplyr::summarise(n = n()) %>%
-#   # ungroup() %>%
-#   group_by(Survey, Year, Sex) %>%
-#   dplyr::summarise(yearN = n()) 
-# 
+#Age.pop is the estimate of numbers of fish after running through the age length key. 
+# -9 is a catch all for unassigned fish to round out the estimated abundance in that year. So your age comps
+# Age, Sex, Age.Pop/sum(Age.Pop) for that sex and year combination. 
+## for formatting purposes these are presnetly females only.
+actemp <- merge(read.csv(here("input","raw_data","comps","GOA Age Composition Totals.csv")) %>%
+                  select(Survey, Year, Sex, Age..years., Age.Pop),read.csv(here("input","raw_data","comps","GOA Age Composition Totals.csv")) %>%
+                  select(Survey, Year, Sex, Age..years., Age.Pop) %>%
+                  group_by(Survey, Year, Sex) %>%
+                  dplyr::summarise(sumap = sum(Age.Pop)),
+                by = c('Year','Sex'), all = TRUE) %>%
+  mutate(value = Age.Pop/sumap) %>%
+  select(Year, Sex, Age..years., value) %>%
+  filter(Sex == 'Female' & Age..years. != -9) %>%
+  tidyr::pivot_wider(., names_from= Age..years., values_from = value) %>%
+  select(-Sex) %>%
+  mutate(`19` = NA) %>%
+  dplyr::relocate(`1`,.after = Year) %>%
+  dplyr::relocate(`19`,.before= `20`) %>%
+  dplyr::relocate(`18`,.before = `19`)
+
+ak_agecomps[,2:21,3] <- as.matrix(merge(data.frame('Year' = 1960:2018),actemp,
+                                        by = 'Year', all = TRUE) %>% select(-Year))
+                                        
+
+  
+
 # read.csv(here("input","raw_data","comps","GOA Age Composition Totals.csv")) %>% View()
 # select(Survey, Year,Sex, Age..years.) %>%
 #   group_by(Survey, Year, Sex, Age..years.) %>%
@@ -556,12 +573,12 @@ mat_ak %>%
   ggplot(., aes(x = age, y = value, color = variable)) +
   geom_line(lwd = 1.1) +
   scale_color_manual(values = rev(demPal), labels =  paste0('R',1:4)) +
-  theme_sleek() +theme(legend.position = c(0.9,0.8)) +
+  theme_sleek() +theme(legend.position = c(0.7,0.7)) +
   labs(x = 'Age', y = 'Proportion Mature', color = 'Stock')
 
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','om_maturity.png'),
-       height = 6, width = 6, unit = 'in', dpi = 420)
+       height = 3, width = 3.5, unit = 'in', dpi = 420)
 
 ## movement ----
 ## see raw_data/demography/movement/movement-estimates-toAge.R
@@ -603,7 +620,7 @@ for(a in 1:nage){
 }
 
 
-#* bc aselex ----
+#* bc lselex ----
 ## BC only has LEN selex
 
 ## code from brendan
@@ -622,7 +639,6 @@ nG <- length(alpha_g1)
 len <- 32:75
 sel_lg <- array(0, dim = c(length(len),5))
 for(g in 1:nG){
-  
   if(selType[g] == 1)
   {
     sel_lg[,g] <- 1 / ( 1 + exp( - log(19) * (len - alpha_g1[g] + beta_g1[g]) / beta_g1[g] ) )
@@ -655,9 +671,9 @@ colnames(selMat) <- c("Length","Trap","LL","Trawl","Std","StRS")
 
 ## LL, TRAP, TRAWL
 for(y in 1:dim(OM_fish_selex_yafs)[[1]]){
-  OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(sel_lg[,3]))
-  OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(sel_lg[,2]))
-  OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(sel_lg[,4]))
+  OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'LL'])) ## LL
+  OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## TRAP
+  OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trawl'])) ## TRAWL
 }
 
 
@@ -670,14 +686,14 @@ logistic3 <- function(age, a50, a95){
 ## since this can get tweaked down the road I will eyeball from the B1 
 # l50_bc <- 52.976
 ## assuming trap, trawl and fix have the same selex
-a50_fem_bc <- 17; a95_fem_bc <- 20
-a50_mal_bc <- 15; a95_mal_bc <- 17
-
-for(a in 1:nage){
-  OM_fish_selex_yafs[,a,5:7,1] <-   logistic3(age = a, a50 = a50_fem_bc, a95 = a95_fem_bc)
-  OM_fish_selex_yafs[,a,5:7,2] <- logistic3(age = a, a50 = a50_mal_bc, a95 = a95_mal_bc)
-}
-
+# a50_fem_bc <- 17; a95_fem_bc <- 20
+# a50_mal_bc <- 15; a95_mal_bc <- 17
+# 
+# for(a in 1:nage){
+#   OM_fish_selex_yafs[,a,5:7,1] <-   logistic3(age = a, a50 = a50_fem_bc, a95 = a95_fem_bc)
+#   OM_fish_selex_yafs[,a,5:7,2] <- logistic3(age = a, a50 = a50_mal_bc, a95 = a95_mal_bc)
+# }
+#* wc aselex ----
 ## 8 and 9 are WC fix and TWL, which correspond to fleets 1 and 3 in SS
 for(flt in 1:2){
 OM_fish_selex_yafs[,,c(8,9)[flt],1] <- as.matrix( merge(data.frame('Year' = 1960:2018),
@@ -728,22 +744,28 @@ OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960
 save(OM_fish_selex_yafs, file = here('input','input_data',"OM_fish_selex_yafs.rdata"))
 # save(OM_surv_selex_yafs, file = here('input','input_data',"OM_selex_female_yaf.rdata"))
 
-png(here('input','input_data','input_figs','fishery_aselex.png'),
+#* plot input selex ----
+png(here('input','input_data','input_figs','fishery_selex.png'),
     height = 8, width = 6, unit = 'in', res = 420)
 par(mfrow = c(3,3) )
 for(flt in 1:nfleets_fish){
   for(s in 1:2){
     tmp <- OM_fish_selex_yafs[59,,flt,s]
-    if(s == 1) plot(tmp, col = sexPal[1], type = 'l', lwd = 2, xlab = 'Age', ylab = 'Selectivity',
+    if(s == 1) plot(tmp, 
+                    col = sexPal[1], 
+                    type = 'l', lwd = 2, 
+                    xlab = ifelse(fltnames$SELTYPE[fltnames$COMM][flt] == 'AGE',
+                                  'Age','Length'), 
+                    ylab = 'Selectivity',
+                    lty = 1,
                     ylim = c(0,1), main = fltnames_fish[flt], xlim = c(0,75),
                     col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
     box(which = 'plot', lty = 'solid', 
         col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
         lwd = 2)
-    if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lwd = 2)
+    if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
   }
 }
-
 dev.off()
 ## survey ----
 ## spatial matrix -- for matching on region, stock, sub_area, etc

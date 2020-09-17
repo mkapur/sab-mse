@@ -43,16 +43,16 @@ plot.figures = FALSE # Set true for printing to file
 # Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
 df <- load_data_seasons(nspace = 6, move = TRUE) ## data that works with OM
 
-time <- 1
-yrinit <- df$nyear
-### Run the OM and the EM for x number of years in the MSE 
-### Set targets for harvesting etc 
-# df$parms$initN <- df$parms$initN*0
-# df$parms$Rin <- df$parms$Rin*0
-# df$F0 <- 0*df$F0
-simyears <- 25 # Project 30 years into the future (2048 that year)
-year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
-N0 <- NA
+# time <- 1
+# yrinit <- df$nyear
+# ### Run the OM and the EM for x number of years in the MSE 
+# ### Set targets for harvesting etc 
+# # df$parms$initN <- df$parms$initN*0
+# # df$parms$Rin <- df$parms$Rin*0
+# # df$F0 <- 0*df$F0
+# simyears <- 25 # Project 30 years into the future (2048 that year)
+# year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
+# N0 <- NA
 sim.data <- runOM_datagen(df)
 # sim.data <- run.agebased.true.catch(df)
 

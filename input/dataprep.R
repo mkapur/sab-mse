@@ -12,16 +12,22 @@ require(ggplot2)
 require(ggsidekick)
 require(PNWColors)
 
-## read 2019 sab WC ss
+## 2019 Sab WC SS ----
 wc <- SS_output(here("input","raw_data","2019 WC Stock Assessment"))
 
-## load manual fleetnames txt file
+## Fltnames ----
 fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE)
+fltnames_fish <- fltnames$NAME[fltnames$COMM]
+fltnames_surv <- fltnames$NAME[fltnames$SURV]
+fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
+fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
 
+nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
+nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
+nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
+nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
+## Color palettes ----
 
-demPal <- c('pink','dodgerblue','goldenrod','grey22') ## 4 demographic regions, these are 4:1
-fishfltPal <- paste0("#",c('140c00','5c6b70','faff81','ffc53a',
-                           'f97d10','8573d3','034db5','efbcd5','ef798a','e84855')) 
 ## catch & discards ----
 
 ## might need to convert some units
@@ -30,7 +36,7 @@ fishfltPal <- paste0("#",c('140c00','5c6b70','faff81','ffc53a',
 ## AK in tons (1000 tons = 1 metric ton)
 ## format: year x fleet
 
-## catches
+#* catches ----
 omcatch0 <- data.frame(Year = 1960:2018)
 
 ## read files
@@ -51,7 +57,9 @@ names(bccatch)[1] <- names(wccatch)[1] <- names(akcatch)[1] <- 'Year'
 omcatch <- merge(omcatch0, akcatch,  by = "Year", all = TRUE) %>% 
   merge(., bccatch, by = "Year", all = TRUE) %>% 
   merge(., wccatch, by = "Year", all = TRUE) 
-write.csv(omcatch, file = here("input","input_data","OM_catch.csv"), row.names = FALSE)
+
+write.csv(omcatch %>% select(Year,fltnames_fish) , file = here("input","input_data","OM_catch.csv"), row.names = FALSE)
+
 omcatch <- read.csv(here("input","input_data","OM_catch.csv") )
 ## plot values
 omcatch %>%
@@ -67,19 +75,17 @@ ggsave(last_plot(),
        file = here('input','input_data','input_figs','om_catches.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
-## discards
-## MIGHT NEED THESE FOR FIXED EAST AND WEST
-akdis <- read.csv(here("input","raw_data","catch","AK_discards.csv"))[,c(1,2,9)] %>% 
-  pivot_wider(names_from = Gear, values_from = Combined_Discard) %>% select(-Other)
-names(akdis)[2:ncol(akdis)] = fltnames$NAME[fltnames$M == 'AK' & fltnames$DISCARD]
+#* discards ----
+akdis <- read.csv(here("input","raw_data","catch","AK_FIX_discard.csv"),fileEncoding="UTF-8-BOM")[,1:3]
+names(akdis)[2:ncol(akdis)] <- paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$DISCARD])
 
 bcdis <- read.csv(here("input","raw_data","catch","BC_om_releasesCatch.csv"))[,c(1,4:5)]
-names(bcdis)[2:3] = fltnames$NAME[fltnames$M == 'BC' & fltnames$DISCARD]
+names(bcdis)[2:3] = paste(fltnames$NAME[fltnames$M == 'BC' & fltnames$DISCARD])
 
-wcdis <- wc$discard %>% select(Yr, Obs, Fleet_Name) %>%
+wcdis <- wc$discard %>% mutate(Obs = Obs*1000) %>% select(Yr, Obs, Fleet_Name) %>%
   pivot_wider(., names_from = Fleet_Name, values_from = Obs)  %>% 
   filter(Yr > 1959)
-names(wcdis)[2:3] <- fltnames$NAME[fltnames$M == 'WC' & fltnames$DISCARD]
+names(wcdis)[2:3] <- paste(fltnames$NAME[fltnames$M == 'WC' & fltnames$DISCARD])
 
 names(bcdis)[1] <- names(wcdis)[1] <- names(akdis)[1] <- 'Year'
 
@@ -96,10 +102,12 @@ omdis %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
-  scale_color_brewer(palette = 'Dark2') +
+  scale_color_manual(values = fishfltPal) +
   scale_x_continuous(breaks = seq(1970,2020,10)) +
   geom_line(lwd = 1) +
-  labs(x = 'Year', y = 'Obs discard (mt)', color = 'Comm. Fleet')
+  labs(x = 'Year', y = 'Obs discard (mt)', color = 'Comm. Fleet',
+       subtitle="WC 2019 SS Values multiplied by 1000") 
+
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','om_discards.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
@@ -564,68 +572,18 @@ ggsave(last_plot(),
 ## array year x age x fleet for each sex
 ## these are really ballparks and will need to be tweaked to condition OM
 
-#* wc aselex ----
-## (age only); in SS 1 = FEM
-wc_fem_asel <- wc_mal_asel <- array(NA, 
-                                    dim = c(length(1960:2018), 
-                                            length(0:70)+1, 
-                                            length( paste(fltnames$NAME[fltnames$M == 'WC' & 
-                                                                          (fltnames$COMM  |  fltnames$SURV)]))),
-                                    dimnames =  list( 1960:2018,
-                                                      c('Year',0:70), 
-                                                      paste(fltnames$NAME[fltnames$M == 'WC' & 
-                                                                            (fltnames$COMM  |  fltnames$SURV)])))
+OM_surv_selex_yafs <- array(NA, dim = c(length(1960:2018),
+                                        length(0:70),
+                                        length(paste(fltnames$NAME[fltnames$SURV])),
+                                        2))
+OM_fish_selex_yafs <- array(NA, dim = c(length(1960:2018),
+                                        length(0:70),
+                                        length(paste(fltnames$NAME[fltnames$COMM])),
+                                        2))
+dimnames(OM_surv_selex_yafs) =  list( 1960:2018,   c(0:70),  paste(fltnames$NAME[fltnames$SURV]))
+dimnames(OM_fish_selex_yafs) =  list( 1960:2018,   c(0:70),  paste(fltnames$NAME[fltnames$COMM]))
 
 
-## fix, twl, nwcbo for VAST
-for(flt in 1:3){
-  
-  wc_fem_asel[,,flt] <-   as.matrix( merge(data.frame('Year' = 1960:2018),
-                                           wc$ageselex %>% 
-                                             filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
-                                             mutate(Year = Yr) %>%
-                                             select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
-                                             filter(Sex == 1 & Fleet == c(1,3,8)[flt]) %>%
-                                             select(-Sex) %>%
-                                             select(-Fleet),
-                                           by= 'Year', all.x = TRUE) )
-  
-  wc_mal_asel[,,flt] <-    as.matrix( merge(data.frame('Year' = 1960:2018),
-                                            wc$ageselex %>% 
-                                              filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
-                                              mutate(Year = Yr) %>%
-                                              select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
-                                              filter(Sex == 2 & Fleet == c(1,3,8)[flt]) %>%
-                                              select(-Sex) %>%
-                                              select(-Fleet),
-                                            by= 'Year', all.x = TRUE) )
-  
-}    
-#* bc aselex ----
-## BC only has LEN selex
-logistic3 <- function(age, a50, a95){
-  selage <- 1/(1+exp(-log(19)*(age-a50)/(a95-a50)))
-  return(selage)
-}
-## for ease we should use the BC growth curve (from their OM) and convert to exp age
-## since this can get tweaked down the road I will eyeball from the B1 
-# l50_bc <- 52.976
-a50_fem_bc <- 17; a95_fem_bc <- 20
-a50_mal_bc <- 15; a95_mal_bc <- 17
-bc_fem_asel <- bc_mal_asel <- array(NA, dim = c(length(1960:2018),
-                                                length(0:70)+1,
-                                                length(paste(fltnames$NAME[fltnames$M == 'BC' & 
-                                                                             (fltnames$COMM  |  fltnames$SURV)]))),
-                                    dimnames =  list( 1960:2018,
-                                                      c('Year',0:70), 
-                                                      paste(fltnames$NAME[fltnames$M == 'BC' & 
-                                                                            (fltnames$COMM  |  fltnames$SURV)])))
-for(a in 1:length(0:70)){
-  bc_fem_asel[,1,] <- bc_mal_asel[,1,] <- 1960:2018
-  bc_fem_asel[,c(0:70)[a],] <-  logistic3(age = a, a50 = a50_fem_bc, a95 = a95_fem_bc)
-  bc_mal_asel[,c(0:70)[a],] <- logistic3(age = a, a50 = a50_mal_bc, a95 = a95_mal_bc)
-}
-# plot(bc_fem_asel[45,2:72,1])
 #* ak aselex ----
 ## AK values from an email with Kari on 25 Aug 2020 from tem.par
 logistic2 <- function(age, a50, delta){
@@ -633,36 +591,160 @@ logistic2 <- function(age, a50, delta){
   return(selage)
 }
 ## Longline/fixed gear fishery for post-IFQ years (1995 onward), log scale values
+## right now assuming TRAWL has the same
 a50_fem_ak <- 1.07528048238
 del_fem_ak <- 0.764917256584
 a50_mal_ak <- 1.14893337353
 del_mal_ak <- 0.945517826919
 
-ak_fem_asel <- ak_mal_asel <- array(NA, dim = c(length(1960:2018),
-                                                length(0:70)+1,
-                                                length(paste(fltnames$NAME[fltnames$M == 'AK' & 
-                                                                             (fltnames$COMM  |  fltnames$SURV)]))),
-                                    dimnames =  list( 1960:2018,
-                                                      c('Year',0:70), 
-                                                      paste(fltnames$NAME[fltnames$M == 'AK' & 
-                                                                            (fltnames$COMM  |  fltnames$SURV)]))) 
 for(a in 1:nage){
-  ak_fem_asel[,1,1:2] <- ak_mal_asel[,1,1:2] <-1960:2018
-  ak_fem_asel[36:59,a,] <-  logistic2(age = a, a50 = a50_fem_ak, delta = del_fem_ak)
-  ak_mal_asel[36:59,a,] <- logistic2(age = a, a50 = a50_mal_ak, delta = del_mal_ak)
+  OM_fish_selex_yafs[,a,1:4,1] <-  logistic2(age = a, a50 = a50_fem_ak, delta = del_fem_ak)
+  OM_fish_selex_yafs[,a,1:4,2] <- logistic2(age = a, a50 = a50_mal_ak, delta = del_mal_ak)
 }
 
 
-OM_selex_male_yaf <- list(ak_mal_asel, bc_mal_asel, wc_mal_asel)
-OM_selex_female_yaf <- list(ak_fem_asel, bc_fem_asel, wc_fem_asel)
+#* bc aselex ----
+## BC only has LEN selex
 
-save(OM_selex_male_yaf, file = here('input','input_data',"OM_selex_male_yaf.rdata"))
-save(OM_selex_female_yaf, file = here('input','input_data',"OM_selex_female_yaf.rdata"))
+## code from brendan
+# Code below should give you everything you need to estimate selectivity at length for each gear/survey type.
+# Trap (g = 1) and longline (g = 2) are dome-shaped using a normal distribution with mean = alpha and SD = beta (selType = 2)
+# Trawl (g = 3) is dome shaped with gamma distribution with shape= alpha and scale = beta (selType = 3)
+# Surveys (Std: g = 4; StRs: g = 5) are asymptotic with a logistic 
+# parameterization, with L50 = alpha - beta, and SD = beta (selType = 1)
+
+# Initial values.
+alpha_g1 <- c(62.8329, 63.6959, 33.8898, 54.1045, 64.2127)
+beta_g1 <- c(7.04483, 3.09715, 1.41494, 4.55724, 12.9197)
+selType <- c(2,2,3,1,1)
+nG <- length(alpha_g1)
+# Calculate selectivity by gear and length
+len <- 32:75
+sel_lg <- array(0, dim = c(length(len),5))
+for(g in 1:nG){
+  
+  if(selType[g] == 1)
+  {
+    sel_lg[,g] <- 1 / ( 1 + exp( - log(19) * (len - alpha_g1[g] + beta_g1[g]) / beta_g1[g] ) )
+  }
+  if(selType[g] == 2)
+  {
+    sel_lg[,g] <- exp(-(0.5 * (len - alpha_g1[g])/beta_g1[g])^2 )
+  }
+  if(selType[g] == 3)
+  {
+    sel_lg[,g] <- len ^(alpha_g1[g] - 1) * exp(-len/beta_g1[g])
+    sel_lg[,g] <- sel_lg[,g] / max(sel_lg[,g])
+  }
+}
+selMat <- cbind(len, sel_lg)
+colnames(selMat) <- c("Length","Trap","LL","Trawl","Std","StRS")
+
+## find age at length using saming init_LAA key as for movement [dims alis]
+# load(here("input","raw_data","demography","movement", "init_LAA.rda")) ## from prelim runs
+# B1 = B2 = matrix(NA, nrow = 82, ncol = 3)
+# B1[,1] <- B2[,1] <- 0:81
+# for(s in 1:2){
+#   for(l in 0:81){
+#     B1[l,s+1] <-which.max(init_LAA[,l,3,s])
+#     B2[l,s+1] <-which.max(init_LAA[,l,4,s])
+#   }
+# }
+# BCALK = data.frame(cbind(B1,B2[,2:3]))
+# names(BCALK) = c('len','ageb1F','ageb1M','ageb2F','ageb2M')
+
+## LL, TRAP, TRAWL
+for(y in 1:dim(OM_fish_selex_yafs)[[1]]){
+  OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(sel_lg[,3]))
+  OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(sel_lg[,2]))
+  OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(sel_lg[,4]))
+}
 
 
 
+logistic3 <- function(age, a50, a95){
+  selage <- 1/(1+exp(-log(19)*(age-a50)/(a95-a50)))
+  return(selage)
+}
+## for ease we should use the BC growth curve (from their OM) and convert to exp age
+## since this can get tweaked down the road I will eyeball from the B1 
+# l50_bc <- 52.976
+## assuming trap, trawl and fix have the same selex
+a50_fem_bc <- 17; a95_fem_bc <- 20
+a50_mal_bc <- 15; a95_mal_bc <- 17
+
+for(a in 1:nage){
+  OM_fish_selex_yafs[,a,5:7,1] <-   logistic3(age = a, a50 = a50_fem_bc, a95 = a95_fem_bc)
+  OM_fish_selex_yafs[,a,5:7,2] <- logistic3(age = a, a50 = a50_mal_bc, a95 = a95_mal_bc)
+}
+
+## 8 and 9 are WC fix and TWL, which correspond to fleets 1 and 3 in SS
+for(flt in 1:2){
+OM_fish_selex_yafs[,,c(8,9)[flt],1] <- as.matrix( merge(data.frame('Year' = 1960:2018),
+                 wc$ageselex %>% 
+                   filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
+                   mutate(Year = Yr) %>%
+                   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
+                   filter(Sex == 1 & Fleet == c(1,3)[flt]) %>%
+                   select(-Sex) %>%
+                   select(-Fleet),
+                 by= 'Year', all.x = TRUE)%>% select(-Year))
+OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960:2018),
+                                                 wc$ageselex %>% 
+                                                   filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
+                                                   mutate(Year = Yr) %>%
+                                                   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
+                                                   filter(Sex == 2 & Fleet == c(1,3)[flt]) %>%
+                                                   select(-Sex) %>%
+                                                   select(-Fleet),
+                                                 by= 'Year', all.x = TRUE) %>% select(-Year)) 
+}
+# 
+# for(flt in 1:3){
+#   
+#   wc_fem_asel[,,flt] <-   as.matrix( merge(data.frame('Year' = 1960:2018),
+#                                            wc$ageselex %>% 
+#                                              filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
+#                                              mutate(Year = Yr) %>%
+#                                              select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
+#                                              filter(Sex == 1 & Fleet == c(1,3,8)[flt]) %>%
+#                                              select(-Sex) %>%
+#                                              select(-Fleet),
+#                                            by= 'Year', all.x = TRUE) )
+#   
+#   wc_mal_asel[,,flt] <-    as.matrix( merge(data.frame('Year' = 1960:2018),
+#                                             wc$ageselex %>% 
+#                                               filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
+#                                               mutate(Year = Yr) %>%
+#                                               select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
+#                                               filter(Sex == 2 & Fleet == c(1,3,8)[flt]) %>%
+#                                               select(-Sex) %>%
+#                                               select(-Fleet),
+#                                             by= 'Year', all.x = TRUE) )
+#   
+# }    
 
 
+save(OM_fish_selex_yafs, file = here('input','input_data',"OM_fish_selex_yafs.rdata"))
+# save(OM_surv_selex_yafs, file = here('input','input_data',"OM_selex_female_yaf.rdata"))
+
+png(here('input','input_data','input_figs','fishery_aselex.png'),
+    height = 8, width = 6, unit = 'in', res = 420)
+par(mfrow = c(3,3) )
+for(flt in 1:nfleets_fish){
+  for(s in 1:2){
+    tmp <- OM_fish_selex_yafs[59,,flt,s]
+    if(s == 1) plot(tmp, col = sexPal[1], type = 'l', lwd = 2, xlab = 'Age', ylab = 'Selectivity',
+                    ylim = c(0,1), main = fltnames_fish[flt], xlim = c(0,75),
+                    col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+    box(which = 'plot', lty = 'solid', 
+        col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
+        lwd = 2)
+    if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lwd = 2)
+  }
+}
+
+dev.off()
 ## survey ----
 ## spatial matrix -- for matching on region, stock, sub_area, etc
 spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
@@ -693,7 +775,7 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.c
   # arrange(.,Year,fleet) #%>%
 
 names(survsig) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,1,2,3)])
-write.csv(survsig[,c(4,3,2,5,1)],here("input","input_data","OM_indices_sigma.csv"),row.names = FALSE)
+write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indices_sigma.csv"),row.names = FALSE)
 
 ## make columns as fleets, include extra  bc surv
 names(bcnom) <- c('Year','value', 'sigma', 'Fleet')
@@ -716,10 +798,9 @@ surv_vals <- vast0 %>%
   tidyr::pivot_wider(names_from= Fleet, values_from = value) %>%
   filter(Year > 1964 & Year < 2019)
 surv_vals[surv_vals == -1] <- NA
-names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) ## note that
-# row.names(surv_vals) <- surv_vals$Year
+names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) 
 
-write.csv(surv_vals[,c(3,4,5,2,6)], here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
+write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
 
 surv_vals %>%
   # select(-BC_EARLY) %>%
@@ -727,7 +808,7 @@ surv_vals %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
-  scale_color_brewer(palette = 'Dark2') +
+  scale_color_manual(values = survfltPal)+
   scale_x_continuous(breaks = seq(1970,2020,10)) +
   geom_line(lwd = 1) +
   labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') +

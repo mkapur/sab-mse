@@ -10,7 +10,6 @@ runOM_datagen <- function(df, seed = 731){
   nage <- df$nage
   age <- df$age
 
-  
   nfleets_surv <- df$nfleets_surv
   nfleets_fish <- df$nfleets_fish
   nfleets_acomp <- df$nfleets_acomp
@@ -61,21 +60,13 @@ runOM_datagen <- function(df, seed = 731){
   sigmaG_yk <- df$sigmaG_yk
   phi_ij <- df$phi_ij ##  matrix of whether i,j are from distinct stocks (0 otherwise)
   LBins <- df$LBins
-  
-  # wage_ssb <- df$wage_ssb
-  # wage_catch <- df$wage_catch
-  # wage_survey <- df$wage_survey
-  # wage_mid <- df$wage_mid
-  
-  # array<Type> Length_yai_beg(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
-  # array<Type> Length_yai_mid(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
-  # array<Type> LengthAge_alyi_beg(nage,LBins,tEnd+1,nspace); // placeholder for true age-length dist
-  # array<Type> LengthAge_alyi_mid(nage,LBins,tEnd+1,nspace); // placeholder for true age-length dist
 
   
-  # M selectivity 
-  # Msel <- df$Msel # no difference between males and females
-  # M0 <- exp(df$parms$logMinit)
+  # M, selectivity 
+  ## note these combine age and length sel, flag type via selType
+  fish_selex_yafs <- df$fish_selex_yafs
+  surv_selex_yafs <- df$surv_selex_yafs
+  
   M <- rep(0.2,nage) #M0*Msel # Naural mortality at age
   SDR <- exp(df$logSDR)
   b <- rep(1, tEnd)
@@ -384,19 +375,29 @@ runOM_datagen <- function(df, seed = 731){
   Adj <- Z_a_TEMP <- Z_a_TEMP2 <- NULL
 
   for(fish_flt in 1:nfleets_fish){
-    if(is.na(catch_yf_obs[y, fish_flt+1])) next()
+    if(is.na(catch_yf_obs[y, fish_flt+1])) next() ## skip if no catch
     
     catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <- 0
     ## putative biomass available
     denom = 0
     for(i in 1:nspace){
       # if(phi_im[i, m] == 0) next() ## skip area if not in mgmt reg
-      ## this needs to deal accurately with sex-selex 
-      denom <- denom + (phi_if_fish[fish_flt, i] *
-                          1.0*    sum(N_yais_beg[y,a,i,]*
-                                        wtatlen_kab[phi_ik2[i],1]*
-                                        Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])+
-                          catch_yf_obs[y, fish_flt+1])
+      ## this needs to deal accurately with sex-selex length OR age
+      if(selType_fish[fish_flt == 'AGE']){
+        denom <- denom + (phi_if_fish[fish_flt, i] *
+                            fish_selex_yafs[y,,i,]*    
+                            sum(N_yais_beg[y,a,i,]*
+                                  wtatlen_kab[phi_ik2[i],1]*
+                                  Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])+
+                            catch_yf_obs[y, fish_flt+1])
+      } else if(selType_fish[fish_flt == 'LEN']){
+        denom <- denom + (phi_if_fish[fish_flt, i] *
+                            fish_selex_yafs[y,,i,]*    
+                            sum(N_yais_beg[y,a,i,]*
+                                  Length_yais_beg[y,a,i,])+
+                            catch_yf_obs[y, fish_flt+1])
+        
+      }
     }
     ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now
     ## make this guess by M, and sum over phi_im
@@ -421,7 +422,8 @@ runOM_datagen <- function(df, seed = 731){
             (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*
             (1-exp(-Z_a_TEMP[a]))*
             phi_if_fish[fish_flt, i]*
-            1.0*    sum(N_yais_beg[y,a,i,]*
+            1.0*    
+            sum(N_yais_beg[y,a,i,]*
                           wtatlen_kab[phi_ik2[i],1]*
                           Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
 

@@ -1,21 +1,14 @@
 require(ggplot2)
 require(patchwork)
 library(gridExtra)
-require(colorblindr)
-## SANITY CHECK PLOTS
-nspace <- dim(Ninit_Aai)[3]
-
-
-# data.frame(matrix(Ninits, ncol=nspace, byrow=FALSE))
-
-
 
 
 pNinit <- Ninit_ais[,,1] %>%
   data.frame() %>%
-  mutate('Age' = 1:71) %>%
+  mutate('Age' = age) %>%
   reshape2::melt(id = c('Age')) %>%
   ggplot(., aes(x = Age, y = value, color = variable )) +
+  scale_color_manual(values = subareaPal) +
   geom_line(lwd = 2) + 
   labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
   ggsidekick::theme_sleek()
@@ -25,40 +18,45 @@ pNzeroF <- N_0ais[,,1] %>% data.frame() %>%
   mutate('Age' = 1:71) %>%
   reshape2::melt(id = c('Age')) %>%
   ggplot(., aes(x = Age, y = value, color = variable )) +
-  geom_line(lwd = 2) + 
+  geom_line(lwd = 1) + 
+  scale_color_manual(values = subareaPal) +
   labs(x = 'Age in Year 0',y = 'Unfished Numbers', color = 'subarea') +
   ggsidekick::theme_sleek()+theme(legend.position = 'none')
 pNzeroM <- N_0ais[,,2] %>% data.frame() %>%
   mutate('Age' = 1:71) %>%
   reshape2::melt(id = c('Age')) %>%
   ggplot(., aes(x = Age, y = value, color = variable )) +
-  geom_line(lwd = 2) + 
+  geom_line(lwd = 1) + 
+  scale_color_manual(values = subareaPal) +
   labs(x = 'Age in Year 0',y = 'Unfished Numbers', color = 'subarea') +
   ggsidekick::theme_sleek() 
 
 ggsave(pNzeroF  | pNzeroM,
        file = here('figs',
-                   "NZero_noMove_2Sex.png"),
+                   "NZero_Move_2Sex.png"),
        width = 6, height = 4, unit = 'in',
        dpi = 420)
 
-pNage1 <- N_yais_beg[1,,1,1] %>%
-data.frame() %>%
-  mutate('Yr' = 1:nrow(.)) %>%
-  reshape2::melt(id = c('Yr')) %>%
-  mutate(age = as.numeric(substr(variable,2,2))-1) %>%
-  ggplot(., aes(x = age, y = value,  group = Yr )) +
-  # geom_point() +
-  # geom_boxplot() +
-  geom_line() +
-  labs(x = 'Age in Year',y = 'Numbers',  title = "AREA1") +
-  ggsidekick::theme_sleek() + theme(legend.position = 'none') 
-
-
-plot(N_yais_beg[1,,1,1],type = 'l') #, ylim = c(0,20e5))
-for(i in 1:10){
-  lines(N_yais_beg[i,,1,1], col = grey((i)/10), lwd =2)
+## N at age by area by year (females)
+png(file = here('figs','N_age_years1-5.png'),
+    width = 10, height = 8, unit = 'in', res = 420)
+par(mfrow = c(2,3))
+for(i in 1:6){
+  plot(N_yais_beg[1,,i,1],
+       type = 'l',
+       lwd = 2, 
+       col = subareaPal[i],
+       main = inames[i], 
+       col.main =subareaPal[i], 
+       ylim = c(0,500),
+       xlim = c(0,70),
+       xlab = "Age", 
+       ylab = 'Numbers')
+  for(y in 2:2){
+    lines(N_yais_beg[y,,1,1],  col = subareaPal[i], lwd =2)
+  }
 }
+dev.off()
 
 pNage2 <- N_yai_beg[,,2] %>%
   data.frame() %>%
@@ -106,8 +104,10 @@ pRyk <- R_yk %>% data.frame() %>%
   ggsidekick::theme_sleek()
 
 
-pSRR <- cbind(R_yk, SSB_yk) %>% data.frame() %>%
-  mutate('Yr' = 1:nrow(.), RECS1 = X1, RECS2 = X2, SSBS1 = X3, SSBS2 = X4) %>%
+pSRR <- cbind(R_yk, SSB_yk) %>% 
+  data.frame() %>%
+  mutate('Yr' = 1:nrow(.), 
+         RECS1 = X1, RECS2 = X2, SSBS1 = X3, SSBS2 = X4) %>%
   select(-X1,-X2,-X3,-X4) %>%
   reshape2::melt(id = c('Yr')) %>%
   mutate(variable2 = substr(variable,1,3), stock = substr(variable,4,5)) %>%

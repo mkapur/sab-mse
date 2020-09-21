@@ -39,9 +39,10 @@ runOM_datagen <- function(df, seed = 731){
   
   ## Biology
   M_k <- df$M_k
-  mat_age <- rep(0.2, nage)
+  mat_age <- rep(0.2, nage) ## mortality
   wtatlen_kab <- df$wtatlen_kab
-
+  mat_ak <- df$mat_ak ## maturity by age and stock
+  load(here('input','input_data','unfished_ALK.rdata')) ## from prelim runs, for ssb0
   ## Obs
   # catch_yf_obs <- df$Catch2
   catch_yf_obs <- df$catch
@@ -101,9 +102,10 @@ runOM_datagen <- function(df, seed = 731){
   SSB_0i <- rep(0, nspace);  SSB_0k <- rep(0, nstocks);
   for(i in 1:nspace){
     for(a in 1:(nage)){
-      SSB_0i[i] = SSB_0i[i] + mat_age[a]*N_0ais[a,i,1];
+      SSB_0i[i] = SSB_0i[i] +  N_0ais[a,i,1]*wtatlen_kab[phi_ik2[i],1]*
+        unfished_ALK_F[a,i]^wtatlen_kab[phi_ik2[i],2]*mat_ak[a,phi_ik2[i]] ;
       for(k in 1:nstocks){
-        SSB_0k[k] = SSB_0k[k] + phi_ik[k,i]*mat_age[a]*N_0ais[a,i,1];
+        SSB_0k[k] = SSB_0k[k] + phi_ik[k,i]*SSB_0i[i];
       } #// end stocks
     } #// end ages
   } # // end space
@@ -236,7 +238,7 @@ runOM_datagen <- function(df, seed = 731){
       SSB_yi[y,i] <- 0
       for(a in 1:(nage)){
         SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_beg[y,a,i,1]*wtatlen_kab[phi_ik2[i],1]*
-          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
+          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]*mat_ak[a,phi_ik2[i]]
         if(is.na(SSB_yi[y,i])) stop("NA ON SSB_YI year ",y," space ",i," age ",a)
         } #// end ages
     } #// end space

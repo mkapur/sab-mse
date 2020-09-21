@@ -184,7 +184,7 @@ runOM_datagen <- function(df, seed = 731){
                                               dimnames = list(c(year), paste(fltnames_surv)))
   
   ## start year loop ----
-  for(y in 1:5){#(tEnd-1)){
+  for(y in 1:6){#(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -237,7 +237,8 @@ runOM_datagen <- function(df, seed = 731){
       for(a in 1:(nage)){
         SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_beg[y,a,i,1]*wtatlen_kab[phi_ik2[i],1]*
           Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]
-      } #// end ages
+        if(is.na(SSB_yi[y,i])) stop("NA ON SSB_YI year ",y," space ",i," age ",a)
+        } #// end ages
     } #// end space
     for(k in 1:nstocks){
       SSB_yk[y,k]<- 0
@@ -247,6 +248,7 @@ runOM_datagen <- function(df, seed = 731){
     } #// end space
     cat(sum(SSB_yk[y,]),"\n")
     cat(sum(SSB_yi[y,]),"\n")
+    if(is.na(sum(SSB_yk[y,]))) stop("NA ON SSB_YK",y) 
     
     ## Ryi, Ryk Recruits ----
     # next year based on present SSB
@@ -272,6 +274,7 @@ runOM_datagen <- function(df, seed = 731){
     for(s in 1:2){
       for(i in 1:nspace){
         N_yais_mid[y,1,i,s] <- N_yais_beg[y,1,i,s]*exp(-M[1])
+        # Length_yais_beg[y,1,i,s] <- L1_yk[y,phi_ik2[i],s]
         for(a in 2:(nage-1)){ ## note that TMB starts at pos 1 which is age 1 which is pos 2 here
           pLeave = 0.0;  NCome = 0.0
           for(j in 1:nspace){           
@@ -326,7 +329,7 @@ runOM_datagen <- function(df, seed = 731){
   ## reweight length-at-age based on movement from other stocks ----
     for(s in 1:2){
       for(i in 1:nspace){  
-        for(a in 2:(nage)){ ## note that TMB starts at pos 1 which is age 1 which is pos 2 here
+        for(a in 1:(nage)){ ## note that TMB starts at pos 1 which is age 1 which is pos 2 here
           LCome = 0.0; NCome = 0.0
           for(j in 1:nspace){           
             if(i != j){
@@ -334,8 +337,10 @@ runOM_datagen <- function(df, seed = 731){
               NCome = NCome + phi_ij[i,j]*N_yais_beg[y,a,j,s] ## for denom
             }
           } ## end subareas j
-          Length_yais_beg[y+1,a,i,s] = (N_yais_beg[y,a,i,s]*Length_yais_beg[y,a,i,s] + LCome)/(N_yais_beg[y,a,i,s]+NCome)
-        } ## end ages
+          Length_yais_beg[y+1,a,i,s] = (N_yais_beg[y,a,i,s]*Length_yais_beg[y,a,i,s] + LCome)/
+            (N_yais_beg[y,a,i,s]+NCome)
+          # if(is.na(Length_yais_beg[y+1,1,i,s])) stop("NA Length_yais_beg on year ",y, " age1 ", "space ",i)
+           } ## end ages
       } ## end subareas i
     } ## sexes
     
@@ -359,7 +364,7 @@ runOM_datagen <- function(df, seed = 731){
       } ## end nspace
     } ## end sex
 
-  } ## end years testing
+  }  ## end years testing
 
   
   ## Hybrid F tuning  ----

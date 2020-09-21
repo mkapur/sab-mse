@@ -19,6 +19,8 @@ runOM_datagen <- function(df, seed = 731){
   fltnames_fish = df$fltnames_fish
   fltnames_acomp = df$fltnames_acomp
   fltnames_lcomp = df$fltnames_lcomp
+  selType_fish = df$selType_fish
+  selType_surv = df$selType_surv
 
   nmgmt_reg <- ncol(df$phi_fm)
   
@@ -186,7 +188,7 @@ runOM_datagen <- function(df, seed = 731){
                                               dimnames = list(c(year), paste(fltnames_surv)))
   
   ## start year loop ----
-  for(y in 1:6){#(tEnd-1)){
+  for(y in 1:25){#(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -260,8 +262,7 @@ runOM_datagen <- function(df, seed = 731){
         # // SSB_yk already has summation
         R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k]
                      /(SSB_0k[k]*(1-h_k[k])+ 
-                         SSB_yk[y,k]*(5*h_k[k]-1)))#*
-          # exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+                         SSB_yk[y,k]*(5*h_k[k]-1)))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
         # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
       } # // end stocks
       R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ik[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
@@ -366,7 +367,7 @@ runOM_datagen <- function(df, seed = 731){
       } ## end nspace
     } ## end sex
 
-  }  ## end years testing
+  # }  ## end years testing
 
   
   ## Hybrid F tuning  ----
@@ -403,9 +404,14 @@ runOM_datagen <- function(df, seed = 731){
                             catch_yf_obs[y, fish_flt+1])
       } else if(selType_fish[fish_flt == 'LEN']){
         denom <- denom + (phi_if_fish[fish_flt, i] *
-                            fish_selex_yafs[y,,i,]*    
-                            sum(N_yais_beg[y,a,i,]*
-                                  Length_yais_beg[y,a,i,])+
+                            fish_selex_yafs[y,,i,]* 
+                            ## not sure about this; M and F n_age x most likely len at age into weight = biomass??
+                            sum(N_yais_beg[y,a,i,1]*
+                                  wtatlen_kab[phi_ik2[i],1]*
+                                  which.max(LengthAge_alyis_beg[a,,y,i,1]^wtatlen_kab[phi_ik2[i],2]),
+                                N_yais_beg[y,a,i,2]*
+                                  wtatlen_kab[phi_ik2[i],1]*
+                                  which.max(LengthAge_alyis_beg[a,,y,i,2]^wtatlen_kab[phi_ik2[i],2])) +
                             catch_yf_obs[y, fish_flt+1])
         
       }

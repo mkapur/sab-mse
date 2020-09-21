@@ -97,12 +97,13 @@ omdis <- merge(omdis0, akdis,  by = "Year", all = TRUE) %>%
 omdis[omdis == -1.0] <- NA
 save(omdis, file = here("input","input_data","OM_discard.csv"))
 
+
 ## plot values
 omdis %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
-  scale_color_manual(values = fishfltPal) +
+  scale_color_manual(values = fishfltPal[which(colnames(fishfltPal) %in% names(omdis)[2:ncol(omdis)])]) +
   scale_x_continuous(breaks = seq(1970,2020,10)) +
   geom_line(lwd = 1) +
   labs(x = 'Year', y = 'Obs discard (mt)', color = 'Comm. Fleet',
@@ -269,7 +270,6 @@ OM_lencomps_female <- OM_lencomps_male <- list()
 list.files(here('input','raw_data','comps'), pattern = "BINDME", full.names = TRUE) %>%
   lapply(load,.GlobalEnv)
 
-OM_lencomps_female <- list(ak_lencomps_female, bc_lencomps_female, wc_lencomps_female )
 OM_lencomps_male <- list(ak_lencomps_male, bc_lencomps_male, wc_lencomps_male )
 save(OM_lencomps_female, file = here('input','input_data',"OM_lencomps_female.rdata"))
 save(OM_lencomps_male, file = here('input','input_data',"OM_lencomps_male.rdata"))
@@ -695,16 +695,49 @@ logistic3 <- function(age, a50, a95){
 # }
 #* wc aselex ----
 ## 8 and 9 are WC fix and TWL, which correspond to fleets 1 and 3 in SS
+## these entries are timeblocked. For ease I wrote this CSV and dragged the values.
+# wcas0 <- wc$ageselex %>%
+#   filter(Yr > 1880 & Factor == 'Asel' & Fleet %in% c(1,3)) %>%
+#   filter(Sex == 1) %>%
+#   mutate(Year = Yr) %>%
+#   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
+#   group_by(Fleet) %>%
+#   complete(., Year = c(1890,1960:2018)) %>% write.csv(.,here('input','raw_data','selex','wcas0F.csv'))
+# wcas0 <- wc$ageselex %>%
+#   filter(Yr > 1880 & Factor == 'Asel' & Fleet %in% c(1,3)) %>%
+#   filter(Sex == 2) %>%
+#   mutate(Year = Yr) %>%
+#   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
+#   group_by(Fleet) %>%
+#   complete(.,Year = c(1890,1960:2018)) %>% write.csv(.,here('input','raw_data','selex','wcas0M.csv'))
+
+
+# for(s in 1:2){
+#   for(flt in c(1,3)){
+#     wcas0[wcas0$Year < 1996 & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)] <-
+#       wcas0[wcas0$Year == 1996 & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)]
+#     
+#     wcas0[wcas0$Year %in% 1997:2002 & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)] <-
+#       wcas0[wcas0$Year%in% 1997:2002  & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)]
+#     wcas0[wcas0$Year %in% 2003:2017 & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)] <-
+#       wcas0[wcas0$Year%in% 2003:2017  & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)]
+#     
+#     wcas0[wcas0$Year > 2017 & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)] <-
+#       wcas0[wcas0$Year > 2017  & wcas0$Sex == s & wcas0$Fleet == flt,4:ncol(wcas0)]
+#   }
+# }
+
+wcas0 <- read.csv(here('input','raw_data','selex','wcas0.csv'))
+
 for(flt in 1:2){
 OM_fish_selex_yafs[,,c(8,9)[flt],1] <- as.matrix( merge(data.frame('Year' = 1960:2018),
-                 wc$ageselex %>% 
-                   filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
-                   mutate(Year = Yr) %>%
-                   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
+                                                        wcas0 %>%
                    filter(Sex == 1 & Fleet == c(1,3)[flt]) %>%
                    select(-Sex) %>%
                    select(-Fleet),
-                 by= 'Year', all.x = TRUE)%>% select(-Year))
+                 by= 'Year', 
+                 all.x = TRUE)
+                 %>% select(-Year))
 OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960:2018),
                                                  wc$ageselex %>% 
                                                    filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
@@ -742,7 +775,7 @@ OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960
 
 
 save(OM_fish_selex_yafs, file = here('input','input_data',"OM_fish_selex_yafs.rdata"))
-# save(OM_surv_selex_yafs, file = here('input','input_data',"OM_selex_female_yaf.rdata"))
+# save(OM_surv_selex_yafs, file = here('input','input_data',"OM_surv_selex_yafs.rdata"))
 
 #* plot input selex ----
 png(here('input','input_data','input_figs','fishery_selex.png'),

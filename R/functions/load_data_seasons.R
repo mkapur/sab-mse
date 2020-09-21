@@ -131,8 +131,11 @@ load_data_seasons <- function(nspace = 6,
   omega_ais <- array(0, dim = c(nage,nspace,2))## eigenvector for stable spatial distribution at age
   for(s in 1:2){
     for(a in 1:nage){
-      omega_ais[a,,s] <- eigen(X_ijas[,,a,s])$values 
+
+      omega_ais[a,,s] <- eigen(X_ijas[,,a,s])$values/sum(eigen(X_ijas[,,a,s])$values)
       omega_ais[a,,s][which(omega_ais[a,,s] < 0)] <- 0.05
+      if(all(X_ijas[,,a,s] == 0)){omega_ais[a,,s] <- 1/nspace} ## since we have
+      ## no movement values for sub A5, just assume even dist
     }
   }
 
@@ -555,6 +558,7 @@ load_data_seasons <- function(nspace = 6,
     sigmaG_yk = growthPars$sigmaG_yk,
     L1_yk = growthPars$L1_yk,
     wtatlen_kab = wtatlen_kab,
+    mat_ak = mat_ak,
     #* DATA ----
     survey = survey, # Make sure the survey has the same length as the catch time series
     survey_err = survey_err, #ac.data$ss.error, # Make sure the survey has the same length as the catch time series
@@ -564,7 +568,7 @@ load_data_seasons <- function(nspace = 6,
     catch = catch,
     discard = omdis,
     fish_selex_yafs = OM_fish_selex_yafs,
-    surv_selex_yafs = OM_surv_selex_yafs,
+    # surv_selex_yafs = OM_surv_selex_yafs,
     
     #* ADDL PARS ----
     parms = parms,

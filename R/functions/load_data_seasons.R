@@ -339,8 +339,8 @@ load_data_seasons <- function(nspace = 6,
     
     ## tau_ik
     tau_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
-    rownames(tau_ik) <- unique(rev(spmat$stock))
-    colnames(tau_ik) <- rev(spmat$subarea)
+    rownames(tau_ik) <- unique(spmat$stock)
+    colnames(tau_ik) <- spmat$subarea
     tau_ik[1,1] <-   tau_ik[4,6]  <- 1 ## 100% of recruitment in stock
     tau_ik[2,2:3] <-  tau_ik[3,4:5] <-  0.5 ## split 50/50 for now
   } else {

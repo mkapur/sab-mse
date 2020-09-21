@@ -739,13 +739,10 @@ OM_fish_selex_yafs[,,c(8,9)[flt],1] <- as.matrix( merge(data.frame('Year' = 1960
                  all.x = TRUE)
                  %>% select(-Year))
 OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960:2018),
-                                                 wc$ageselex %>% 
-                                                   filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
-                                                   mutate(Year = Yr) %>%
-                                                   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
-                                                   filter(Sex == 2 & Fleet == c(1,3)[flt]) %>%
-                                                   select(-Sex) %>%
-                                                   select(-Fleet),
+                                                        wcas0 %>%
+                                                          filter(Sex == 2 & Fleet == c(1,3)[flt]) %>%
+                                                          select(-Sex) %>%
+                                                          select(-Fleet),
                                                  by= 'Year', all.x = TRUE) %>% select(-Year)) 
 }
 # 

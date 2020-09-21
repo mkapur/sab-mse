@@ -337,12 +337,12 @@ load_data_seasons <- function(nspace = 6,
     colnames(phi_fm) = c('AK','BC','WC')
     phi_fm[1:2,1] <- phi_fm[3:5,2]  <- phi_fm[6:9,3]  <- 1
     
-    ## tau_ik
-    tau_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
-    rownames(tau_ik) <- unique(spmat$stock)
-    colnames(tau_ik) <- spmat$subarea
-    tau_ik[1,1] <-   tau_ik[4,6]  <- 1 ## 100% of recruitment in stock
-    tau_ik[2,2:3] <-  tau_ik[3,4:5] <-  0.5 ## split 50/50 for now
+    ## tau_ki
+    tau_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
+    rownames(tau_ki) <- unique(spmat$stock)
+    colnames(tau_ki) <- spmat$subarea
+    tau_ki[1,1] <-   tau_ki[4,6]  <- 1 ## 100% of recruitment in stock
+    tau_ki[2,2:3] <-  tau_ki[3,4:5] <-  0.5 ## split 50/50 for now
   } else {
     phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
@@ -360,7 +360,7 @@ load_data_seasons <- function(nspace = 6,
         phi_ij[i,j] = ifelse(phi_ik2[i] == phi_ik2[j],0,1)
       }
     }
-    tau_ik <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
+    tau_ki <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
   }
 
   
@@ -548,7 +548,7 @@ load_data_seasons <- function(nspace = 6,
     phi_ik2 = phi_ik2,
     phi_ij = phi_ij,
     phi_fm = phi_fm,
-    tau_ik = tau_ik,
+    tau_ki = tau_ki,
     
     #* DEMOG ----
     X_ijas = X_ijas,

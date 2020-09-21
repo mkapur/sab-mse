@@ -131,11 +131,12 @@ load_data_seasons <- function(nspace = 6,
   omega_ais <- array(0, dim = c(nage,nspace,2))## eigenvector for stable spatial distribution at age
   for(s in 1:2){
     for(a in 1:nage){
-
-      omega_ais[a,,s] <- eigen(X_ijas[,,a,s])$values/sum(eigen(X_ijas[,,a,s])$values)
-      omega_ais[a,,s][which(omega_ais[a,,s] < 0)] <- 0.05
-      if(all(X_ijas[,,a,s] == 0)){omega_ais[a,,s] <- 1/nspace} ## since we have
+      omega_ais[a,,s] <- round(eigen(X_ijas[,,a,s])$values/
+                                 sum(eigen(X_ijas[,,a,s])$values),3)
+      # omega_ais[a,,s][which(omega_ais[a,,s] < 0)] <- 0.05
+      if(all(X_ijas[,,a,s] == 0)){ omega_ais[a,,s] <- 1/nspace} ## since we have
       ## no movement values for sub A5, just assume even dist
+      ## I forced this to be 166 vs 167 because it was causing too many individuals
     }
   }
 

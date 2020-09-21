@@ -37,11 +37,12 @@ runOM_datagen <- function(df, seed = 731){
   knames <- rownames(phi_ik)
   mnames <- colnames(phi_fm)
   phi_ik2 <- df$phi_ik2 + 1 ## zero-indexed, add one
-  tau_ik <- df$tau_ik 
+  tau_ki <- df$tau_ki 
   
   ## Biology
   M_k <- df$M_k
-  mat_age <- rep(0.2, nage) ## mortality
+  # M <- rep(0.2,nage) #M0*Msel # Naural mortality at age
+  mat_age <- rep(0.15, nage) ## mortality
   wtatlen_kab <- df$wtatlen_kab
   mat_ak <- df$mat_ak ## maturity by age and stock
   load(here('input','input_data','unfished_ALK.rdata')) ## from prelim runs, for ssb0
@@ -70,12 +71,12 @@ runOM_datagen <- function(df, seed = 731){
   fish_selex_yafs <- df$fish_selex_yafs
   surv_selex_yafs <- df$surv_selex_yafs
   
-  M <- rep(0.2,nage) #M0*Msel # Naural mortality at age
+
   SDR <- exp(df$logSDR)
   b <- rep(1, tEnd)
   q = 0.5 ## placeholder
   # True values 
-  M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
+  # M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
   h_k <- exp(df$parms$logh_k)
   R_0k <- rep(exp(df$parms$logRinit), nspace) ## change this to better value
   
@@ -86,20 +87,23 @@ runOM_datagen <- function(df, seed = 731){
     for(k in 1:nstocks){
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
-          N_0ais[a,i,s] =  N_0ais[a,i,s]+
+          N_0ais[a,i,s] = N_0ais[a,i,s]+
             0.5* 
-            ifelse(omega_ais[a,i,s]==0,1,omega_ais[a,i,s]) *
+            omega_ais[a,i,s]*
             R_0k[k]*
-            tau_ik[k,i]*
-            exp(-(M[a]*age[a]))
+            tau_ki[k,i]* ## downscale to subarea. C1 and A1 higher because they're own stock
+            exp(-(mat_age[a]*age[a]))
+          # cat(paste(c(s,k,i,a), sep = " "),     N_0ais[a,i,s] ,"\n")
         } ## end age < plus
         # // note the A+ group will be in slot A-1
-        N_0ais[nage,i,s] =  ifelse(omega_ais[nage,i,s]==0,1,omega_ais[nage,i,s]) *
-          N_0ais[nage-1,i,s]*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]*age[nage]))
+        N_0ais[nage,i,s] =   omega_ais[a,i,s]*
+          N_0ais[nage-1,i,s]*
+          exp(-(mat_age[nage-1]*age[nage-1]))/
+          (1-exp(-mat_age[nage]*age[nage]))
       } ## // end subareas
     }  ## // end stocks
   } ## end sexes
-  
+  # N_0ais[1:15,,1] %>% data.frame() %>% mutate(rowSums(.))
   ## females only
   SSB_0i <- rep(0, nspace);  SSB_0k <- rep(0, nstocks);
   for(i in 1:nspace){
@@ -123,16 +127,17 @@ runOM_datagen <- function(df, seed = 731){
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
           Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+
-            0.5*
-            ifelse(omega_ais[a,i,s]==0,1,omega_ais[a,i,s]) * ## omega is zero for non-movement years leading to weird shapes.
-            tau_ik[k,i] * 
+            0.5* ## sex ratio
+            omega_ais[a,i,s] * ## omega is zero for non-movement years leading to weird shapes.
+            tau_ki[k,i] * 
             R_0k[k]*
-            exp(-(M[a]*age[a])) * 
-            exp(-0.5*SDR*SDR+tildeR_initk[k])
+            exp(-(mat_age[a]*age[a])) #* 
+            # exp(-0.5*SDR*SDR+tildeR_initk[k])
         } #// end ages
-        Ninit_ais[nage,i,s] = (ifelse(omega_ais[nage,i,s]==0,1,omega_ais[nage,i,s]) * 
-                                 exp(-M[nage]*age[nage-1]))/(1-exp(-(M[nage]*age[nage]))* 
-                                                               exp(-0.5*SDR*SDR+tildeR_initk[k]))
+        Ninit_ais[nage,i,s] = omega_ais[a,i,s] * 
+                                 exp(-mat_age[nage]*age[nage-1])/
+          (1-exp(-(mat_age[nage]*age[nage])))#* 
+                                                               # exp(-0.5*SDR*SDR+tildeR_initk[k]))
       } #// end space
     } #// end stocks
   } # end sex
@@ -156,7 +161,7 @@ runOM_datagen <- function(df, seed = 731){
   rownames(SSB_yi) <- rownames(SSB_yk) <- rownames(R_yi) <- rownames(R_yk) <- year
   
   
-  niter <- 100 ## F iterations
+  niter <- 50 ## F iterations
   F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1),
                           dimnames = list(c(year),
                                           c(fltnames_fish),
@@ -188,7 +193,8 @@ runOM_datagen <- function(df, seed = 731){
                                               dimnames = list(c(year), paste(fltnames_surv)))
   
   ## start year loop ----
-  for(y in 1:25){#(tEnd-1)){
+  # for(y in 1:15){
+  for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -197,7 +203,7 @@ runOM_datagen <- function(df, seed = 731){
         for(s in 1:2){ ## sexes
           Length_yais_beg[1,1,i,s] <- L1_yk[y,phi_ik2[i],s]
           N_yais_beg[1,1,i,s] <- Ninit_ais[1,i,s]
-          N_yais_mid[1,1,i,s] <- N_yais_beg[1,1,i,s]*exp(-M[1])
+          N_yais_mid[1,1,i,s] <- N_yais_beg[1,1,i,s]*exp(-mat_age[1])
           for(a in 2:(nage-1)){ ## fill A0 in position 1 later
             for(j in 1:nspace){           
               pLeave = 0.0;  NCome = 0.0; # // reset for new age
@@ -213,7 +219,7 @@ runOM_datagen <- function(df, seed = 731){
               exp(-kappa_yk[1,phi_ik2[i],s]*a)
             Length_yais_mid[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
               exp(-0.5*kappa_yk[1,phi_ik2[i],s]*a)
-            N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-M[a])
+            N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-mat_age[a])
           } #// end ages
           ## // plus group includes those already at A AND age into A
           for(j in 1:nspace){   
@@ -223,7 +229,7 @@ runOM_datagen <- function(df, seed = 731){
               NCome = NCome + X_ijas[j,i,nage,s]*(Ninit_ais[nage,j,s] + Ninit_ais[nage-1,j,s])  #// if M becomes spatial use M_aj here
             }
           } #// end subareas j
-          N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-M[nage])
+          N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-mat_age[nage])
           
           Length_yais_beg[y,nage,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
             exp(-kappa_yk[1,phi_ik2[i],s]*nage-1)
@@ -262,10 +268,11 @@ runOM_datagen <- function(df, seed = 731){
         # // SSB_yk already has summation
         R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k]
                      /(SSB_0k[k]*(1-h_k[k])+ 
-                         SSB_yk[y,k]*(5*h_k[k]-1)))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+                         SSB_yk[y,k]*(5*h_k[k]-1)))#*
+          # exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
         # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
       } # // end stocks
-      R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ik[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
+      R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
       N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits
     } ### end space
     cat(sum(R_yk[y,]),"\n")
@@ -276,7 +283,7 @@ runOM_datagen <- function(df, seed = 731){
     # at-age for the middle of this year and beginning of next 
     for(s in 1:2){
       for(i in 1:nspace){
-        N_yais_mid[y,1,i,s] <- N_yais_beg[y,1,i,s]*exp(-M[1])
+        N_yais_mid[y,1,i,s] <- N_yais_beg[y,1,i,s]*exp(-mat_age[1])
         # Length_yais_beg[y,1,i,s] <- L1_yk[y,phi_ik2[i],s]
         for(a in 2:(nage-1)){ ## note that TMB starts at pos 1 which is age 1 which is pos 2 here
           pLeave = 0.0;  NCome = 0.0
@@ -286,8 +293,8 @@ runOM_datagen <- function(df, seed = 731){
               NCome = NCome + X_ijas[j,i,a,s]*N_yais_beg[y,a,j,s]; ### actual numbers incoming
             }
           } ### end subareas j         
-          N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-M[a]) 
-          N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-M[a]) ## this exponent needs to be Ztuned eventually
+          N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]) 
+          N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]) ## this exponent needs to be Ztuned eventually
         } ## end ages for N
         ## linear growth below A4 as in synthesis
         len.step <- ifelse( L1_yk[y,phi_ik2[i],s] < 4,  L1_yk[y,phi_ik2[i],s], 4)  ## lmin is size at age 0 (?)
@@ -311,7 +318,7 @@ runOM_datagen <- function(df, seed = 731){
             NCome <- NCome + X_ijas[j,i,nage-1,s]*(N_yais_beg[y,nage,j,s] + N_yais_beg[y,nage-1,j,s]) 
           } ## end i != j
         } ## end subareas j
-        N_yais_mid[y,nage,i,s] = N_yais_beg[y,nage,i,s]*exp(-M[nage])
+        N_yais_mid[y,nage,i,s] = N_yais_beg[y,nage,i,s]*exp(-mat_age[nage])
         N_yais_beg[y+1,nage,i,s] =   ((1-pLeave)*( N_yais_beg[y,nage,i,s]+ N_yais_beg[y,nage-1,i,s]) + NCome)*exp(-0.15);
         ## plus group weighted average (we already have the numbers at age)
         Length_yais_beg[y+1,nage,i,s] = ( N_yais_beg[y+1,nage-1,i,s]*
@@ -371,8 +378,8 @@ runOM_datagen <- function(df, seed = 731){
     
     
     ## Hybrid F tuning  ----
-    # v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
-    v1 = 0.865; Fmax <- 2##corresponds to an Fmax of 2
+    v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
+    # v1 = 0.865; Fmax <- 2##corresponds to an Fmax of 2
     # v1 = 0.7; Fmax = 1.5
     # v1 = 0.65; Fmax <- 1.15
     # v1 = 0.25
@@ -393,7 +400,7 @@ runOM_datagen <- function(df, seed = 731){
       ## putative biomass available
       denom = 0
       for(i in 1:nspace){
-        # if(phi_im[i, m] == 0) next() ## skip area if not in mgmt reg
+        # if(phi_imat_age[i, m] == 0) next() ## skip area if not in mgmt reg
         ## this needs to deal accurately with sex-selex length OR age
         if(selType_fish[fish_flt] == 'AGE'){
           denom <- denom + (phi_if_fish[fish_flt, i] *
@@ -431,7 +438,7 @@ runOM_datagen <- function(df, seed = 731){
         ## note that the k in catch_afk is ITERS, not stocks
         for(i in 1:nspace){
           for(a in 1:nage){
-            Z_a_TEMP[a] <- F1_yf[y,fish_flt,k] + M[a]
+            Z_a_TEMP[a] <- F1_yf[y,fish_flt,k] + mat_age[a]
             if(selType_fish[fish_flt] == 'AGE'){
               
               catch_afk_TEMP[a,fish_flt,k] <-    catch_afk_TEMP[a,fish_flt,k] +
@@ -464,7 +471,7 @@ runOM_datagen <- function(df, seed = 731){
         Adj[k] <- catch_yf_obs[y, fish_flt+1]/sum(catch_afk_TEMP[,fish_flt,k])
         
         ## Get new Z given ADJ - need to add discard and selex here
-        for(a in 1:nage) Z_a_TEMP2[a] <-  Adj[k]*1.0*F1_yf[y,fish_flt,k] +  M[a]
+        for(a in 1:nage) Z_a_TEMP2[a] <-  Adj[k]*1.0*F1_yf[y,fish_flt,k] +  mat_age[a]
         
         ## Second Guess for F (EQ 24)
         denom = 0
@@ -529,25 +536,24 @@ runOM_datagen <- function(df, seed = 731){
       for(i in 1:nspace){
         for(a in 1:nage){
           if(selType_fish[fish_flt] == 'AGE'){
-            Zreal_ya[y,a] <-   Freal_yf[y, fish_flt] + M[a] ## should this include all flets?
+            Zreal_ya[y,a] <-   Freal_yf[y, fish_flt] + mat_age[a] ## should this include all flets?
             catch_yaf_pred[y,a,fish_flt] <- catch_yaf_pred[y,a,fish_flt] +
               (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
               phi_if_fish[fish_flt, i]*
-       
               sum(       fish_selex_yafs[y,a,fish_flt,]*  N_yais_beg[y,a,i,]*
                     wtatlen_kab[phi_ik2[i],1]*
                     Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
             
-            Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + M[a]
+            Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + mat_age[a]
             catch_yaif_pred[y,a,i,fish_flt] <- (F_area_yfi[y,fish_flt,i]/
                                                   (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
               phi_if_fish[fish_flt, i]*
-              fish_selex_yafs[y,a,fish_flt,]* 
-              sum(N_yais_beg[y,a,i,]*
+         
+              sum(     fish_selex_yafs[y,a,fish_flt,]* N_yais_beg[y,a,i,]*
                     wtatlen_kab[phi_ik2[i],1]*
                     Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
           } else if(selType_fish[fish_flt] == 'LEN'){
-            Zreal_ya[y,a] <-   Freal_yf[y, fish_flt] + M[a] ## should this include all flets?
+            Zreal_ya[y,a] <-   Freal_yf[y, fish_flt] + mat_age[a] ## should this include all flets?
             catch_yaf_pred[y,a,fish_flt] <- catch_yaf_pred[y,a,fish_flt] +
               (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
               phi_if_fish[fish_flt, i]*
@@ -559,7 +565,7 @@ runOM_datagen <- function(df, seed = 731){
                     wtatlen_kab[phi_ik2[i],1]*
                     which.max(LengthAge_alyis_beg[a,,y,i,2]^wtatlen_kab[phi_ik2[i],2]))
             
-            Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + M[a]
+            Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + mat_age[a]
             catch_yaif_pred[y,a,i,fish_flt] <- (F_area_yfi[y,fish_flt,i]/
                                                   (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
               phi_if_fish[fish_flt, i]*
@@ -658,8 +664,8 @@ runOM_datagen <- function(df, seed = 731){
 # Ninit <- rep(NA,nage)
 # Ninit_dev <- (df$parms$initN)
 # Ninit[1] <- R0
-# Ninit[2:(nage-1)] <-R0 * exp(-M[2:(nage-1)]*age[2:(nage-1)])*exp(-0.5*SDR^2*0+Ninit_dev[1:(nage-2)])
-# Ninit[nage] <- R0*exp(-(M[nage-1]*age[nage-1]))/(1-exp(-M[nage]))*exp(-0.5*SDR^2*0+Ninit_dev[nage-1])# Plus group (ignore recruitment dev's in first year )
+# Ninit[2:(nage-1)] <-R0 * exp(-mat_age[2:(nage-1)]*age[2:(nage-1)])*exp(-0.5*SDR^2*0+Ninit_dev[1:(nage-2)])
+# Ninit[nage] <- R0*exp(-(mat_age[nage-1]*age[nage-1]))/(1-exp(-mat_age[nage]))*exp(-0.5*SDR^2*0+Ninit_dev[nage-1])# Plus group (ignore recruitment dev's in first year )
 # 
 # Create containers to save the data
 # SSB_init <- NA
@@ -764,7 +770,7 @@ runOM_datagen <- function(df, seed = 731){
 # Ninit_dev <- (df$parms$initN)
 # 
 # Ninit[2:(nage-1)] <-R0 * exp(-Mage[2:(nage-1)])*exp(-0.5*SDR^2*0+Ninit_dev[1:(nage-2)])
-# Ninit[nage] <- R0*exp(-(M[nage]*age[nage]))/(1-exp(-M[nage]))*exp(-0.5*SDR^2*0+Ninit_dev[nage-1])# Plus group (ignore recruitment dev's in first year )
+# Ninit[nage] <- R0*exp(-(mat_age[nage]*age[nage]))/(1-exp(-mat_age[nage]))*exp(-0.5*SDR^2*0+Ninit_dev[nage-1])# Plus group (ignore recruitment dev's in first year )
 # 
 #p.save <-matrix(NA,tEnd)
 
@@ -969,7 +975,7 @@ runOM_datagen <- function(df, seed = 731){
 #           N.save.age[, yr,space,season]*exp(-Z)*(movemat[space,,season,yr])+ # Remove the ones that leave
 #           N.save.age[, yr,spaceidx,season]*exp(-Z)*(movemat[spaceidx,,season,yr])# add the ones come to the surrounding areas
 #         
-#         age_comps_OM[,yr,space,season] <- N.save.age[, yr,space,season]/sum(N.save.age[, yr,space,season])
+#         age_comps_Omat_age[,yr,space,season] <- N.save.age[, yr,space,season]/sum(N.save.age[, yr,space,season])
 #         
 #         SSB.all[yr,space,season]<- sum(N.save.age[,yr,space,season]*Mat.sel, na.rm = T)
 #         Catch.save.age[, yr,space, season] <- (Fseason/(Z))*(1-exp(-(Z)))*N.save.age[,yr,space,season]*w_catch
@@ -997,7 +1003,7 @@ runOM_datagen <- function(df, seed = 731){
 #         N.save.age[nage,yr+1,space,1] <- Nsurvive.plus- Nout.plus + Nin.plus
 #         
 #         
-#         age_comps_OM[,yr,space,season] <- N.save.age[, yr,space,season]/sum(N.save.age[, yr,space,season])
+#         age_comps_Omat_age[,yr,space,season] <- N.save.age[, yr,space,season]/sum(N.save.age[, yr,space,season])
 #         
 #         SSB.all[yr,space,season]<- sum(N.save.age[,yr,space,season]*Mat.sel, na.rm = T)
 #         Catch.save.age[, yr,space, season] <- (Fseason/(Z))*(1-exp(-(Z)))*N.save.age[,yr,space,season]*w_catch

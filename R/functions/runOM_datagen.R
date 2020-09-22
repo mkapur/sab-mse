@@ -446,7 +446,7 @@ runOM_datagen <- function(df, seed = 731){
         ## note that the k in catch_afk is ITERS, not stocks
         for(i in 1:nspace){
           for(a in 1:nage){
-            Z_a_TEMP[a] <- F1_yf[y,fish_flt,k] + mat_age[a]
+            Z_a_TEMP[a] <- sum(fish_selex_yafs[y, a, fish_flt, ]*F1_yf[y,fish_flt,k]) + mat_age[a]
             if(selType_fish[fish_flt] == 'AGE'){
               
               catch_afk_TEMP[a,fish_flt,k] <-    catch_afk_TEMP[a,fish_flt,k] +
@@ -481,8 +481,11 @@ runOM_datagen <- function(df, seed = 731){
         Adj[k] <- catch_yf_obs[y, fish_flt+1]/sum(catch_afk_TEMP[,fish_flt,k])
         
         ## Get new Z given ADJ - need to add discard and selex here
-        for(a in 1:nage) Z_a_TEMP2[a] <-  Adj[k]*1.0*F1_yf[y,fish_flt,k] +  mat_age[a]
-        
+       
+        for (a in 1:nage)   Z_a_TEMP2[a] <- Adj[k] * 
+          sum(fish_selex_yafs[y, a, fish_flt, ] * F1_yf[y, fish_flt, k]) +
+          mat_age[a]
+
         ## Second Guess for F (EQ 24)
         denom = 0
         for(i in 1:nspace){
@@ -574,16 +577,19 @@ runOM_datagen <- function(df, seed = 731){
               (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
               phi_if_fish[fish_flt, i]*
               sum(
-                fish_selex_yafs[y, a, fish_flt, 1] * N_yais_beg[y, a, i, 1] *
+                fish_selex_yafs[y,      which.max(LengthAge_alyis_beg[a, , y, i, 1]), fish_flt, 1] *
+                  N_yais_beg[y, a, i, 1] *
                   wtatlen_kab[phi_ik2[i], 1] *
                   which.max(LengthAge_alyis_beg[a, , y, i, 1]) ^
                   wtatlen_kab[phi_ik2[i], 2],
-                fish_selex_yafs[y, a, fish_flt, 2] * N_yais_beg[y, a, i, 2] *
+                fish_selex_yafs[y,      which.max(LengthAge_alyis_beg[a, , y, i, 1]), fish_flt, 2] *
+                  N_yais_beg[y, a, i, 2] *
                   wtatlen_kab[phi_ik2[i], 1] *
                   which.max(LengthAge_alyis_beg[a, , y, i, 2]) ^
                   wtatlen_kab[phi_ik2[i], 2] )
             
             Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + mat_age[a]
+            
             catch_yaif_pred[y,a,i,fish_flt] <-       catch_yaif_pred[y,a,i,fish_flt] +(F_area_yfi[y,fish_flt,i]/
                                                   (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
               phi_if_fish[fish_flt, i]*
@@ -604,6 +610,8 @@ runOM_datagen <- function(df, seed = 731){
       catch_yf_pred[y,fish_flt] <- sum(catch_yaf_pred[y,,fish_flt])
       if(catch_yf_pred[y,fish_flt]  > 5*catch_yf_obs[y,fish_flt+1] &
          catch_yf_obs[y,fish_flt+1] != 0 ) stop('cpred huge on flt ',  fltnames_fish[fish_flt], 'year ',y)
+      if(catch_yf_pred[y,fish_flt]  < catch_yf_obs[y,fish_flt+1]/5 &
+         catch_yf_obs[y,fish_flt+1] != 0 ) stop('cpred tiny on flt ',  fltnames_fish[fish_flt], 'year ',y)
       cat(  catch_yf_pred[y,fish_flt]," ",fish_flt,"\n")
     } ## end fishery fleets
 

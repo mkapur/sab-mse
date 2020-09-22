@@ -131,6 +131,7 @@ load_data_seasons <- function(nspace = 6,
   omega_ais <- array(0, dim = c(nage,nspace,2))## eigenvector for stable spatial distribution at age
   for(s in 1:2){
     for(a in 1:nage){
+      # omega_ais[a,,s] <- round(eigen(X_ijas[,,a,s])$values,3)
       omega_ais[a,,s] <- round(eigen(X_ijas[,,a,s])$values/
                                  sum(eigen(X_ijas[,,a,s])$values),3)
       # omega_ais[a,,s][which(omega_ais[a,,s] < 0)] <- 0.05
@@ -314,8 +315,8 @@ load_data_seasons <- function(nspace = 6,
     rownames(phi_if_fish) <- names(catch)[2:ncol(catch)]
     colnames(phi_if_fish) <-  spmat$subarea
     
-    phi_if_fish[1:2,1:2] <-  phi_if_fish[3:5,3:4] <-  
-      phi_if_fish[c(6,8),5] <-        phi_if_fish[c(7,9),6] <- 1
+    phi_if_fish[c(1,3),1] <- phi_if_fish[c(2,4),2] <-   phi_if_fish[5:7,3:4] <-  
+      phi_if_fish[c(8,9),5:6] <-  1
     
   
     ## phi_ik
@@ -474,7 +475,7 @@ load_data_seasons <- function(nspace = 6,
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
-    logh_k = rep(log(0.25),4),
+    logh_k = rep(log(0.2),4),
     logRinit = log(1e5)
   )
   

@@ -162,7 +162,7 @@ runOM_datagen <- function(df, seed = 731){
   rownames(SSB_yi) <- rownames(SSB_yk) <- rownames(R_yi) <- rownames(R_yk) <- year
   
   
-  niter <- 100 ## F iterations
+  niter <- 50 ## F iterations
   F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1),
                           dimnames = list(c(year),
                                           c(fltnames_fish),
@@ -194,8 +194,8 @@ runOM_datagen <- function(df, seed = 731){
                                               dimnames = list(c(year), paste(fltnames_surv)))
   
   ## start year loop ----
-  # for(y in 1:15){
-  for(y in 1:(tEnd-1)){
+  for(y in 1:25){
+  # for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -257,8 +257,8 @@ runOM_datagen <- function(df, seed = 731){
         SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
       } # // end stocks
     } #// end space
-    cat(sum(SSB_yk[y,]),"\n")
-    cat(sum(SSB_yi[y,]),"\n")
+    # cat(sum(SSB_yk[y,]),"\n")
+    # cat(sum(SSB_yi[y,]),"\n")
     if(is.na(sum(SSB_yk[y,]))) stop("NA ON SSB_YK",y) 
     
     ## Ryi, Ryk Recruits ----
@@ -277,9 +277,9 @@ runOM_datagen <- function(df, seed = 731){
       R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
       N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits
     } ### end space
-    cat(sum(R_yk[y,]),"\n")
-    cat(sum(R_yi[y,]),"\n")
-    cat(sum(N_yais_beg[y+1,1,,]),"\n")
+    # cat(sum(R_yk[y,]),"\n")
+    # cat(sum(R_yi[y,]),"\n")
+    # cat(sum(N_yais_beg[y+1,1,,]),"\n")
     
     #N- and Nominal Length ----
     # at-age for the middle of this year and beginning of next 
@@ -602,9 +602,9 @@ runOM_datagen <- function(df, seed = 731){
         catch_yfi_pred[y,fish_flt,i] <- sum(catch_yaif_pred[y,,i,fish_flt])
       } ## end nspace for predicted catch
       catch_yf_pred[y,fish_flt] <- sum(catch_yaf_pred[y,,fish_flt])
-      if(catch_yf_pred[y,fish_flt]  > 5*catch_yf_obs[y,fish_flt+1] &catch_yf_obs[y,fish_flt+1] != 0 ) stop('cpred huge on flt ', 
-                                                                         fltnames_fish[fish_flt], 'year ',y)
-      # cat(  catch_yf_pred[y,fish_flt]," ",fish_flt,"\n")
+      if(catch_yf_pred[y,fish_flt]  > 5*catch_yf_obs[y,fish_flt+1] &
+         catch_yf_obs[y,fish_flt+1] != 0 ) stop('cpred huge on flt ',  fltnames_fish[fish_flt], 'year ',y)
+      cat(  catch_yf_pred[y,fish_flt]," ",fish_flt,"\n")
     } ## end fishery fleets
 
     head(catch_yf_pred)

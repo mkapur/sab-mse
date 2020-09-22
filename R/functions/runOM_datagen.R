@@ -162,7 +162,7 @@ runOM_datagen <- function(df, seed = 731){
   rownames(SSB_yi) <- rownames(SSB_yk) <- rownames(R_yi) <- rownames(R_yk) <- year
   
   
-  niter <- 50 ## F iterations
+  niter <- 100 ## F iterations
   F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1),
                           dimnames = list(c(year),
                                           c(fltnames_fish),
@@ -396,6 +396,10 @@ runOM_datagen <- function(df, seed = 731){
     Adj <- Z_a_TEMP <- Z_a_TEMP2 <- NULL
     
     for(fish_flt in 1:nfleets_fish){
+      
+      catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <-
+        catch_yaif_pred[y,,,fish_flt] <- 0
+      
       if(is.na(catch_yf_obs[y, fish_flt+1])) next() ## skip if no catch
       
 
@@ -540,8 +544,7 @@ runOM_datagen <- function(df, seed = 731){
       for(m in 1:nmgmt_reg){
         F_ym[y,m] <- F_ym[y,m]+phi_fm[fish_flt,m]*Freal_yf[y, fish_flt]
       }
-      catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <-
-        catch_yaif_pred[y,,,fish_flt] <- 0
+   
       for(i in 1:nspace){
         for(a in 1:nage){
           if(selType_fish[fish_flt] == 'AGE'){
@@ -599,7 +602,7 @@ runOM_datagen <- function(df, seed = 731){
         catch_yfi_pred[y,fish_flt,i] <- sum(catch_yaif_pred[y,,i,fish_flt])
       } ## end nspace for predicted catch
       catch_yf_pred[y,fish_flt] <- sum(catch_yaf_pred[y,,fish_flt])
-      if(catch_yf_pred[y,fish_flt]  > 5*catch_yf_obs[y,fish_flt+1]) stop('cpred huge on flt ', 
+      if(catch_yf_pred[y,fish_flt]  > 5*catch_yf_obs[y,fish_flt+1] &catch_yf_obs[y,fish_flt+1] != 0 ) stop('cpred huge on flt ', 
                                                                          fltnames_fish[fish_flt], 'year ',y)
       # cat(  catch_yf_pred[y,fish_flt]," ",fish_flt,"\n")
     } ## end fishery fleets

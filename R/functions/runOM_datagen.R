@@ -426,9 +426,9 @@ runOM_datagen <- function(df, seed = 731){
                                 fish_selex_yafs[y, , fish_flt, 2] * N_yais_beg[y, , i, 2] *
                                   wtatlen_kab[phi_ik2[i], 1] *
                                   apply(LengthAge_alyis_beg[, , y, i, 2],1,which.max)^ 
-                                              wtatlen_kab[phi_ik2[i], 2] ) +
-                              catch_yf_obs[y, fish_flt + 1])
-          
+                                              wtatlen_kab[phi_ik2[i], 2]  +
+                              catch_yf_obs[y, fish_flt + 1]))
+          cat(i,denom,"\n")
         }
       }
       ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now
@@ -460,6 +460,10 @@ runOM_datagen <- function(df, seed = 731){
               
               
             } else if(selType_fish[fish_flt] == 'LEN'){
+              LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
+                             length(fish_selex_yafs[y,    nage  , fish_flt, 1]),
+                             which.max(LengthAge_alyis_beg[a, , y, i, 1]))
+              
               catch_afk_TEMP[a,fish_flt,k] <-    catch_afk_TEMP[a,fish_flt,k] +
                 (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*
                 (1-exp(-Z_a_TEMP[a]))*
@@ -485,10 +489,12 @@ runOM_datagen <- function(df, seed = 731){
         
         ## Get new Z given ADJ - need to add discard and selex here
        
-        for (a in 1:nage)   Z_a_TEMP2[a] <- Adj[k] * 
-          sum(fish_selex_yafs[y, a, fish_flt, ] * F1_yf[y, fish_flt, k]) +
-          mat_age[a]
-
+        for (a in 1:nage)   {
+          Z_a_TEMP2[a] <- Adj[k] * 
+            sum(fish_selex_yafs[y, a, fish_flt, ] * F1_yf[y, fish_flt, k]) +
+            mat_age[a]
+        }
+        
         ## Second Guess for F (EQ 24)
         denom = 0
         for(i in 1:nspace){
@@ -501,6 +507,10 @@ runOM_datagen <- function(df, seed = 731){
                       Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])*
                 (1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
             } else if(selType_fish[fish_flt] == 'LEN'){
+              LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
+                             length(fish_selex_yafs[y,    nage  , fish_flt, 1]),
+                             which.max(LengthAge_alyis_beg[a, , y, i, 1]))
+              
               denom <- denom + phi_if_fish[fish_flt, i] *
                 sum(
                   fish_selex_yafs[y,LAA, fish_flt, 1] *
@@ -561,7 +571,7 @@ runOM_datagen <- function(df, seed = 731){
             catch_yaf_pred[y,a,fish_flt] <- catch_yaf_pred[y,a,fish_flt] +
               (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
               phi_if_fish[fish_flt, i]*
-              sum(       fish_selex_yafs[y,a,fish_flt,]*  N_yais_beg[y,a,i,]*
+              sum(fish_selex_yafs[y,a,fish_flt,]*  N_yais_beg[y,a,i,]*
                     wtatlen_kab[phi_ik2[i],1]*
                     Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
             

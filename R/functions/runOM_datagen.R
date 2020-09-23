@@ -285,6 +285,14 @@ runOM_datagen <- function(df, seed = 731){
       for(i in 1:nspace){
         N_yais_mid[y,1,i,s] <- N_yais_beg[y,1,i,s]*exp(-mat_age[1])
         # Length_yais_beg[y,1,i,s] <- L1_yk[y,phi_ik2[i],s]
+        ## linear growth below A4 as in synthesis
+        len.step <- ifelse( L1_yk[y,phi_ik2[i],s] < 4,  L1_yk[y,phi_ik2[i],s], 4)  ## lmin is size at age 0 (?)
+        len.slope <- ( L1_yk[y,phi_ik2[i],s] - len.step) / 4 ## linear growth slope
+        # Length at the start of the year (cm)
+        Length_yais_beg[y,1:4,i,s] <- len.step[1]+len.slope*(seq(1, (4 + 1), 1) - 1)[1:4]  
+        Length_yais_beg[y,5,i,s] <- L1_yk[y,phi_ik2[i],s] ## L1 Corresponds to age 4 per analysis
+        Length_yais_mid[y,1:5,i,s] <- Length_yais_beg[y,1:5,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,1:5,i,s]*
+                                                                      (1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))
         for(a in 2:(nage-1)){ ## note that TMB starts at pos 1 which is age 1 which is pos 2 here
           pLeave = 0.0;  NCome = 0.0
           for(j in 1:nspace){           
@@ -296,15 +304,7 @@ runOM_datagen <- function(df, seed = 731){
           N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]) 
           N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]) ## this exponent needs to be Ztuned eventually
         } ## end ages for N
-        ## linear growth below A4 as in synthesis
-        len.step <- ifelse( L1_yk[y,phi_ik2[i],s] < 4,  L1_yk[y,phi_ik2[i],s], 4)  ## lmin is size at age 0 (?)
-        len.slope <- ( L1_yk[y,phi_ik2[i],s] - len.step) / 4 ## linear growth slope
-        # Length at the start of the year (cm)
-        Length_yais_beg[y,1:4,i,s] <- len.step[1]+len.slope*(seq(1, (4 + 1), 1) - 1)[1:4]  
-        Length_yais_beg[y,5,i,s] <- L1_yk[y,phi_ik2[i],s] ## L1 Corresponds to age 4 per analysis
-        Length_yais_mid[y,1:5,i,s] = Length_yais_beg[y,5,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,5,i,s]*
-                                                                 (1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))
-   
+
         for(a in 6:nage-1){
           ## as in document: next year A1 == this year A0 plus growth
           Length_yais_beg[y+1,a,i,s] = Length_yais_beg[y,a-1,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a-1,i,s])*
@@ -330,13 +330,14 @@ runOM_datagen <- function(df, seed = 731){
                                             (Length_yais_beg[y,nage,i,s]+
                                                (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-kappa_yk[y,phi_ik2[i],s]))))/
           (N_yais_beg[y+1,nage-1,i,s] + N_yais_beg[y+1,nage,i,s])
-        Length_yais_mid[y+1,nage,i,s] = (N_yais_mid[y+1,nage-1,i,s]*
+        
+        Length_yais_mid[y+1,nage,i,s] = (N_yais_mid[y,nage-1,i,s]*
                                            (Length_yais_beg[y,nage-1,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage-1,i,s]*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))) +
-                                           N_yais_mid[y+1,nage,i,s]*
+                                           N_yais_mid[y,nage,i,s]*
                                            (Length_yais_beg[y,nage,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s]))))/
           (N_yais_mid[y,nage-1,i,s] + N_yais_mid[y,nage,i,s])
       } ## end subareas i
-      # cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
+      cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
     } ## end sexes
     
     ## reweight length-at-age based on movement from other stocks ----

@@ -520,22 +520,23 @@ save(growthPars,
 
 ## weight at length
 wtatlen_kab <- matrix(NA, nrow = 4, ncol = 2) ## stock x a,b for aL^b
-rownames(wtatlen_kab) <- paste0("R",1:4)
+rownames(wtatlen_kab) <- paste0("R",4:1)
 
-wtatlen_kab[1,1] <- wc$Growth_Parameters$WtLen1
-wtatlen_kab[1,2] <- wc$Growth_Parameters$WtLen2
+wtatlen_kab[4,1] <- wc$Growth_Parameters$WtLen1
+wtatlen_kab[4,2] <- wc$Growth_Parameters$WtLen2
 
 ## Hybrid of WC and BC, from Cox 2011
-wtatlen_kab[2,1] <- sum(8.58e-6,wc$Growth_Parameters$WtLen1)/2
-wtatlen_kab[2,2] <- sum(3.05,wc$Growth_Parameters$WtLen2)/2
+wtatlen_kab[3,1] <- sum(8.58e-6,wc$Growth_Parameters$WtLen1)/2
+wtatlen_kab[3,2] <- sum(3.05,wc$Growth_Parameters$WtLen2)/2
 
-## mean BC and inflated BC used for AK
-wtatlen_kab[3,1] <- sum(8.58e-6,8.58e-6 *1.15)/2
-wtatlen_kab[3,2] <-  sum(3.05,3.05*1.15)/2
+## mean BC and inflated BC used for AK-BC
+wtatlen_kab[2,1] <- sum(8.58e-6,8.58e-6 *1.15)/2
+wtatlen_kab[2,2] <-  sum(3.05,3.05*1.15)/2
+# wtatlen_kab[2,2] <-  4
 
 ## AK uses wt at age. Let's just increase the BC values a bit
-wtatlen_kab[4,1] <- 8.58e-6
-wtatlen_kab[4,2] <- 3.05*1.15
+wtatlen_kab[1,1] <- 8.58e-6
+wtatlen_kab[1,2] <- 3.05*1.15
 
 save(wtatlen_kab, 
      file = here('input','input_data',"OM_wtatlen_kab.rdata"))
@@ -585,7 +586,7 @@ ggsave(last_plot(),
 ## the mod needs to be run first to come up with the conversion factors --
 
 
-## selex ----
+## selex [fishery] ----
 ## array year x age x fleet for each sex
 ## these are really ballparks and will need to be tweaked to condition OM
 
@@ -630,7 +631,7 @@ for(a in 1:nage){
 # Surveys (Std: g = 4; StRs: g = 5) are asymptotic with a logistic 
 # parameterization, with L50 = alpha - beta, and SD = beta (selType = 1)
 
-# Initial values.
+# Initial values. LL is pos 3, Trap is pos 2, Trawl is pos 4
 alpha_g1 <- c(62.8329, 63.6959, 33.8898, 54.1045, 64.2127)
 beta_g1 <- c(7.04483, 3.09715, 1.41494, 4.55724, 12.9197)
 selType <- c(2,2,3,1,1)
@@ -671,7 +672,12 @@ colnames(selMat) <- c("Length","Trap","LL","Trawl","Std","StRS")
 
 ## LL, TRAP, TRAWL
 for(y in 1:dim(OM_fish_selex_yafs)[[1]]){
-  OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'LL'])) ## LL
+  # OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## LL
+  # OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## TRAP
+  # OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trawl'])) ## TRAWL
+  
+  
+  OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## LL
   OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## TRAP
   OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trawl'])) ## TRAWL
 }
@@ -730,7 +736,7 @@ logistic3 <- function(age, a50, a95){
 wcas0 <- read.csv(here('input','raw_data','selex','wcas0.csv'))
 
 for(flt in 1:2){
-OM_fish_selex_yafs[,,c(8,9)[flt],1] <- as.matrix( merge(data.frame('Year' = 1960:2018),
+OM_fish_selex_yafs[,,c(8,9)[flt],1] <-  as.matrix( merge(data.frame('Year' = 1960:2018),
                                                         wcas0 %>%
                    filter(Sex == 1 & Fleet == c(1,3)[flt]) %>%
                    select(-Sex) %>%
@@ -738,13 +744,36 @@ OM_fish_selex_yafs[,,c(8,9)[flt],1] <- as.matrix( merge(data.frame('Year' = 1960
                  by= 'Year', 
                  all.x = TRUE)
                  %>% select(-Year))
+
 OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960:2018),
                                                         wcas0 %>%
                                                           filter(Sex == 2 & Fleet == c(1,3)[flt]) %>%
                                                           select(-Sex) %>%
                                                           select(-Fleet),
                                                  by= 'Year', all.x = TRUE) %>% select(-Year)) 
+
+
 }
+
+## use NWSLP as placeholder because NWCBO is CAAL
+for(y in 1:nyear){
+  for(flt in 1:nfleets_surv){
+    OM_surv_selex_yafs[y,,flt,1] <-  as.matrix(wc$ageselex %>% filter(Fleet == 8 &
+                                                               Factor == 'Asel' & Yr == 2018,
+                                                             Sex == 1) %>%
+      select(-Factor, -Seas, -Morph,-Label, -Yr,-Fleet,-Sex))
+    
+    
+    OM_surv_selex_yafs[y,,flt,2] <-as.matrix(wc$ageselex %>% filter(Fleet == 8 &
+                                                                      Factor == 'Asel' & Yr == 2018,
+                                                                    Sex == 2) %>%
+                                               select(-Factor, -Seas, -Morph,-Label, -Yr,-Fleet,-Sex))
+  } ## end flt
+} ## end yr
+
+## selex [survey] ---
+
+
 # 
 # for(flt in 1:3){
 #   
@@ -772,7 +801,7 @@ OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960
 
 
 save(OM_fish_selex_yafs, file = here('input','input_data',"OM_fish_selex_yafs.rdata"))
-# save(OM_surv_selex_yafs, file = here('input','input_data',"OM_surv_selex_yafs.rdata"))
+save(OM_surv_selex_yafs, file = here('input','input_data',"OM_surv_selex_yafs.rdata"))
 
 #* plot input selex ----
 png(here('input','input_data','input_figs','fishery_selex.png'),
@@ -789,6 +818,29 @@ for(flt in 1:nfleets_fish){
                     ylab = 'Selectivity',
                     lty = 1,
                     ylim = c(0,1), main = fltnames_fish[flt], xlim = c(0,75),
+                    col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+    box(which = 'plot', lty = 'solid', 
+        col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
+        lwd = 2)
+    if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
+  }
+}
+dev.off()
+
+png(here('input','input_data','input_figs','survey_selex.png'),
+    height = 8, width = 6, unit = 'in', res = 420)
+par(mfrow = c(2,3) )
+for(flt in 1:nfleets_surv){
+  for(s in 1:2){
+    tmp <- OM_surv_selex_yafs[59,,flt,s]
+    if(s == 1) plot(tmp, 
+                    col = sexPal[1], 
+                    type = 'l', lwd = 2, 
+                    xlab = ifelse(fltnames$SELTYPE[fltnames$SURV][flt] == 'AGE',
+                                  'Age','Length'), 
+                    ylab = 'Selectivity',
+                    lty = 1,
+                    ylim = c(0,1), main = fltnames_surv[flt], xlim = c(0,75),
                     col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
     box(which = 'plot', lty = 'solid', 
         col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
@@ -848,7 +900,8 @@ surv_vals <- vast0 %>%
   rbind(., bcnom[,c(1,4,2)]) %>%
   arrange(.,Year,Fleet) %>%
   tidyr::pivot_wider(names_from= Fleet, values_from = value) %>%
-  filter(Year > 1964 & Year < 2019)
+  filter(Year > 1964 & Year < 2019) %>%
+merge(., data.frame('Year' = 1960:2018), all = TRUE) 
 surv_vals[surv_vals == -1] <- NA
 names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) 
 

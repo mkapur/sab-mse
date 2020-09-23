@@ -754,7 +754,7 @@ OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960
 
 
 }
-
+## Survey aSelex ---
 ## use NWSLP as placeholder because NWCBO is CAAL
 for(y in 1:nyear){
   for(flt in 1:nfleets_surv){
@@ -836,8 +836,7 @@ for(flt in 1:nfleets_surv){
     if(s == 1) plot(tmp, 
                     col = sexPal[1], 
                     type = 'l', lwd = 2, 
-                    xlab = ifelse(fltnames$SELTYPE[fltnames$SURV][flt] == 'AGE',
-                                  'Age','Length'), 
+                    xlab = 'Age', 
                     ylab = 'Selectivity',
                     lty = 1,
                     ylim = c(0,1), main = fltnames_surv[flt], xlim = c(0,75),
@@ -855,8 +854,11 @@ spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                     stock = c("R4","R3","R3","R2","R2","R1"),
                     mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
 bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
-  mutate(SE = 0.317, lci = nominal.Trap.CPUE-1.96*SE, uci =nominal.Trap.CPUE+1.96*SE, Fleet = "BC_early") %>%
-  select(YEAR, nominal.Trap.CPUE, SE, Fleet)
+  mutate(CPUE =  1e3*nominal.Trap.CPUE,
+    SE = 0.317*1e3, 
+         lci = CPUE-1.96*SE,
+         uci = CPUE+1.96*SE, Fleet = "BC_early") %>%
+  select(YEAR, CPUE, SE, Fleet)
 names(bcnom) <- c('Year','value', 'sigma', 'fleet')
 #* survey error ----
 ## reformat this and save            
@@ -902,14 +904,14 @@ surv_vals <- vast0 %>%
   tidyr::pivot_wider(names_from= Fleet, values_from = value) %>%
   filter(Year > 1964 & Year < 2019) %>%
 merge(., data.frame('Year' = 1960:2018), all = TRUE) 
-surv_vals[surv_vals == -1] <- NA
+surv_vals[surv_vals < 0 ] <- NA ## -1, -1000
 names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) 
 
 write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
 
 surv_vals %>%
   # select(-BC_EARLY) %>%
-  mutate(BC_EARLY = BC_EARLY*1000) %>%
+  # mutate(BC_EARLY = BC_EARLY*1000) %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +

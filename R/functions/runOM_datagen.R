@@ -194,8 +194,8 @@ runOM_datagen <- function(df, seed = 731){
                                               dimnames = list(c(year), paste(fltnames_surv)))
   
   ## start year loop ----
-  # for(y in 1:25){
-  for(y in 1:(tEnd-1)){
+  for(y in 1:25){
+  # for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -264,8 +264,6 @@ runOM_datagen <- function(df, seed = 731){
     ## Ryi, Ryk Recruits ----
     # next year based on present SSB
     omega_0ij <- rep(1, nspace)
-    
-    
     for(i in 1:nspace){
       for(k in 1:nstocks){
         # // SSB_yk already has summation
@@ -304,7 +302,9 @@ runOM_datagen <- function(df, seed = 731){
         # Length at the start of the year (cm)
         Length_yais_beg[y,1:4,i,s] <- len.step[1]+len.slope*(seq(1, (4 + 1), 1) - 1)[1:4]  
         Length_yais_beg[y,5,i,s] <- L1_yk[y,phi_ik2[i],s] ## L1 Corresponds to age 4 per analysis
-        
+        Length_yais_mid[y,1:5,i,s] = Length_yais_beg[y,5,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,5,i,s]*
+                                                                 (1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))
+   
         for(a in 6:nage-1){
           ## as in document: next year A1 == this year A0 plus growth
           Length_yais_beg[y+1,a,i,s] = Length_yais_beg[y,a-1,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a-1,i,s])*
@@ -336,6 +336,7 @@ runOM_datagen <- function(df, seed = 731){
                                            (Length_yais_beg[y,nage,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s]))))/
           (N_yais_mid[y,nage-1,i,s] + N_yais_mid[y,nage,i,s])
       } ## end subareas i
+      # cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
     } ## end sexes
     
     ## reweight length-at-age based on movement from other stocks ----
@@ -377,9 +378,7 @@ runOM_datagen <- function(df, seed = 731){
     } ## end sex
     
     }  ## end years testing
-    
-    # for(y in 1:(tEnd-1)){
-      for(y in 32:40){
+    # for(y in 25:40){
         
     ## Hybrid F tuning  ----
     # v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
@@ -397,7 +396,10 @@ runOM_datagen <- function(df, seed = 731){
     
     Adj <- Z_a_TEMP <- Z_a_TEMP2 <- NULL
     for(fish_flt in 5:7){
-      selMult <- ifelse(fish_flt %in% c(1,2),0.5,ifelse(fish_flt %in% 5:7,0.25,1)) ## trying to tweak selex to fit
+    # for(fish_flt in 1:nfleets_fish){
+      
+      selMult = c(0.5,0.5,1,1,0.05,0.4,0.3,1,1)[fish_flt]
+      # selMult <- ifelse(fish_flt %in% c(1,2),0.5,ifelse(fish_flt %in% 5:7,0.25,1)) ## trying to tweak selex to fit
       
     # for(fish_flt in 1:nfleets_fish){
       catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <-
@@ -642,29 +644,57 @@ runOM_datagen <- function(df, seed = 731){
     
     ## survey biomass ----
     ## Estimate survey biomass at midyear 
-    # for( sur_flt in 1:nfleets_surv){
-    #   
-    #   Nsamp_acomp_yf[y,sur_flt] <- survey_yf_pred[y,sur_flt] <- 0
-    #   for(i in 1:nspace){ 
-    #     for(a in 1:nage){
-    #       ## need selex here
-    #       survey_yf_pred[y,sur_flt] <-  survey_yf_pred[y,sur_flt] + 
-    #         q*
-    #         phi_if_surv[sur_flt,i]*
-    #         sum(surv_selex_yafs[y,a,fish_flt,]* 
-    #                 N_yais_mid[y,a,i,]*
-    #               wtatlen_kab[phi_ik2[i],1]*
-    #               Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
-    #       
-    #       Nsamp_acomp_yf[y,sur_flt] <-  
-    #         Nsamp_acomp_yf[sur_flt]  + 
-    #         phi_if_surv[sur_flt,i]
-    #       surv_selex_yafs[y,a,fish_flt,]*N_yais_mid[y,a,i,s]; ## To use with age comps; may need to change phi to sum acomp surveys
-    #     } ## end ages
-    #     
-    #     
-    #   } ## end nspace
-    # } ## end surv fleets
+    
+    # for(y in 1:(tEnd-1)){
+    for(y in 1:25){
+        
+    for( sur_flt in 1:nfleets_surv){
+      if(is.na(surv_yf_obs[y,sur_flt])) next()
+      Nsamp_acomp_yf[y,sur_flt] <- survey_yf_pred[y,sur_flt] <- 0
+      selMult <- rep(1,nfleets_surv)[sur_flt]
+      for(i in 1:nspace){
+        for(a in 1:nage){
+          # if(selType_surv[sur_flt] == 'AGE'){
+          survey_yf_pred[y,sur_flt] <-  survey_yf_pred[y,sur_flt] +
+            q*
+            phi_if_surv[sur_flt,i]*
+            sum(selMult*surv_selex_yafs[y,a,sur_flt,]*
+                    N_yais_mid[y,a,i,]*
+                  wtatlen_kab[phi_ik2[i],1]*
+                  Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
+
+          Nsamp_acomp_yf[y,sur_flt] <-
+            Nsamp_acomp_yf[sur_flt]  +
+           phi_if_surv[sur_flt,i]* sum(selMult*surv_selex_yafs[y,a,sur_flt,]*N_yais_mid[y,a,i,]); ## To use with age comps; may need to change phi to sum acomp surveys
+       
+        # } else if(selType_surv[sur_flt] == 'LEN'){
+        #     LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , sur_flt, 1]),
+        #                    length(fish_selex_yafs[y,    nage  , sur_flt, 1]),
+        #                    which.max(LengthAge_alyis_beg[a, , y, i, 1]))
+        #     
+        #     survey_yf_pred[y,sur_flt] <-  survey_yf_pred[y,sur_flt] +
+        #       q*
+        #       phi_if_surv[sur_flt,i]*
+        #       sum( selMult*surv_selex_yafs[y,LAA, sur_flt, 1] *
+        #              N_yais_mid[y, a, i, 1] *
+        #              wtatlen_kab[phi_ik2[i], 1] *
+        #              which.max(LengthAge_alyis_mid[a, , y, i, 1]) ^
+        #              wtatlen_kab[phi_ik2[i], 2],
+        #            selMult*surv_selex_yafs[y, LAA, sur_flt, 2] *
+        #              N_yais_mid[y, a, i, 2] *
+        #              wtatlen_kab[phi_ik2[i], 1] *
+        #              which.max(LengthAge_alyis_mid[a, , y, i, 2]) ^
+        #              wtatlen_kab[phi_ik2[i], 2] )
+        #     
+        #     Nsamp_acomp_yf[y,sur_flt] <-  Nsamp_acomp_yf[sur_flt]  +
+        #       phi_if_surv[sur_flt,i]*
+        #     sum(selMult*surv_selex_yafs[y, LAA, sur_flt, 1]*N_yais_mid[y,a,i,1],
+        #         selMult*surv_selex_yafs[y, LAA, sur_flt, 2]*N_yais_mid[y,a,i,2])
+        # } ## end LEN selex
+        } ## end ages
+      } ## end nspace
+      cat(  y," PRED ",survey_yf_pred[y,sur_flt]," OBS ",surv_yf_obs[y,sur_flt]," ",sur_flt,"\n")
+    } ## end surv fleets
     
     ## survey age comps w error
     

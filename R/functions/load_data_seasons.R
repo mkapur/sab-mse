@@ -303,12 +303,11 @@ load_data_seasons <- function(nspace = 6,
     
     ## phi_survy
     phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
-    
     rownames(phi_if_surv) <- names(survey)
     colnames(phi_if_surv) <- spmat$subarea
 
-    phi_if_surv[1,1:2] <-  phi_if_surv[2,3:4] <-  
-      phi_if_surv[3,3:4]<-  phi_if_surv[4,5] <-  phi_if_surv[5,6] <- 1
+    phi_if_surv[1,1] <-  phi_if_surv[2,2] <-  
+      phi_if_surv[3:4,3:4]<-  phi_if_surv[5,5:6] <- 1
     
     ## phi_fish
     phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets

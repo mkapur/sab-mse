@@ -28,7 +28,8 @@ pNzeroF <- N_0ais[,,1] %>% data.frame() %>%
   scale_color_manual(values = subareaPal) +
   labs(x = 'Age in Year 0',y = 'Unfished Numbers', color = 'subarea') +
   ggsidekick::theme_sleek()+theme(legend.position = 'none')
-pNzeroM <- N_0ais[,,2] %>% data.frame() %>%
+
+pNzeroM <- sim.data$N_0ais[,,2] %>% data.frame() %>%
   mutate('Age' = 1:71) %>%
   reshape2::melt(id = c('Age')) %>%
   ggplot(., aes(x = Age, y = value, color = variable )) +
@@ -44,7 +45,7 @@ ggsave(pNzeroF  | pNzeroM,
        dpi = 420)
 
 ## N at age by area by year (females) ----
-png(file = here('figs','N_age_years1-5.png'),
+png(file = here('figs','N_age_years1-15.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
 for(i in 1:6){
@@ -55,20 +56,42 @@ for(i in 1:6){
        col = 'black',
        main = inames[i], 
        col.main =subareaPal[i], 
-       ylim = c(0,50000),
+       ylim = c(0,20000),
        xlim = c(0,70),
        xlab = "Age", 
        ylab = 'Numbers')
   box(which = 'plot', lty = 'solid', 
       col = subareaPal[i],
       lwd = 2)
-  for (y in 2:25) {
+  for (y in 2:15) {
     lines(N_yais_beg[y, , 1, 1],
           # lty = c(2:6)[y],
           col = gray.colors(25, start = 0.1, end = 0.9)[y],
           lwd = 2)
   }
 
+}
+dev.off()
+
+## total nums in area by year
+png(file = here('figs','N_iy.png'),
+    width = 10, height = 8, unit = 'in', res = 420)
+par(mfrow = c(2,3))
+for(i in 1:6){
+  plot(rowSums(N_yais_beg[,,i,]),
+       type = 'l',
+       lwd = 2, 
+       col =subareaPal[i],
+       main = inames[i], 
+       col.main =subareaPal[i], 
+       ylim = c(0,150000),
+       xlim = c(0,nyear),
+       xlab = "Model Year", 
+       ylab = 'Numbers (M+F)')
+  # lines(rowSums(N_yais_beg[,,i,2]),
+  #      type = 'l',
+  #      lwd = 3, 
+  #      col =subareaPal[i])
 }
 dev.off()
 
@@ -113,14 +136,26 @@ pRyk <- R_yk %>% data.frame() %>%
 
 
 ## SRR ----
-pSRR <- R_yk %>% 
+getRYK <- function(h,r0,ssb,ssb0){
+  RYK = (4*h*r0*ssb)/
+    (ssb0*(1-h)+
+       ssb*(5*h-1))
+  return(RYK)
+}
+# plot(0:1000, getRYK(h = 0.5, r0 =1500, ssb = 0:1000, ssb0 = 500),
+#      ylim = c(0,3000), xlim = c(0,1000))
+
+SRR <- data.frame('SSByk' = 0:10000, 
+                  'RYK' = getR)
+
+pSRR <- R_yk[1:15,] %>% 
   data.frame() %>%
   mutate('Yr' = 1:nrow(.))  %>%
   reshape2::melt(.,id = c('Yr')) %>%
   mutate(RYK = value) %>%
   select(-value) %>%
   bind_cols(.,
-            SSB_yk %>% 
+            SSB_yk[1:15,] %>% 
               data.frame() %>%
               mutate('Yr' = 1:nrow(.))  %>%
               reshape2::melt(.,id = c('Yr')) %>%
@@ -130,8 +165,10 @@ pSRR <- R_yk %>%
   scale_color_manual(values = demPal) +
   geom_point() +
   labs(x = 'SSB',y = 'Recruits #', color = 'stock') +
+  scale_y_continuous(limits = c(0,25000)) +
+  # scale_x_continuous(limits = c(0,400000)) +
   ggsidekick::theme_sleek() +
-  facet_wrap(~ variable, scales = 'free')
+  facet_wrap(~ variable)
 
 ggsave(pSRR,
        file = here('figs',
@@ -246,67 +283,122 @@ png(here("figs","LAA_Dist_A2.png"),
 do.call(grid.arrange,pA2)
 dev.off()
 
-## catches post F tuning
+## CATCH pred by fleet ----
 
-## new option - by area weighted Fs
-# catch_yf_predt <- data.frame(matrix(NA, nrow = tEnd, ncol = nfleets_fish))
-# for(flt in 1:nfleets_fish){
-#   for(y in 1:(tEnd-1)){
-#   catch_yf_predt[y,flt] <- sum(catch_yfi_pred[y,flt,])
-#   }
-# }
-
-## old option -- fleet -specific
-
-
-## comparing options
-# plot(Freal_yf[,2] ~ rowSums(F_area_yfi[,2,]), 
-#      xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
-# abline(0,1,col = 'red',add = TRUE)
-# 
-# plot(catch_yf_pred[,2] ~   catch_yf_predt[,2], 
-#      xlab = 'New Method sum of F x fleet x Area', ylab = 'old method F_fleet')
-# abline(0,1,col = 'red',add = TRUE)
 
 catch_yf_predt <- data.frame(catch_yf_pred)
-
-# names(catch_yf_predt) <- paste('Fleet',1:3)
 
 catch_yf_predt <- catch_yf_predt %>%
   mutate(Year = year) %>%
   melt(id = 'Year') %>%
-  mutate(Type = 'PRED')
+  mutate(Type = 'PRED') %>%
+  mutate(REG = substr(variable,0,2)) #%>%
+  filter(REG == 'BC') #%>% View()
 
-catch_yf_obst<- catch_yf_obs[1:length(year),] %>%  data.frame() %>%select(-Year) 
-# names(catch_yf_obst) <- paste('Fleet',1:3)
+catch_yf_obst <- catch_yf_obs[1:length(year),] %>%  data.frame() %>%select(-Year) 
 
 catch_yf_obst <- catch_yf_obst %>%
   mutate(Year = year) %>%
   melt(id = 'Year') %>%
   ## convert CV to SD via CV = mean/sd
   mutate(Type = 'OBS', 
-         # Year = , ## use real years
          lci = value - 1.96*(0.1*value),
-         uci = value + 1.96*(0.1*value)) 
+         uci = value + 1.96*(0.1*value)) %>%
+  mutate(REG = substr(variable,0,2)) #%>%
+  filter(REG == 'BC') #%>% View()
 
-ggplot(data = catch_yf_obst, aes(x = Year, y = value, color = variable)) +
+ggplot(data = catch_yf_obst, 
+       aes(x = Year, y = value, color = variable)) +
   geom_line(data = catch_yf_predt, lwd = 0.75) +
   scale_color_manual(values = fishfltPal) +
   geom_point(pch = 1, fill = NA, col = 'black') +
   geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
   theme_sleek() + 
   theme(legend.position = 'none')+
-  labs(y = 'Catch', color = 'Fishing Fleet') +
+  labs(y = 'catch', color = 'Fishing Fleet')+
   facet_wrap(~variable, scales = "free_y")
 
 ggsave(last_plot(),
        file = here('figs',
-                   paste0('catch_fits_',
-                          'v1=',v1,Sys.Date(),'.png')),
+                   paste0('catch_fits_noLenSel_',
+                          'v1=',v1,'Fmax=',Fmax,Sys.Date(),'.png')),
+       width = 10, height = 6, unit = 'in',
+       dpi = 420)
+## catch pred by m ----
+catch_yf_predm <- catch_yf_predt %>% 
+  group_by(Year, REG) %>%
+  summarise(totC = sum(value)) %>%  mutate(Type = 'PRED') 
+catch_yf_obsm <- catch_yf_obst %>% 
+  group_by(Year, REG) %>%
+  summarise(totC = sum(value)) %>%
+  mutate(Type = 'OBS', 
+         lci = totC - 1.96*(0.1*totC),
+         uci = totC + 1.96*(0.1*totC)) 
+
+ggplot(data = catch_yf_obsm, 
+       aes(x = Year, y = totC, color = REG)) +
+  geom_line(data = catch_yf_predm, lwd = 1.1) +
+  scale_color_manual(values = mgmtPal) +
+  geom_point(pch = 1, fill = NA, col = 'black') +
+  geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
+  theme_sleek() + 
+  theme(legend.position = 'none')+
+  labs(y = 'catch', color = 'Fishing Fleet')+
+  facet_wrap(~REG, scales = "free_y")
+
+ggsave(last_plot(),
+       file = here('figs',
+                   paste0('catchm_fits_noLenSel_',
+                          'v1=',v1,'Fmax=',Fmax,Sys.Date(),'.png')),
+       width = 10, height = 6, unit = 'in',
+       dpi = 420)
+## survey preds ----
+
+
+survey_yf_predt <- data.frame(survey_yf_pred)
+
+survey_yf_predt <- survey_yf_predt %>%
+  mutate(Year = year) %>%
+  melt(id = 'Year') %>%
+  mutate(Type = 'PRED') %>%
+  mutate(REG = substr(variable,0,2)) #%>%
+filter(REG == 'BC') #%>% View()
+
+survey_yf_obst <- surv_yf_obs %>%  data.frame() 
+
+survey_yf_obst <- survey_yf_obst %>%
+  mutate(Year = year) %>%
+  melt(id = 'Year') %>%
+  ## convert CV to SD via CV = mean/sd
+  mutate(Type = 'OBS', 
+         lci = value - 1.96*(0.1*value),
+         uci = value + 1.96*(0.1*value)) %>%
+  mutate(REG = substr(variable,0,2)) #%>%
+filter(REG == 'BC') #%>% View()
+
+ggplot(data = survey_yf_obst, 
+       aes(x = Year, y = value, color = variable)) +
+  geom_line(data = survey_yf_predt, lwd = 0.75) +
+  scale_color_manual(values = fishfltPal) +
+  geom_point(pch = 1, fill = NA, col = 'black') +
+  geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
+  theme_sleek() + 
+  theme(legend.position = 'none')+
+  labs(y = 'survey', color = 'Fishing Fleet')+
+  facet_wrap(~variable, scales = "free_y")
+
+ggsave(last_plot(),
+       file = here('figs',
+                   paste0('survey_fits_selMult_',
+                          'v1=',v1,'Fmax=',Fmax,Sys.Date(),'.png')),
        width = 10, height = 6, unit = 'in',
        dpi = 420)
 
-
+# survey_yf_predt$value[survey_yf_predt$variable %in% c('BC_LL','BC_TRAP','BC_TWL')] <-
+#   survey_yf_predt$value[survey_yf_predt$variable %in% c('BC_LL','BC_TRAP','BC_TWL')]/2E2
+# 
+# survey_yf_predt$value[survey_yf_predt$variable %in% c('AK_FIX_W','AK_FIX_E','AK_TWL_W')] <-
+#   survey_yf_predt$value[survey_yf_predt$variable %in% c('AK_FIX_W','AK_FIX_E','AK_TWL_W')]*2.2
 
 
 # 

@@ -650,7 +650,7 @@ runOM_datagen <- function(df, seed = 731){
     } ## end fishery fleets
 
     ## N_yais_end ----
-    ## now update N_yais_end (terminal post-fishing biomass)
+    ## fill EOY and beginning of next year using Ztuned
     for(s in 1:2){
       for(i in 1:nspace){
         for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/3+Zreal_yai[y,a,i]))
@@ -659,6 +659,7 @@ runOM_datagen <- function(df, seed = 731){
       } ## end ages 
     } ## end subareas i
   } ## end sexes
+  
   ## SSB_y ----
   for(i in 1:nspace){
     SSB_yi[y,i] <- 0

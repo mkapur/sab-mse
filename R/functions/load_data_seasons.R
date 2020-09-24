@@ -2,7 +2,7 @@
 # year and age input 
 load_data_seasons <- function(nspace = 6, 
                               nstocks = 4,
-                              myear = 2018,
+                              myear = 2019,
                               move = TRUE, 
                               LBins = 81,
 
@@ -676,7 +676,7 @@ load_data_seasons <- function(nspace = 6,
     df$ss_survey[idx.future] <- mean(df$ss_survey[df$ss_survey != -1])
     df$flag_survey <- c(df$flag_survey, rep(-1,yr_future))
     df$flag_survey[idx.future] <- 1
-    df$flag_catch[years > 2018] <- 1
+    df$flag_catch[years > 2019] <- 1
     
     Rdevs <- rnorm(n = yr_future,mean = 0, sd = exp(df$logSDR))
     #Rdevs <- rep(0, yr_future)

@@ -174,9 +174,7 @@ runOM_datagen <- function(df, seed = 731){
                                                                                c(fltnames_fish),
                                                                                c(inames)))
   F_ym <- matrix(0, nrow = tEnd, ncol = nmgmt_reg)
-  # Catch_yf_est <- array(0, dim = c(tEnd,nage,nfleets_fish))
-  # CatchN <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
-  
+
   catch_yaf_pred <-  array(0, dim = c(tEnd, nage, nfleets_fish),
                            dimnames = list(c(year),
                                            c(age),
@@ -193,8 +191,8 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  # for(y in 1:25){
-  for(y in 1:(tEnd-1)){
+  for(y in 1:3){
+  # for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -240,40 +238,7 @@ runOM_datagen <- function(df, seed = 731){
       } #// end  subareas i
     } ## end y == 1
     # if(any(is.na(N_yais_beg[y,,,]))) stop('NA ON year', y,"\n")
-    ## SSB_y ----
     
-    for(i in 1:nspace){
-      SSB_yi[y,i] <- 0
-      for(a in 1:(nage)){
-        SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_beg[y,a,i,1]*wtatlen_kab[phi_ik2[i],1]*
-          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]*mat_ak[a,phi_ik2[i]]
-        if(is.na(SSB_yi[y,i])) stop("NA ON SSB_YI year ",y," space ",i," age ",a)
-      } #// end ages
-    } #// end space
-    for(k in 1:nstocks){
-      SSB_yk[y,k]<- 0
-      for(i in 1:nspace){
-        SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
-      } # // end stocks
-    } #// end space
-    # cat(sum(SSB_yk[y,]),"\n")
-    # cat(sum(SSB_yi[y,]),"\n")
-    if(is.na(sum(SSB_yk[y,]))) stop("NA ON SSB_YK",y) 
-    
-    ## Ryi, Ryk Recruits ----
-    # next year based on present SSB
-    omega_0ij <- rep(1, nspace)
-    for(i in 1:nspace){
-      for(k in 1:nstocks){
-        # // SSB_yk already has summation
-        R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k])/
-          (SSB_0k[k]*(1-h_k[k])+ 
-             SSB_yk[y,k]*(5*h_k[k]-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
-        # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
-      } # // end stocks
-      R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
-      N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits
-    } ### end space
     # cat(sum(R_yk[y,]),"\n")
     # cat(sum(R_yi[y,]),"\n")
     # cat(sum(N_yais_beg[y+1,1,,]),"\n")
@@ -301,7 +266,7 @@ runOM_datagen <- function(df, seed = 731){
             }
           } ### end subareas j         
           N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]/3) 
-          N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]/3) ## this exponent needs to be Ztuned eventually
+          # N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]/3)
         } ## end ages for N
         
         for(a in 6:nage-1){
@@ -320,7 +285,7 @@ runOM_datagen <- function(df, seed = 731){
           } ## end i != j
         } ## end subareas j
         N_yais_mid[y,nage,i,s] = N_yais_beg[y,nage,i,s]*exp(-mat_age[nage]/3)
-        N_yais_beg[y+1,nage,i,s] =   ((1-pLeave)*( N_yais_beg[y,nage,i,s]+ N_yais_beg[y,nage-1,i,s]) + NCome)*exp(-mat_age[nage]/3);
+        # N_yais_beg[y+1,nage,i,s] =   ((1-pLeave)*( N_yais_beg[y,nage,i,s]+ N_yais_beg[y,nage-1,i,s]) + NCome)*exp(-mat_age[nage]/3);
         ## plus group weighted average (we already have the numbers at age)
         Length_yais_beg[y+1,nage,i,s] = ( N_yais_beg[y+1,nage-1,i,s]*
                                             (Length_yais_beg[y,nage-1,i,s]+
@@ -688,15 +653,45 @@ runOM_datagen <- function(df, seed = 731){
     ## now update N_yais_end (terminal post-fishing biomass)
     for(s in 1:2){
       for(i in 1:nspace){
-        for(a in 1:nage){
-        ## Z real has F and first third of biomass, mid has second third
-        ## assumes no more movement
-        N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/3+Zreal_yai[y,a,i]))
-        } ## end ages 
-      } ## end subareas i
-      # cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
-    } ## end sexes
-
+        for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/3+Zreal_yai[y,a,i]))
+        for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]*exp(-mat_age[a]/3)
+        N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])*exp(-mat_age[nage]/3)
+      } ## end ages 
+    } ## end subareas i
+  } ## end sexes
+  ## SSB_y ----
+  for(i in 1:nspace){
+    SSB_yi[y,i] <- 0
+    for(a in 1:(nage)){
+      SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_end[y,a,i,1]*wtatlen_kab[phi_ik2[i],1]*
+        Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]*mat_ak[a,phi_ik2[i]]
+      if(is.na(SSB_yi[y,i])) stop("NA ON SSB_YI year ",y," space ",i," age ",a)
+    } #// end ages
+  } #// end space
+  for(k in 1:nstocks){
+    SSB_yk[y,k]<- 0
+    for(i in 1:nspace){
+      SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
+    } # // end stocks
+  } #// end space
+  # cat(sum(SSB_yk[y,]),"\n")
+  # cat(sum(SSB_yi[y,]),"\n")
+  if(is.na(sum(SSB_yk[y,]))) stop("NA ON SSB_YK",y) 
+  
+  ## Ryi, Ryk Recruits ----
+  # next year based on present SSB
+  omega_0ij <- rep(1, nspace)
+  for(i in 1:nspace){
+    for(k in 1:nstocks){
+      # // SSB_yk already has summation
+      R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k])/
+        (SSB_0k[k]*(1-h_k[k])+ 
+           SSB_yk[y,k]*(5*h_k[k]-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+      # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
+    } # // end stocks
+    R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
+    N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits for next year
+  } ### end space
     # head(catch_yf_pred)
     
     ## survey biomass ----

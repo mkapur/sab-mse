@@ -37,7 +37,7 @@ nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
 ## format: year x fleet
 
 #* catches ----
-omcatch0 <- data.frame(Year = 1960:2018)
+omcatch0 <- data.frame(Year = 1960:2019)
 
 ## read files
 akcatch <- read.csv(here("input","raw_data","catch","AK_comm_catch.csv")) ## this is separated at 145W, corresponding to A1 and A2
@@ -89,7 +89,7 @@ names(wcdis)[2:3] <- paste(fltnames$NAME[fltnames$M == 'WC' & fltnames$DISCARD])
 
 names(bcdis)[1] <- names(wcdis)[1] <- names(akdis)[1] <- 'Year'
 
-omdis0 <- data.frame(Year = 1960:2018)
+omdis0 <- data.frame(Year = 1960:2019)
 omdis <- merge(omdis0, akdis,  by = "Year", all = TRUE) %>% 
   merge(., bcdis, by = "Year", all = TRUE) %>% 
   merge(., wcdis, by = "Year", all = TRUE) 
@@ -141,19 +141,19 @@ aklc.files <-   list.files(here('input','raw_data',"comps"), pattern = "lcomps",
 
 akfemidx <- c(1,3,9,11,5,7)
 akmalidx <- c(1:12)[!c(1:12) %in% akfemidx]
-ak_lencomps_female <- ak_lencomps_male <- array(NA, dim = c(length(1960:2018), 
+ak_lencomps_female <- ak_lencomps_male <- array(NA, dim = c(length(1960:2019), 
                                                             31,
                                                             length(fltnames$NAME[fltnames$LCOMP & fltnames$M == 'AK']) ))
 dimnames(ak_lencomps_female)[[3]] <- dimnames(ak_lencomps_male)[[3]] <- fltnames$NAME[fltnames$LCOMP & fltnames$M == 'AK']
 
 for(i in 1:length(akfemidx)){
-  ak_lencomps_female[,,i] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+  ak_lencomps_female[,,i] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                              read.csv(aklc.files[akfemidx[i]],fileEncoding="UTF-8-BOM"),
                                              by = 'Year', all.x = TRUE))
 }
 
 for(i in 1:length(akmalidx)){
-  ak_lencomps_male[,,i] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+  ak_lencomps_male[,,i] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                            read.csv(aklc.files[akmalidx[i]],fileEncoding="UTF-8-BOM"),
                                            by = 'Year', all.x = TRUE))
 }
@@ -169,11 +169,11 @@ bcdat <- read.csv(here('input','raw_data',"comps",'BC_LWMSO_1970-present.csv')) 
 
 ## calculate raw comp values
 bcgears <- c("TRAP","LONGLINE","BOTTOM TRAWL") ## how they appear in data from Brendan
-bc_lencomps_female <- bc_lencomps_male <- array(NA, dim = c(length(1978:2018), length(1:88), length(bcgears)),
-                                                dimnames = list(paste(1978:2018), paste(1:88),  bcgears))
+bc_lencomps_female <- bc_lencomps_male <- array(NA, dim = c(length(1978:2019), length(1:88), length(bcgears)),
+                                                dimnames = list(paste(1978:2019), paste(1:88),  bcgears))
 
-bc_lencomps_yearN_female <-bc_lencomps_yearN_male <- array(NA, dim = c(length(1978:2018), 2 , length(bcgears)),
-                                                           dimnames = list(paste(1978:2018), c('YEAR','n'),  bcgears))
+bc_lencomps_yearN_female <-bc_lencomps_yearN_male <- array(NA, dim = c(length(1978:2019), 2 , length(bcgears)),
+                                                           dimnames = list(paste(1978:2019), c('YEAR','n'),  bcgears))
 
 for(i in 1:length(bcgears)){
   bc_lencomps0 <-  bcdat %>%
@@ -185,7 +185,7 @@ for(i in 1:length(bcgears)){
     summarise(total = n() )%>%   mutate(freq = total/sum(total))  %>%
     tidyr::complete(., SPECIMEN_AGE = 1:88, 
                     SPECIMEN_SEX_CODE = factor(1:2), 
-                    YEAR = factor(1978:2018),
+                    YEAR = factor(1978:2019),
                     fill = list(TRIP_TYPE = 'OBSERVED COMMERCIAL',
                                 GEAR_DESC ='BOTTOM TRAWL', 
                                 total = 0)) 
@@ -234,7 +234,7 @@ save(bc_lencomps_male, file = here('input','raw_data',"comps","bc_lencomps_male_
 # plist = list(); idx = 1
 # for(i in 1:length(bcgears)){
 #   # par(mfrow = c(3, ceiling(sum(bc_lencomps_yearN_female[,2,i] != 0)/3)))
-#   for(y in 1:length(1978:2018)){
+#   for(y in 1:length(1978:2019)){
 #     if(all(bc_lencomps_female[y,,i] == 0) & all(bc_lencomps_male[y,,i] == 0) ) next()
 #     plist[[idx]] <- bc_lencomps_female[y,,i] %>%
 #       melt() %>%
@@ -279,22 +279,22 @@ save(OM_lencomps_male, file = here('input','input_data',"OM_lencomps_male.rdata"
 
 #* ak agecomps ----
 ## fixed gear and GOA survey. note they are NOT sex specific.
-ak_agecomps  <- array(NA, dim = c(length(1960:2018),
+ak_agecomps  <- array(NA, dim = c(length(1960:2019),
                                   length(0:70),
                                   length(fltnames$NAME[fltnames$ACOMP & fltnames$M == 'AK']) ))
-dimnames(ak_agecomps) <-  list(c(1960:2018),
+dimnames(ak_agecomps) <-  list(c(1960:2019),
                                c(0:70),
                                c(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$ACOMP])))
 
 ## fix e, fixw, goasurv
-ak_agecomps[,c(1,3:31),1] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+ak_agecomps[,c(1,3:31),1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
                                     by = 'Year',all.x = TRUE)%>% select(-Year))
-ak_agecomps[,c(1,3:31),2] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+ak_agecomps[,c(1,3:31),2] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_W_agecomp.csv")),
                                     by = 'Year',all.x = TRUE) %>% select(-Year))
 
-# ak_agecomps[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+# ak_agecomps[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2019),
 #                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
 #                                     by = 'Year',all.x = TRUE))
 #Age.pop is the estimate of numbers of fish after running through the age length key. 
@@ -317,7 +317,7 @@ actemp <- merge(read.csv(here("input","raw_data","comps","GOA Age Composition To
   dplyr::relocate(`19`,.before= `20`) %>%
   dplyr::relocate(`18`,.before = `19`)
 
-ak_agecomps[,2:21,3] <- as.matrix(merge(data.frame('Year' = 1960:2018),actemp,
+ak_agecomps[,2:21,3] <- as.matrix(merge(data.frame('Year' = 1960:2019),actemp,
                                         by = 'Year', all = TRUE) %>% select(-Year))
                                         
 
@@ -354,32 +354,32 @@ ak_agecomps[,2:21,3] <- as.matrix(merge(data.frame('Year' = 1960:2018),actemp,
 #                  "BC_om_MaleSSAgeProp.csv"), row.names = FALSE) 
 
 
-bc_agecomps_female <- bc_agecomps_male <- array(NA, dim= c(length(1960:2018), 
+bc_agecomps_female <- bc_agecomps_male <- array(NA, dim= c(length(1960:2019), 
                                                            35,
                                                            3)) ## SS, commercial, strs
 
-bc_agecomps_female[,,1] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+bc_agecomps_female[,,1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                            read.csv(here("input","raw_data","comps",
                                                          "BC_om_FemaleCommercialTrapAgeProp.csv")),
                                            by = 'Year', all.x = TRUE))
-bc_agecomps_female[,,2] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+bc_agecomps_female[,,2] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                            read.csv(here("input","raw_data","comps",
                                                          "BC_om_FemaleStRSAgeProp.csv")),
                                            by = 'Year', all.x = TRUE))
-bc_agecomps_female[,,3] <-  as.matrix(merge(data.frame('Year' = 1960:2018),
+bc_agecomps_female[,,3] <-  as.matrix(merge(data.frame('Year' = 1960:2019),
                                             read.csv(here("input","raw_data","comps",
                                                           "BC_om_FemaleSSAgeProp.csv")),
                                             by = 'Year', all.x = TRUE))
 
-bc_agecomps_male[,,1] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+bc_agecomps_male[,,1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                          read.csv(here("input","raw_data","comps",
                                                        "BC_om_MaleCommercialTrapAgeProp.csv")),
                                          by = 'Year', all.x = TRUE))
-bc_agecomps_male[,,2] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+bc_agecomps_male[,,2] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                          read.csv(here("input","raw_data","comps",
                                                        "BC_om_MaleStRSAgeProp.csv")),
                                          by = 'Year', all.x = TRUE))
-bc_agecomps_male[,,3] <-  as.matrix(merge(data.frame('Year' = 1960:2018),
+bc_agecomps_male[,,3] <-  as.matrix(merge(data.frame('Year' = 1960:2019),
                                           read.csv(here("input","raw_data","comps",
                                                         "BC_om_MaleSSAgeProp.csv")),
                                           by = 'Year', all.x = TRUE))
@@ -394,12 +394,12 @@ save(bc_agecomps_male, file  = here('input','raw_data',"comps","bc_agecomps_male
 #* wc agecomps ----
 wcdat <- SS_readdat(here('input',"raw_data","2019 WC Stock Assessment","data.ss"))
 
-wc_agecomps_female <- wc_agecomps_male <- array(NA, dim= c(length(1960:2018), 
+wc_agecomps_female <- wc_agecomps_male <- array(NA, dim= c(length(1960:2019), 
                                                            length(0:50)+1,
                                                            2),
                                                            #length( paste(fltnames$NAME[fltnames$M == 'WC' & 
                                                             #                             fltnames$ACOMP]))),
-                                                dimnames =list( 1960:2018,
+                                                dimnames =list( 1960:2019,
                                                                 c('Year',0:50), 
                                                                 paste(fltnames$NAME[fltnames$M == 'WC' & 
                                                                                       fltnames$ACOMP])[2:3])) 
@@ -418,12 +418,12 @@ wcAC_mal <- wcdat$agecomp[,c(1:9,61:ncol(wcdat$agecomp))] %>%
   select(-Yr) 
 
 for(flt in 1:length(c(1,3))){
-  wc_agecomps_female[,,flt] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+  wc_agecomps_female[,,flt] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                                wcAC_fem %>% 
                                                  filter(FltSvy == c(1,3,8)[flt]) %>%
                                                  select(-FltSvy),
                                                by = 'Year', all = TRUE))
-  wc_agecomps_male[,,flt] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+  wc_agecomps_male[,,flt] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                              wcAC_mal %>% 
                                                filter(FltSvy == c(1,3,8)[flt]) %>%
                                                select(-FltSvy),
@@ -455,11 +455,11 @@ for(flt in 1:length(c(1,3))){
 #     wcAC_mal8[y,a] <- wcAC_mal8[y,a]/rowSums(wcAC_mal8[y,2:ncol(wcAC_mal8)])
 #   }
 # }
-# wc_agecomps_female[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+# wc_agecomps_female[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2019),
 #                                            wcAC_fem8,
 #                                            by = 'Year',all = TRUE))
 # 
-# wc_agecomps_male[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2018),
+# wc_agecomps_male[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2019),
 #                                          wcAC_mal8,
 #                                          by = 'Year',all = TRUE))
 
@@ -485,13 +485,18 @@ substrRight <- function(x, n){
 growPar$Sex <- substrRight(as.character(growPar$Sex), 1)## overwrite for loops
 
 # array of year x stock x sex
+## note that in ch1, R4 and R5 correspond to our R3 and R4; also R4 still means the same
+## thing (alaska) but is in the first column per phi_ik2
 Linf_yk <- L1_yk <- kappa_yk <- sigmaG_yk <- array(NA, 
-                                                   dim = c(length(1960:2018),
-                                                           length(unique(growPar$Region)),2))
+                                                   dim = c(length(1960:2019),
+                                                           length(unique(growPar$Region)),2),
+                                                   dimnames = list(c(year),
+                                                                   c(paste0("R",4:1)),
+                                                                   c('Fem','Mal')))
 
 for(s in 1:2){
   for(r in 1:4){
-    temp <- subset(growPar, Sex == c("F","M")[s] & Region == paste0("R",c(1,2,4,5)[r]))
+    temp <- subset(growPar, Sex == c("F","M")[s] & Region == paste0("R",c(5,4,2,1)[r]))
     if("pool" %in% temp$Period){
       Linf_yk[,r,s] <- temp$Linf
       L1_yk[,r,s] <- temp$L1
@@ -512,6 +517,12 @@ for(s in 1:2){
     sigmaG_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$Sigma[temp$Period == 'late']
   }
 }
+
+## sanity check: the first subarea (i == 1) should return the first stock (k =1)
+## and thus the highest Linfs
+Linf_yk[1,phi_ik2[1],1]
+Linf_yk[1,phi_ik2[6],1]
+
 growthPars <- list("Linf_yk"=Linf_yk, "L1_yk"=L1_yk,
              "kappa_yk"=kappa_yk, "sigmaG_yk"=sigmaG_yk)
 save(growthPars, 
@@ -590,16 +601,16 @@ ggsave(last_plot(),
 ## array year x age x fleet for each sex
 ## these are really ballparks and will need to be tweaked to condition OM
 
-OM_surv_selex_yafs <- array(NA, dim = c(length(1960:2018),
+OM_surv_selex_yafs <- array(NA, dim = c(length(1960:2019),
                                         length(0:70),
                                         length(paste(fltnames$NAME[fltnames$SURV])),
                                         2))
-OM_fish_selex_yafs <- array(NA, dim = c(length(1960:2018),
+OM_fish_selex_yafs <- array(NA, dim = c(length(1960:2019),
                                         length(0:70),
                                         length(paste(fltnames$NAME[fltnames$COMM])),
                                         2))
-dimnames(OM_surv_selex_yafs) =  list( 1960:2018,   c(0:70),  paste(fltnames$NAME[fltnames$SURV]))
-dimnames(OM_fish_selex_yafs) =  list( 1960:2018,   c(0:70),  paste(fltnames$NAME[fltnames$COMM]))
+dimnames(OM_surv_selex_yafs) =  list( 1960:2019,   c(0:70),  paste(fltnames$NAME[fltnames$SURV]))
+dimnames(OM_fish_selex_yafs) =  list( 1960:2019,   c(0:70),  paste(fltnames$NAME[fltnames$COMM]))
 
 
 #* ak aselex ----
@@ -708,14 +719,14 @@ logistic3 <- function(age, a50, a95){
 #   mutate(Year = Yr) %>%
 #   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
 #   group_by(Fleet) %>%
-#   complete(., Year = c(1890,1960:2018)) %>% write.csv(.,here('input','raw_data','selex','wcas0F.csv'))
+#   complete(., Year = c(1890,1960:2019)) %>% write.csv(.,here('input','raw_data','selex','wcas0F.csv'))
 # wcas0 <- wc$ageselex %>%
 #   filter(Yr > 1880 & Factor == 'Asel' & Fleet %in% c(1,3)) %>%
 #   filter(Sex == 2) %>%
 #   mutate(Year = Yr) %>%
 #   select(-Factor, -Seas, -Morph,-Label, -Yr) %>%
 #   group_by(Fleet) %>%
-#   complete(.,Year = c(1890,1960:2018)) %>% write.csv(.,here('input','raw_data','selex','wcas0M.csv'))
+#   complete(.,Year = c(1890,1960:2019)) %>% write.csv(.,here('input','raw_data','selex','wcas0M.csv'))
 
 
 # for(s in 1:2){
@@ -736,7 +747,7 @@ logistic3 <- function(age, a50, a95){
 wcas0 <- read.csv(here('input','raw_data','selex','wcas0.csv'))
 
 for(flt in 1:2){
-OM_fish_selex_yafs[,,c(8,9)[flt],1] <-  as.matrix( merge(data.frame('Year' = 1960:2018),
+OM_fish_selex_yafs[,,c(8,9)[flt],1] <-  as.matrix( merge(data.frame('Year' = 1960:2019),
                                                         wcas0 %>%
                    filter(Sex == 1 & Fleet == c(1,3)[flt]) %>%
                    select(-Sex) %>%
@@ -745,7 +756,7 @@ OM_fish_selex_yafs[,,c(8,9)[flt],1] <-  as.matrix( merge(data.frame('Year' = 196
                  all.x = TRUE)
                  %>% select(-Year))
 
-OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960:2018),
+OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960:2019),
                                                         wcas0 %>%
                                                           filter(Sex == 2 & Fleet == c(1,3)[flt]) %>%
                                                           select(-Sex) %>%
@@ -758,14 +769,14 @@ OM_fish_selex_yafs[,,c(8,9)[flt],2] <- as.matrix( merge(data.frame('Year' = 1960
 ## use NWSLP as placeholder because NWCBO is CAAL
 for(y in 1:nyear){
   for(flt in 1:nfleets_surv){
-    OM_surv_selex_yafs[y,,flt,1] <-  as.matrix(wc$ageselex %>% filter(Fleet == 8 &
-                                                               Factor == 'Asel' & Yr == 2018,
+    OM_surv_selex_yafs[y,,flt,1] <-  as.matrix(wc$ageselex %>% filter(Fleet == 3 &
+                                                               Factor == 'Asel' & Yr == 2019,
                                                              Sex == 1) %>%
       select(-Factor, -Seas, -Morph,-Label, -Yr,-Fleet,-Sex))
     
     
-    OM_surv_selex_yafs[y,,flt,2] <-as.matrix(wc$ageselex %>% filter(Fleet == 8 &
-                                                                      Factor == 'Asel' & Yr == 2018,
+    OM_surv_selex_yafs[y,,flt,2] <-as.matrix(wc$ageselex %>% filter(Fleet == 3 &
+                                                                      Factor == 'Asel' & Yr == 2019,
                                                                     Sex == 2) %>%
                                                select(-Factor, -Seas, -Morph,-Label, -Yr,-Fleet,-Sex))
   } ## end flt
@@ -777,7 +788,7 @@ for(y in 1:nyear){
 # 
 # for(flt in 1:3){
 #   
-#   wc_fem_asel[,,flt] <-   as.matrix( merge(data.frame('Year' = 1960:2018),
+#   wc_fem_asel[,,flt] <-   as.matrix( merge(data.frame('Year' = 1960:2019),
 #                                            wc$ageselex %>% 
 #                                              filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
 #                                              mutate(Year = Yr) %>%
@@ -787,7 +798,7 @@ for(y in 1:nyear){
 #                                              select(-Fleet),
 #                                            by= 'Year', all.x = TRUE) )
 #   
-#   wc_mal_asel[,,flt] <-    as.matrix( merge(data.frame('Year' = 1960:2018),
+#   wc_mal_asel[,,flt] <-    as.matrix( merge(data.frame('Year' = 1960:2019),
 #                                             wc$ageselex %>% 
 #                                               filter(Yr > 1959 & Yr < 2019 & Factor == 'Asel') %>%
 #                                               mutate(Year = Yr) %>%
@@ -859,10 +870,11 @@ bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
          lci = CPUE-1.96*SE,
          uci = CPUE+1.96*SE, Fleet = "BC_early") %>%
   select(YEAR, CPUE, SE, Fleet)
+bcnom[bcnom < 0 ] <- NA ## -1, -1000
 names(bcnom) <- c('Year','value', 'sigma', 'fleet')
 #* survey error ----
 ## reformat this and save            
-survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
+survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
@@ -875,7 +887,7 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.c
   bind_rows(bcnom) %>%
   select(-value) %>%
   pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
-  merge(., data.frame('Year' = 1960:2018), all = TRUE) %>%
+  merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
   select(-Year) 
 
   # arrange(.,Year,fleet) #%>%
@@ -886,7 +898,7 @@ write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indice
 ## make columns as fleets, include extra  bc surv
 names(bcnom) <- c('Year','value', 'sigma', 'Fleet')
 #* survey biomass ----
-vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
+vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
@@ -902,9 +914,9 @@ surv_vals <- vast0 %>%
   rbind(., bcnom[,c(1,4,2)]) %>%
   arrange(.,Year,Fleet) %>%
   tidyr::pivot_wider(names_from= Fleet, values_from = value) %>%
-  filter(Year > 1964 & Year < 2019) %>%
-merge(., data.frame('Year' = 1960:2018), all = TRUE) 
-surv_vals[surv_vals < 0 ] <- NA ## -1, -1000
+  filter(Year > 1964 & Year < 2020) %>%
+merge(., data.frame('Year' = 1960:2019), all = TRUE) 
+
 names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) 
 
 write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
@@ -921,7 +933,7 @@ surv_vals %>%
   labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') +
   labs(subtitle = "BC_EARLY has been multiplied by 1000 for comparison")
 ggsave(last_plot(),
-       file = here('input','input_data','input_figs','OM_indices.png'),
+       file = here('input','input_data','input_figs','OM_indices-09-22-2020.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
 ## Aging error ----

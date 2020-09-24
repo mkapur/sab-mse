@@ -191,8 +191,8 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  for(y in 1:3){
-  # for(y in 1:(tEnd-1)){
+  # for(y in 1:3){
+  for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){
@@ -361,7 +361,7 @@ runOM_datagen <- function(df, seed = 731){
     Adj <- Z_a_TEMP <- Z_a_TEMP2 <- NULL
     # for(fish_flt in 2){
     for(fish_flt in 1:nfleets_fish){
-      
+      # selMult = rep(1,nfleets_fish)[fish_flt]
       selMult = c(0.5,0.3,1,1,1/4,1/4,1/10,1,1)[fish_flt]
       # selMult <- ifelse(fish_flt %in% c(1,2),0.5,ifelse(fish_flt %in% 5:7,0.25,1)) ## trying to tweak selex to fit
       
@@ -376,9 +376,9 @@ runOM_datagen <- function(df, seed = 731){
         ## this needs to deal accurately with sex-selex length OR age
         if(selType_fish[fish_flt] == 'AGE'){
           denom <- denom + (phi_if_fish[fish_flt, i] *
-                              sum(selMult*fish_selex_yafs[y,,fish_flt,]*N_yais_beg[y,,i,]*
+                              sum(selMult*fish_selex_yafs[y,,fish_flt,]*N_yais_mid[y,,i,]*
                                     wtatlen_kab[phi_ik2[i],1]*
-                                    Length_yais_beg[y,,i,]^wtatlen_kab[phi_ik2[i],2],
+                                    Length_yais_mid[y,,i,]^wtatlen_kab[phi_ik2[i],2],
                               catch_yf_obs[y, fish_flt+1]))
         } else if(selType_fish[fish_flt] == 'LEN'){
           # per AEP 
@@ -386,16 +386,16 @@ runOM_datagen <- function(df, seed = 731){
                               ## not sure about this; M and F n_age x most likely len at age into weight = biomass??
                               sum(
                                 # selMult*fish_selex_yafs[y, , fish_flt, 1] * 
-                                  N_yais_beg[y, , i, 1] *
-                                  LengthAge_alyis_beg[, , y, i, 1] *
+                                  N_yais_mid[y, , i, 1] *
+                                  LengthAge_alyis_mid[, , y, i, 1] *
                                   wtatlen_kab[phi_ik2[i], 1] *
-                                  apply(LengthAge_alyis_beg[, , y, i, 1],1,which.max)^ ## most likely lengths at age ^
+                                  apply(LengthAge_alyis_mid[, , y, i, 1],1,which.max)^ ## most likely lengths at age ^
                                               wtatlen_kab[phi_ik2[i], 2],
                                 # selMult*fish_selex_yafs[y, , fish_flt, 2] * 
-                                  N_yais_beg[y, , i, 2] *
-                                  LengthAge_alyis_beg[, , y, i, 1] *
+                                  N_yais_mid[y, , i, 2] *
+                                  LengthAge_alyis_mid[, , y, i, 1] *
                                   wtatlen_kab[phi_ik2[i], 1] *
-                                  apply(LengthAge_alyis_beg[, , y, i, 2],1,which.max)^
+                                  apply(LengthAge_alyis_mid[, , y, i, 2],1,which.max)^
                                               wtatlen_kab[phi_ik2[i], 2],
                               catch_yf_obs[y, fish_flt + 1]))
           
@@ -403,13 +403,13 @@ runOM_datagen <- function(df, seed = 731){
           # denom <- denom + (phi_if_fish[fish_flt, i] *
           #                     ## not sure about this; M and F n_age x most likely len at age into weight = biomass??
           #                     sum(
-          #                       selMult*fish_selex_yafs[y, , fish_flt, 1] * N_yais_beg[y, , i, 1] *
+          #                       selMult*fish_selex_yafs[y, , fish_flt, 1] * N_yais_mid[y, , i, 1] *
           #                         wtatlen_kab[phi_ik2[i], 1] *
-          #                         apply(LengthAge_alyis_beg[, , y, i, 1],1,which.max)^ ## most likely lengths at age ^
+          #                         apply(LengthAge_alyis_mid[, , y, i, 1],1,which.max)^ ## most likely lengths at age ^
           #                                     wtatlen_kab[phi_ik2[i], 2],
-          #                       selMult*fish_selex_yafs[y, , fish_flt, 2] * N_yais_beg[y, , i, 2] *
+          #                       selMult*fish_selex_yafs[y, , fish_flt, 2] * N_yais_mid[y, , i, 2] *
           #                         wtatlen_kab[phi_ik2[i], 1] *
-          #                         apply(LengthAge_alyis_beg[, , y, i, 2],1,which.max)^ 
+          #                         apply(LengthAge_alyis_mid[, , y, i, 2],1,which.max)^ 
           #                                     wtatlen_kab[phi_ik2[i], 2],
           #                     catch_yf_obs[y, fish_flt + 1]))
      
@@ -441,15 +441,15 @@ runOM_datagen <- function(df, seed = 731){
                 (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*
                 (1-exp(-Z_a_TEMP[a]))*
                 phi_if_fish[fish_flt, i]*
-                sum(selMult*fish_selex_yafs[y,a,fish_flt,]* N_yais_beg[y,a,i,]*
+                sum(selMult*fish_selex_yafs[y,a,fish_flt,]* N_yais_mid[y,a,i,]*
                       wtatlen_kab[phi_ik2[i],1]*
-                      Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
+                      Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
               
               
             } else if(selType_fish[fish_flt] == 'LEN'){
-              LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
+              LAA <- ifelse( which.max(LengthAge_alyis_mid[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
                              length(fish_selex_yafs[y,    nage  , fish_flt, 1]),
-                             which.max(LengthAge_alyis_beg[a, , y, i, 1]))
+                             which.max(LengthAge_alyis_mid[a, , y, i, 1]))
               
               # per AEP
               catch_afk_TEMP[a,fish_flt,k] <-    catch_afk_TEMP[a,fish_flt,k] +
@@ -458,14 +458,14 @@ runOM_datagen <- function(df, seed = 731){
                 phi_if_fish[fish_flt, i]*
                 sum(
                 # selMult*fish_selex_yafs[y,LAA, fish_flt, 1] *
-                       N_yais_beg[y, a, i, 1] *
-                       LengthAge_alyis_beg[a, , y, i, 1] *
+                       N_yais_mid[y, a, i, 1] *
+                       LengthAge_alyis_mid[a, , y, i, 1] *
                        wtatlen_kab[phi_ik2[i], 1] *
                        LAA ^
                        wtatlen_kab[phi_ik2[i], 2],
                      # selMult*fish_selex_yafs[y, LAA, fish_flt, 2] *
-                       N_yais_beg[y, a, i, 2] *
-                       LengthAge_alyis_beg[a, , y, i, 1] *
+                       N_yais_mid[y, a, i, 2] *
+                       LengthAge_alyis_mid[a, , y, i, 1] *
                        wtatlen_kab[phi_ik2[i], 1] *
                        LAA ^
                        wtatlen_kab[phi_ik2[i], 2] )
@@ -475,14 +475,14 @@ runOM_datagen <- function(df, seed = 731){
               #   (1-exp(-Z_a_TEMP[a]))*
               #   phi_if_fish[fish_flt, i]*
               #   sum( selMult*fish_selex_yafs[y,LAA, fish_flt, 1] *
-              #       N_yais_beg[y, a, i, 1] *
+              #       N_yais_mid[y, a, i, 1] *
               #       wtatlen_kab[phi_ik2[i], 1] *
-              #       which.max(LengthAge_alyis_beg[a, , y, i, 1]) ^
+              #       which.max(LengthAge_alyis_mid[a, , y, i, 1]) ^
               #       wtatlen_kab[phi_ik2[i], 2],
               #       selMult*fish_selex_yafs[y, LAA, fish_flt, 2] *
-              #       N_yais_beg[y, a, i, 2] *
+              #       N_yais_mid[y, a, i, 2] *
               #       wtatlen_kab[phi_ik2[i], 1] *
-              #       which.max(LengthAge_alyis_beg[a, , y, i, 2]) ^
+              #       which.max(LengthAge_alyis_mid[a, , y, i, 2]) ^
               #       wtatlen_kab[phi_ik2[i], 2] )
             } ## end seltype Len
           } ## end ages
@@ -504,26 +504,26 @@ runOM_datagen <- function(df, seed = 731){
           for(a in 1:nage){
             if(selType_fish[fish_flt] == 'AGE'){
               denom <- denom + phi_if_fish[fish_flt, i] *
-                sum(selMult*fish_selex_yafs[y,a,fish_flt,]* N_yais_beg[y,a,i,]*
+                sum(selMult*fish_selex_yafs[y,a,fish_flt,]* N_yais_mid[y,a,i,]*
                       wtatlen_kab[phi_ik2[i],1]*
-                      Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])*
+                      Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])*
                 (1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
             } else if(selType_fish[fish_flt] == 'LEN'){
-              LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
+              LAA <- ifelse( which.max(LengthAge_alyis_mid[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
                              length(fish_selex_yafs[y,    nage  , fish_flt, 1]),
-                             which.max(LengthAge_alyis_beg[a, , y, i, 1]))
+                             which.max(LengthAge_alyis_mid[a, , y, i, 1]))
               
               denom <- denom + phi_if_fish[fish_flt, i] *
                 sum( 
                   # selMult*fish_selex_yafs[y,LAA, fish_flt, 1] *
-                       N_yais_beg[y, a, i, 1] *
-                       LengthAge_alyis_beg[a, , y, i, 1] *
+                       N_yais_mid[y, a, i, 1] *
+                       LengthAge_alyis_mid[a, , y, i, 1] *
                        wtatlen_kab[phi_ik2[i], 1] *
                        LAA ^
                        wtatlen_kab[phi_ik2[i], 2],
                      # selMult*fish_selex_yafs[y, LAA, fish_flt, 2] *
-                       N_yais_beg[y, a, i, 2] *
-                       LengthAge_alyis_beg[a, , y, i, 1] *
+                       N_yais_mid[y, a, i, 2] *
+                       LengthAge_alyis_mid[a, , y, i, 1] *
                        wtatlen_kab[phi_ik2[i], 1] *
                        LAA ^
                        wtatlen_kab[phi_ik2[i], 2] )*
@@ -556,12 +556,12 @@ runOM_datagen <- function(df, seed = 731){
       ## get total N exploitable by this fleet
       for(i in 1:nspace){
         N_avail_yf[y,fish_flt] <- N_avail_yf[y,fish_flt] + sum( phi_if_fish[fish_flt, i]*
-                                                                  sum(N_yais_beg[y,,i,]))
+                                                                  sum(N_yais_mid[y,,i,]))
       }
       ## get ratio of N in area & reweight F
       ## will just return Freal and 1 for single-area fisheries
       for(i in 1:nspace){
-        N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]* sum(N_yais_beg[y,,i,]))/ N_avail_yf[y,fish_flt]
+        N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]* sum(N_yais_mid[y,,i,]))/ N_avail_yf[y,fish_flt]
         F_area_yfi[y,fish_flt,i] <- Freal_yf[y, fish_flt]*N_weight_yfi[y,fish_flt, i]
       }
       
@@ -579,9 +579,9 @@ runOM_datagen <- function(df, seed = 731){
               (Freal_yf[y, fish_flt]/(Zreal_ya[y,a]))*(1-exp(-Zreal_ya[y,a]))*
               phi_if_fish[fish_flt, i]*
               
-              sum(selMult*fish_selex_yafs[y,a,fish_flt,]*N_yais_beg[y,a,i,]*
+              sum(selMult*fish_selex_yafs[y,a,fish_flt,]*N_yais_mid[y,a,i,]*
                     wtatlen_kab[phi_ik2[i],1]*
-                    Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
+                    Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
             
             Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + mat_age[a]
 
@@ -589,15 +589,15 @@ runOM_datagen <- function(df, seed = 731){
                                                   (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
               phi_if_fish[fish_flt, i]*
 
-              sum(fish_selex_yafs[y,a,fish_flt,]* N_yais_beg[y,a,i,]*
+              sum(fish_selex_yafs[y,a,fish_flt,]* N_yais_mid[y,a,i,]*
                     wtatlen_kab[phi_ik2[i],1]*
-                    Length_yais_beg[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
+                    Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
             
           } else if(selType_fish[fish_flt] == 'LEN'){
             ## if the expected length at age is greater than we have selex for, just use the last value
-            LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
+            LAA <- ifelse( which.max(LengthAge_alyis_mid[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
                            length(fish_selex_yafs[y,    nage  , fish_flt, 1]),
-                           which.max(LengthAge_alyis_beg[a, , y, i, 1])
+                           which.max(LengthAge_alyis_mid[a, , y, i, 1])
                            )
             
             Zreal_ya[y,a] <-   Freal_yf[y, fish_flt] + mat_age[a] ## should this include all flets?
@@ -607,14 +607,14 @@ runOM_datagen <- function(df, seed = 731){
               phi_if_fish[fish_flt, i]*
               sum( 
                 # selMult*fish_selex_yafs[y,LAA, fish_flt, 1] *
-                     N_yais_beg[y, a, i, 1] *
-                     LengthAge_alyis_beg[a, , y, i, 1] *
+                     N_yais_mid[y, a, i, 1] *
+                     LengthAge_alyis_mid[a, , y, i, 1] *
                      wtatlen_kab[phi_ik2[i], 1] *
                      LAA ^
                      wtatlen_kab[phi_ik2[i], 2],
                    # selMult*fish_selex_yafs[y, LAA, fish_flt, 2] *
-                     N_yais_beg[y, a, i, 2] *
-                     LengthAge_alyis_beg[a, , y, i, 1] *
+                     N_yais_mid[y, a, i, 2] *
+                     LengthAge_alyis_mid[a, , y, i, 1] *
                      wtatlen_kab[phi_ik2[i], 1] *
                      LAA ^
                      wtatlen_kab[phi_ik2[i], 2] )
@@ -626,14 +626,14 @@ runOM_datagen <- function(df, seed = 731){
               phi_if_fish[fish_flt, i]*
               sum(
                 # fish_selex_yafs[y,LAA, fish_flt, 1] *
-                  N_yais_beg[y, a, i, 1] *
+                  N_yais_mid[y, a, i, 1] *
                   wtatlen_kab[phi_ik2[i], 1] *
-                  which.max(LengthAge_alyis_beg[a, , y, i, 1]) ^
+                  which.max(LengthAge_alyis_mid[a, , y, i, 1]) ^
                   wtatlen_kab[phi_ik2[i], 2],
                 # fish_selex_yafs[y, LAA, fish_flt, 2] *
-                  N_yais_beg[y, a, i, 2] *
+                  N_yais_mid[y, a, i, 2] *
                   wtatlen_kab[phi_ik2[i], 1] *
-                  which.max(LengthAge_alyis_beg[a, , y, i, 2]) ^
+                  which.max(LengthAge_alyis_mid[a, , y, i, 2]) ^
                   wtatlen_kab[phi_ik2[i], 2] )
             
           } ## end seltype len

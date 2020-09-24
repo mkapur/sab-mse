@@ -143,7 +143,7 @@ runOM_datagen <- function(df, seed = 731){
     } #// end stocks
   } # end sex
   
-  Length_yais_beg <- Length_yais_mid <- N_yais_beg <- N_yais_mid <-N_yais_end <- array(NA, dim = c(tEnd, nage, nspace, 2),
+  Length_yais_beg <- Length_yais_mid <- N_yais_beg <- N_yais_mid <- N_yais_end <- array(NA, dim = c(tEnd, nage, nspace, 2),
                                                                           dimnames = list(c(year),
                                                                                           c(age),
                                                                                           c(inames),
@@ -197,14 +197,15 @@ runOM_datagen <- function(df, seed = 731){
   # for(y in 1:25){
   for(y in 1:(tEnd-1)){
     cat(y,"\n")
-    ## Year 0 ----
+    
+    ## Year 0 (y = 1) ----
     if(y == 1){
       # for(k in 1:nstocks){   
       for(i in 1:nspace){
         for(s in 1:2){ ## sexes
           Length_yais_beg[1,1,i,s] <- L1_yk[y,phi_ik2[i],s]
-          N_yais_beg[1,1,i,s] <- Ninit_ais[1,i,s]
-          N_yais_mid[1,1,i,s] <- N_yais_beg[1,1,i,s]*exp(-mat_age[1]/3)
+          N_yais_beg[1,,i,s] <- Ninit_ais[1,i,s] ## fill beg with Ninit, all ages
+          N_yais_mid[1,1,i,s] <- N_yais_beg[1,1,i,s]*exp(-mat_age[1]/3) ## fill age0 for this year
           for(a in 2:(nage-1)){ ## fill A0 in position 1 later
             for(j in 1:nspace){           
               pLeave = 0.0;  NCome = 0.0; # // reset for new age
@@ -213,14 +214,11 @@ runOM_datagen <- function(df, seed = 731){
                 NCome = NCome + X_ijas[j,i,a,s]*Ninit_ais[a,j,s]; #// actual numbers incoming
               }
             } #// end subareas j
-            # // this is the synthesis syntax; 10 is placeholder for LMIN
-            # // likely need a lower L1 at age stock-specific and linear before that age
-            
             Length_yais_beg[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
               exp(-kappa_yk[1,phi_ik2[i],s]*a)
             Length_yais_mid[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
               exp(-0.5*kappa_yk[1,phi_ik2[i],s]*a)
-            N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-mat_age[a]/3)
+            N_yais_mid[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-mat_age[a]/3)
           } #// end ages
           ## // plus group includes those already at A AND age into A
           for(j in 1:nspace){   
@@ -230,57 +228,19 @@ runOM_datagen <- function(df, seed = 731){
               NCome = NCome + X_ijas[j,i,nage,s]*(Ninit_ais[nage,j,s] + Ninit_ais[nage-1,j,s])  #// if M becomes spatial use M_aj here
             }
           } #// end subareas j
-          N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-mat_age[nage]/3)
-          
+          N_yais_mid[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-mat_age[nage]/3)
           Length_yais_beg[y,nage,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
             exp(-kappa_yk[1,phi_ik2[i],s]*nage-1)
           Length_yais_mid[y,nage,i,s]  = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
             exp(-0.5*kappa_yk[1,phi_ik2[i],s]*nage-1)
-          
+          ## populate this just for year 1
         } #// end sexes
       } #// end  subareas i
     } ## end y == 1
     # if(any(is.na(N_yais_beg[y,,,]))) stop('NA ON year', y,"\n")
-    ## SSB_y ----
+   
     
-    for(i in 1:nspace){
-      SSB_yi[y,i] <- 0
-      for(a in 1:(nage)){
-        SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_beg[y,a,i,1]*wtatlen_kab[phi_ik2[i],1]*
-          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]*mat_ak[a,phi_ik2[i]]
-        if(is.na(SSB_yi[y,i])) stop("NA ON SSB_YI year ",y," space ",i," age ",a)
-      } #// end ages
-    } #// end space
-    for(k in 1:nstocks){
-      SSB_yk[y,k]<- 0
-      for(i in 1:nspace){
-        SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
-      } # // end stocks
-    } #// end space
-    # cat(sum(SSB_yk[y,]),"\n")
-    # cat(sum(SSB_yi[y,]),"\n")
-    if(is.na(sum(SSB_yk[y,]))) stop("NA ON SSB_YK",y) 
-    
-    ## Ryi, Ryk Recruits ----
-    # next year based on present SSB
-    omega_0ij <- rep(1, nspace)
-    for(i in 1:nspace){
-      for(k in 1:nstocks){
-        # // SSB_yk already has summation
-        R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k])/
-          (SSB_0k[k]*(1-h_k[k])+ 
-             SSB_yk[y,k]*(5*h_k[k]-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
-        # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
-      } # // end stocks
-      R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
-      N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits
-    } ### end space
-    # cat(sum(R_yk[y,]),"\n")
-    # cat(sum(R_yi[y,]),"\n")
-    # cat(sum(N_yais_beg[y+1,1,,]),"\n")
-    
-    #N- and Nominal Length ----
-    # at-age for the middle of this year and beginning of next 
+    #N- and Nominal LAA ----
     for(s in 1:2){
       for(i in 1:nspace){
         N_yais_mid[y,1,i,s] <- N_yais_beg[y,1,i,s]*exp(-mat_age[1]/3)
@@ -300,9 +260,9 @@ runOM_datagen <- function(df, seed = 731){
               pLeave = pLeave + X_ijas[i,j,a,s]; ### will do 1-this for proportion which stay
               NCome = NCome + X_ijas[j,i,a,s]*N_yais_beg[y,a,j,s]; ### actual numbers incoming
             }
-          } ### end subareas j         
-          N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]/3) 
-          N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]/3) ## this exponent needs to be Ztuned eventually
+          } ### end subareas j   
+          N_yais_mid[y,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]/3) ## this exponent needs to be Ztuned eventually
+          # N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]/3) 
         } ## end ages for N
 
         for(a in 6:nage-1){
@@ -336,11 +296,16 @@ runOM_datagen <- function(df, seed = 731){
                                            N_yais_mid[y,nage,i,s]*
                                            (Length_yais_beg[y,nage,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s]))))/
           (N_yais_mid[y,nage-1,i,s] + N_yais_mid[y,nage,i,s])
+        ## now that we have mid for all ages, fill year 1 only for SSB
+        ## future years will use end biomass affected by F
+        for(a in 1:nage) N_yais_end[1,a,i,s] <-  N_yais_mid[1,a,i,s]*exp(-mat_age[a]/3)
       } ## end subareas i
       # cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
+   
+ 
     } ## end sexes
     
-    ## reweight length-at-age based on movement from other stocks ----
+    #* LAA due to Movement ----
     for(s in 1:2){
       for(i in 1:nspace){  
         for(a in 1:(nage)){ ## note that TMB starts at pos 1 which is age 1 which is pos 2 here
@@ -378,9 +343,11 @@ runOM_datagen <- function(df, seed = 731){
       } ## end nspace
     } ## end sex
     
-    }  ## end years testing
+    
+    
+    # }  ## end years testing
     # for(y in 15:25){
-  for(y in 1:(tEnd-1)){
+  # for(y in 1:(tEnd-1)){
     ## Hybrid F tuning  ----
     # v1 <- 0.99;   Fmax <- 3; ##corresponds to an Fmax of 3
     # v1 = 0.865; Fmax <- 2##corresponds to an Fmax of 2
@@ -396,8 +363,8 @@ runOM_datagen <- function(df, seed = 731){
                                             c(1:(niter+1)))) 
     
     Adj <- Z_a_TEMP <- Z_a_TEMP2 <- NULL
-    for(fish_flt in 2){
-    # for(fish_flt in 1:nfleets_fish){
+    # for(fish_flt in 2){
+    for(fish_flt in 1:nfleets_fish){
       
       selMult = c(0.5,0.3,1,1,1/4,1/4,1/10,1,1)[fish_flt]
       # selMult <- ifelse(fish_flt %in% c(1,2),0.5,ifelse(fish_flt %in% 5:7,0.25,1)) ## trying to tweak selex to fit
@@ -458,7 +425,7 @@ runOM_datagen <- function(df, seed = 731){
       F1_yf[y, fish_flt, 1] <-    catch_yf_obs[y, fish_flt+1]/denom
       latest_guess <-    F1_yf[y, fish_flt, 1]
   
-      ## k iterations ----
+      #* k iterations ----
       for(k in 2:(niter+1)){
         catch_afk_TEMP[,fish_flt,k] <- 0
         
@@ -584,23 +551,23 @@ runOM_datagen <- function(df, seed = 731){
         # cat(k, latest_guess,"\n")
       } ## end hybrid F iterations
       
-      ## Define F, Z and predicted catches ----
+      #* Define F, Z and predicted catches ----
       Freal_yf[y, fish_flt] <- latest_guess ## final as Freal_yf
       if(is.na(Freal_yf[y, fish_flt])) stop("NA F ON",y,"\t", fish_flt,"\n")
       
       ## annoying multi-loops for F in area
       # N_avail_yf[y,fish_flt] <- 0
       ## get total N exploitable by this fleet
-      # for(i in 1:nspace){
-      #   N_avail_yf[y,fish_flt] <- N_avail_yf[y,fish_flt] + sum( phi_if_fish[fish_flt, i]*
-      #                                                             sum(N_yais_beg[y,,i,]))
-      # }
+      for(i in 1:nspace){
+        N_avail_yf[y,fish_flt] <- N_avail_yf[y,fish_flt] + sum( phi_if_fish[fish_flt, i]*
+                                                                  sum(N_yais_beg[y,,i,]))
+      }
       ## get ratio of N in area & reweight F
       ## will just return Freal and 1 for single-area fisheries
-      # for(i in 1:nspace){
-      #   N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]* sum(N_yais_beg[y,,i,]))/ N_avail_yf[y,fish_flt]
-      #   F_area_yfi[y,fish_flt,i] <- Freal_yf[y, fish_flt]*N_weight_yfi[y,fish_flt, i]
-      # }
+      for(i in 1:nspace){
+        N_weight_yfi[y,fish_flt, i] <- sum(phi_if_fish[fish_flt, i]* sum(N_yais_beg[y,,i,]))/ N_avail_yf[y,fish_flt]
+        F_area_yfi[y,fish_flt,i] <- Freal_yf[y, fish_flt]*N_weight_yfi[y,fish_flt, i]
+      }
       
       ## add together for mgmt regions
       for(m in 1:nmgmt_reg){
@@ -688,19 +655,55 @@ runOM_datagen <- function(df, seed = 731){
 
     ## N_yais_end ----
     ## now update N_yais_end (terminal post-fishing biomass)
-    #N- and Nominal Length ----
-    # at-age for the middle of this year and beginning of next 
     for(s in 1:2){
       for(i in 1:nspace){
         for(a in 1:nage){
         ## Z real has F and first third of biomass, mid has second third
         ## assumes no more movement
-        N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-mat_age[a]/3+Zreal_yai[y,a,i])
-        } ## end ages for L
+        N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/3+Zreal_yai[y,a,i]))
+        } ## end ages 
       } ## end subareas i
       # cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
     } ## end sexes
+    ## SSB_y ----
+    ## how much biomass is present in a given year, dictated by the EOY NAA
+    ## this determines recruitment for the following year (eg recruits in 1965 become A0 for 1966)
+    for(i in 1:nspace){
+      SSB_yi[y,i] <- 0
+      for(a in 1:(nage)){
+        SSB_yi[y,i] <- SSB_yi[y,i] +  N_yais_end[y,a,i,1]*wtatlen_kab[phi_ik2[i],1]*
+          Length_yais_beg[y,a,i,1]^wtatlen_kab[phi_ik2[i],2]*mat_ak[a,phi_ik2[i]]
+        if(is.na(SSB_yi[y,i])) stop("NA ON SSB_YI year ",y," space ",i," age ",a)
+      } #// end ages
+    } #// end space
     
+    for(k in 1:nstocks){
+      SSB_yk[y,k]<- 0
+      for(i in 1:nspace){
+        SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
+      } # // end stocks
+    } #// end space
+    # cat(sum(SSB_yk[y,]),"\n")
+    # cat(sum(SSB_yi[y,]),"\n")
+    if(is.na(sum(SSB_yk[y,]))) stop("NA ON SSB_YK",y) 
+    
+    ## Ryi, Ryk Recruits ----
+    # next year based on present SSB
+    omega_0ij <- rep(1, nspace)
+    for(i in 1:nspace){
+      for(k in 1:nstocks){
+        # // SSB_yk already has summation
+        R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k])/
+          (SSB_0k[k]*(1-h_k[k])+ 
+             SSB_yk[y,k]*(5*h_k[k]-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+        # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
+      } # // end stocks
+      R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
+      N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits
+    } ### end space
+    # cat(sum(R_yk[y,]),"\n")
+    # cat(sum(R_yi[y,]),"\n")
+    # cat(sum(N_yais_beg[y+1,1,,]),"\n")
     
     # } ## yr test
     # head(catch_yf_pred)
@@ -710,7 +713,7 @@ runOM_datagen <- function(df, seed = 731){
     
   
   
-  for(y in 1:(tEnd-1)){   
+  # for(y in 1:(tEnd-1)){   
     for( sur_flt in 1:nfleets_surv){
       if(is.na(surv_yf_obs[y,sur_flt])) next()
       Nsamp_acomp_yf[y,sur_flt] <- survey_yf_pred[y,sur_flt] <- 0

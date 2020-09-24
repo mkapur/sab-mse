@@ -656,10 +656,9 @@ runOM_datagen <- function(df, seed = 731){
         for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/3+Zreal_yai[y,a,i]))
         for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]*exp(-mat_age[a]/3)
         N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])*exp(-mat_age[nage]/3)
-      } ## end ages 
-    } ## end subareas i
-  } ## end sexes
-  
+      } ## end subareas i
+    } ## end sexes
+    
   ## SSB_y ----
   for(i in 1:nspace){
     SSB_yi[y,i] <- 0

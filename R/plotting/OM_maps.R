@@ -9,28 +9,25 @@ require(patchwork)
 require(ggsidekick)
 require(rgdal)
 library(marmap)
+# 
+# 
+# cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
+#                 "#0072B2", "#D55E00", "#CC79A7", "navy", "#F0E442" )
 
-
-cbbPalette <- c("#000000", "#009E73", "#e79f00", "#9ad0f3",
-                "#0072B2", "#D55E00", "#CC79A7", "navy", "#F0E442" )
-# fullPal <- c('pink','dodgerblue2','skyblue','gold','goldenrod','grey22') ## six subareas
-# demPal <- c('pink','dodgerblue','dodgerblue','goldenrod','goldenrod','grey22') ## 4 demographic regions
-# regPal <- c('seagreen3','seagreen3','gold','gold','grey44','grey44') ## 3 mgmt areas
 ## Updated F1 map of strata using Luke's approach ----
 
-load("./input/raw/eez_nepac_regions.rda")
+load(here('input','downloads','eez_nepac_regions.rda'))
 regions <- eez_nepac_regions
 # source("./R/breakpoints_map.R") ## makes the breakpoint lines & clips
 
 ## orthogonal clips
-load("./input/cleaned/sub_area_clips_B1.Rdata") ## default clips for original 7 areas
-load("./input/cleaned/sub_area_clips_B2.Rdata") ## default clips for original 7 areas
+load(here('input','downloads',"sub_area_clips_B1.Rdata")) ## default clips for original 7 areas
+load(here('input','downloads',"sub_area_clips_B2.Rdata")) ## default clips for original 7 areas
 
 ## 50N flat clips
-load("./input/cleaned/sub_area_clips_50N.Rdata") 
-## default clips for original 7 areas
-# load("./input/cleaned/sub_area_clips.Rdata") 
-
+load(here('input','downloads',"sub_area_clips_50N.Rdata") )
+load(here("input","downloads","n36_shape.rda"))
+load(here("input","downloads","n50_shape.rda"))
 
 ## ocean currents
 shape <- readOGR(dsn = "C:/Users/MKapur/Dropbox/UW/sab-growth/raw_data/Major_Ocean_Currents_arrowPolys_30m_8", 
@@ -42,33 +39,37 @@ currents.col <- c("#000000", "#009E73", "#0072B2","#e79f00","#e79f00")
 x1 <- rep(180, 4); x1end <- rep(190, 4)
 y1 <- rev(seq(30,35,length.out = 4))
 
-
-
 ggplot(data = regions) +
   # kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
   theme_classic(base_size = 14) +
-  geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
-  geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
   
-  ## for orthogonal
-  # geom_sf(data = B1, fill = 'dodgerblue4', alpha = 0.9, color = NA) +
-  # geom_sf(data = B2, fill = 'gold', alpha = 0.9, color = NA) +
+  ## mgmt fills
+  # geom_sf(data = clips[[1]], fill = mgmtPal[1], alpha = 0.9, color = NA) +
+  # geom_sf(data =  clips[[2]], fill = mgmtPal[1], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[3]], fill = mgmtPal[2], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[4]], fill = mgmtPal[2], alpha = 0.9, color = NA ) +
+  # geom_sf(data = clips[[5]], fill = mgmtPal[3], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[6]], fill = mgmtPal[3], alpha = 0.9,color = NA) +
   
-  ## OM strata with 50N Break
-  geom_sf(data = n50_shape, fill = 'dodgerblue4', alpha = 0.9, color = NA) +
-  geom_sf(data = n36_shape, fill = 'gold', alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[3]], fill = demPal[3], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[4]], fill = demPal[4], alpha = 0.9, color = NA ) +
-  geom_sf(data = clips[[5]], fill = demPal[5], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[6]], fill = demPal[6], alpha = 0.9,color = NA) +
+  ## subarea fills
+  geom_sf(data = clips[[1]], fill = subareaPal[1], alpha = 0.9, color = NA) +
+  geom_sf(data =  clips[[2]], fill = subareaPal[2], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[3]], fill = subareaPal[3], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[4]], fill = subareaPal[4], alpha = 0.9, color = NA ) +
+  geom_sf(data = clips[[5]], fill = subareaPal[5], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[6]], fill = subareaPal[6], alpha = 0.9,color = NA) +
   
-  ## OM strata labels
-  geom_label(data = data.frame(), aes( x = c(238, 233, 232, 225, 220, 200),
-    y = c(33, 40, 49, 52, 57, 53)),
-    label = c("C1", "C2", "B1","B2","A2", "A1") ,
-    fill = demPal[c(6:1)],
-    color = c("grey88", rep('black',3), rep('black',2))) +
+  ## stock fills
+  # geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
+  # geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[3]], fill = demPal[2], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[4]], fill = demPal[3], alpha = 0.9, color = NA ) +
+  # geom_sf(data = clips[[5]], fill = demPal[3], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[6]], fill = demPal[4], alpha = 0.9,color = NA) +
+  
 
+  ## EEZ
+  geom_sf(lwd = 1, col = '#173028', fill = 'grey88',alpha = 0.2) +
   ## show demography from growth paper
   ##R3
   # geom_sf(data =   st_union(x=clips[[2]],y=clips[[3]])  ,
@@ -90,15 +91,27 @@ ggplot(data = regions) +
   #                     'S. California Bight',
   #                     'California Current')) +
 
-  ## EEZ
-  geom_sf(lwd = 1, col = '#173028', fill = 'grey88',alpha = 0.2) +
 
+  ## OM strata labels
+  # geom_label(data = data.frame(), aes( x = c(238, 233, 232, 225, 220, 200),
+  #   y = c(33, 40, 49, 52, 57, 53)),
+  #   label = list(c(6:1),
+  #                c("C1", "C2", "B1","B2","A2", "A1"))[[1]] ,
+  #   fill = 'grey88',
+  #   color = 'black') +
+  
+  ## OM Stock labels
+  # geom_label(data = data.frame(), aes( x = c(238, 233, 223,  200),
+  #                                      y = c(33, 48,  54, 53)),
+  #            label = list(c(4:1),c("R1", "R2", "R3","R4"))[[1]] ,
+  #            fill = 'grey88',
+  #            color = 'black') +
   coord_sf(xlim = c(165, 245), ylim = c(26, 65)) +
   labs(x ="",y="")
 
 # Save
 
-ggsave(here::here("figs", "map-EEZ_strata_lab.png"), 
+ggsave(here::here("figs", "map-EEZ_strata_nolab.png"), 
        width = 10, height = 8)
 
 ggsave(last_plot(),

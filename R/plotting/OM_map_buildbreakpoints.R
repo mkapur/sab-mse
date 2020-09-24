@@ -14,13 +14,16 @@ n36 <- tibble(X = seq(-120 + 360, -129 + 360, length.out = 100),
 n36_poly <- st_linestring(n36)
 n36_geom <- st_sfc(list(n36_poly), crs = "+proj=longlat +datum=WGS84 +no_defs")
 n36_shape <- st_sf(n36_geom)
+save(n36_shape, file = here("input","downloads","n36_shape.rda"))
+
+
 # 50 N
 n50 <- tibble(X = seq(-123 + 360, -138 + 360, length.out = 100),
 							Y = rep(50, 100)) %>% as.matrix()
 n50_poly <- st_linestring(n50)
 n50_geom <- st_sfc(list(n50_poly), crs = "+proj=longlat +datum=WGS84 +no_defs")
 n50_shape <- st_sf(n50_geom)
-
+save(n50_shape, file = here("input","downloads","n50_shape.rda"))
 
 # 50 BC
 n50BC <- tibble(X = seq(-125 + 360, -138 + 360, length.out = 100),

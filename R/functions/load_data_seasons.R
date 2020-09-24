@@ -5,20 +5,10 @@ load_data_seasons <- function(nspace = 6,
                               myear = 2019,
                               move = TRUE, 
                               LBins = 81,
-
-                              # movemaxinit = 0.35, 
-                              # movefiftyinit = 6,
-                              # nsurvey = 2, 
                               logSDR = 1.4, 
                               bfuture = 0.5,
-                              # moveout = 0.85, 
-                              # movesouth = 0.05,
-                              # moveinit = NA, 
-                              # moveslope = 0.9,
-                              # selectivity_change = 0,
                               yr_future  = 0,
                               b = 0.5
-                              # sel_hist = 1
                               ){
   
   #' @nspace = Spatial areas

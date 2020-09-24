@@ -29,7 +29,7 @@ pNzeroF <- N_0ais[,,1] %>% data.frame() %>%
   labs(x = 'Age in Year 0',y = 'Unfished Numbers', color = 'subarea') +
   ggsidekick::theme_sleek()+theme(legend.position = 'none')
 
-pNzeroM <- sim.data$N_0ais[,,2] %>% data.frame() %>%
+pNzeroM <- N_0ais[,,2] %>% data.frame() %>%
   mutate('Age' = 1:71) %>%
   reshape2::melt(id = c('Age')) %>%
   ggplot(., aes(x = Age, y = value, color = variable )) +
@@ -74,7 +74,7 @@ for(i in 1:6){
 dev.off()
 
 ## total nums in area by year
-png(file = here('figs','N_iy.png'),
+png(file = here('figs','N_season_iy.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
 for(i in 1:6){
@@ -88,10 +88,14 @@ for(i in 1:6){
        xlim = c(0,nyear),
        xlab = "Model Year", 
        ylab = 'Numbers (M+F)')
-  # lines(rowSums(N_yais_beg[,,i,2]),
-  #      type = 'l',
-  #      lwd = 3, 
-  #      col =subareaPal[i])
+  lines(rowSums(N_yais_mid[,,i,]),
+       type = 'l',
+       lwd = 3,
+       col =subareaPal[i])
+  lines(rowSums(N_yais_end[,,i,]),
+        type = 'l',
+        lwd = 3,
+        col =subareaPal[i])
 }
 dev.off()
 

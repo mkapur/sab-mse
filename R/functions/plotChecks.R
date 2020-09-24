@@ -73,7 +73,7 @@ for(i in 1:6){
 }
 dev.off()
 
-## total nums in area by year
+## total nums in area by season ----
 png(file = here('figs','N_season_iy.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
@@ -81,21 +81,25 @@ for(i in 1:6){
   plot(rowSums(N_yais_beg[,,i,]),
        type = 'l',
        lwd = 2, 
-       col =subareaPal[i],
+       col = scales::alpha(subareaPal[i],0.2),
        main = inames[i], 
-       col.main =subareaPal[i], 
-       ylim = c(0,150000),
+       col.main = subareaPal[i], 
+       ylim = c(0,400000),
        xlim = c(0,nyear),
        xlab = "Model Year", 
        ylab = 'Numbers (M+F)')
   lines(rowSums(N_yais_mid[,,i,]),
        type = 'l',
        lwd = 3,
-       col =subareaPal[i])
+       col = scales::alpha(subareaPal[i],0.4))
   lines(rowSums(N_yais_end[,,i,]),
         type = 'l',
         lwd = 3,
-        col =subareaPal[i])
+        col = scales::alpha(subareaPal[i],0.8))
+  legend("topright",col = c(scales::alpha(subareaPal[i],0.2),
+                            scales::alpha(subareaPal[i],0.4),
+                            scales::alpha(subareaPal[i],0.8)), 
+         legend = c("beg","mid","end"), lty =1, lwd = 5)
 }
 dev.off()
 
@@ -287,9 +291,7 @@ png(here("figs","LAA_Dist_A2.png"),
 do.call(grid.arrange,pA2)
 dev.off()
 
-## CATCH pred by fleet ----
-
-
+## catch pred by fleet ----
 catch_yf_predt <- data.frame(catch_yf_pred)
 
 catch_yf_predt <- catch_yf_predt %>%

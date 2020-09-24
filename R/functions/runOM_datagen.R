@@ -217,7 +217,7 @@ runOM_datagen <- function(df, seed = 731){
               exp(-kappa_yk[1,phi_ik2[i],s]*a)
             Length_yais_mid[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
               exp(-0.5*kappa_yk[1,phi_ik2[i],s]*a)
-            N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-mat_age[a]/3)
+            N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-mat_age[a]/2)
           } #// end ages
           ## // plus group includes those already at A AND age into A
           for(j in 1:nspace){   
@@ -265,8 +265,8 @@ runOM_datagen <- function(df, seed = 731){
               NCome = NCome + X_ijas[j,i,a,s]*N_yais_beg[y,a,j,s]; ### actual numbers incoming
             }
           } ### end subareas j         
-          N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]/3) 
-          # N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]/3)
+          N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]/2) 
+          # N_yais_beg[y+1,a,i,s] = ((1-pLeave)*N_yais_beg[y,a-1,i,s] + NCome)*exp(-mat_age[a]/2)
         } ## end ages for N
         
         for(a in 6:nage-1){
@@ -619,7 +619,7 @@ runOM_datagen <- function(df, seed = 731){
                      LAA ^
                      wtatlen_kab[phi_ik2[i], 2] )
             
-            Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + mat_age[a]/3
+            Zreal_yai[y,a,i]  <-  F_area_yfi[y,fish_flt,i] + mat_age[a]/2
 
             catch_yaif_pred[y,a,i,fish_flt] <-       catch_yaif_pred[y,a,i,fish_flt] +(F_area_yfi[y,fish_flt,i]/
                                                   (  Zreal_yai[y,a,i] ))*(1-exp(-  Zreal_yai[y,a,i] ))*
@@ -653,8 +653,8 @@ runOM_datagen <- function(df, seed = 731){
     ## fill EOY and beginning of next year using Ztuned
     for(s in 1:2){
       for(i in 1:nspace){
-        for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/3+Zreal_yai[y,a,i]))
-        for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]*exp(-mat_age[a]/3)
+        for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/2+Zreal_yai[y,a,i]))
+        for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]*exp(-mat_age[a]/2)
         N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])*exp(-mat_age[nage]/3)
       } ## end subareas i
     } ## end sexes

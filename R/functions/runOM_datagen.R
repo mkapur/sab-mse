@@ -43,7 +43,7 @@ runOM_datagen <- function(df, seed = 731){
   ## Biology
   M_k <- df$M_k
   # M <- rep(0.2,nage) #M0*Msel # Naural mortality at age
-  mat_age <- rep(0.15, nage) ## mortality
+  mat_age <- rep(0.05, nage) ## mortality
   wtatlen_kab <- df$wtatlen_kab
   mat_ak <- df$mat_ak ## maturity by age and stock
   load(here('input','input_data','unfished_ALK.rdata')) ## from prelim runs, for ssb0
@@ -191,7 +191,7 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  # for(y in 1:3){
+  # for(y in 1:10){
   for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
@@ -368,7 +368,7 @@ runOM_datagen <- function(df, seed = 731){
     # for(fish_flt in 1:nfleets_fish){
       catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <-
         catch_yaif_pred[y,,,fish_flt] <- 0
-      if(is.na(catch_yf_obs[y, fish_flt+1])) next() ## skip if no catch
+      if(is.na(catch_yf_obs[y, fish_flt+1])  | catch_yf_obs[y, fish_flt+1] == 0 ) next() ## skip if no catch
       ## putative biomass available
       denom = 0
       for(i in 1:nspace){

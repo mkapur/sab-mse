@@ -338,10 +338,7 @@ Type objective_function<Type>::operator() ()
       } // end space
     } // end stocks
   } // end sex
-  
-  
-  
-  // 
+
   for(int y=0;y<(tEnd);y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -388,41 +385,44 @@ Type objective_function<Type>::operator() ()
       for(int i=0;i<(nspace);i++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
         // linear growth below A4 as in synthesis
-        if(L1_yk(y,phi_ik2(i),s) < 3) {
+        if(L1_yk(y,phi_ik2(i),s) < 3){
           Type lenstep = L1_yk(y,phi_ik2(i),s);
           Type lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         } else if(L1_yk(y,phi_ik2(i),s) >= 3){
           Type lenstep = 3.0;
           Type lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         }
-        for(int a=1;a<4;a++){
+        for(int a=0;a<4;a++){
           Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
         } // end linear age
-    
-        // Length_yais_beg(y,4,i,s) <-  L1_yk(y,phi_ik2(i),s);
-        // Length_yais_mid(y,0:4,i,s) <- Length_yais_beg(y,0:4,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,0:4,i,s)*
-        //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
-    //     for(int a=1;a<(nage-1);a++){
-    //       Type pLeave = 0.0; Type NCome = 0.0; 
-    //       for(int j=0;j<(nspace);j++){ 
-    //         if(i != j){
-    //           pLeave += X_ija(i,j,a); 
-    //           NCome += X_ija(j,i,a)*N_yais_beg(y,a,j); 
-    //         } // end i != j
-    //       } // end subareas j            
-    //       N_yais_mid(y,a,i) = N_yais_beg(y,a,i)*exp(-0.4); // no movement?
-    //       N_yais_beg(y+1,a,i) = ((1-pLeave)*N_yais_beg(y,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
-    //       // as in document: next year A1 == this year A0 plus growth
-    //       Length_yai_beg(y+1,a,i) = Length_yai_beg(y,a-1,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i))));
-    //       Length_yai_mid(y,a,i) = Length_yai_beg(y,a,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a,i))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i))));
-    //     } // end ages
-    //     // plus groups
-    //     Type pLeave = 0.0; Type NCome = 0.0; 
-    //     for(int j=0;j<(nspace);j++){ 
-    //       if(i != j){
-    //         pLeave += X_ija(i,j,nage-1); 
-    //         NCome += X_ija(j,i,nage-1)*(N_yais_beg(y,nage-1,j) + N_yais_beg(y,nage-2,j)); 
-    //       } // end i != j
+        Length_yais_beg(y,4,i,s) <-  L1_yk(y,phi_ik2(i),s);
+        for(int a=0;a<4;a++){
+          Length_yais_mid(y,a,i,s) <- Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
+            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
+        } // end linear age
+        for(int a=1;a<(nage-1);a++){
+          Type pLeave = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              pLeave += X_ijas(i,j,a,s);
+              NCome += X_ijas(j,i,a,s)*N_yais_beg(y,a,j,s);
+            } // end i != j
+          } // end subareas j
+          N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mat_age(a)/2);
+        } // end ages for N
+        for(int a=5;a<(nage-1);a++){
+          Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg(y,a-1,i,s))*
+            (1-exp(-kappa_yk[y,phi_ik2[i],s]));
+          Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+        } 
+        // plus groups
+        Type pLeave = 0.0; Type NCome = 0.0;
+        for(int j=0;j<(nspace);j++){
+          if(i != j){
+            pLeave += X_ija(i,j,nage-1);
+            NCome += X_ija(j,i,nage-1)*(N_yais_beg(y,nage-1,j) + N_yais_beg(y,nage-2,j));
+          } // end i != j
     //     } // end subareas j
     //     N_yais_mid(y,nage-1,i) = N_yais_beg(y,nage-1,i)*exp(-0.4);
     //     N_yais_beg(y+1,nage-1,i) =   ((1-pLeave)*(N_yais_beg(y,nage-1,i)+N_yais_beg(y,nage-2,i)) + NCome)*exp(-0.4);

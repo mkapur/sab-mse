@@ -52,7 +52,6 @@ for(i in 1:6){
   plot(N_yais_beg[1,,i,1],
        type = 'l',
        lwd = 2, 
-
        col = 'black',
        main = inames[i], 
        col.main =subareaPal[i], 
@@ -290,6 +289,23 @@ png(here("figs","LAA_Dist_A2.png"),
     height = 10, width = 10, unit = 'in', res = 420)
 do.call(grid.arrange,pA2)
 dev.off()
+
+## F time series ----
+# by fleet and subarea
+fts <-data.frame(Freal_yf) 
+names(fts) <- fltnames_fish
+
+fts %>% mutate(Year = year)%>%
+  melt(id = 'Year') %>%
+  ggplot(., aes(x = Year, y = value, col = variable)) +
+  geom_line(lwd = 1.1) +
+  scale_color_manual(values = fishfltPal) +
+  theme_sleek() + 
+  theme(legend.position = 'none')+
+  facet_wrap(.~variable, scales = 'free_y')
+  labs(y = 'F', color = 'Fishing Fleet')
+
+
 
 ## catch pred by fleet ----
 catch_yf_predt <- data.frame(catch_yf_pred)

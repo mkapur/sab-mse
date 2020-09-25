@@ -44,12 +44,12 @@ ggsave(pNzeroF  | pNzeroM,
        width = 6, height = 4, unit = 'in',
        dpi = 420)
 
-## N at age by area by year (females) ----
+## N_AY----
 png(file = here('figs','N_age_years1-15.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
 for(i in 1:6){
-  plot(N_yais_beg[1,,i,1],
+  plot(N_yais_end[1,,i,1],
        type = 'l',
        lwd = 2, 
        col = 'black',
@@ -62,8 +62,8 @@ for(i in 1:6){
   box(which = 'plot', lty = 'solid', 
       col = subareaPal[i],
       lwd = 2)
-  for (y in 2:15) {
-    lines(N_yais_beg[y, , 1, 1],
+  for (y in 2:tEnd) {
+    lines(N_yais_end[y, , 1, 1],
           # lty = c(2:6)[y],
           col = gray.colors(25, start = 0.1, end = 0.9)[y],
           lwd = 2)
@@ -72,7 +72,7 @@ for(i in 1:6){
 }
 dev.off()
 
-## total nums in area by season ----
+## N_yseason ----
 png(file = here('figs','N_season_iy.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
@@ -98,7 +98,9 @@ for(i in 1:6){
   legend("topright",col = c(scales::alpha(subareaPal[i],0.2),
                             scales::alpha(subareaPal[i],0.4),
                             scales::alpha(subareaPal[i],0.8)), 
-         legend = c("beg","mid","end"), lty =1, lwd = 5)
+         legend = c("beg",
+                    "mid (move)",
+                    "end (fished)"), cex = 0.7, lty =1, lwd = 5)
 }
 dev.off()
 
@@ -183,8 +185,8 @@ ggsave(pSRR,
        width = 6, height = 6, unit = 'in',
        dpi = 420)
 
-## deterministic/expected length at ages
-pLAA1F <- Length_yais_beg[,,1,1] %>% 
+## LAA y
+pLAA1F <- Length_yais_end[,,1,1] %>% 
   data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
   reshape2::melt(id = c('Yr')) %>%

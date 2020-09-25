@@ -582,6 +582,7 @@ mat_ak %>%
   data.frame() %>%
   mutate(age = 0:70) %>%
   melt(id = 'age') %>%
+  filter(age < 20) %>%
   ggplot(., aes(x = age, y = value, color = variable)) +
   geom_line(lwd = 1.1) +
   scale_color_manual(values = rev(demPal), labels =  paste0('R',1:4)) +
@@ -934,6 +935,37 @@ surv_vals %>%
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','OM_indices-09-22-2020.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
+
+survey%>%
+  mutate(Year = 1960:2019) %>%  
+  melt(id = c('Year')) %>% 
+  merge(., 
+        read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
+          distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
+          filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
+          # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
+          mutate(value = Estimate_metric_tons,
+                 sigma = SD_mt, 
+                 fleet = Fleet, 
+                 mgmt = fleet, 
+                 type = 'survey') %>%
+          select(Year, value, sigma, fleet) %>%
+          bind_rows(bcnom) %>%
+          select(-value) %>%
+          pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
+          select(-Year) , 
+        all.x = TRUE) %>%
+  mutate(lci = ifelse(value.y != 317, round(value.x-1.96*exp(value.y)), value.x-317),
+         uci = ifelse(value.y != 317, round(value.x+1.96*exp(value.y)), value.x+317)) %>%
+
+  ggplot(., aes(x = Year, y = value.x, color = variable)) +
+  theme_sleek() + theme(legend.position = c(0.8,0.8)) +
+  scale_color_manual(values = survfltPal)+
+  scale_x_continuous(breaks = seq(1970,2020,10)) +
+  geom_line(lwd = 1) +
+  geom_ribbon(aes(ymin = lci, ymax = uci, color = variable, fill = variable)) +
+  labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') +
+  labs(subtitle = "BC_EARLY has been multiplied by 1000 for comparison")
 
 ## Aging error ----
 ## from MH on google drive; just use the "first" for each mgmt region

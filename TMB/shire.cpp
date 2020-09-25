@@ -382,7 +382,64 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end y == 0
     
-  }
+    
+    //   // N- and Nominal Length - at-age for the middle of this year and beginning of next
+    for(int s=0;s<2;s++){
+      for(int i=0;i<(nspace);i++){
+        N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
+        // linear growth below A4 as in synthesis
+        if(L1_yk(y,phi_ik2(i),s) < 3) {
+          Type lenstep = L1_yk(y,phi_ik2(i),s);
+          Type lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        } else if(L1_yk(y,phi_ik2(i),s) >= 3){
+          Type lenstep = 3.0;
+          Type lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        }
+     
+          // Length at the start of the year (cm)
+          // Length_yais_beg(y,0:3,i,s) <- len.step(0)+len.slope*(seq(0, (3 + 0), 1) - 1)(0:3) 
+        // Length_yais_beg(y,4,i,s) <- L1_yk[y,phi_ik2[i],s] 
+          // Length_yais_mid(y,0:4,i,s) <- Length_yais_beg(y,0:4,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,0:4,i,s)*
+            // (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))
+    //     for(int a=1;a<(nage-1);a++){
+    //       Type pLeave = 0.0; Type NCome = 0.0; 
+    //       for(int j=0;j<(nspace);j++){ 
+    //         if(i != j){
+    //           pLeave += X_ija(i,j,a); 
+    //           NCome += X_ija(j,i,a)*N_yais_beg(y,a,j); 
+    //         } // end i != j
+    //       } // end subareas j            
+    //       N_yais_mid(y,a,i) = N_yais_beg(y,a,i)*exp(-0.4); // no movement?
+    //       N_yais_beg(y+1,a,i) = ((1-pLeave)*N_yais_beg(y,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
+    //       // as in document: next year A1 == this year A0 plus growth
+    //       Length_yai_beg(y+1,a,i) = Length_yai_beg(y,a-1,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i))));
+    //       Length_yai_mid(y,a,i) = Length_yai_beg(y,a,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a,i))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i))));
+    //     } // end ages
+    //     // plus groups
+    //     Type pLeave = 0.0; Type NCome = 0.0; 
+    //     for(int j=0;j<(nspace);j++){ 
+    //       if(i != j){
+    //         pLeave += X_ija(i,j,nage-1); 
+    //         NCome += X_ija(j,i,nage-1)*(N_yais_beg(y,nage-1,j) + N_yais_beg(y,nage-2,j)); 
+    //       } // end i != j
+    //     } // end subareas j
+    //     N_yais_mid(y,nage-1,i) = N_yais_beg(y,nage-1,i)*exp(-0.4);
+    //     N_yais_beg(y+1,nage-1,i) =   ((1-pLeave)*(N_yais_beg(y,nage-1,i)+N_yais_beg(y,nage-2,i)) + NCome)*exp(-0.4);
+    //     // plus group weighted average (we already have the numbers at age)
+    //     Length_yai_beg(y,nage-1,i) = (N_yais_beg(y,nage-2,i)*
+    //       (Length_yai_beg(y,nage-2,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-2,i)*(1-exp(-kappa_yk(y,phi_ik2(i)))))) +
+    //       N_yais_beg(y,nage-1,i)*
+    //       (Length_yai_beg(y,nage-1,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i))))))/
+    //         (N_yais_beg(y,nage-2,i) + N_yais_beg(y,nage-1,i));
+    //     
+    //     Length_yai_mid(y,nage-1,i) = (N_yais_mid(y,nage-2,i)*
+    //       (Length_yai_beg(y,nage-2,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-2,i)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i)))))) +
+    //       N_yais_mid(y,nage-1,i)*
+    //       (Length_yai_beg(y,nage-1,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-1,i))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i))))))/
+    //         (N_yais_mid(y,nage-2,i) + N_yais_mid(y,nage-1,i));
+      } // end subareas i
+    } // end sexes
+  } // temporary yend
   //   
   //   // calculate SSB using N at beginning of year
   // 
@@ -408,45 +465,7 @@ Type objective_function<Type>::operator() ()
   //     N_yais_beg(y,0,i) =  R_yi(y,i); // fill age-0 recruits
   //   } // end space
   //   
-  //   // N- and Nominal Length - at-age for the middle of this year and beginning of next
-  //   for(int i=0;i<(nspace);i++){ 
-  //     for(int a=1;a<(nage-1);a++){
-  //       Type pLeave = 0.0; Type NCome = 0.0; 
-  //       for(int j=0;j<(nspace);j++){ 
-  //         if(i != j){
-  //           pLeave += X_ija(i,j,a); 
-  //           NCome += X_ija(j,i,a)*N_yais_beg(y,a,j); 
-  //         } // end i != j
-  //       } // end subareas j            
-  //       N_yais_mid(y,a,i) = N_yais_beg(y,a,i)*exp(-0.4); // no movement?
-  //       N_yais_beg(y+1,a,i) = ((1-pLeave)*N_yais_beg(y,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
-  //       // as in document: next year A1 == this year A0 plus growth
-  //       Length_yai_beg(y+1,a,i) = Length_yai_beg(y,a-1,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i))));
-  //       Length_yai_mid(y,a,i) = Length_yai_beg(y,a,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a,i))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i))));
-  //     } // end ages
-  //     // plus groups
-  //     Type pLeave = 0.0; Type NCome = 0.0; 
-  //     for(int j=0;j<(nspace);j++){ 
-  //       if(i != j){
-  //         pLeave += X_ija(i,j,nage-1); 
-  //         NCome += X_ija(j,i,nage-1)*(N_yais_beg(y,nage-1,j) + N_yais_beg(y,nage-2,j)); 
-  //       } // end i != j
-  //     } // end subareas j
-  //     N_yais_mid(y,nage-1,i) = N_yais_beg(y,nage-1,i)*exp(-0.4);
-  //     N_yais_beg(y+1,nage-1,i) =   ((1-pLeave)*(N_yais_beg(y,nage-1,i)+N_yais_beg(y,nage-2,i)) + NCome)*exp(-0.4);
-  //     // plus group weighted average (we already have the numbers at age)
-  //     Length_yai_beg(y,nage-1,i) = (N_yais_beg(y,nage-2,i)*
-  //       (Length_yai_beg(y,nage-2,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-2,i)*(1-exp(-kappa_yk(y,phi_ik2(i)))))) +
-  //       N_yais_beg(y,nage-1,i)*
-  //       (Length_yai_beg(y,nage-1,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i))))))/
-  //         (N_yais_beg(y,nage-2,i) + N_yais_beg(y,nage-1,i));
-  //     
-  //     Length_yai_mid(y,nage-1,i) = (N_yais_mid(y,nage-2,i)*
-  //       (Length_yai_beg(y,nage-2,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-2,i)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i)))))) +
-  //       N_yais_mid(y,nage-1,i)*
-  //       (Length_yai_beg(y,nage-1,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-1,i))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i))))))/
-  //         (N_yais_mid(y,nage-2,i) + N_yais_mid(y,nage-1,i));
-  //   } // end subareas i
+  
   //     
   //     // reweight length-at-age based on movement from other stocks
   //     for(int i=0;i<(nspace);i++){

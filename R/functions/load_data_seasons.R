@@ -90,10 +90,9 @@ load_data_seasons <- function(nspace = 6,
   
   ## Selex: still need SURVEY ----
   load(here('input','input_data',"OM_fish_selex_yafs.rdata"))
-  load(here('input','input_data',"OM_survey_selex_yafs.rdata"))
+  load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
   
   # Survey ----
-  # survey <- read.csv(here("input","data",'acoustic survey.csv'))
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma.csv'))
 

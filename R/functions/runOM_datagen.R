@@ -218,8 +218,9 @@ runOM_datagen <- function(df, seed = 731){
             N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-mat_age[a]/2)
           } #// end ages
           ## // plus group includes those already at A AND age into A
+		      pLeave = 0.0;  NCome = 0.0; # // reset for new age
           for(j in 1:nspace){   
-            pLeave = 0.0;  NCome = 0.0; # // reset for new age
+        
             if(i != j){
               pLeave = pLeave + X_ijas[i,j,nage,s]
               NCome = NCome + X_ijas[j,i,nage,s]*(Ninit_ais[nage,j,s] + Ninit_ais[nage-1,j,s])  #// if M becomes spatial use M_aj here

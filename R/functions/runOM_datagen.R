@@ -10,6 +10,9 @@ runOM_datagen <- function(df, seed = 731){
   nstocks <- df$nstocks
   nage <- df$nage
   age <- df$age
+  nyear <- df$tEnd
+  year <- df$years
+  tEnd <- length(df$years)
   
   nfleets_surv <- df$nfleets_surv
   nfleets_fish <- df$nfleets_fish
@@ -24,10 +27,6 @@ runOM_datagen <- function(df, seed = 731){
   selType_surv = df$selType_surv
   
   nmgmt_reg <- ncol(df$phi_fm)
-  
-  nyear <- df$tEnd
-  year <- df$years
-  tEnd <- length(df$years)
   
   ## these are TMB-ready; need to add one for indexing to work
   phi_if_surv <- df$phi_if_surv 
@@ -195,13 +194,12 @@ runOM_datagen <- function(df, seed = 731){
   # for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
-    if(y == 1){
-      # for(k in 1:nstocks){   
+    if(y == 1){ 
       for(i in 1:nspace){
         for(s in 1:2){ ## sexes
           Length_yais_beg[1,1,i,s] <- L1_yk[y,phi_ik2[i],s]
           N_yais_beg[1,1,i,s] <- Ninit_ais[1,i,s]
-          N_yais_mid[1,1,i,s] <- N_yais_beg[1,1,i,s]*exp(-mat_age[1]/3)
+          N_yais_mid[1,1,i,s] <- N_yais_beg[1,1,i,s]*exp(-mat_age[1]/2)
           for(a in 2:(nage-1)){ ## fill A0 in position 1 later
             for(j in 1:nspace){           
               pLeave = 0.0;  NCome = 0.0; # // reset for new age
@@ -227,7 +225,7 @@ runOM_datagen <- function(df, seed = 731){
               NCome = NCome + X_ijas[j,i,nage,s]*(Ninit_ais[nage,j,s] + Ninit_ais[nage-1,j,s])  #// if M becomes spatial use M_aj here
             }
           } #// end subareas j
-          N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-mat_age[nage]/3)
+          N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-mat_age[nage]/2)
           
           Length_yais_beg[y,nage,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
             exp(-kappa_yk[1,phi_ik2[i],s]*nage-1)
@@ -247,7 +245,7 @@ runOM_datagen <- function(df, seed = 731){
     # at-age for the middle of this year and beginning of next 
     for(s in 1:2){
       for(i in 1:nspace){
-        N_yais_mid[y,1,i,s] <- N_yais_beg[y,1,i,s]*exp(-mat_age[1]/3)
+        N_yais_mid[y,1,i,s] <- N_yais_beg[y,1,i,s]*exp(-mat_age[1]/2)
         # Length_yais_beg[y,1,i,s] <- L1_yk[y,phi_ik2[i],s]
         ## linear growth below A4 as in synthesis
         len.step <- ifelse( L1_yk[y,phi_ik2[i],s] < 4,  L1_yk[y,phi_ik2[i],s], 4)  ## lmin is size at age 0 (?)
@@ -284,9 +282,9 @@ runOM_datagen <- function(df, seed = 731){
             NCome <- NCome + X_ijas[j,i,nage-1,s]*(N_yais_beg[y,nage,j,s] + N_yais_beg[y,nage-1,j,s]) 
           } ## end i != j
         } ## end subareas j
-        N_yais_mid[y,nage,i,s] = N_yais_beg[y,nage,i,s]*exp(-mat_age[nage]/3)
+        N_yais_mid[y,nage,i,s] = N_yais_beg[y,nage,i,s]*exp(-mat_age[nage]/2)
         # if(y < tEnd){
-        # N_yais_beg[y+1,nage,i,s] =   ((1-pLeave)*( N_yais_beg[y,nage,i,s]+ N_yais_beg[y,nage-1,i,s]) + NCome)*exp(-mat_age[nage]/3);
+        # N_yais_beg[y+1,nage,i,s] =   ((1-pLeave)*( N_yais_beg[y,nage,i,s]+ N_yais_beg[y,nage-1,i,s]) + NCome)*exp(-mat_age[nage]/2);
         ## plus group weighted average (we already have the numbers at age)
         Length_yais_beg[y+1,nage,i,s] = ( N_yais_beg[y+1,nage-1,i,s]*
                                             (Length_yais_beg[y,nage-1,i,s]+
@@ -660,7 +658,7 @@ runOM_datagen <- function(df, seed = 731){
       for(i in 1:nspace){
         for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/2+Zreal_yai[y,a,i]))
         for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]*exp(-mat_age[a]/2)
-        N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])*exp(-mat_age[nage]/3)
+        N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])*exp(-mat_age[nage]/2)
       } ## end subareas i
     } ## end sexes
     

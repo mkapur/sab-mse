@@ -33,28 +33,24 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   DATA_ARRAY(phi_ik); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
-  
   DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
   
   // biology // 
-  // PARAMETER_VECTOR(Rin); // Time varying stuff
   DATA_INTEGER(nage); // Plus group
   DATA_VECTOR(age); // ages
-  DATA_VECTOR(Msel); // How mortality scales with age
   DATA_VECTOR(mat_age); // Maturity ogive
-  PARAMETER(logMinit); // Natural mortality
-  
+
   // biology storage
-  array<Type> Ninit_ai(nage,nspace); // initial numbers at age in subarea, just once
-  array<Type> N_0ai(nage, nspace); // numbers in year 0 at age in subarea
+  array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once
+  array<Type> N_0ais(nage, nspace,2); // numbers in year 0 at age in subarea
   vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
   vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
   
-  array<Type> N_yai_beg( tEnd+1, nage, nspace); N_yai_beg.setZero(); 
-  array<Type> N_yai_mid( tEnd+1, nage, nspace); N_yai_mid.setZero(); 
+  array<Type> N_yais_beg( tEnd+1, nage, nspace,2); N_yai_beg.setZero(); 
+  array<Type> N_yais_mid( tEnd+1, nage, nspace,2); N_yai_mid.setZero(); 
   array<Type> SSB_yk(tEnd,nstocks);
   array<Type> SSB_yi(tEnd,nspace);
-  array<Type> survey_bio_f_est(tEnd,nfleets_surv); // this is actually predicted
+  array<Type> surv_yf_pred(tEnd,nfleets_surv); // this is actually predicted
   array<Type> Zsave(nage,tEnd);
   
   // movement //
@@ -83,7 +79,6 @@ Type objective_function<Type>::operator() ()
   // repro //
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER_VECTOR(logh_k); // Steepness by stock
-  DATA_INTEGER(sum_zero); // should rec dev's sum to zero?
   DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
   
   // repro storage
@@ -92,24 +87,22 @@ Type objective_function<Type>::operator() ()
   array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
   
   // observations //
-  DATA_INTEGER(year_sel);
-  DATA_INTEGER(selYear);
-  DATA_SCALAR(logQ);
-  DATA_VECTOR(b); // bias adjustment factor
+  PARAMETER_VECTOR(b); // bias adjustment factor
   DATA_VECTOR(years);
-  DATA_VECTOR(flag_sel);
-  DATA_INTEGER(age_maxage); // Last age included in age comps
-  DATA_VECTOR(ss_catch); // age comp sample size
-  DATA_VECTOR(flag_catch); // Years age was sampled
-  DATA_ARRAY(age_catch); // Age comps in catch -- should be by fleet
+  DATA_INTEGER(nage); // Last age included in age comps
+  DATA_VECTOR(catch_yf_obs); 
+  // DATA_ARRAY(age_catch); // Age comps in catch -- should be by fleet
   
   // Selectivity
+  DATA_IVECTOR(selType_fish); // 1 == AGESEL, 2 = LENSEL
+  DATA_IVECTOR(selType_surv); // 1 == AGESEL, 2 = LENSEL
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (slx_type controls parameterization)
   PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (slx_type controls parameterization)
+  
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   DATA_INTEGER(slx_type)
     // Predicted selectivity
-    array<Type> fsh_slx(nyr, nage, nsex);           // Fishery selectivity-at-age by sex (on natural scale)
+  array<Type> fsh_slx(nyr, nage, nsex);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx(nyr, nage, nsex);           // Survey selectivity-at-age by sex(on natural scale)
   array<Type>selectivity_save(nage,tEnd);
   // Survey Biomass
@@ -121,7 +114,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logSDsurv); // Survey uncertainty
   
   // Survey Comps
-  DATA_VECTOR(ss_survey); // Age comp sample size
+  DATA_VECTOR(survey); // Age comp sample size
   DATA_VECTOR(flag_surv_acomp); // Were ages sampled this year
   DATA_ARRAY(age_survey); // Age compositions, age x year
   DATA_ARRAY(age_error); // Age compositions, age x fleet (row 1 = true age, row 2= biased age, row 3 = sd)

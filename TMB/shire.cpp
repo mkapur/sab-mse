@@ -37,9 +37,9 @@ Type objective_function<Type>::operator() ()
 
   // DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   // DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
-  // DATA_ARRAY(phi_ik); // 0/1 nesting of subareas i into stocks k (rows)
-  // DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
-  // DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
+  DATA_ARRAY(phi_ik); // 0/1 nesting of subareas i into stocks k (rows)
+  DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
+  DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
   // 
   // biology // 
   DATA_VECTOR(mat_age); // natural mortality at age
@@ -50,22 +50,25 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
   
   // growth //
-  // DATA_ARRAY(Linf_yk); // sex, stock, year specific
-  // DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
-  // DATA_ARRAY(kappa_yk);
+  DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs
+  DATA_ARRAY(wtatlen_kab); // aL^b values by stock
+  DATA_ARRAY(Linf_yk); // sex, stock, year specific
+  DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
+  DATA_ARRAY(kappa_yk);
   // DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
-  // DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
-  // DATA_INTEGER(LBins); // maximum length bin in CM
+  DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
+  DATA_INTEGER(LBins); // maximum length bin in CM
   
-  // array<Type> Length_yai_beg(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
-  // array<Type> Length_yai_mid(tEnd+1,nage,nspace); // placeholder for true lengths-at-age
-  // array<Type> LengthAge_alyi_beg(nage,LBins,tEnd+1,nspace); // placeholder for true age-length dist
-  // array<Type> LengthAge_alyi_mid(nage,LBins,tEnd+1,nspace); // placeholder for true age-length dist
+  array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
 
   // repro //
-  // PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  // PARAMETER_VECTOR(logh_k); // Steepness by stock
+  PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
+  PARAMETER_VECTOR(logh_k); // Steepness by stock
   // DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
+  DATA_ARRAY(mat_ak); // maturity at age for stock
   
   // repro storage
   vector<Type> R(tEnd);
@@ -114,7 +117,7 @@ Type objective_function<Type>::operator() ()
   // PARAMETER_VECTOR(psel_fish);
   // PARAMETER_VECTOR(psel_surv);
   // PARAMETER_VECTOR(F0);
-  // PARAMETER_ARRAY(PSEL); // Time varying selectivity
+  // PARAMETER_ARRAY(PSEL); // y varying selectivity
   
   // Catches
   // DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
@@ -146,22 +149,23 @@ Type objective_function<Type>::operator() ()
   // biology storage
   array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once
   array<Type> N_0ais(nage, nspace,2); // numbers in year 0 at age in subarea
-  // vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
-  // vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
-  // array<Type> N_yais_beg( tEnd+1, nage, nspace,2); N_yai_beg.setZero(); 
-  // array<Type> N_yais_mid( tEnd+1, nage, nspace,2); N_yai_mid.setZero(); 
-  // array<Type> SSB_yk(tEnd,nstocks);
-  // array<Type> SSB_yi(tEnd,nspace);
+  vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
+  vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
+  array<Type> N_yais_beg( tEnd+1, nage, nspace,2); N_yais_beg.setZero();
+  array<Type> N_yais_mid( tEnd+1, nage, nspace,2); N_yais_mid.setZero();
+  array<Type> N_yais_end( tEnd+1, nage, nspace,2); N_yais_end.setZero();
+  array<Type> SSB_yk(tEnd,nstocks);
+  array<Type> SSB_yi(tEnd,nspace);
   // array<Type> surv_yf_pred(tEnd,nfleets_surv); // this is actually predicted
   // array<Type> Zsave(nage,tEnd);
   
-  // PARAMETER(logSDR);
+  PARAMETER(logSDR);
   // PARAMETER(logphi_survey);
   
   // Transform out of log space
   // Type SDsurv = exp(logSDsurv);
   // Type SDcatch = exp(logSDcatch);
-  // Type SDR = exp(logSDR);
+  Type SDR = exp(logSDR);
   vector<Type> R_0k = exp(logR_0k);
   vector<Type> h_k = exp(logh_k);
   // 
@@ -182,8 +186,8 @@ Type objective_function<Type>::operator() ()
   
   // recdevs placeholder
   for(int k=0;k<(nstocks);k++){
-    for(int time=0;time<(tEnd-1);time++){
-      tildeR_yk(time,k) =0;
+    for(int y=0;y<(tEnd-1);y++){
+      tildeR_yk(y,k) =0;
     }
     tildeR_yk(tEnd-1,k) =0;
   }
@@ -215,14 +219,14 @@ Type objective_function<Type>::operator() ()
   // }
   // // std::cout << fsh_slx_pars << "\n slx out of log space\n";
   // 
-  // // Notes on the following syntax: the do while allows you to estimate parameters within a time block. It
-  // // "does" the looping over year and age "while" within the time block, then
+  // // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
+  // // "does" the looping over year and age "while" within the y block, then
   // // iterates to the next block. Year is not in a for loop because it is
   // // iterated by the do statement.
   // 
   // // The switch for slx_type allows you to change parameterization. This could
   // // easily be expanded to accomodate any selectivity type (the fsh_slx_pars
-  // // allows for a flexible number of parameters and time blocks)
+  // // allows for a flexible number of parameters and y blocks)
   // 
   // int i = 0;
   // 
@@ -296,136 +300,97 @@ Type objective_function<Type>::operator() ()
   
 
   
-  // Equilibrium Unfished numbers-at-age, subarea (outside of time loop) 
+  // Equilibrium Unfished numbers-at-age, subarea (outside of y loop) 
   // identical to Ninit except no recdevs
   N_0ais.setZero();   
-  for(int k=0;k<(nstocks);k++){
-    for(int i=0;i<(nspace);i++){ 
-      for(int a=0;a<(nage-1);a++){
-        N_0ais(a,i,2) = 0.5*omega_ais(a,i)*R_0k(k)*tau_ik(k,i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
-      }
-      // note the A+ group will be in slot A-1
-      N_0ais(nage-1,i,2) = omega_ais(nage-1,i)* N_0ai(nage-2,i)*exp(-(mat_age()nage-2)*age(nage-2))) 
-        /(Type(1.0)-exp(-mat_age(nage-1)*age(nage-1)));
-    } // end subareas
-  } // end stocks
+  for(int s=0;s<2;s++){
+    for(int k=0;k<(nstocks);k++){
+      for(int i=0;i<(nspace);i++){ 
+        for(int a=0;a<(nage-1);a++){
+          N_0ais(a,i,s) = 0.5*omega_ais(a,i,s)*R_0k(k)*tau_ik(k,i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
+        }  // note the A+ group will be in slot A-1
+        N_0ais(nage-1,i,s) = omega_ais(nage-1,i,s)* N_0ais(nage-2,i,s)*exp(-(mat_age(nage-2)*age(nage-2))) 
+          /(Type(1.0)-exp(-mat_age(nage-1)*age(nage-1)));
+      } // end subareas
+    } // end stocks
+  } // end sex
+  
+  // // Equilibrium Unfished SSB, stock (outside of y loop)
+  for(int i=0;i<(nspace);i++){
+    for(int a=0;a<nage;a++){ // Loop over ages
+      SSB_0i(i) += mat_age(a)*N_0ais(a,i,0)*wtatlen_kab(phi_ik2(i),1)*pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),2))*mat_ak(a,phi_ik2(i));
+      for(int k=0;k<(nstocks);k++){
+        SSB_0k(k) += phi_ik(k,i)*SSB_0i(i);
+      } // end stocks
+    } // end ages
+  } // end space
+
+  // The first year of the simulation is initialized with the following age distribution
+  Ninit_ais.setZero(); 
+  for(int s=0;s<2;s++){
+    for(int k=0;k<(nstocks);k++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage-1);a++){
+          Ninit_ais(a,i,s) = 0.5* omega_ais(a,i,s) * tau_ik(k,i) * R_0k(k)* exp(-(mat_age(a)*age(a))) * exp(-0.5*SDR*SDR+tildeR_initk(k));
+        } // end ages
+        Ninit_ais(nage-1,i) = (omega_ais(nage-1,i,s) * Ninit_ais(nage-2,i,s) *
+          exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-(mat_age(nage-1)*age(nage-1)))* exp(-0.5*SDR*SDR+tildeR_initk(k)));
+      } // end space
+    } // end stocks
+  } // end sex
+  
+  
   
   // 
-  // // Equilibrium Unfished SSB, stock (outside of time loop)
-  // for(int i=0;i<(nspace);i++){ 
-  //   for(int a=0;a<nage;a++){ // Loop over ages
-  //     SSB_0i(i) += mat_age(a)*N_0ai(a,i)*0.5;
-  //     for(int k=0;k<(nstocks);k++){ 
-  //       SSB_0k(k) += phi_ik(k,i)*mat_age(a)*N_0ai(a,i)*0.5;
-  //     } // end stocks
-  //   } // end ages
-  // } // end space
-  // 
-  // 
-  // // The first year of the simulation is initialized with the following age distribution 
-  // for(int k=0;k<(nstocks);k++){
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int a=0;a<(nage-1);a++){
-  //       Ninit_ai(a,i) = 0.5* omega_ais(a,i) * tau_ik(k,i) * R_0k(k)* exp(-(M(a)*age(a))) * exp(-0.5*SDR*SDR+tildeR_initk(k));
-  //     } // end ages
-  //     Ninit_ai(nage-1,i) = (omega_ais(nage-1,i) * Ninit_ai(nage-2,i) *
-  //       exp(-M(nage-1)*age(nage-1)))/(Type(1.0)-exp(-(M(nage-1)*age(nage-1)))* exp(-0.5*SDR*SDR+tildeR_initk(k)));
-  //   } // end space
-  // } // end stocks
-  // 
-  // 
-  // for(int time=0;time<(tEnd);time++){ // Start time loop
-  //   
-  //   pmax_catch_save(time) = pmax_catch;
-  //   // Take care of selectivity
-  //   
-  //   
-  //   if (flag_sel(time) == 1){
-  //     
-  //     for(int i=0;i<psel_fish.size();i++){
-  //       psel_fish(i) = psel_fish_zero(i)+PSEL(i,time-selYear+1)*sigma_psel; // 27 is the number of years selectivity is calculated PSEL.cols()-1/ time-selYear-
-  //     }
-  //     
-  //     pmax_catch = max(cumsum((psel_fish)));
-  //     pmax_catch_save(time) = pmax_catch;
-  //     
-  //     for(int j=0;j<(nage);j++){ // Fix the Catch selectivity
-  //       if (age(j) == Smin){
-  //         ptmp_catch = 0;
-  //         catchselec(j) = exp(ptmp_catch-pmax_catch);
-  //       }
-  //       if ((age(j) > Smin) & (age(j) <= Smax)){
-  //         ptmp_catch = psel_fish(j-Smin-1)+ptmp_catch;
-  //         catchselec(j) = exp(ptmp_catch-pmax_catch);
-  //       }
-  //       if(age(j) > (Smax_survey)){
-  //         catchselec(j) = catchselec(Smax);
-  //       }
-  //     }
-  //   }
-  //   
-  //   for(int fish_flt=0;fish_flt<(nfleets_fish);fish_flt++){
-  //     Catch_yf_est(time,fish_flt) = 0;
-  //   }
-  //   
-  //   Fyear(time) = F0(time);
-  //   
-  //   
-  //   for(int a=0;a<(nage);a++){ // Loop over other ages
-  //     Freal(a) = Fyear(time)*catchselec(a);
-  //     Z(a) = Freal(a)+Myear(a);
-  //     selectivity_save(a,time) = catchselec(a);
-  //     Zsave(a,time) = Z(a);
-  //   }
-  //   
-  //   
-  //   // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
-  //   // note we are assuming unfished here as the exponent is M only
-  //   // add length at age initial here so that time loop can be removed
-  //   if (time == 0){  
-  //     for(int k=0;k<(nstocks);k++){
-  //       for(int i=0;i<(nspace);i++){ 
-  //         for(int j=0;j<(nspace);j++){ 
-  //           for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
-  //             Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
-  //             if(i != j){
-  //               pLeave += X_ija(i,j,a); // will do 1-this for proportion which stay
-  //               NCome += X_ija(j,i,a)*Ninit_ai(a,j); // actual numbers incoming
-  //             }
-  //             
-  //             // this is the synthesis syntax; 10 is placeholder for LMIN
-  //             // likely need a lower L1 at age stock-specific and linear before that age
-  //             Length_yai_beg(time,a,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
-  //               exp(-kappa_yk(0,phi_ik2(i))*a);
-  //             Length_yai_mid(time,a,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
-  //               exp(-0.5*kappa_yk(0,phi_ik2(i))*a);
-  //             
-  //             N_yai_beg(time,a,i) = ((1-pLeave)*Ninit_ai(a,i) + NCome)*exp(-M(a));
-  //           } // end ages
-  //           Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
-  //           // plus group includes those already at A AND age into A
-  //           if(i != j){
-  //             pLeave += X_ija(i,j,nage-1); 
-  //             NCome += X_ija(j,i,nage-1)*(N_yai_beg(0,nage-1,j) + N_yai_beg(0,nage-2,j)) ; // if M becomes spatial use M_aj here
-  //           }
-  //           N_yai_beg(time,nage-1,i) =  ((1-pLeave)*(N_yai_beg(0,nage-1,i)+N_yai_beg(0,nage-2,i)) + NCome)*exp(-M(nage-1));
-  //          
-  //          Length_yai_beg(time,nage-1,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
-  //            exp(-kappa_yk(0,phi_ik2(i))*nage-1);
-  //          Length_yai_mid(time,nage-1,i) = Linf_yk(0,phi_ik2(i))+(10-Linf_yk(0,phi_ik2(i)))*
-  //            exp(-0.5*kappa_yk(0,phi_ik2(i))*nage-1);
-  //         } // end subareas j
-  //       } // end subareas i
-  //     } // end stocks
-  //   } // end time == 0
+  for(int y=0;y<(tEnd);y++){ // Start y loop
+    // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
+    // note we are assuming unfished here as the exponent is M only
+    // add length at age initial here so that y loop can be removed
+    if (y == 0){
+      for(int i=0;i<(nspace);i++){
+        for(int s=0;s<2;s++){
+          Length_yais_beg(0,0,i,s) <- L1_yk(y,phi_ik2(i),s);
+          N_yais_beg(0,0,i,s) <- Ninit_ais(0,i,s);
+          N_yais_mid(0,0,i,s) <- N_yais_beg(0,0,i,s)*exp(-mat_age(0)/2);
+          for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
+            for(int j=0;j<(nspace);j++){ 
+              Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
+              if(i != j){
+                pLeave += X_ijas(i,j,a,s); // will do 1-this for proportion which stay
+                NCome += X_ijas(j,i,a,s)*Ninit_ais(a,j,s); // actual numbers incoming
+              } // end i != j
+            } // end subareas j
+            // Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            //   exp(-kappa_yk(0,phi_ik2(i),s)*a);
+            // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
+            // N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mat_age[a]/2);
+          } // end ages
+           //  Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
+           //  // plus group includes those already at A AND age into A
+           //  if(i != j){
+           //    pLeave += X_ijas(i,j,nage-1,s);
+           //    NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(0,nage-1,j,s) + N_yais_beg(0,nage-2,j,s)) ; // if M becomes spatial use M_aj here
+           //  }
+           //  N_yais_beg(y,nage-1,i) =  ((1-pLeave)*(N_yais_beg(0,nage-1,i)+N_yais_beg(0,nage-2,i)) + NCome)*exp(-M(nage-1));
+           // 
+           // Length_yais_beg(y,nage-1,i) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+           //   exp(-kappa_yk(0,phi_ik2(i))*nage-1);
+           // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+           //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*nage-1);
+        } // end sexes
+      } // end subareas i
+    } // end y == 0
+    
+  }
   //   
   //   // calculate SSB using N at beginning of year
   // 
   //   for(int i=0;i<(nspace);i++){
   //     for(int a=0;a<nage;a++){ // Loop over ages
-  //       SSB_yi(time,i) += N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // for storage
+  //       SSB_yi(y,i) += N_yais_beg(y,a,i)*wage_ssb(a,y)*0.5; // for storage
   //       for(int k=0;k<(nstocks);k++){  
-  //         SSB_yk(time,k) += phi_ik(k,i)*N_yai_beg(time,a,i)*wage_ssb(a,time)*0.5; // hat
+  //         SSB_yk(y,k) += phi_ik(k,i)*N_yais_beg(y,a,i)*wage_ssb(a,y)*0.5; // hat
   //       } // end stocks
   //     } // end ages
   //   } // end space
@@ -435,12 +400,12 @@ Type objective_function<Type>::operator() ()
   //   for(int i=0;i<(nspace);i++){
   //     for(int k=0;k<(nstocks);k++){  
   //       // SSB_yk already has summation
-  //       R_yk(time,k) = (4*h_k(k)*R_0k(k)*SSB_yk(time,k)
+  //       R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k)
   //                                      /(SSB_0k(k)*(1-h_k(k))+ 
-  //         SSB_yk(time,k)*(5*h_k(k)-1)))*exp(-0.5*b(time)*SDR*SDR+tildeR_yk(time,k));
+  //         SSB_yk(y,k)*(5*h_k(k)-1)))*exp(-0.5*b(y)*SDR*SDR+tildeR_yk(y,k));
   //     } // end stocks
-  //     R_yi(time,i) = R_yk(time,phi_ik2(i))*tau_ik(phi_ik2(i),i)*omega_0ij(i); // downscale to subarea including age-0 movement
-  //     N_yai_beg(time,0,i) =  R_yi(time,i); // fill age-0 recruits
+  //     R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ik(phi_ik2(i),i)*omega_0ij(i); // downscale to subarea including age-0 movement
+  //     N_yais_beg(y,0,i) =  R_yi(y,i); // fill age-0 recruits
   //   } // end space
   //   
   //   // N- and Nominal Length - at-age for the middle of this year and beginning of next
@@ -450,37 +415,37 @@ Type objective_function<Type>::operator() ()
   //       for(int j=0;j<(nspace);j++){ 
   //         if(i != j){
   //           pLeave += X_ija(i,j,a); 
-  //           NCome += X_ija(j,i,a)*N_yai_beg(time,a,j); 
+  //           NCome += X_ija(j,i,a)*N_yais_beg(y,a,j); 
   //         } // end i != j
   //       } // end subareas j            
-  //       N_yai_mid(time,a,i) = N_yai_beg(time,a,i)*exp(-0.4); // no movement?
-  //       N_yai_beg(time+1,a,i) = ((1-pLeave)*N_yai_beg(time,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
+  //       N_yais_mid(y,a,i) = N_yais_beg(y,a,i)*exp(-0.4); // no movement?
+  //       N_yais_beg(y+1,a,i) = ((1-pLeave)*N_yais_beg(y,a,i) + NCome)*exp(-0.4); // this exponent needs to be Ztuned eventually
   //       // as in document: next year A1 == this year A0 plus growth
-  //       Length_yai_beg(time+1,a,i) = Length_yai_beg(time,a-1,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i))));
-  //       Length_yai_mid(time,a,i) = Length_yai_beg(time,a,i) + (Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,a,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))));
+  //       Length_yai_beg(y+1,a,i) = Length_yai_beg(y,a-1,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i))));
+  //       Length_yai_mid(y,a,i) = Length_yai_beg(y,a,i) + (Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,a,i))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i))));
   //     } // end ages
   //     // plus groups
   //     Type pLeave = 0.0; Type NCome = 0.0; 
   //     for(int j=0;j<(nspace);j++){ 
   //       if(i != j){
   //         pLeave += X_ija(i,j,nage-1); 
-  //         NCome += X_ija(j,i,nage-1)*(N_yai_beg(time,nage-1,j) + N_yai_beg(time,nage-2,j)); 
+  //         NCome += X_ija(j,i,nage-1)*(N_yais_beg(y,nage-1,j) + N_yais_beg(y,nage-2,j)); 
   //       } // end i != j
   //     } // end subareas j
-  //     N_yai_mid(time,nage-1,i) = N_yai_beg(time,nage-1,i)*exp(-0.4);
-  //     N_yai_beg(time+1,nage-1,i) =   ((1-pLeave)*(N_yai_beg(time,nage-1,i)+N_yai_beg(time,nage-2,i)) + NCome)*exp(-0.4);
+  //     N_yais_mid(y,nage-1,i) = N_yais_beg(y,nage-1,i)*exp(-0.4);
+  //     N_yais_beg(y+1,nage-1,i) =   ((1-pLeave)*(N_yais_beg(y,nage-1,i)+N_yais_beg(y,nage-2,i)) + NCome)*exp(-0.4);
   //     // plus group weighted average (we already have the numbers at age)
-  //     Length_yai_beg(time,nage-1,i) = (N_yai_beg(time,nage-2,i)*
-  //       (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-kappa_yk(time,phi_ik2(i)))))) +
-  //       N_yai_beg(time,nage-1,i)*
-  //       (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-kappa_yk(time,phi_ik2(i))))))/
-  //         (N_yai_beg(time,nage-2,i) + N_yai_beg(time,nage-1,i));
+  //     Length_yai_beg(y,nage-1,i) = (N_yais_beg(y,nage-2,i)*
+  //       (Length_yai_beg(y,nage-2,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-2,i)*(1-exp(-kappa_yk(y,phi_ik2(i)))))) +
+  //       N_yais_beg(y,nage-1,i)*
+  //       (Length_yai_beg(y,nage-1,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i))))))/
+  //         (N_yais_beg(y,nage-2,i) + N_yais_beg(y,nage-1,i));
   //     
-  //     Length_yai_mid(time,nage-1,i) = (N_yai_mid(time,nage-2,i)*
-  //       (Length_yai_beg(time,nage-2,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-2,i)*(1-exp(-0.5*kappa_yk(time,phi_ik2(i)))))) +
-  //       N_yai_mid(time,nage-1,i)*
-  //       (Length_yai_beg(time,nage-1,i)+(Linf_yk(time,phi_ik2(i))-Length_yai_beg(time,nage-1,i))*(1-exp(-0.5*kappa_yk(time,phi_ik2(i))))))/
-  //         (N_yai_mid(time,nage-2,i) + N_yai_mid(time,nage-1,i));
+  //     Length_yai_mid(y,nage-1,i) = (N_yais_mid(y,nage-2,i)*
+  //       (Length_yai_beg(y,nage-2,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-2,i)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i)))))) +
+  //       N_yais_mid(y,nage-1,i)*
+  //       (Length_yai_beg(y,nage-1,i)+(Linf_yk(y,phi_ik2(i))-Length_yai_beg(y,nage-1,i))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i))))))/
+  //         (N_yais_mid(y,nage-2,i) + N_yais_mid(y,nage-1,i));
   //   } // end subareas i
   //     
   //     // reweight length-at-age based on movement from other stocks
@@ -490,11 +455,11 @@ Type objective_function<Type>::operator() ()
   //         for(int j=0;j<(nspace);j++){
   //           // sum up other areas applicable to this subarea + age
   //           if(i != j){
-  //             LCome += phi_ij(i,j)*N_yai_beg(time,a,j)*Length_yai_beg(time,a,j); // for numerator
-  //             NCome += phi_ij(i,j)*N_yai_beg(time,a,j); // for denom
+  //             LCome += phi_ij(i,j)*N_yais_beg(y,a,j)*Length_yai_beg(y,a,j); // for numerator
+  //             NCome += phi_ij(i,j)*N_yais_beg(y,a,j); // for denom
   //           }
   //         } // end subareas j
-  //         Length_yai_beg(time+1,a,i) = (N_yai_beg(time,a,i)*Length_yai_beg(time,a,i) + LCome)/(N_yai_beg(time,a,i)+NCome);
+  //         Length_yai_beg(y+1,a,i) = (N_yais_beg(y,a,i)*Length_yai_beg(y,a,i) + LCome)/(N_yais_beg(y,a,i)+NCome);
   //       } // end ages
   //     } // end subareas i
   //     
@@ -502,16 +467,16 @@ Type objective_function<Type>::operator() ()
   //   // prob of length-at-age
   //   for(int i=0;i<(nspace);i++){
   //     for(int a=1;a<(nage);a++){
-  //       LengthAge_alyi_beg(a,0,time,i) = pnorm(Type(1.0),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-  //       LengthAge_alyi_mid(a,0,time,i) = pnorm(Type(1.0),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+  //       LengthAge_alyi_beg(a,0,y,i) = pnorm(Type(1.0),  Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i)));
+  //       LengthAge_alyi_mid(a,0,y,i) = pnorm(Type(1.0),  Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i)));
   //       for(int l=1;l<(LBins-1);l++){
-  //         LengthAge_alyi_beg(a,l,time,i) = pnorm(Type(l+1),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i))) -
-  //           pnorm(Type(l),  Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-  //         LengthAge_alyi_mid(a,l,time,i) = pnorm(Type(l+1),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i))) -
-  //           pnorm(Type(l),  Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+  //         LengthAge_alyi_beg(a,l,y,i) = pnorm(Type(l+1),  Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i))) -
+  //           pnorm(Type(l),  Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i)));
+  //         LengthAge_alyi_mid(a,l,y,i) = pnorm(Type(l+1),  Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i))) -
+  //           pnorm(Type(l),  Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i)));
   //         } // end LBins
-  //       LengthAge_alyi_beg(a,LBins-1,time,i) = 1-pnorm(Type(LBins-1), Length_yai_beg(time,a,i), sigmaG_yk(time,phi_ik2(i)));
-  //       LengthAge_alyi_mid(a,LBins-1,time,i) = 1-pnorm(Type(LBins-1), Length_yai_mid(time,a,i), sigmaG_yk(time,phi_ik2(i)));
+  //       LengthAge_alyi_beg(a,LBins-1,y,i) = 1-pnorm(Type(LBins-1), Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i)));
+  //       LengthAge_alyi_mid(a,LBins-1,y,i) = 1-pnorm(Type(LBins-1), Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i)));
   //     } // end ages
   //   } // end nspace
   //   
@@ -535,22 +500,22 @@ Type objective_function<Type>::operator() ()
   //   //   for(int a=0;a<nage;a++){
   //   //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
   //   //       // make an initial guess for F using obs catch - need to update selex
-  //   //       F1_yf(time,fish_flt) = catch_yf_obs(time, fish_flt)/
-  //   //         (phi_if_fish(fish_flt, i) * N_yai_beg(time,a,i)*wage_catch(a,time) *  selectivity_save(a,time) + catch_yf_obs(time, fish_flt));
+  //   //       F1_yf(y,fish_flt) = catch_yf_obs(y, fish_flt)/
+  //   //         (phi_if_fish(fish_flt, i) * N_yais_beg(y,a,i)*wage_catch(a,y) *  selectivity_save(a,y) + catch_yf_obs(y, fish_flt));
   //   //       
   //   //       for(int fiter=0; fiter<10;fiter++){
   //   //         // modify the guess (overwrite)
   //   //         
-  //   //         term0 = 1/(1+exp(v2*( F1_yf(time,fish_flt) - v1)));
-  //   //         term1 = F1_yf(time,fish_flt)*term0;
+  //   //         term0 = 1/(1+exp(v2*( F1_yf(y,fish_flt) - v1)));
+  //   //         term1 = F1_yf(y,fish_flt)*term0;
   //   //         term2 = v1*(1-term0);
-  //   //         F1_yf(time,fish_flt) = -log(1-(term1+term2));
+  //   //         F1_yf(y,fish_flt) = -log(1-(term1+term2));
   //   //         
   //   //       } // end hybrid F iterations
-  //   //       Catch_yaf_est(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i)*wage_catch(a,time); // do this by fleet with phi
-  //   //       CatchN_yaf(time,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yai_beg(time,a,i);// Calculate the catch in kg
-  //   //       Catch_yf_est(time,fish_flt) += Catch_yaf_est(time,a,fish_flt); // sum over the current catch at age 
-  //   //       CatchN(time,fish_flt) += CatchN_yaf(time,a,fish_flt);
+  //   //       Catch_yaf_est(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i)*wage_catch(a,y); // do this by fleet with phi
+  //   //       CatchN_yaf(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i);// Calculate the catch in kg
+  //   //       Catch_yf_est(y,fish_flt) += Catch_yaf_est(y,a,fish_flt); // sum over the current catch at age 
+  //   //       CatchN(y,fish_flt) += CatchN_yaf(y,a,fish_flt);
   //   //     } // end fishery fleets
   //   //   } // end ages
   //   // } // end nspace
@@ -560,8 +525,8 @@ Type objective_function<Type>::operator() ()
   //   for(int i=0;i<(nspace);i++){
   //     for(int a=0;a<nage;a++){   
   //       for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
-  //         survey_bio_f_est(time,sur_flt) += surveyselc(a)*wage_survey(a,time)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
-  //         Nsamp_acomp_f(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_yai_mid(time,a,i); // To use with age comps; may need to change phi to sum acomp surveys
+  //         survey_bio_f_est(y,sur_flt) += surveyselc(a)*wage_survey(a,y)*phi_if_surv(sur_flt,i)*N_yais_mid(y,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
+  //         Nsamp_acomp_f(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_yais_mid(y,a,i); // To use with age comps; may need to change phi to sum acomp surveys
   //       } // end surv fleets
   //     } // end ages
   //   } // end nspace
@@ -572,24 +537,24 @@ Type objective_function<Type>::operator() ()
   //   // estimate age comps in surveys
   //   // need to include error here
   //   for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
-  //     if(flag_surv_acomp(time) == 1){ // flag if there is an age measurement this year
+  //     if(flag_surv_acomp(y) == 1){ // flag if there is an age measurement this year
   //       for(int i=0;i<(nspace);i++){
   //         for(int a=0;a<(age_maxage-1);a++){ // Loop over other ages
   //           if(a == 1){
   //             // first determine aging error offset
   //             // note that the first row has the a-tilde, the second row has the SD by fleet
-  //             acomp_yaf_temp(time,a,surv_flt_acomp) = pnorm(age(a),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp));
+  //             acomp_yaf_temp(y,a,surv_flt_acomp) = pnorm(age(a),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp));
   // 
   //           } else if(a< age_maxage){
-  //             acomp_yaf_temp(time,a,surv_flt_acomp) = pnorm(Type(a+1),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp)) -
+  //             acomp_yaf_temp(y,a,surv_flt_acomp) = pnorm(Type(a+1),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp)) -
   //               pnorm(age(a),  age_error(0,a,surv_flt_acomp), age_error(1,a,surv_flt_acomp));
-  //             // survey_acomp_f_est(time,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
+  //             // survey_acomp_f_est(y,a,surv_flt_acomp) = (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yais_mid(y,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // estimated comps based on nbeg, should be fleet accrued
   //           } // end else
   //         } // end ages
-  //           acomp_yaf_temp(time,age_maxage-1,surv_flt_acomp) = Type(1.0) -
+  //           acomp_yaf_temp(y,age_maxage-1,surv_flt_acomp) = Type(1.0) -
   //             pnorm(Type(age_maxage-1), age_error(0,age_maxage-1,surv_flt_acomp), age_error(1,age_maxage-1,surv_flt_acomp) );
   //           //   
-  //           //   survey_acomp_f_est(time,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yai_mid(time,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // placeholder note the indexing on ntot might be off
+  //           //   survey_acomp_f_est(y,age_maxage-1,surv_flt_acomp) += (surveyselc(a+1)*phi_if_surv(surv_flt_acomp,i)*N_yais_mid(y,a+1,i))/Nsamp_acomp_f(surv_flt_acomp); // placeholder note the indexing on ntot might be off
   //           // 
   //           // 
   //           
@@ -600,18 +565,18 @@ Type objective_function<Type>::operator() ()
   //   
   //   // estimate age comps in catches
   //   // need to include error here
-  //   if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
+  //   if(flag_catch(y) == 1){ // Flag if  there was a measurement that year
   //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
   //       for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
   //         if(a<age_maxage){
-  //           catch_acomp_f_est(time,a,fish_flt) = (CatchN_yaf(time,a+1,fish_flt)/CatchN(time,fish_flt)); // Catch comp (1 bc the data starts at age = 1)
+  //           catch_acomp_f_est(y,a,fish_flt) = (CatchN_yaf(y,a+1,fish_flt)/CatchN(y,fish_flt)); // Catch comp (1 bc the data starts at age = 1)
   //         }else{
-  //           catch_acomp_f_est(time,age_maxage-1,fish_flt) += (CatchN_yaf(time,a+1,fish_flt)/CatchN(time,fish_flt));
+  //           catch_acomp_f_est(y,age_maxage-1,fish_flt) += (CatchN_yaf(y,a+1,fish_flt)/CatchN(y,fish_flt));
   //         } // end else
   //       } // end ages
   //     } // end fish_flt
   //   } // end flag
-  // } // END TIME LOOP
+  // } // END y LOOP
   // 
   // 
   // // LIKELIHOODS //
@@ -621,22 +586,22 @@ Type objective_function<Type>::operator() ()
   // 
   // // Likelihood: survey biomass
   // for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-  //   for(int time=1;time<tEnd;time++){ // Survey Surveyobs
-  //     if(flag_surv_bio(time) == 2){
-  //       ans_survey += -dnorm(log(survey_bio_f_est(time,surv_flt)), 
-  //                            log(survey_bio_f_obs(time,surv_flt)), 
-  //                            SDsurv+survey_err(time), TRUE); // the err also needs to be by flt
+  //   for(int y=1;y<tEnd;y++){ // Survey Surveyobs
+  //     if(flag_surv_bio(y) == 2){
+  //       ans_survey += -dnorm(log(survey_bio_f_est(y,surv_flt)), 
+  //                            log(survey_bio_f_obs(y,surv_flt)), 
+  //                            SDsurv+survey_err(y), TRUE); // the err also needs to be by flt
   //     } // end survey flag
   //     
-  //   } // end time
+  //   } // end y
   // } // end surv_flt
   // 
   // 
   // // Likelihood: catches
   // Type ans_catch = 0.0;
   // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-  //   for(int time=0;time<tEnd;time++){ // Total Catches
-  //     ans_catch += -dnorm(log(Catch_yf_est(time,fish_flt)+1e-6), log(catch_yf_obs(time,fish_flt)+1e-6), SDcatch, TRUE); 
+  //   for(int y=0;y<tEnd;y++){ // Total Catches
+  //     ans_catch += -dnorm(log(Catch_yf_est(y,fish_flt)+1e-6), log(catch_yf_obs(y,fish_flt)+1e-6), SDcatch, TRUE); 
   //     
   //   }
   // }
@@ -655,18 +620,18 @@ Type objective_function<Type>::operator() ()
   // sum2.setZero();
   // 
   // for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
-  //   for(int time=1;time<tEnd;time++){ // Loop over available years
-  //     if(flag_surv_acomp(time) == 1){ // Flag if  there was a measurement that year
+  //   for(int y=1;y<tEnd;y++){ // Loop over available years
+  //     if(flag_surv_acomp(y) == 1){ // Flag if  there was a measurement that year
   //       for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
-  //         // NOTE THAT THE survey_acomp_f_obs ARE IN A X TIME X FLEET, which is not the typical ordering
-  //         // need to replace SS_survey(time) with the number of samples from each year x fleet
-  //         sum1(time) += lgamma(ss_survey(time)*survey_acomp_f_obs(a,time,surv_flt_acomp)+1);
-  //         sum2(time) += lgamma(ss_survey(time)*survey_acomp_f_obs(a,time,surv_flt_acomp) + phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp)) -
-  //           lgamma(phi_survey*ss_survey(time)*survey_acomp_f_est(time,a,surv_flt_acomp));
+  //         // NOTE THAT THE survey_acomp_f_obs ARE IN A X y X FLEET, which is not the typical ordering
+  //         // need to replace SS_survey(y) with the number of samples from each year x fleet
+  //         sum1(y) += lgamma(ss_survey(y)*survey_acomp_f_obs(a,y,surv_flt_acomp)+1);
+  //         sum2(y) += lgamma(ss_survey(y)*survey_acomp_f_obs(a,y,surv_flt_acomp) + phi_survey*ss_survey(y)*survey_acomp_f_est(y,a,surv_flt_acomp)) -
+  //           lgamma(phi_survey*ss_survey(y)*survey_acomp_f_est(y,a,surv_flt_acomp));
   //       } // end ages
-  //       ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
+  //       ans_survcomp += lgamma(ss_survey(y)+1)-sum1(y)+lgamma(phi_survey*ss_survey(y))-lgamma(ss_survey(y)+phi_survey*ss_survey(y))+sum2(y);
   //     } // end acomp flag
-  //   } // end time
+  //   } // end y
   // } // end survey acomp fleets
   // 
   // 
@@ -679,46 +644,46 @@ Type objective_function<Type>::operator() ()
   // // Likelihood: age comps in catches
   // // need to remove/change this phi_Catch thing and provide fish catch comps by fleet
   // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ 
-  //   for(int time=1;time<tEnd;time++){ // Loop over available years
-  //     if(catch_yf_obs(time,fish_flt)>0){ // only bother if we caught something
-  //       if(flag_catch(time) == 1){ // Flag if  there was a measurement that year
+  //   for(int y=1;y<tEnd;y++){ // Loop over available years
+  //     if(catch_yf_obs(y,fish_flt)>0){ // only bother if we caught something
+  //       if(flag_catch(y) == 1){ // Flag if  there was a measurement that year
   //         for(int a=0;a<(age_catch.rows()-1);a++){ // Loop over ages for catch comp (there are only 15 in obs)
-  //           sum3(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time)+1);
-  //           sum4(time) += lgamma(catch_yf_obs(time,fish_flt)*age_catch(a,time) + phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt)) -
-  //             lgamma(phi_catch*catch_yf_obs(time,fish_flt)*catch_acomp_f_est(time,a,fish_flt));
+  //           sum3(y) += lgamma(catch_yf_obs(y,fish_flt)*age_catch(a,y)+1);
+  //           sum4(y) += lgamma(catch_yf_obs(y,fish_flt)*age_catch(a,y) + phi_catch*catch_yf_obs(y,fish_flt)*catch_acomp_f_est(y,a,fish_flt)) -
+  //             lgamma(phi_catch*catch_yf_obs(y,fish_flt)*catch_acomp_f_est(y,a,fish_flt));
   //         } // end ages
-  //         ans_catchcomp += lgamma(catch_yf_obs(time,fish_flt)+1)-sum3(time)+lgamma(phi_catch*catch_yf_obs(time,fish_flt))
-  //           -lgamma(catch_yf_obs(time,fish_flt)+phi_catch*catch_yf_obs(time,fish_flt))+sum4(time);
+  //         ans_catchcomp += lgamma(catch_yf_obs(y,fish_flt)+1)-sum3(y)+lgamma(phi_catch*catch_yf_obs(y,fish_flt))
+  //           -lgamma(catch_yf_obs(y,fish_flt)+phi_catch*catch_yf_obs(y,fish_flt))+sum4(y);
   //       } // end catch flag 
   //     } // end if catches > 0
-  //   } // end time
+  //   } // end y
   // } // end fish fleets 
   // 
   // // Likelihood: SD Recruitment (hyperprior)
   // Type ans_SDR = 0.0;
   // for(int k=0;k<(nstocks);k++){
-  //   for(int time=0;time<(tEnd-1);time++){ // Start time loop
-  //     ans_SDR += Type(0.5)*(tildeR_yk(time,k)*tildeR_yk(time,k))/(SDR*SDR)+b(time)*log(SDR*SDR);
+  //   for(int y=0;y<(tEnd-1);y++){ // Start y loop
+  //     ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
   //   }
   // }
   // 
   // // Likelihood: Error for Selectivity
   // Type ans_psel = 0.0;
-  // for(int time=0;time<year_sel;time++){ // Start time loop
-  //   for(int i=0;i<psel_fish.size();i++){ // Start time loop
-  //     ans_psel += Type(0.5)*(PSEL(i,time)*PSEL(i,time))/(sigma_psel*sigma_psel);
+  // for(int y=0;y<year_sel;y++){ // Start y loop
+  //   for(int i=0;i<psel_fish.size();i++){ // Start y loop
+  //     ans_psel += Type(0.5)*(PSEL(i,y)*PSEL(i,y))/(sigma_psel*sigma_psel);
   //   }
   // }
   // 
   // // Likelihood: Priors on h and M
   // Type ans_priors = 0.0;
-  // for(int time=0;time<(nage);time++){ // Start time loop
+  // for(int y=0;y<(nage);y++){ // Start y loop
   //   for(int i=0;i<(nspace);i++){
   //     for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
   //       ans_priors += Type(0.5)*(Ninit_ai(a,i)*Ninit_ai(a,i))/(SDR*SDR);
   //     } // end ages
   //   } // end space
-  // } // end time
+  // } // end y
   // 
   // // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
   // 
@@ -786,10 +751,10 @@ Type objective_function<Type>::operator() ()
   //   REPORT(Length_yai_beg)
   //   REPORT(LengthAge_alyi_beg)
   //   REPORT(Length_yai_mid)
-  //   REPORT(N_yai_beg)
+  //   REPORT(N_yais_beg)
   //   REPORT(survey_bio_f_est)
   //   REPORT(survey_bio_f_obs)
-  //   REPORT(N_yai_mid)
+  //   REPORT(N_yais_mid)
   //   REPORT(Nsamp_acomp_f)
   //   return ans;
 }

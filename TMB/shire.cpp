@@ -7,7 +7,6 @@
 // correct growth for early ages
 // make selex fleet specific
 // introduce selectivity estimation
-// introduce tuning of F and use Ztuned in Natage
 // need error on tau
 // everything sex specific
 // calculate reference points
@@ -33,7 +32,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
   // DATA_INTEGER(nfleets_acomp); // number of age comp fleets
   // DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
-  // DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
+  DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
 
   // DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   // DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
@@ -134,7 +133,16 @@ Type objective_function<Type>::operator() ()
   // array<Type> CatchN(tEnd,nfleets_fish);
   
   // F tuning storage
-  // array<Type> Ftuned_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
+  int niter = 50;
+  array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
+  array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage 
+  array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
+  array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
+  array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
+  array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
+  array<Type> F_ym(tEnd,nmgmt_reg); 
+
+  // array<Type> Ftuned_yf
   // array<Type> Ftuned_ym(tEnd,nfleets_fish); // summation of Fs nested in mgmt regions
   // array<Type> Ztuned_yf(tEnd, nage, nspace); // final tuned subarea and yr specific Z
   // vector<Type> Fyear(tEnd);
@@ -463,7 +471,6 @@ Type objective_function<Type>::operator() ()
       Type v1 = 0.7; Type Fmax = 1.5;
       int niter = 50;
 
-      // array<Type> F1_yf(tEnd,nfleets_fish+1);
       array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
 
       // for(int i=0;i<(nspace);i++){

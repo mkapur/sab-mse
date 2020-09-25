@@ -43,6 +43,8 @@ ggplot(data = regions) +
   # kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
   theme_classic(base_size = 14) +
   
+
+   
   ## mgmt fills
   # geom_sf(data = clips[[1]], fill = mgmtPal[1], alpha = 0.9, color = NA) +
   # geom_sf(data =  clips[[2]], fill = mgmtPal[1], alpha = 0.9, color = NA) +
@@ -50,6 +52,14 @@ ggplot(data = regions) +
   # geom_sf(data = clips[[4]], fill = mgmtPal[2], alpha = 0.9, color = NA ) +
   # geom_sf(data = clips[[5]], fill = mgmtPal[3], alpha = 0.9, color = NA) +
   # geom_sf(data = clips[[6]], fill = mgmtPal[3], alpha = 0.9,color = NA) +
+  
+  ## show demography from growth paper
+  ##R3
+  # geom_sf(data =   st_union(x=clips[[2]],y=clips[[3]])  ,
+          # fill = NA, lwd = 1.1,color = 'white', linetype = 'dashed') +
+  # ##r2
+  # geom_sf(data =   st_union(x=clips[[4]],y=clips[[5]])  ,
+          # fill = NA, lwd = 1.1,  color = 'white', linetype = 'dashed') +
   
   ## subarea fills
   geom_sf(data = clips[[1]], fill = subareaPal[1], alpha = 0.9, color = NA) +
@@ -70,13 +80,7 @@ ggplot(data = regions) +
 
   ## EEZ
   geom_sf(lwd = 1, col = '#173028', fill = 'grey88',alpha = 0.2) +
-  ## show demography from growth paper
-  ##R3
-  # geom_sf(data =   st_union(x=clips[[2]],y=clips[[3]])  ,
-  #         fill = NA, lwd = 1.1,color = 'red', linetype = 'dashed') +
-  # # ##r2
-  # geom_sf(data =   st_union(x=clips[[4]],y=clips[[5]])  ,
-  #         fill = NA, lwd = 1.1,  color = 'red', linetype = 'dashed') +
+
   
   ## show major currents
   # geom_polygon(data = shapefile_df,
@@ -87,7 +91,7 @@ ggplot(data = regions) +
   #          colour = currents.col[1:4], size = 1.1) +
   # annotate("text", x = x1+20, y = y1,
   #          label =  c('Alaskan Current',
-  #                     'N. Pacific Current', 
+  #                     'N. Pacific Current',
   #                     'S. California Bight',
   #                     'California Current')) +
 
@@ -96,23 +100,28 @@ ggplot(data = regions) +
   # geom_label(data = data.frame(), aes( x = c(238, 233, 232, 225, 220, 200),
   #   y = c(33, 40, 49, 52, 57, 53)),
   #   label = list(c(6:1),
-  #                c("C1", "C2", "B1","B2","A2", "A1"))[[1]] ,
+  #                c(paste0('Subarea ',c("C1", "C2", "B1","B2","A2", "A1"))))[[2]] ,
   #   fill = 'grey88',
   #   color = 'black') +
   
   ## OM Stock labels
   # geom_label(data = data.frame(), aes( x = c(238, 233, 223,  200),
   #                                      y = c(33, 48,  54, 53)),
-  #            label = list(c(4:1),c("R1", "R2", "R3","R4"))[[1]] ,
+  #            label = list(c(4:1),c(paste0('Stock ',c("R1", "R2", "R3","R4"))))[[2]] ,
   #            fill = 'grey88',
   #            color = 'black') +
   coord_sf(xlim = c(165, 245), ylim = c(26, 65)) +
   labs(x ="",y="")
 
 # Save
-
 ggsave(here::here("figs", "map-EEZ_strata_nolab.png"), 
        width = 10, height = 8)
+
+ggsave(subalab,  
+       file = here::here("figs", "map-EEZ_stocklab2.png"),
+       width = 10, height = 8)
+
+
 
 ggsave(last_plot(),
        file = "C:/Users/mkapur/Dropbox/mkapur.github.io/static/slides/kapur_genex/demog_dark3.png", 

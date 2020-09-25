@@ -30,7 +30,7 @@ Type objective_function<Type>::operator() ()
   int nyear = year.size();
   
   // DATA_INTEGER(nfleets_surv); // number of survey fleets
-  // DATA_INTEGER(nfleets_fish); //number of fishery fleets
+  DATA_INTEGER(nfleets_fish); //number of fishery fleets
   // DATA_INTEGER(nfleets_acomp); // number of age comp fleets
   // DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   // DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
@@ -457,6 +457,38 @@ Type objective_function<Type>::operator() ()
       } // end ages
     } // end nspace
     } // end sex
+    
+      // Catch at beginning of year
+      // Hybrid F tuning inputs & temp storage
+      Type v1 = 0.7; Type Fmax = 1.5;
+      int niter = 50;
+
+      // array<Type> F1_yf(tEnd,nfleets_fish+1);
+      array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
+
+      // for(int i=0;i<(nspace);i++){
+      //   for(int a=0;a<nage;a++){
+      //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      //       // make an initial guess for F using obs catch - need to update selex
+      //       F1_yf(y,fish_flt) = catch_yf_obs(y, fish_flt)/
+      //         (phi_if_fish(fish_flt, i) * N_yais_beg(y,a,i)*wage_catch(a,y) *  selectivity_save(a,y) + catch_yf_obs(y, fish_flt));
+      // 
+      //       for(int fiter=0; fiter<10;fiter++){
+      //         // modify the guess (overwrite)
+      // 
+      //         term0 = 1/(1+exp(v2*( F1_yf(y,fish_flt) - v1)));
+      //         term1 = F1_yf(y,fish_flt)*term0;
+      //         term2 = v1*(1-term0);
+      //         F1_yf(y,fish_flt) = -log(1-(term1+term2));
+      // 
+      //       } // end hybrid F iterations
+      //       Catch_yaf_est(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i)*wage_catch(a,y); // do this by fleet with phi
+      //       CatchN_yaf(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i);// Calculate the catch in kg
+      //       Catch_yf_est(y,fish_flt) += Catch_yaf_est(y,a,fish_flt); // sum over the current catch at age
+      //       CatchN(y,fish_flt) += CatchN_yaf(y,a,fish_flt);
+      //     } // end fishery fleets
+      //   } // end ages
+      // } // end nspace
         } // temporary yend
     
     
@@ -506,45 +538,7 @@ Type objective_function<Type>::operator() ()
   //       
 
   //   
-  //   // Catch at beginning of year
-  //   // Hybrid F tuning inputs
-  //   // Type Fmax = 3.5;
-  //   // Type v1=0.99; //corresponds to an Fmax of 3
-  //   // Type v1=0.865; //corresponds to an Fmax of 2
-  //   // Type v1=0.95;
-  //   // Type v2=30;
-  //   // Type F_no_inc=7;
-  //   // Type term0 = 0.0;
-  //   // Type term1 = 0.0;
-  //   // Type term2 = 0.0;
-  //   
-  //   // array<Type> F1_yf(tEnd,nfleets_fish);
-  //   
-  //   
-  //   // for(int i=0;i<(nspace);i++){
-  //   //   for(int a=0;a<nage;a++){
-  //   //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-  //   //       // make an initial guess for F using obs catch - need to update selex
-  //   //       F1_yf(y,fish_flt) = catch_yf_obs(y, fish_flt)/
-  //   //         (phi_if_fish(fish_flt, i) * N_yais_beg(y,a,i)*wage_catch(a,y) *  selectivity_save(a,y) + catch_yf_obs(y, fish_flt));
-  //   //       
-  //   //       for(int fiter=0; fiter<10;fiter++){
-  //   //         // modify the guess (overwrite)
-  //   //         
-  //   //         term0 = 1/(1+exp(v2*( F1_yf(y,fish_flt) - v1)));
-  //   //         term1 = F1_yf(y,fish_flt)*term0;
-  //   //         term2 = v1*(1-term0);
-  //   //         F1_yf(y,fish_flt) = -log(1-(term1+term2));
-  //   //         
-  //   //       } // end hybrid F iterations
-  //   //       Catch_yaf_est(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i)*wage_catch(a,y); // do this by fleet with phi
-  //   //       CatchN_yaf(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i);// Calculate the catch in kg
-  //   //       Catch_yf_est(y,fish_flt) += Catch_yaf_est(y,a,fish_flt); // sum over the current catch at age 
-  //   //       CatchN(y,fish_flt) += CatchN_yaf(y,a,fish_flt);
-  //   //     } // end fishery fleets
-  //   //   } // end ages
-  //   // } // end nspace
-  //   
+  
   //   
   //   // Estimate survey biomass at midyear
   //   for(int i=0;i<(nspace);i++){

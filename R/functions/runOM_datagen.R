@@ -190,7 +190,7 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  for(y in tEnd){
+  for(y in 1:(tEnd-1)){
   # for(y in 1:3){
     cat(y,"\n")
     ## Year 0 ----
@@ -657,8 +657,8 @@ runOM_datagen <- function(df, seed = 731){
     for(s in 1:2){
       for(i in 1:nspace){
         for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/2+Zreal_yai[y,a,i]))
-        for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]*exp(-mat_age[a]/2)
-        N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])*exp(-mat_age[nage]/2)
+        for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]
+        N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])
       } ## end subareas i
     } ## end sexes
     

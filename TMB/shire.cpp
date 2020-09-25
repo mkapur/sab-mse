@@ -381,9 +381,9 @@ Type objective_function<Type>::operator() ()
         } // end sexes
       } // end subareas i
     } // end y == 0
-    
-    
-    //   // N- and Nominal Length - at-age for the middle of this year and beginning of next
+
+    Type lenstep = 0.0;Type lenslope = 0.0;
+    // N- and Nominal Length - at-age for the middle of this year and beginning of next
     for(int s=0;s<2;s++){
       for(int i=0;i<(nspace);i++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
@@ -395,12 +395,13 @@ Type objective_function<Type>::operator() ()
           Type lenstep = 3.0;
           Type lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         }
-     
-          // Length at the start of the year (cm)
-          // Length_yais_beg(y,0:3,i,s) <- len.step(0)+len.slope*(seq(0, (3 + 0), 1) - 1)(0:3) 
-        // Length_yais_beg(y,4,i,s) <- L1_yk[y,phi_ik2[i],s] 
-          // Length_yais_mid(y,0:4,i,s) <- Length_yais_beg(y,0:4,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,0:4,i,s)*
-            // (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))
+        for(int a=1;a<4;a++){
+          Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
+        } // end linear age
+    
+        // Length_yais_beg(y,4,i,s) <-  L1_yk(y,phi_ik2(i),s);
+        // Length_yais_mid(y,0:4,i,s) <- Length_yais_beg(y,0:4,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,0:4,i,s)*
+        //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
     //     for(int a=1;a<(nage-1);a++){
     //       Type pLeave = 0.0; Type NCome = 0.0; 
     //       for(int j=0;j<(nspace);j++){ 

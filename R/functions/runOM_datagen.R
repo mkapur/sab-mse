@@ -212,15 +212,12 @@ runOM_datagen <- function(df, seed = 731){
             # // likely need a lower L1 at age stock-specific and linear before that age
             N_yais_beg[y,a,i,s] = ((1-pLeave)*Ninit_ais[a,i,s] + NCome)*exp(-mat_age[a]/2)
             
+            ## setup LAA using pure VB syntax,
             Length_yais_beg[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
-              (1-exp(-kappa_yk[1,phi_ik2[i],s]))
-            
+              exp(-kappa_yk[1,phi_ik2[i],s]*a)
             Length_yais_mid[y,a,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
-              exp(1-0.5*kappa_yk[1,phi_ik2[i],s]*a)
-            
-            ## nex year LAA beg (starter)
-            Length_yais_beg[y+1,a,i,s] =  Length_yais_beg[y,a-1,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a-1,i,s])*
-              (1-exp(kappa_yk[y,phi_ik2[i],s]))
+              exp(-0.5*kappa_yk[1,phi_ik2[i],s]*a)
+
           } #// end ages
           ## // plus group includes those already at A AND age into A
 		      pLeave = 0.0;  NCome = 0.0; # // reset for new age
@@ -231,15 +228,10 @@ runOM_datagen <- function(df, seed = 731){
             }
           } #// end subareas j
           N_yais_beg[y,nage,i,s] =  ((1-pLeave)*(Ninit_ais[nage,i,s] + Ninit_ais[nage-1,i,s]) +  NCome)*exp(-mat_age[nage]/2)
-          
-          ## this year LAA
           Length_yais_beg[y,nage,i,s] = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
-            exp(1-kappa_yk[1,phi_ik2[i],s]*nage-1)
+            exp(-kappa_yk[1,phi_ik2[i],s]*nage-1)
           Length_yais_mid[y,nage,i,s]  = Linf_yk[1,phi_ik2[i],s]+(L1_yk[y,phi_ik2[i],s]-Linf_yk[1,phi_ik2[i],s])*
-            exp(1-0.5*kappa_yk[1,phi_ik2[i],s]*nage-1)
-          
-      
-
+            exp(-0.5*kappa_yk[1,phi_ik2[i],s]*nage-1)
         } #// end sexes
       } #// end  subareas i
     } ## end y == 1
@@ -275,11 +267,11 @@ runOM_datagen <- function(df, seed = 731){
           # N_yais_mid[y,a,i,s] = N_yais_beg[y,a,i,s]*exp(-mat_age[a]/2) 
         } ## end ages for N
         for(a in 6:nage-1){
-          ## as in document: next year A1 == this year A0 plus growth
+          ## as in document: next year A1 == this year A0 plus growth, eq 4
           Length_yais_beg[y+1,a,i,s] = Length_yais_beg[y,a-1,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a-1,i,s])*
             (1-exp(-kappa_yk[y,phi_ik2[i],s]))
-          Length_yais_mid[y,a,i,s] = Length_yais_beg[y,a,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a,i,s]*
-                                                                   (1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))
+          Length_yais_mid[y,a,i,s] = Length_yais_beg[y,a,i,s] + (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,a,i,s])*
+                                                                   (1-exp(-0.5*kappa_yk[y,phi_ik2[i],s]))
         } ## end ages for L
         # ## plus groups
         pLeave = 0.0;  NCome = 0.0
@@ -290,20 +282,35 @@ runOM_datagen <- function(df, seed = 731){
           } ## end i != j
         } ## end subareas j
         N_yais_mid[y,nage,i,s] =((1-pLeave)*N_yais_beg[y,nage,i,s] + NCome)*exp(-mat_age[nage]/2)
-        # ## plus group weighted average (we already have the numbers at age)
-        Length_yais_beg[y+1,nage,i,s] = ( N_yais_beg[y+1,nage-1,i,s]*
+        ## plus group weighted average (we already have the numbers at age)
+        Length_yais_beg[y,nage,i,s] = ( N_yais_beg[y,nage-1,i,s]*
                                             (Length_yais_beg[y,nage-1,i,s]+
                                                (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage-1,i,s]*(1-exp(-kappa_yk[y,phi_ik2[i],s])))) +
-                                            N_yais_beg[y+1,nage-1,i,s]*
+                                            N_yais_beg[y,nage-1,i,s]*
                                             (Length_yais_beg[y,nage,i,s]+
                                                (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-kappa_yk[y,phi_ik2[i],s]))))/
-          (N_yais_beg[y+1,nage-1,i,s] + N_yais_beg[y+1,nage,i,s])
-
-        Length_yais_mid[y+1,nage,i,s] = (N_yais_mid[y,nage-1,i,s]*
+          (N_yais_beg[y,nage-1,i,s] + N_yais_beg[y,nage,i,s])
+        
+        Length_yais_mid[y,nage,i,s] = (N_yais_mid[y,nage-1,i,s]*
                                            (Length_yais_beg[y,nage-1,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage-1,i,s]*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))) +
                                            N_yais_mid[y,nage,i,s]*
                                            (Length_yais_beg[y,nage,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s]))))/
           (N_yais_mid[y,nage-1,i,s] + N_yais_mid[y,nage,i,s])
+        
+        
+        # Length_yais_beg[y+1,nage,i,s] = ( N_yais_beg[y+1,nage-1,i,s]*
+        #                                     (Length_yais_beg[y,nage-1,i,s]+
+        #                                        (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage-1,i,s]*(1-exp(-kappa_yk[y,phi_ik2[i],s])))) +
+        #                                     N_yais_beg[y+1,nage-1,i,s]*
+        #                                     (Length_yais_beg[y,nage,i,s]+
+        #                                        (Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-kappa_yk[y,phi_ik2[i],s]))))/
+        #   (N_yais_beg[y+1,nage-1,i,s] + N_yais_beg[y+1,nage,i,s])
+        # 
+        # Length_yais_mid[y+1,nage,i,s] = (N_yais_mid[y,nage-1,i,s]*
+        #                                    (Length_yais_beg[y,nage-1,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage-1,i,s]*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s])))) +
+        #                                    N_yais_mid[y,nage,i,s]*
+        #                                    (Length_yais_beg[y,nage,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s]))))/
+        #   (N_yais_mid[y,nage-1,i,s] + N_yais_mid[y,nage,i,s])
       } ## end subareas i
       # cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
     } ## end sexes
@@ -646,25 +653,33 @@ runOM_datagen <- function(df, seed = 731){
     ## of the mortality and the tuned F extraction.
     for(s in 1:2){
       for(i in 1:nspace){
-        for(a in 1:nage) N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/2+Zreal_yai[y,a,i]))
-        for(a in 2:(nage-1)) N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]
+        for(a in 1:nage){
+          N_yais_end[y,a,i,s] <- N_yais_mid[y,a,i,s]*exp(-(mat_age[a]/2+Zreal_yai[y,a,i]))
+        }
+        for(a in 2:(nage-1)){
+          N_yais_beg[y+1,a,i,s] <- N_yais_end[y,a-1,i,s]
+        }
         N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])
+      } ## end subareas i
+    } ## end sexes
+    for(s in 1:2){
+      for(i in 1:nspace){
         ## reweight length-at-age given movement
         for(a in 1:(nage)){ ## note that TMB starts at pos 1 which is age 1 which is pos 2 here
           LCome = 0.0; NCome = 0.0
-          for(j in 1:nspace){           
+          for(j in 1:nspace){
             if(i != j){
               LCome = LCome + phi_ij[i,j]*N_yais_end[y,a,j,s]*Length_yais_mid[y,a,j,s] ## for numerator
               NCome = NCome + phi_ij[i,j]*N_yais_end[y,a,j,s] ## for denom
             }
           } ## end subareas j
-          Length_yais_end[y,a,i,s] =  Length_yais_beg[y+1,a,i,s] =(N_yais_end[y,a,i,s]*Length_yais_mid[y,a,i,s] + LCome)/
+          Length_yais_end[y,a,i,s] <-   Length_yais_beg[y+1,a,i,s] <- (N_yais_end[y,a,i,s]*Length_yais_mid[y,a,i,s] + LCome)/
             (N_yais_end[y,a,i,s]+NCome)
+          # cat( i,"\t",  Length_yais_beg[y+1,a,i,s],"\n")
         } ## end ages
-   
       } ## end subareas i
     } ## end sexes
-    
+    if(any(is.na(Length_yais_beg[y+1,,,]))) stop('NA next year LYAIS_BEG')
   
     
   ## SSB_y ----

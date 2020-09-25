@@ -55,7 +55,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(Linf_yk); // sex, stock, year specific
   DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
   DATA_ARRAY(kappa_yk);
-  // DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
+  DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
   DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
   DATA_INTEGER(LBins); // maximum length bin in CM
   
@@ -431,7 +431,7 @@ Type objective_function<Type>::operator() ()
           N_yais_beg(y,nage-1,i,s)*
           (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
             (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i),s);
-
+        
         Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
           (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
           N_yais_mid(y,nage-1,i,s)*
@@ -439,7 +439,28 @@ Type objective_function<Type>::operator() ()
             (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i),s);
       } // end subareas i
     } // end sexes
-  } // temporary yend
+    
+    // prob of length-at-age
+    for(int s=0;s<2;s++){
+    for(int i=0;i<(nspace);i++){
+      for(int a=1;a<(nage);a++){
+        LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+        LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+        for(int l=1;l<(LBins-1);l++){
+          LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+            pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+          LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+            pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+        } // end LBins
+        LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+        LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+      } // end ages
+    } // end nspace
+    } // end sex
+        } // temporary yend
+    
+    
+    
   //   
   //   // calculate SSB using N at beginning of year
   // 
@@ -483,22 +504,7 @@ Type objective_function<Type>::operator() ()
   //     } // end subareas i
   //     
   //       
-  //   // prob of length-at-age
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int a=1;a<(nage);a++){
-  //       LengthAge_alyi_beg(a,0,y,i) = pnorm(Type(1.0),  Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i)));
-  //       LengthAge_alyi_mid(a,0,y,i) = pnorm(Type(1.0),  Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i)));
-  //       for(int l=1;l<(LBins-1);l++){
-  //         LengthAge_alyi_beg(a,l,y,i) = pnorm(Type(l+1),  Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i))) -
-  //           pnorm(Type(l),  Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i)));
-  //         LengthAge_alyi_mid(a,l,y,i) = pnorm(Type(l+1),  Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i))) -
-  //           pnorm(Type(l),  Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i)));
-  //         } // end LBins
-  //       LengthAge_alyi_beg(a,LBins-1,y,i) = 1-pnorm(Type(LBins-1), Length_yai_beg(y,a,i), sigmaG_yk(y,phi_ik2(i)));
-  //       LengthAge_alyi_mid(a,LBins-1,y,i) = 1-pnorm(Type(LBins-1), Length_yai_mid(y,a,i), sigmaG_yk(y,phi_ik2(i)));
-  //     } // end ages
-  //   } // end nspace
-  //   
+
   //   
   //   // Catch at beginning of year
   //   // Hybrid F tuning inputs

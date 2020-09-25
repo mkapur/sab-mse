@@ -353,18 +353,18 @@ Type objective_function<Type>::operator() ()
           N_yais_beg(0,0,i,s) <- Ninit_ais(0,i,s);
           N_yais_mid(0,0,i,s) <- N_yais_beg(0,0,i,s)*exp(-mat_age(0)/2);
           for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
+            Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
             for(int j=0;j<(nspace);j++){ 
-              Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
               if(i != j){
                 pLeave += X_ijas(i,j,a,s); // will do 1-this for proportion which stay
                 NCome += X_ijas(j,i,a,s)*Ninit_ais(a,j,s); // actual numbers incoming
               } // end i != j
             } // end subareas j
-            // Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-            //   exp(-kappa_yk(0,phi_ik2(i),s)*a);
-            // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-            //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
-            // N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mat_age[a]/2);
+            Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+              exp(-kappa_yk(0,phi_ik2(i),s)*a);
+            Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+              exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
+            N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mat_age[a]/2);
           } // end ages
            //  Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
            //  // plus group includes those already at A AND age into A

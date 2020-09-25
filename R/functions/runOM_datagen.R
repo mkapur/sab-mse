@@ -191,7 +191,7 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  for(y in 1:25){
+  for(y in tEnd){
   # for(y in 1:(tEnd-1)){
     cat(y,"\n")
     ## Year 0 ----
@@ -285,6 +285,7 @@ runOM_datagen <- function(df, seed = 731){
           } ## end i != j
         } ## end subareas j
         N_yais_mid[y,nage,i,s] = N_yais_beg[y,nage,i,s]*exp(-mat_age[nage]/3)
+        # if(y < tEnd){
         # N_yais_beg[y+1,nage,i,s] =   ((1-pLeave)*( N_yais_beg[y,nage,i,s]+ N_yais_beg[y,nage-1,i,s]) + NCome)*exp(-mat_age[nage]/3);
         ## plus group weighted average (we already have the numbers at age)
         Length_yais_beg[y+1,nage,i,s] = ( N_yais_beg[y+1,nage-1,i,s]*
@@ -300,6 +301,7 @@ runOM_datagen <- function(df, seed = 731){
                                            N_yais_mid[y,nage,i,s]*
                                            (Length_yais_beg[y,nage,i,s]+(Linf_yk[y,phi_ik2[i],s]-Length_yais_beg[y,nage,i,s])*(1-exp(-0.5*kappa_yk[y,phi_ik2[i],s]))))/
           (N_yais_mid[y,nage-1,i,s] + N_yais_mid[y,nage,i,s])
+        # } ## end not tEnd clause
       } ## end subareas i
       # cat(y+1,sum(Length_yais_mid[y+1,,,s]),"\n")
     } ## end sexes
@@ -361,8 +363,8 @@ runOM_datagen <- function(df, seed = 731){
                                             c(1:(niter+1)))) 
     
     Adj <- Z_a_TEMP <- Z_a_TEMP2 <- NULL
-    for(fish_flt in 5){
-    # for(fish_flt in 1:nfleets_fish){
+    # for(fish_flt in 5:7){
+    for(fish_flt in 1:nfleets_fish){
       # selMult = rep(1,nfleets_fish)[fish_flt]
       selMult = c(0.5,0.3,1,1,1/4,1/4,1/10,1,1)[fish_flt]
       # selMult <- ifelse(fish_flt %in% c(1,2),0.5,ifelse(fish_flt %in% 5:7,0.25,1)) ## trying to tweak selex to fit

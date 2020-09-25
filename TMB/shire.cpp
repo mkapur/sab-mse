@@ -366,18 +366,18 @@ Type objective_function<Type>::operator() ()
               exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
             N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mat_age[a]/2);
           } // end ages
-           //  Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
-           //  // plus group includes those already at A AND age into A
-           //  if(i != j){
-           //    pLeave += X_ijas(i,j,nage-1,s);
-           //    NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(0,nage-1,j,s) + N_yais_beg(0,nage-2,j,s)) ; // if M becomes spatial use M_aj here
-           //  }
-           //  N_yais_beg(y,nage-1,i) =  ((1-pLeave)*(N_yais_beg(0,nage-1,i)+N_yais_beg(0,nage-2,i)) + NCome)*exp(-M(nage-1));
-           // 
-           // Length_yais_beg(y,nage-1,i) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-           //   exp(-kappa_yk(0,phi_ik2(i))*nage-1);
-           // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-           //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*nage-1);
+          Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
+          for(int j=0;j<(nspace);j++){ 
+            if(i != j){
+              pLeave += X_ijas(i,j,nage-1,s);
+              NCome += X_ijas(j,i,nage-1,s)*(Ninit_ais(0,nage-1,j,s) + Ninit_ais(0,nage-2,j,s)) ; // if M becomes spatial use M_aj here
+            } // end i != j
+          } // end subareas j
+          N_yais_beg(y,nage-1,i) =  ((1-pLeave)*(Ninit_ais(0,nage-1,i)+Ninit_ais(0,nage-2,i)) + NCome)*exp(-mat_age(nage-1));
+          Length_yais_beg(y,nage-1,i) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            exp(-kappa_yk(0,phi_ik2(i))*(nage-1));
+          Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
         } // end sexes
       } // end subareas i
     } // end y == 0

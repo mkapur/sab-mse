@@ -683,14 +683,13 @@ colnames(selMat) <- c("Length","Trap","LL","Trawl","Std","StRS")
 
 ## LL, TRAP, TRAWL
 for(y in 1:dim(OM_fish_selex_yafs)[[1]]){
+  OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'LL'])) ## LL
+  OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## TRAP
+  OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trawl'])) ## TRAWL
+
   # OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## LL
   # OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## TRAP
   # OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trawl'])) ## TRAWL
-  
-  
-  OM_fish_selex_yafs[y,,5,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## LL
-  OM_fish_selex_yafs[y,,6,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trap'])) ## TRAP
-  OM_fish_selex_yafs[y,,7,1:2] <- c(rep(0, length(0:31)),t(selMat[1:39,'Trawl'])) ## TRAWL
 }
 
 

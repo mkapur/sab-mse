@@ -12,11 +12,12 @@ pNinit <- Ninit_ais[,,1] %>%
   scale_color_manual(values = subareaPal) +
   geom_line(lwd = 2) + 
   labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
-  ggsidekick::theme_sleek()
+  ggsidekick::theme_sleek()+
+  facet_wrap(~variable,scales = 'free_y')
 
 ggsave(pNinit,
        file = here('figs',
-                   "NZeroNinit_Move_BothSex_normalizedOmega.png"),
+                   "NZeroNinit_Move_BothSex_nage10.png"),
        width = 6, height = 4, unit = 'in',
        dpi = 420)
 
@@ -55,7 +56,7 @@ for(i in 1:6){
        col = 'black',
        main = inames[i], 
        col.main =subareaPal[i], 
-       ylim = c(0,20000),
+       # ylim = c(0,20000),
        xlim = c(0,70),
        xlab = "Age", 
        ylab = 'Numbers')
@@ -77,14 +78,17 @@ png(file = here('figs','N_season_iy.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
 for(i in 1:6){
+  ylt = 3*max(sum(N_yais_end[2,,i,][!is.na(N_yais_end[2,,i,])]),
+              sum(N_yais_end[10,,i,][!is.na(N_yais_end[10,,i,])]))
+
   plot(rowSums(N_yais_beg[,,i,]),
        type = 'l',
        lwd = 2, 
        col = scales::alpha(subareaPal[i],0.2),
        main = inames[i], 
        col.main = subareaPal[i], 
-       ylim = c(0,400000),
-       xlim = c(0,nyear),
+       ylim = c(0,ylt),
+       xlim = c(0,nyear),xaxt='n',
        xlab = "Model Year", 
        ylab = 'Numbers (M+F)')
   lines(rowSums(N_yais_mid[,,i,]),
@@ -101,19 +105,22 @@ for(i in 1:6){
          legend = c("beg",
                     "mid (move)",
                     "end (fished)"), cex = 0.7, lty =1, lwd = 5)
+  axis(1, at = seq(1,nyear,5), labels = year[seq(1,nyear,5)])
 }
 dev.off()
 
-## SSB y ----
-pSSByi <- SSB_yi %>%
+## SSB y in kt ----
+pSSByi <- 
+  SSB_yi %>%
   data.frame() %>%
-  mutate('Yr' = 1:nrow(SSB_yi)) %>%
+  mutate('Yr' =year) %>%
   reshape2::melt(id = c('Yr')) %>%
-  ggplot(., aes(x = Yr, y = value, color = variable )) +
+  ggplot(., aes(x = Yr, y = value/1e6, color = variable )) +
   scale_color_manual(values = subareaPal) +
   geom_line(lwd = 2) + 
-  labs(x = 'Modeled Year',y = 'SSB', color = 'subarea') +
-  ggsidekick::theme_sleek() + theme( legend.position = c(0.8,0.8))
+  labs(x = 'Modeled Year',y = 'SSB (kt, 1kt = 1000mt)', color = 'subarea') +
+  ggsidekick::theme_sleek() + theme( legend.position = c(0.9,0.8)) +
+  facet_wrap(~variable,scales = 'free_y')
 
 pSSByk <- SSB_yk[1:nyear,] %>%
   data.frame() %>%
@@ -124,6 +131,41 @@ pSSByk <- SSB_yk[1:nyear,] %>%
   geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
   ggsidekick::theme_sleek() + theme( legend.position = c(0.8,0.8))
 
+## ssb_ym with compare ----
+assSB <- read.csv(here('input','downloads','AssessmentDat_thru2018.csv'),fileEncoding="UTF-8-BOM") %>%
+  mutate(REG = substr(Index,1,2), assSSBMT = Value) %>% filter(Type == 'SpawnBiomass')
+
+SSB_ym0 <-  SSB_yi %>%
+  data.frame() %>%
+  mutate('Yr' =year) %>%
+  reshape2::melt(id = c('Yr')) %>%
+  merge(., spmat, by.x = "variable", by.y = "subarea") %>% 
+  group_by(Yr, mgmt) %>%
+    summarise(totSSBkg = sum(value), 
+              totSSBmt = totSSBkg/1e6) %>% select(Yr, mgmt, totSSBmt)
+levels(SSB_ym0$mgmt) <- c('AI','AK','BC','CC','WC')
+  
+SSB_ym0$mgmt[SSB_ym0$mgmt == 'AI'] <- 'AK'  
+SSB_ym0$mgmt[SSB_ym0$mgmt == 'CC'] <- 'WC'  
+SSB_ym <- SSB_ym0 %>% group_by(Yr, mgmt) %>%
+  summarise(omSSBMT = sum(totSSBmt))
+
+merge(assSB, SSB_ym, by.x = c('Year','REG'), by.y = c('Yr','mgmt')) %>%
+  select(Year, REG, CV,assSSBMT, omSSBMT) %>%
+  filter(Year > 1980) %>%
+  ggplot(., aes(x = Year, y = assSSBMT, color = REG)) +
+  geom_line(aes(y = omSSBMT),lwd = 1.1) +
+  geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG)) +
+  scale_color_manual(values = mgmtPal)+
+  geom_point()+  ggsidekick::theme_sleek() +
+  labs(x = 'Modeled Year',y = 'SSB', color = 'Mgmt Region') +
+  facet_wrap(~REG,scales = 'free_y')
+ggsave(last_plot(),
+       file = here('figs',
+                  paste0(Sys.Date(),"-SSB_ym_compare.png")),
+       width = 6, height = 4, unit = 'in',
+       dpi = 420)
+
 ## R y ----
 pRyi <- R_yi %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
@@ -132,7 +174,8 @@ pRyi <- R_yi %>% data.frame() %>%
   scale_color_manual(values = subareaPal) +
   geom_line(lwd = 2) + 
   labs(x = 'Model Year',y = 'Recruits', color = 'subarea') +
-  ggsidekick::theme_sleek()+ theme( legend.position = c(0.8,0.8))
+  ggsidekick::theme_sleek()+ theme( legend.position = c(0.8,0.8))+
+  facet_wrap(~variable,scales = 'free_y')
 
 pRyk <- R_yk %>% data.frame() %>%
   mutate('Yr' = 1:nrow(.)) %>%
@@ -145,26 +188,17 @@ pRyk <- R_yk %>% data.frame() %>%
 
 
 ## SRR ----
-getRYK <- function(h,r0,ssb,ssb0){
-  RYK = (4*h*r0*ssb)/
-    (ssb0*(1-h)+
-       ssb*(5*h-1))
-  return(RYK)
-}
-# plot(0:1000, getRYK(h = 0.5, r0 =1500, ssb = 0:1000, ssb0 = 500),
-#      ylim = c(0,3000), xlim = c(0,1000))
 
-SRR <- data.frame('SSByk' = 0:10000, 
-                  'RYK' = getR)
 
-pSRR <- R_yk[1:15,] %>% 
+
+pSRR <- R_yk %>% 
   data.frame() %>%
   mutate('Yr' = 1:nrow(.))  %>%
   reshape2::melt(.,id = c('Yr')) %>%
   mutate(RYK = value) %>%
   select(-value) %>%
   bind_cols(.,
-            SSB_yk[1:15,] %>% 
+            SSB_yk %>% 
               data.frame() %>%
               mutate('Yr' = 1:nrow(.))  %>%
               reshape2::melt(.,id = c('Yr')) %>%
@@ -174,10 +208,10 @@ pSRR <- R_yk[1:15,] %>%
   scale_color_manual(values = demPal) +
   geom_point() +
   labs(x = 'SSB',y = 'Recruits #', color = 'stock') +
-  scale_y_continuous(limits = c(0,25000)) +
+  # scale_y_continuous(limits = c(0,25000)) +
   # scale_x_continuous(limits = c(0,400000)) +
   ggsidekick::theme_sleek() +
-  facet_wrap(~ variable)
+  facet_wrap(~ variable, scales = 'free')
 
 ggsave(pSRR,
        file = here('figs',

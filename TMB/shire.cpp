@@ -28,10 +28,10 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(year); // number of years modeled
   int nyear = year.size();
   
-  // DATA_INTEGER(nfleets_surv); // number of survey fleets
+  DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
-  // DATA_INTEGER(nfleets_acomp); // number of age comp fleets
-  // DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
+  DATA_INTEGER(nfleets_acomp); // number of age comp fleets
+  DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
 
   // DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
@@ -81,17 +81,23 @@ Type objective_function<Type>::operator() ()
   // DATA_ARRAY(age_catch); // Age comps in catch -- should be by fleet
   
   // Selectivity
-  // DATA_IVECTOR(selType_fish); // 1 == AGESEL, 2 = LENSEL
-  // DATA_IVECTOR(selType_surv); // 1 == AGESEL, 2 = LENSEL
-  // PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (slx_type controls parameterization)
-  // PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (slx_type controls parameterization)
+  DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
+  DATA_IVECTOR(selShape_fish); 
+  DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
+  DATA_IVECTOR(selShape_surv); 
+  PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
+  PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
   
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // DATA_INTEGER(slx_type)
     // Predicted selectivity
-  // array<Type> fsh_slx(nyear, nage, 2);           // Fishery selectivity-at-age by sex (on natural scale)
-  // array<Type> srv_slx(nyear, nage, 2);           // Survey selectivity-at-age by sex(on natural scale)
-  
+  array<Type> fsh_slx_yafs(nyear, nage, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
+  array<Type> srv_slx_yafs(nyear, nage, nfleets_surv,2);           // Survey selectivity-at-age by sex(on natural scale)
+  // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
+  // each time block. Used for both selectivity and catchability
+  DATA_IVECTOR(fsh_blks)        // fishery  
+    DATA_IVECTOR(srv_blks)        // survey
+    
   // Survey Biomass
   // DATA_VECTOR(survey_err);
   // DATA_VECTOR(survey); // Acoustic survey - vector of obs x year 
@@ -108,15 +114,6 @@ Type objective_function<Type>::operator() ()
   // array<Type> acomp_yaf_temp(tEnd, age_maxage, nfleets_acomp); // placeholder for aging error calcs
   // array<Type> survey_acomp_f_est(tEnd, age_maxage, nfleets_acomp); //when error multiplied by Nage
   // vector<Type> Nsamp_acomp_f(nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
-  
-  // Survey Selex
-  // DATA_SCALAR(smul); // Multiplier for survey selectivity
-  // DATA_SCALAR(sigma_psel); // selectivity SD
-  // DATA_SCALAR(logphi_survey);
-  // PARAMETER_VECTOR(psel_fish);
-  // PARAMETER_VECTOR(psel_surv);
-  // PARAMETER_VECTOR(F0);
-  // PARAMETER_ARRAY(PSEL); // y varying selectivity
   
   // Catches
   // DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
@@ -190,6 +187,116 @@ Type objective_function<Type>::operator() ()
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
  
+ 
+ // from SEAK
+ 
+ // Fishery selectivity
+ // Number of parameters in the chosen selectivity type: 
+ int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
+ // // Preliminary calcs to bring parameters out of log space
+ array<Type> fsh_slx_pars(log_fsh_slx_pars.dim);
+ fsh_slx_pars.setZero();
+ for (int k = 0; k < 2; k++) {
+   for (int h = 0; h < fsh_blks.size(); h++) {
+     for (int n = 0; n < npar_slx; n++) {
+       fsh_slx_pars(h,n,k) = exp(log_fsh_slx_pars(h,n,k));
+     }
+   }
+ }
+ // // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
+ // // "does" the looping over year and age "while" within the y block, then
+ // // iterates to the next block. Year is not in a for loop because it is
+ // // iterated by the do statement.
+ // 
+ // // The switch for slx_shape allows you to change parameterization SHAPE. This could
+ // // easily be expanded to accomodate any selectivity type (the fsh_slx_pars
+ // // allows for a flexible number of parameters and y blocks)
+ // 
+ int i = 0;
+ for(int y = 0; y < fsh_blks.size(); y++){
+   do{
+     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+       switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
+       case 0: // enter age based sel
+         for (int s = 0; s < 2; s++) {
+           for (int a= 0; a < nage; a++) {
+             // Selectivity switch (case 0 or 1 references the value of slx_type)
+             switch (selShape_fish(fish_flt)) {
+             case 0: // Logistic with a50 and a95, where fsh_slx_pars(y,0,s) = a50 and fsh_slx_pars(y,1,s) = a95
+               fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) * (a - fsh_slx_pars(y,0,s)) / (fsh_slx_pars(y,1,s) - fsh_slx_pars(y,0,s))) );
+               break;
+             case 1: // Logistic with a50 and slope, where fsh_slx_pars(y,0,s) = a50 and fsh_slx_pars(y,1,s) = slope.
+               //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+               fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) * fsh_slx_pars(y,1,s) * (a - fsh_slx_pars(y,0,s)) ) );
+               break;
+             case 2: // Dome Normal with alpha (mean) and beta (sd)
+               fsh_slx_yafs(i,a,fish_flt,s)  = exp(-(0.5 * (a - fsh_slx_pars(y,2,s))/pow(fsh_slx_pars(y,3,s),2)));
+               break; 
+             case 3: // Dome Gamma with alpha (mean) and beta (sd)
+               fsh_slx_yafs(i,a,fish_flt,s)  =  pow(a, (fsh_slx_pars(y,2,s) - 1)) * exp(-a/fsh_slx_pars(y,3,s));
+               break;
+             } // end switch selShape
+           } // end ages
+         } // end sex
+         break;
+       case 1: // enter length based sel
+         // for (int l= 0; l < LBins; l++) {
+         // switch (selShape_fish(fish_flt)) {
+         // break;
+         // } // end switch selShape
+         // } // end length
+       // } // end sex
+         break;
+       } // end selType
+     } // end fish_flt
+     i++;
+   } while (i <= fsh_blks(y));
+ } // end y blooks
+ // 
+ // // std::cout << fsh_slx(1,1,1) << "\n Fishery selectivity \n";
+ // 
+ // // Survey selectivity - see notes on syntax in fishery selectivity section
+ // 
+ // // Preliminary calcs to bring parameters out of log space
+ // array<Type> srv_slx_pars(log_srv_slx_pars.dim);
+ // srv_slx_pars.setZero();
+ // 
+ // for (int k = 0; k < 2; k++) {
+ //   for (int h = 0; h < srv_blks.size(); h++) {
+ //     for (int n = 0; n < npar_slx; n++) { 
+ //       srv_slx_pars(h,n,k) = exp(log_srv_slx_pars(h,n,k));
+ //     }
+ //   }
+ // }
+ // 
+ // i = 0;     // re-set i to 0 (do not redeclare)
+ // 
+ // for(int h = 0; h < srv_blks.size(); h++){
+ //   do{
+ //     for (int k = 0; k < 2; k++) {
+ //       for (int j = 0; j < nage; j++) {
+ //         
+ //         // Selectivity switch (case 0 or 1 references the value of slx_type)
+ //         switch (slx_type) {
+ //         
+ //         case 0: // Logistic with a50 and a95, where srv_slx_pars(h,0,k) = a50 and srv_slx_pars(h,1,k) = a95
+ //           srv_slx(i,j,k) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) * (j - srv_slx_pars(h,0,k)) / (srv_slx_pars(h,1,k) - fsh_slx_pars(h,0,k))) );
+ //           break;
+ //           
+ //         case 1: // Logistic with a50 and slope, where srv_slx_pars(h,0,k) = a50 and srv_slx_pars(h,1,k) = slope.
+ //           //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+ //           srv_slx(i,j,k) = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) * srv_slx_pars(h,1,k) * (j - srv_slx_pars(h,0,k)) ) );
+ //           
+ //           break;
+ //         }
+ //       }
+ //     }
+ //     i++;
+ //   } while (i <= srv_blks(h));
+ // }
+ // selectivity
+ 
+ 
   //  END DATA & PARS, BEGIN MODEL //
   
   // recdevs placeholder
@@ -202,112 +309,7 @@ Type objective_function<Type>::operator() ()
   for(int k=0;k<(nstocks);k++){
       tildeR_initk(k) =0;
   }
-  
-  /// LIKELY MOVE THIS OUT FOR DIFF SELEX HANDLING ----
-  
-  
-  // from SEAK
-  
-  // Fishery selectivity
-  
-  // // Number of parameters in the chosen selectivity type: 
-  // int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
-  // // std::cout << npar_slx << "\n number of params for slx type\n";
-  // 
-  // // Preliminary calcs to bring parameters out of log space
-  // array<Type> fsh_slx_pars(log_fsh_slx_pars.dim);
-  // fsh_slx_pars.setZero();
-  // 
-  // for (int k = 0; k < 2; k++) {
-  //   for (int h = 0; h < fsh_blks.size(); h++) {
-  //     for (int n = 0; n < npar_slx; n++) { 
-  //       fsh_slx_pars(h,n,k) = exp(log_fsh_slx_pars(h,n,k));
-  //     }
-  //   }
-  // }
-  // // std::cout << fsh_slx_pars << "\n slx out of log space\n";
-  // 
-  // // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
-  // // "does" the looping over year and age "while" within the y block, then
-  // // iterates to the next block. Year is not in a for loop because it is
-  // // iterated by the do statement.
-  // 
-  // // The switch for slx_type allows you to change parameterization. This could
-  // // easily be expanded to accomodate any selectivity type (the fsh_slx_pars
-  // // allows for a flexible number of parameters and y blocks)
-  // 
-  // int i = 0;
-  // 
-  // for(int h = 0; h < fsh_blks.size(); h++){
-  //   do{
-  //     for (int k = 0; k < 2; k++) {
-  //       for (int j = 0; j < nage; j++) {
-  //         
-  //         // Selectivity switch (case 0 or 1 references the value of slx_type)
-  //         switch (slx_type) {
-  //         
-  //         case 0: // Logistic with a50 and a95, where fsh_slx_pars(h,0,k) = a50 and fsh_slx_pars(h,1,k) = a95
-  //           fsh_slx(i,j,k) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) * (j - fsh_slx_pars(h,0,k)) / (fsh_slx_pars(h,1,k) - fsh_slx_pars(h,0,k))) );
-  //           break;
-  //           
-  //         case 1: // Logistic with a50 and slope, where fsh_slx_pars(h,0,k) = a50 and fsh_slx_pars(h,1,k) = slope.
-  //           //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-  //           fsh_slx(i,j,k) = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) * fsh_slx_pars(h,1,k) * (j - fsh_slx_pars(h,0,k)) ) );
-  //           break;
-  //         }
-  //       }
-  //     }
-  //     i++;
-  //   } while (i <= fsh_blks(h));
-  // }
-  // 
-  // // std::cout << fsh_slx(1,1,1) << "\n Fishery selectivity \n";
-  // 
-  // // Survey selectivity - see notes on syntax in fishery selectivity section
-  // 
-  // // Preliminary calcs to bring parameters out of log space
-  // array<Type> srv_slx_pars(log_srv_slx_pars.dim);
-  // srv_slx_pars.setZero();
-  // 
-  // for (int k = 0; k < 2; k++) {
-  //   for (int h = 0; h < srv_blks.size(); h++) {
-  //     for (int n = 0; n < npar_slx; n++) { 
-  //       srv_slx_pars(h,n,k) = exp(log_srv_slx_pars(h,n,k));
-  //     }
-  //   }
-  // }
-  // 
-  // i = 0;     // re-set i to 0 (do not redeclare)
-  // 
-  // for(int h = 0; h < srv_blks.size(); h++){
-  //   do{
-  //     for (int k = 0; k < 2; k++) {
-  //       for (int j = 0; j < nage; j++) {
-  //         
-  //         // Selectivity switch (case 0 or 1 references the value of slx_type)
-  //         switch (slx_type) {
-  //         
-  //         case 0: // Logistic with a50 and a95, where srv_slx_pars(h,0,k) = a50 and srv_slx_pars(h,1,k) = a95
-  //           srv_slx(i,j,k) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) * (j - srv_slx_pars(h,0,k)) / (srv_slx_pars(h,1,k) - fsh_slx_pars(h,0,k))) );
-  //           break;
-  //           
-  //         case 1: // Logistic with a50 and slope, where srv_slx_pars(h,0,k) = a50 and srv_slx_pars(h,1,k) = slope.
-  //           //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-  //           srv_slx(i,j,k) = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) * srv_slx_pars(h,1,k) * (j - srv_slx_pars(h,0,k)) ) );
-  //           
-  //           break;
-  //         }
-  //       }
-  //     }
-  //     i++;
-  //   } while (i <= srv_blks(h));
-  // }
-  // selectivity
-  // survey
 
-  
-
-  
   // Equilibrium Unfished numbers-at-age, subarea (outside of y loop) 
   // identical to Ninit except no recdevs
   N_0ais.setZero();   
@@ -450,20 +452,20 @@ Type objective_function<Type>::operator() ()
     
     // prob of length-at-age
     for(int s=0;s<2;s++){
-    for(int i=0;i<(nspace);i++){
-      for(int a=1;a<(nage);a++){
-        LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-        LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-        for(int l=1;l<(LBins-1);l++){
-          LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-            pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-            pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-        } // end LBins
-        LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-        LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-      } // end ages
-    } // end nspace
+      for(int i=0;i<(nspace);i++){
+        for(int a=1;a<(nage);a++){
+          LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+          LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+          for(int l=1;l<(LBins-1);l++){
+            LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+              pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+            LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+              pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+          } // end LBins
+          LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+          LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+        } // end ages
+      } // end nspace
     } // end sex
     
       // Catch at beginning of year
@@ -472,7 +474,8 @@ Type objective_function<Type>::operator() ()
       int niter = 50;
 
       array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
-
+      
+      
       // for(int i=0;i<(nspace);i++){
       //   for(int a=0;a<nage;a++){
       //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){

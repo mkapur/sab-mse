@@ -529,7 +529,7 @@ save(growthPars,
      file = here('input','input_data',"OM_growthPars.rdata"))
 
 
-## weight at length
+## weight at length, kg
 wtatlen_kab <- matrix(NA, nrow = 4, ncol = 2) ## stock x a,b for aL^b
 rownames(wtatlen_kab) <- paste0("R",4:1)
 

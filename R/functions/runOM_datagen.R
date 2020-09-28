@@ -78,8 +78,8 @@ runOM_datagen <- function(df, seed = 731){
   q = 0.5 ## placeholder
   # True values 
   # M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
-  h_k <- exp(df$parms$logh_k) #rep(0.7,4) # 
-  R_0k <- exp(df$parms$logRinit) ## change this to better value
+  h_k <- df$parms$logh_k ## srr wants this in log space
+  R_0k <- exp(df$parms$logRinit) ## srr wants this in normal space
   
   ## NA0 & SB0 ----
   ## note that omega makes this non-smooth
@@ -197,8 +197,8 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  # for(y in 1:(tEnd-1)){
-  for(y in 1:15){
+  for(y in 1:(tEnd-1)){
+  # for(y in 1:15){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){ 
@@ -715,9 +715,9 @@ runOM_datagen <- function(df, seed = 731){
   for(i in 1:nspace){
     for(k in 1:nstocks){
       # // SSB_yk already has summation
-      R_yk[y,k] = (4*log(h_k[k])*R_0k[k]*SSB_yk[y,k])/
-        (SSB_0k[k]*(1-log(h_k[k]))+ 
-           SSB_yk[y,k]*(5*log(h_k[k])-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+      R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k])/
+        (SSB_0k[k]*(1-h_k[k])+ 
+           SSB_yk[y,k]*(5*h_k[k]-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
     } # // end stocks
     R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
     

@@ -32,7 +32,7 @@ runOM_datagen <- function(df, seed = 731){
   phi_if_surv <- df$phi_if_surv 
   phi_if_fish <- df$phi_if_fish 
   phi_fm <- df$phi_fm
-  phi_ik <- df$phi_ik 
+  phi_ki <- df$phi_ki
   inames <- colnames(phi_ik)
   knames <- rownames(phi_ik)
   mnames <- colnames(phi_fm)
@@ -77,31 +77,33 @@ runOM_datagen <- function(df, seed = 731){
   q = 0.5 ## placeholder
   # True values 
   # M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
-  h_k <- rep(0.7,4) # exp(df$parms$logh_k)
+  h_k <- exp(df$parms$logh_k) #rep(0.7,4) # 
   R_0k <- rep(exp(df$parms$logRinit), nspace) ## change this to better value
   
   ## Unfished Naa and SB0 ----
   ## note that omega makes this non-smooth
   N_0ais <- array(0, dim = c(nage, nspace, 2), dimnames = list(c(age),c(inames),c('Fem','Mal')))
   for(s in 1:2){ ## 1 is female, 2 is male
-    for(k in 1:nstocks){
+    # for(k in 1:nstocks){
       for(i in 1:nspace){
         for(a in 1:(nage-1)){
           N_0ais[a,i,s] = N_0ais[a,i,s]+
             0.5* 
-            omega_ais[a,i,s]*
-            R_0k[k]*
-            tau_ki[k,i]* ## downscale to subarea. C1 and A1 higher because they're own stock
-            exp(-(mat_age[a]*age[a]))
+            # omega_ais[a,i,s]*
+            R_0k[phi_ik2[i]]*
+            tau_ki[phi_ik2[i],i]* ## downscale to subarea. C1 and A1 higher because they're own stock
+            exp(-(mat_age[a]*age[a])) ## same as sum to age
           # cat(paste(c(s,k,i,a), sep = " "),     N_0ais[a,i,s] ,"\n")
         } ## end age < plus
         # // note the A+ group will be in slot A-1
-        N_0ais[nage,i,s] =   omega_ais[a,i,s]*
-          N_0ais[nage-1,i,s]*
-          exp(-(mat_age[nage-1]*age[nage-1]))/
-          (1-exp(-mat_age[nage]*age[nage]))
+        N_0ais[nage,i,s] =       
+          N_0ais[nage,i,s] +
+          # omega_ais[a,i,s]*
+         (N_0ais[nage-1,i,s]*
+          exp(-sum(mat_age)))/
+          (1-exp(-mat_age[nage]))
       } ## // end subareas
-    }  ## // end stocks
+    # }  ## // end stocks
   } ## end sexes
   # N_0ais[1:15,,1] %>% data.frame() %>% mutate(rowSums(.))
   ## females only
@@ -111,7 +113,7 @@ runOM_datagen <- function(df, seed = 731){
       SSB_0i[i] = SSB_0i[i] +  N_0ais[a,i,1]*wtatlen_kab[phi_ik2[i],1]*
         unfished_ALK_F[a,i]^wtatlen_kab[phi_ik2[i],2]*mat_ak[a,phi_ik2[i]] ;
       for(k in 1:nstocks){
-        SSB_0k[k] = SSB_0k[k] + phi_ik[k,i]*SSB_0i[i];
+        SSB_0k[k] = SSB_0k[k] + phi_ki[k,i]*SSB_0i[i];
       } #// end stocks
     } #// end ages
   } # // end space
@@ -121,26 +123,30 @@ runOM_datagen <- function(df, seed = 731){
   Ninit_ais <- array(0, dim = c(nage, nspace, 2), dimnames = list(c(age),c(inames),c('Fem','Mal')))
   tildeR_initk <-  rep(1, nstocks)
   tildeR_yk <- matrix(1, nrow = tEnd, ncol = nstocks)
-  
-  for(s in 1:2){
-    for(k in 1:nstocks){   
-      for(i in 1:nspace){
-        for(a in 1:(nage-1)){
-          Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+
-            0.5* ## sex ratio
-            omega_ais[a,i,s] * ## omega is zero for non-movement years leading to weird shapes.
-            tau_ki[k,i] * 
-            R_0k[k]*
-            exp(-(mat_age[a]*age[a])) #* 
+  for(yinit in 1:(nage*10)){ 
+    cat(yinit, "\n")
+    for(s in 1:2){
+      # for(k in 1:nstocks){   
+        for(i in 1:nspace){
+          # Ninit_ais[1,i,s] = Ninit_ais[a,i,s]+0.5*R_0k[phi_ik2[i]]
+          for(a in 1:(nage-1)){
+            Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+
+              0.5* ## sex ratio
+              omega_ais[a,i,s] * ## omega is zero for non-movement years leading to weird shapes.
+              tau_ki[phi_ik2[i],i] * 
+              R_0k[phi_ik2[i]]*
+              exp(-(mat_age[a]*age[a])) #* 
             # exp(-0.5*SDR*SDR+tildeR_initk[k])
-        } #// end ages
-        Ninit_ais[nage,i,s] = omega_ais[a,i,s] * 
-                                 exp(-mat_age[nage]*age[nage-1])/
-          (1-exp(-(mat_age[nage]*age[nage])))#* 
-                                                               # exp(-0.5*SDR*SDR+tildeR_initk[k]))
-      } #// end space
-    } #// end stocks
-  } # end sex
+          } #// end ages
+          Ninit_ais[nage,i,s] =   Ninit_ais[nage,i,s] + 
+            omega_ais[nage,i,s] *
+            Ninit_ais[nage-1,i,s]*exp(-sum(mat_age[nage]))/
+            (1-exp(-(mat_age[nage])))#* 
+          # exp(-0.5*SDR*SDR+tildeR_initk[k]))
+        } #// end space
+      # } #// end stocks
+    } # end sex
+  } ## end yinit years
   
   Length_yais_beg <- Length_yais_mid <- Length_yais_end <- N_yais_beg <- N_yais_mid <- N_yais_end <- array(NA, dim = c(tEnd, nage, nspace, 2),
                                                                           dimnames = list(c(year),
@@ -191,7 +197,7 @@ runOM_datagen <- function(df, seed = 731){
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
   # for(y in 1:(tEnd-1)){
-  for(y in 1:3){
+  for(y in 1:10){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){ 
@@ -662,6 +668,7 @@ runOM_datagen <- function(df, seed = 731){
         N_yais_beg[y+1,nage,i,s] <- (N_yais_end[y,nage,i,s]+ N_yais_end[y,nage-1,i,s])
       } ## end subareas i
     } ## end sexes
+    
     for(s in 1:2){
       for(i in 1:nspace){
         ## reweight length-at-age given movement
@@ -694,7 +701,7 @@ runOM_datagen <- function(df, seed = 731){
   for(k in 1:nstocks){
     SSB_yk[y,k]<- 0
     for(i in 1:nspace){
-      SSB_yk[y,k] <- SSB_yk[y,k] + phi_ik[k,i]*SSB_yi[y,i] 
+      SSB_yk[y,k] <- SSB_yk[y,k] + phi_ki[k,i]*SSB_yi[y,i] 
     } # // end stocks
   } #// end space
   # cat(sum(SSB_yk[y,]),"\n")
@@ -710,13 +717,13 @@ runOM_datagen <- function(df, seed = 731){
       R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k])/
         (SSB_0k[k]*(1-h_k[k])+ 
            SSB_yk[y,k]*(5*h_k[k]-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
-      # if(R_yk[y,k] == 0) stop(paste("RYK IS ZER ON,",y,k,"\n"))
     } # // end stocks
     R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
+    
     N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits for next year
   } ### end space
     # head(catch_yf_pred)
-    
+    cat(y," ",R_yi[y,],"\n")
     
     
     
@@ -750,10 +757,9 @@ runOM_datagen <- function(df, seed = 731){
            phi_if_surv[sur_flt,i]* sum(selMult*surv_selex_yafs[y,a,sur_flt,]*N_yais_mid[y,a,i,]); ## To use with age comps; may need to change phi to sum acomp surveys
         } ## end ages
       } ## end nspace
-      
-      cat(  y," PRED ",survey_yf_pred[y,sur_flt]," OBS ",
-            surv_yf_obs[y,sur_flt]," ",sur_flt,' RATIO ', 
-            survey_yf_pred[y,sur_flt]/surv_yf_obs[y,sur_flt],  "\n")
+      # cat(  y," PRED ",survey_yf_pred[y,sur_flt]," OBS ",
+      #       surv_yf_obs[y,sur_flt]," ",sur_flt,' RATIO ', 
+      #       survey_yf_pred[y,sur_flt]/surv_yf_obs[y,sur_flt],  "\n")
     } ## end surv fleets
         # } else if(selType_surv[sur_flt] == 'LEN'){
         #     LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , sur_flt, 1]),

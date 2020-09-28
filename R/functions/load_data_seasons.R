@@ -113,6 +113,7 @@ load_data_seasons <- function(nspace = 6,
 
   ## Phi objects ----
   ## setup phi (spatial matching matrix) depending on spatial setup
+  ## MAKE A NSPACE == 3 AND 1 OPTION FOR COMBINING
   spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
@@ -135,12 +136,12 @@ load_data_seasons <- function(nspace = 6,
       phi_if_fish[c(8,9),5:6] <-  1
     
     ## phi_ik
-    phi_ik <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
-    rownames(phi_ik) <- unique(spmat$stock)
-    colnames(phi_ik) <- spmat$subarea
+    phi_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
+    rownames(phi_ki) <- unique(spmat$stock)
+    colnames(phi_ki) <- spmat$subarea
     
-    phi_ik[1,1] <-  phi_ik[2,2:3] <-  phi_ik[3,4:5]<-  phi_ik[4,6]  <- 1
-    phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
+    phi_ki[1,1] <-  phi_ki[2,2:3] <-  phi_ki[3,4:5]<-  phi_ki[4,6]  <- 1
+    phi_ki2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
     
     ## phi_ij [eq 6]
     phi_ij <-  matrix(1, ncol = nspace, nrow = nspace) ## 0 indicates  subareas comprise THE SAME stock
@@ -163,8 +164,8 @@ load_data_seasons <- function(nspace = 6,
   } else {
     phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
-    phi_ik <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
-    phi_ik2 <- apply(phi_ik,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
+    phi_ki <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
+    phi_ik2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
    
     # phi_fm <- matrix(0, nrow = nspace, ncol = 2)
     # phi_fm[1,1] <- phi_fm[2,2] <- 1
@@ -218,8 +219,8 @@ load_data_seasons <- function(nspace = 6,
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
-    logh_k = rep(log(0.2),4),
-    logRinit = log(1e5)
+    logh_k = c(1,0.5,0.88,0.7),
+    logRinit = c(log(450*10e6),log(20*10e6),8,4) ## sum wc = 12
   )
 
   # parms <- list( # Just start all the simluations with the same initial conditions 
@@ -267,7 +268,7 @@ load_data_seasons <- function(nspace = 6,
 
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
-    phi_ik = phi_ik,
+    phi_ki = phi_ki,
     phi_ik2 = phi_ik2,
     phi_ij = phi_ij,
     phi_fm = phi_fm,

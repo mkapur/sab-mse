@@ -10,10 +10,13 @@ library(here)
 library(ggsidekick)
 source(here("R","functions",'load_files_OM.R'))
 
-# compile(here("TMB","runsabassessment.cpp"))
-# dyn.load(dynlib(here("TMB","runsabassessment")))
 
+plot.figures = FALSE # Set true for printing to file 
 ## OM MODEL INIT ----
+set.seed(731)
+
+df <- load_data_seasons(nspace = 6, move = TRUE) ## data that works with OM
+
 # Initialize the model parameters. Make a version with movement and no seasons (simple)
 # df.simple <- load_data_seasons(nseason = 1, 
 #                                nspace = 2, 
@@ -34,14 +37,7 @@ source(here("R","functions",'load_files_OM.R'))
   
 ## OM MODEL CONDITIONING ----
 # code from runomem and run om condition
-set.seed(731)
-plot.figures = FALSE # Set true for printing to file 
 
-# Run the simulation model
-# assessment <- read.csv(here("input","data",'assessment_MLE.csv')) ## I believe this comes from SS3
-# assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
-# Catch.obs <- read.csv(here("input","data",'hake_totcatch.csv'))
-df <- load_data_seasons(nspace = 6, move = TRUE) ## data that works with OM
 
 # time <- 1
 # yrinit <- df$nyear
@@ -53,30 +49,34 @@ df <- load_data_seasons(nspace = 6, move = TRUE) ## data that works with OM
 # simyears <- 25 # Project 30 years into the future (2048 that year)
 # year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
 # N0 <- NA
-sim.data <- runOM_datagen(df)
+sim.data <- runOM_datagen(df) ##
 # sim.data <- run.agebased.true.catch(df)
 
-simdata0 <- sim.data # The other one is gonna get overwritten. 
+# simdata0 <- sim.data # The other one is gonna get overwritten. 
 
 
 # Plot stuff 
-parms <- getParameters_OM(trueparms = FALSE, df = df)
+# parms <- getParameters_OM(trueparms = FALSE, df = df)
 
 ##  Create a data frame to send to runsabassessment 
 
-df.new <- create_TMB_data(sim.data, df, history = TRUE)
+# df.new <- create_TMB_data(sim.data, df, history = TRUE)
 
-parms.new <- parms
-F0 <- rowSums(sim.data$Fout)
-Rdev <- parms$Rin
-parms.new$F0 <- F0
-parms.new$Rin <- Rdev
+# parms.new <- parms
+# F0 <- rowSums(sim.data$Fout)
+# Rdev <- parms$Rin
+# parms.new$F0 <- F0
+# parms.new$Rin <- Rdev
 
 ## testing without movement
-df.new$omega_ai[,] <- 0.5 ## stationary dist
+# df.new$omega_ai[,] <- 0.5 ## stationary dist
 # df.new$X_ija[,] <- 
 
-obj <- MakeADFun(df.new,
+compile(here("TMB","shire.cpp"))
+dyn.load(dynlib(here("TMB","shire")))
+
+
+obj <- MakeADFun(df,
                  parms.new,
                  DLL= "runsabassessment") # Run the assessment, in TMB folder
 reps <- obj$report()

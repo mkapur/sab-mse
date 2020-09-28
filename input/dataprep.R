@@ -889,11 +889,25 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
   pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
   merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
   select(-Year) 
+survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
+  distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
+  filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
+  # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
+  mutate(value = Estimate_metric_tons,
+         sigma = SD_mt, 
+         fleet = Fleet, 
+         mgmt = fleet, 
+         type = 'survey') %>%
+  select(Year, value, sigma, fleet) %>%
+  bind_rows(bcnom) %>%
+  select(-value) %>%
+  pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
+  merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
+  select(-Year) 
 
-  # arrange(.,Year,fleet) #%>%
-
-names(survsig) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,1,2,3)])
+names(survsig) <-names(survsigMT) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,1,2,3)])
 write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indices_sigma.csv"),row.names = FALSE)
+write.csv(survsigMT %>% select(fltnames_surv),here("input","input_data","OM_indices_sigmaMT.csv"),row.names = FALSE)
 
 ## make columns as fleets, include extra  bc surv
 names(bcnom) <- c('Year','value', 'sigma', 'Fleet')
@@ -920,7 +934,7 @@ merge(., data.frame('Year' = 1960:2019), all = TRUE)
 names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) 
 
 write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
-
+#* survey plot ----
 surv_vals %>%
   # select(-BC_EARLY) %>%
   # mutate(BC_EARLY = BC_EARLY*1000) %>%
@@ -936,37 +950,29 @@ ggsave(last_plot(),
        file = here('input','input_data','input_figs','OM_indices-09-22-2020.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
+#* survey + error plot ----
 survey%>%
   mutate(Year = 1960:2019) %>%  
-  melt(id = c('Year')) %>% 
+  melt(., id = c('Year')) %>% 
   merge(., 
-        read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
-          distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
-          filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
-          # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
-          mutate(value = Estimate_metric_tons,
-                 sigma = SD_mt, 
-                 fleet = Fleet, 
-                 mgmt = fleet, 
-                 type = 'survey') %>%
-          select(Year, value, sigma, fleet) %>%
-          bind_rows(bcnom) %>%
-          select(-value) %>%
-          pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
-          select(-Year) , 
-        all.x = TRUE) %>%
-  mutate(lci = ifelse(value.y != 317, round(value.x-1.96*exp(value.y)), value.x-317),
-         uci = ifelse(value.y != 317, round(value.x+1.96*exp(value.y)), value.x+317)) %>%
-
+        survsigMT %>%
+          mutate(Year = 1960:2019) %>%  
+          melt(.,id = 'Year'),
+          by = c("Year","variable")) %>%
+  mutate(lci = value.x-value.y, uci = value.x + value.y) %>%
   ggplot(., aes(x = Year, y = value.x, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
   scale_color_manual(values = survfltPal)+
-  scale_x_continuous(breaks = seq(1970,2020,10)) +
+  scale_fill_manual(values = survfltPal, guide = FALSE)+
+  scale_x_continuous(limits =  c(1980,2020), breaks = seq(1980,2020,10)) +
   geom_line(lwd = 1) +
-  geom_ribbon(aes(ymin = lci, ymax = uci, color = variable, fill = variable)) +
-  labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') +
+  geom_ribbon(aes(ymin =  lci, ymax = uci, color = variable, fill = variable), alpha = 0.2) +
+  labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') #+
   labs(subtitle = "BC_EARLY has been multiplied by 1000 for comparison")
 
+ggsave(last_plot(),
+       file = here('input','input_data','input_figs','OM_indices-sigma-09-22-2020.png'),
+       height = 6, width = 6, unit = 'in', dpi = 420)
 ## Aging error ----
 ## from MH on google drive; just use the "first" for each mgmt region
 ## array of age and sd x ages
@@ -991,7 +997,6 @@ save(ageerr_ExpAge, file = here("input","input_data","ageerr_ExpAge.rdata"))
 # age_survey.tmp2[,,1] <- age_survey.tmp2[,,2] <- as.matrix(age_survey.tmp)
 # age_catch.tmp <- read.csv(here("input","data",'age_catch_ss.csv'))
 # ac.data <- read.csv(here("input","data",'ac_data.csv'))
-
 
 
 

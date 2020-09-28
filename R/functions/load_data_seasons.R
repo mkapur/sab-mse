@@ -19,7 +19,13 @@ load_data_seasons <- function(nspace = 6,
   #' @bfuture recruitment bias adjustment in the future - scalar
   #' @yr_future Create dummy data for future years
   
-  years <- 1960:(myear+yr_future)
+  ## ERROR TRAPS 
+  if(nspace  <4 & nstocks >3) stop("mismatch between nspace and nstocks")
+  if(nspace == 1 & move) stop("can't have movement with fully pooled model")
+  
+  
+  
+   years <- 1960:(myear+yr_future)
   nyear <- length(years)
   tEnd <- length(years)
   age <- 0:70 
@@ -27,7 +33,8 @@ load_data_seasons <- function(nspace = 6,
  
   # Maturity ----
   load(here("input","input_data","OM_maturity_ak.rdata")) ## ak is age, stock
-
+  # movement ----
+  
   ## placeholder for X_ija -this will need to get converted from length
   if(move == FALSE){
     X_ijas <- array(0, dim = c(nspace,nspace,nage,2))
@@ -53,7 +60,9 @@ load_data_seasons <- function(nspace = 6,
       ## I forced this to be 166 vs 167 because it was causing too many individuals
     }
   }
-
+  omega_0ij = matrix(0, nrow = nspace, ncol = nspace)
+  diag(omega_0ij) <- 1
+  
   # Weight at length ----
   load(here("input","input_data","OM_wtatlen_kab.rdata")) ## a and be are pars of al^b
   
@@ -160,7 +169,7 @@ load_data_seasons <- function(nspace = 6,
     rownames(tau_ki) <- unique(spmat$stock)
     colnames(tau_ki) <- spmat$subarea
     tau_ki[1,1] <-   tau_ki[4,6]  <- 1 ## 100% of recruitment in stock
-    tau_ki[2,2:3] <-  tau_ki[3,4:5] <-  0.5 ## split 50/50 for now
+    tau_ki[2,2:3] <-  tau_ki[3,5:4] <-  c(0.75,0.25) ## A2 and C1 are larger
   } else {
     phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
@@ -219,8 +228,9 @@ load_data_seasons <- function(nspace = 6,
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
-    logh_k = c(1,0.5,0.88,0.7),
-    logRinit = c(log(450*10e6),log(20*10e6),8,4) ## sum wc = 12
+    logh_k = c(0.7,0.7,0.88,0.7),
+    logRinit = c(log(8*10e6),log(8*10e6),10,4), ## sum wc = 12
+    omega_0ij = omega_0ij
   )
 
   # parms <- list( # Just start all the simluations with the same initial conditions 
@@ -277,6 +287,7 @@ load_data_seasons <- function(nspace = 6,
     #* DEMOG ----
     X_ijas = X_ijas,
     omega_ais = omega_ais,
+    omega_0ij = omega_0ij,
     Linf_yk = growthPars$Linf_yk,
     kappa_yk = growthPars$kappa_yk,
     sigmaG_yk = growthPars$sigmaG_yk,

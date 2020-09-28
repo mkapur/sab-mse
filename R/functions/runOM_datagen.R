@@ -42,7 +42,8 @@ runOM_datagen <- function(df, seed = 731){
   ## Biology
   M_k <- df$M_k
   # M <- rep(0.2,nage) #M0*Msel # Naural mortality at age
-  mat_age <- rep(0.05, nage) ## mortality
+  mat_age <- rep(0.2, nage) ## mortality
+  
   wtatlen_kab <- df$wtatlen_kab
   mat_ak <- df$mat_ak ## maturity by age and stock
   load(here('input','input_data','unfished_ALK.rdata')) ## from prelim runs, for ssb0
@@ -53,7 +54,7 @@ runOM_datagen <- function(df, seed = 731){
   
   # // movement //
   omega_ais <- df$omega_ais
-  # omega_ais[,] <- 0.5
+  omega_0ij <- df$parms$omega_0ij
   
   X_ijas <- df$X_ijas
   
@@ -78,9 +79,9 @@ runOM_datagen <- function(df, seed = 731){
   # True values 
   # M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
   h_k <- exp(df$parms$logh_k) #rep(0.7,4) # 
-  R_0k <- rep(exp(df$parms$logRinit), nspace) ## change this to better value
+  R_0k <- exp(df$parms$logRinit) ## change this to better value
   
-  ## Unfished Naa and SB0 ----
+  ## NA0 & SB0 ----
   ## note that omega makes this non-smooth
   N_0ais <- array(0, dim = c(nage, nspace, 2), dimnames = list(c(age),c(inames),c('Fem','Mal')))
   for(s in 1:2){ ## 1 is female, 2 is male
@@ -123,7 +124,7 @@ runOM_datagen <- function(df, seed = 731){
   Ninit_ais <- array(0, dim = c(nage, nspace, 2), dimnames = list(c(age),c(inames),c('Fem','Mal')))
   tildeR_initk <-  rep(1, nstocks)
   tildeR_yk <- matrix(1, nrow = tEnd, ncol = nstocks)
-  for(yinit in 1:(nage*10)){ 
+  for(yinit in 1:(nage*10)){
     cat(yinit, "\n")
     for(s in 1:2){
       # for(k in 1:nstocks){   
@@ -132,14 +133,14 @@ runOM_datagen <- function(df, seed = 731){
           for(a in 1:(nage-1)){
             Ninit_ais[a,i,s] = Ninit_ais[a,i,s]+
               0.5* ## sex ratio
-              omega_ais[a,i,s] * ## omega is zero for non-movement years leading to weird shapes.
+              # omega_ais[a,i,s] * ## omega is zero for non-movement years leading to weird shapes.
               tau_ki[phi_ik2[i],i] * 
               R_0k[phi_ik2[i]]*
               exp(-(mat_age[a]*age[a])) #* 
             # exp(-0.5*SDR*SDR+tildeR_initk[k])
           } #// end ages
           Ninit_ais[nage,i,s] =   Ninit_ais[nage,i,s] + 
-            omega_ais[nage,i,s] *
+            # omega_ais[nage,i,s] *
             Ninit_ais[nage-1,i,s]*exp(-sum(mat_age[nage]))/
             (1-exp(-(mat_age[nage])))#* 
           # exp(-0.5*SDR*SDR+tildeR_initk[k]))
@@ -197,7 +198,7 @@ runOM_datagen <- function(df, seed = 731){
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
   # for(y in 1:(tEnd-1)){
-  for(y in 1:10){
+  for(y in 1:15){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){ 
@@ -714,9 +715,9 @@ runOM_datagen <- function(df, seed = 731){
   for(i in 1:nspace){
     for(k in 1:nstocks){
       # // SSB_yk already has summation
-      R_yk[y,k] = (4*h_k[k]*R_0k[k]*SSB_yk[y,k])/
-        (SSB_0k[k]*(1-h_k[k])+ 
-           SSB_yk[y,k]*(5*h_k[k]-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
+      R_yk[y,k] = (4*log(h_k[k])*R_0k[k]*SSB_yk[y,k])/
+        (SSB_0k[k]*(1-log(h_k[k]))+ 
+           SSB_yk[y,k]*(5*log(h_k[k])-1))#*exp(-0.5*b[y]*SDR*SDR+tildeR_yk[y,k])
     } # // end stocks
     R_yi[y,i] = R_yk[y,phi_ik2[i]]*tau_ki[phi_ik2[i],i]*omega_0ij[i] #// downscale to subarea including age-0 movement
     

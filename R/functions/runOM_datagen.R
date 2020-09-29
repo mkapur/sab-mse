@@ -141,7 +141,7 @@ runOM_datagen <- function(df, seed = 731){
           } #// end ages
           Ninit_ais[nage,i,s] =   Ninit_ais[nage,i,s] + 
             # omega_ais[nage,i,s] *
-            Ninit_ais[nage-1,i,s]*exp(-sum(mat_age[nage]))/
+            Ninit_ais[nage-1,i,s]*exp(-sum(mat_age))/
             (1-exp(-(mat_age[nage])))#* 
           # exp(-0.5*SDR*SDR+tildeR_initk[k]))
         } #// end space

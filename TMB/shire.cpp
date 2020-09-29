@@ -555,10 +555,24 @@ Type objective_function<Type>::operator() ()
               } // end age
               break;
             case 1: // length sel
+              vector<Type>MLAAblock(LBins);
+              for(int a=1;a<(nage);a++){
+                for(int s=0;s<2;s++){
+                  Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+                } // end sex for z a temp
+                
+                // cheap way to get this year's age-length matrix
+              
+                  for(int l=1;l<(LBins);l++){
+                    MLAAblock[a] = LengthAge_alyis_mid(a,l,y,i,0); // just females for now
+                  } // end length
+                } // end age
+              // most likely length at age
+               Type MLAA =  max(MLAAblock);
+              // LAA = Type
               //     for(int a=1;a<(nage);a++){
               //       for(int l=1;l<(LBins);l++){
-              //   } // end length
-              // } // end age
+           
               // } // end sex
               break;
             } // end selType_fish

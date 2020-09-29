@@ -36,9 +36,9 @@ Type objective_function<Type>::operator() ()
 
   // DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   // DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
-  DATA_ARRAY(phi_ik); // 0/1 nesting of subareas i into stocks k (rows)
+  DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
-  DATA_ARRAY(tau_ik); // downscaling from stocks to sub-areas
+  DATA_ARRAY(tau_ki); // downscaling from stocks to sub-areas
   // 
   // biology // 
   DATA_VECTOR(mat_age); // natural mortality at age
@@ -240,18 +240,20 @@ Type objective_function<Type>::operator() ()
          } // end sex
          break;
        case 1: // enter length based sel
-         // for (int l= 0; l < LBins; l++) {
-         // switch (selShape_fish(fish_flt)) {
-         // break;
-         // } // end switch selShape
-         // } // end length
-       // } // end sex
+         for (int s = 0; s < 2; s++) {
+           for (int l= 0; l < LBins; l++) {
+             // switch (selShape_fish(fish_flt)) {
+             fsh_slx_yafs(i,l,fish_flt,s) = 1.0; //placeholder
+             break;
+             // } // end switch selShape
+           } // end length
+         } // end sex
          break;
        } // end selType
      } // end fish_flt
      i++;
    } while (i <= fsh_blks(y));
- } // end y blooks
+ } // end y blocks
  // 
  // // std::cout << fsh_slx(1,1,1) << "\n Fishery selectivity \n";
  // 
@@ -317,10 +319,10 @@ Type objective_function<Type>::operator() ()
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){ 
         for(int a=0;a<(nage-1);a++){
-          N_0ais(a,i,s) = 0.5*omega_ais(a,i,s)*R_0k(k)*tau_ik(k,i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
+          N_0ais(a,i,s) = 0.5*omega_ais(a,i,s)*R_0k(k)*tau_ki(k,i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
         }  // note the A+ group will be in slot A-1
-        N_0ais(nage-1,i,s) = omega_ais(nage-1,i,s)* N_0ais(nage-2,i,s)*exp(-(mat_age(nage-2)*age(nage-2))) 
-          /(Type(1.0)-exp(-mat_age(nage-1)*age(nage-1)));
+        N_0ais(nage-1,i,s) = omega_ais(nage-1,i,s)* N_0ais(nage-2,i,s)*exp(-sum(mat_age)) 
+          /(Type(1.0)-exp(-mat_age(nage-1)));
       } // end subareas
     } // end stocks
   } // end sex
@@ -330,24 +332,27 @@ Type objective_function<Type>::operator() ()
     for(int a=0;a<nage;a++){ // Loop over ages
       SSB_0i(i) += mat_age(a)*N_0ais(a,i,0)*wtatlen_kab(phi_ik2(i),1)*pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),2))*mat_ak(a,phi_ik2(i));
       for(int k=0;k<(nstocks);k++){
-        SSB_0k(k) += phi_ik(k,i)*SSB_0i(i);
+        SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
       } // end stocks
     } // end ages
   } // end space
 
   // The first year of the simulation is initialized with the following age distribution
   Ninit_ais.setZero(); 
-  for(int s=0;s<2;s++){
-    for(int k=0;k<(nstocks);k++){
+  for(int y=0;y<(10*nage);y++){
+    for(int s=0;s<2;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){
-          Ninit_ais(a,i,s) = 0.5* omega_ais(a,i,s) * tau_ik(k,i) * R_0k(k)* exp(-(mat_age(a)*age(a))) * exp(-0.5*SDR*SDR+tildeR_initk(k));
+          Ninit_ais(a,i,s) += 0.5* omega_ais(a,i,s) * 
+            tau_ki(phi_ik2(i),i) * 
+            R_0k(phi_ik2(i))* exp(-(mat_age(a)*age(a))) *
+            exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i)));
         } // end ages
-        Ninit_ais(nage-1,i) = (omega_ais(nage-1,i,s) * Ninit_ais(nage-2,i,s) *
-          exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-(mat_age(nage-1)*age(nage-1)))* exp(-0.5*SDR*SDR+tildeR_initk(k)));
+        Ninit_ais(nage-1,i) += (omega_ais(nage-1,i,s) * Ninit_ais(nage-2,i,s) *
+          exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-sum(mat_age))* exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i))));
       } // end space
-    } // end stocks
-  } // end sex
+    } // end sex
+  } // end yiniy
 
   for(int y=0;y<(tEnd);y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
@@ -510,7 +515,7 @@ Type objective_function<Type>::operator() ()
   //     for(int a=0;a<nage;a++){ // Loop over ages
   //       SSB_yi(y,i) += N_yais_beg(y,a,i)*wage_ssb(a,y)*0.5; // for storage
   //       for(int k=0;k<(nstocks);k++){  
-  //         SSB_yk(y,k) += phi_ik(k,i)*N_yais_beg(y,a,i)*wage_ssb(a,y)*0.5; // hat
+  //         SSB_yk(y,k) += phi_kik,i)*N_yais_beg(y,a,i)*wage_ssb(a,y)*0.5; // hat
   //       } // end stocks
   //     } // end ages
   //   } // end space
@@ -524,7 +529,7 @@ Type objective_function<Type>::operator() ()
   //                                      /(SSB_0k(k)*(1-h_k(k))+ 
   //         SSB_yk(y,k)*(5*h_k(k)-1)))*exp(-0.5*b(y)*SDR*SDR+tildeR_yk(y,k));
   //     } // end stocks
-  //     R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ik(phi_ik2(i),i)*omega_0ij(i); // downscale to subarea including age-0 movement
+  //     R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i); // downscale to subarea including age-0 movement
   //     N_yais_beg(y,0,i) =  R_yi(y,i); // fill age-0 recruits
   //   } // end space
   //   

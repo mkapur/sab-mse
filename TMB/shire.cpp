@@ -333,7 +333,11 @@ Type objective_function<Type>::operator() ()
   // // Equilibrium Unfished SSB, stock (outside of y loop)
   for(int i=0;i<(nspace);i++){
     for(int a=0;a<nage;a++){ // Loop over ages
-      SSB_0i(i) += mat_age(a)*N_0ais(a,i,0)*wtatlen_kab(phi_ik2(i),1)*pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),2))*mat_ak(a,phi_ik2(i));
+      SSB_0i(i) += mat_age(a)*
+        N_0ais(a,i,0)*
+        wtatlen_kab(phi_ik2(i),1)*
+        pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),2))*
+        mat_ak(a,phi_ik2(i));
       for(int k=0;k<(nstocks);k++){
         SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
       } // end stocks
@@ -490,25 +494,33 @@ Type objective_function<Type>::operator() ()
         catch_yaif_pred.setZero();
         
         Type denom = 0;
-        
         for(int s=0;s<2;s++){
           for(int i=0;i<(nspace);i++){
-            for(int a=1;a<(nage);a++){
-              switch(selType_fish(fish_flt)){
-              case 0: // age sel
+            switch(selType_fish(fish_flt)){
+            case 0: // age sel
+              for(int a=1;a<(nage);a++){
                 denom += phi_if_fish(fish_flt,i)*
                   fsh_slx_yafs(y,a,fish_flt,s)*
                   N_yais_mid(y,a,i)*
                   wtatlen_kab(phi_ik2(i),1)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2))+
                   catch_yf_obs(y,fish_flt+1);
-                  break;
-              case 1: // length sel
-                
-                break;
-                
-              } // end selType_fish
-            } // end age
+              } // end age
+              break;
+            case 1: // length sel
+              for(int a=1;a<(nage);a++){
+                for(int l=1;l<(LBins);l++){
+                  denom += phi_if_fish(fish_flt,i)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i)*
+                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    wtatlen_kab(phi_ik2(i),1)*
+                    pow(     LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),2))+
+                    catch_yf_obs(y,fish_flt+1);
+                } // end length
+              } // end age
+              break;
+            } // end selType_fish
           } // end space
         } // end sex
         

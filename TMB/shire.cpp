@@ -482,7 +482,7 @@ Type objective_function<Type>::operator() ()
     
       // Catch at beginning of year
       // Hybrid F tuning inputs & temp storage
-      Type v1 = 0.7; Type Fmax = 1.5;
+      Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
       int niter = 50;
 
       array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
@@ -523,14 +523,55 @@ Type objective_function<Type>::operator() ()
             } // end selType_fish
           } // end space
         } // end sex
+        F1_yf(y,fish_flt,1) = catch_yf_obs(y, fish_flt)/denom;
+        Type latest_guess = F1_yf(y,fish_flt,1);
         
-        
-      } // temp yend
-        
+        // k iterations 
+        for(int k=2;k<(niter+1);k++){    
+          // modify the guess Eq 20
+          Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
+          Type term1 = latest_guess*term0;
+          Type term2 = v1*(1-term0);
+          F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
+          vector<Type>Z_a_TEMP(nage);
+
+          for(int i=0;i<(nspace);i++){
+            switch(selType_fish(fish_flt)){
+            case 0: // age sel
+              for(int a=1;a<(nage);a++){
+                // catch_afk_TEMP(a,fish_flt,k).setZero();
+                for(int s=0;s<2;s++){
+                  Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+                } // end sex for z a temp
+                for(int s=0;s<2;s++){
+                  catch_afk_TEMP(a,fish_flt,k) +=
+                    F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+                    (1-exp(-Z_a_TEMP[a]))*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i)*
+                    wtatlen_kab(phi_ik2(i),1)*
+                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2));
+                } // end sex
+              } // end age
+              break;
+            case 1: // length sel
+              //     for(int a=1;a<(nage);a++){
+              //       for(int l=1;l<(LBins);l++){
+              //   } // end length
+              // } // end age
+              // } // end sex
+              break;
+            } // end selType_fish
+          } // end space
+      } // end k iters
+      
+      
+  } // temp yend
+  
       //   for(int a=0;a<nage;a++){
       
       //       // make an initial guess for F using obs catch - need to update selex
-      //       F1_yf(y,fish_flt) = catch_yf_obs(y, fish_flt)/
+      //      
       //         (phi_if_fish(fish_flt, i) * N_yais_beg(y,a,i)*wage_catch(a,y) *  selectivity_save(a,y) + catch_yf_obs(y, fish_flt));
       // 
       //       for(int fiter=0; fiter<10;fiter++){

@@ -35,7 +35,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
 
   // DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
-  // DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
+  DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
   DATA_ARRAY(tau_ki); // downscaling from stocks to sub-areas
@@ -77,7 +77,7 @@ Type objective_function<Type>::operator() ()
   // observations //
   PARAMETER_VECTOR(b); // bias adjustment factor
   // DATA_INTEGER(nage); // Last age included in age comps
-  DATA_VECTOR(catch_yf_obs); 
+
   // DATA_ARRAY(age_catch); // Age comps in catch -- should be by fleet
   
   // Selectivity
@@ -95,8 +95,8 @@ Type objective_function<Type>::operator() ()
   array<Type> srv_slx_yafs(nyear, nage, nfleets_surv,2);           // Survey selectivity-at-age by sex(on natural scale)
   // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
   // each time block. Used for both selectivity and catchability
-  DATA_IVECTOR(fsh_blks)        // fishery  
-    DATA_IVECTOR(srv_blks)        // survey
+  DATA_IVECTOR(fsh_blks);        // fishery  
+  DATA_IVECTOR(srv_blks);       // survey
     
   // Survey Biomass
   // DATA_VECTOR(survey_err);
@@ -106,7 +106,6 @@ Type objective_function<Type>::operator() ()
   
   // Survey Comps
   // DATA_VECTOR(survey); // Age comp sample size
-  // DATA_VECTOR(flag_surv_acomp); // Were ages sampled this year
   // DATA_ARRAY(age_survey); // Age compositions, age x year
   // DATA_ARRAY(age_error); // Age compositions, age x fleet (row 1 = true age, row 2= biased age, row 3 = sd)
   
@@ -116,7 +115,7 @@ Type objective_function<Type>::operator() ()
   // vector<Type> Nsamp_acomp_f(nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   
   // Catches
-  // DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
+  DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   // DATA_SCALAR(logSDcatch); // Error on catch, should be by fleet
   // PARAMETER(logphi_catch);
   
@@ -124,9 +123,13 @@ Type objective_function<Type>::operator() ()
   // array<Type> catch_acomp_f_est(tEnd, age_maxage, nfleets_fish); // estimated catch comps; uses derived quants
   
   // Catch storage
-  // array<Type> Catch_yaf_est(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
-  // array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
-  // array<Type> Catch_yf_est(tEnd,nfleets_fish); // estimated total catches by fleet
+  array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
+  array<Type> catch_yf_pred(tEnd,nfleets_fish); 
+  array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace); 
+  array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  
+  
+  array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
+
   // array<Type> CatchN(tEnd,nfleets_fish);
   
   // F tuning storage
@@ -352,7 +355,7 @@ Type objective_function<Type>::operator() ()
           exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-sum(mat_age))* exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i))));
       } // end space
     } // end sex
-  } // end yiniy
+  } // end yinit
 
   for(int y=0;y<(tEnd);y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
@@ -480,10 +483,40 @@ Type objective_function<Type>::operator() ()
 
       array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
       
-      
-      // for(int i=0;i<(nspace);i++){
+      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+        catch_yaf_pred.setZero();
+        catch_yf_pred.setZero();
+        catch_yfi_pred.setZero();
+        catch_yaif_pred.setZero();
+        
+        Type denom = 0;
+        
+        for(int s=0;s<2;s++){
+          for(int i=0;i<(nspace);i++){
+            for(int a=1;a<(nage);a++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_mid(y,a,i)*
+                  wtatlen_kab(phi_ik2(i),1)*
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2))+
+                  catch_yf_obs(y,fish_flt+1);
+                  break;
+              case 1: // length sel
+                
+                break;
+                
+              } // end selType_fish
+            } // end age
+          } // end space
+        } // end sex
+        
+        
+      } // temp yend
+        
       //   for(int a=0;a<nage;a++){
-      //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      
       //       // make an initial guess for F using obs catch - need to update selex
       //       F1_yf(y,fish_flt) = catch_yf_obs(y, fish_flt)/
       //         (phi_if_fish(fish_flt, i) * N_yais_beg(y,a,i)*wage_catch(a,y) *  selectivity_save(a,y) + catch_yf_obs(y, fish_flt));

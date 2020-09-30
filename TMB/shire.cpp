@@ -479,18 +479,18 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end y == 0
     
-    Type lenstep = 0.0;Type lenslope = 0.0;
+    Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year and beginning of next
     for(int s=0;s<2;s++){
       for(int i=0;i<(nspace);i++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
         // linear growth below A4 as in synthesis
         if(L1_yk(y,phi_ik2(i),s) < 3){
-          Type lenstep = L1_yk(y,phi_ik2(i),s);
-          Type lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+           lenstep = L1_yk(y,phi_ik2(i),s);
+           lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         } else if(L1_yk(y,phi_ik2(i),s) >= 3){
-          Type lenstep = 3.0;
-          Type lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+           lenstep = 3.0;
+           lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         }
         for(int a=0;a<4;a++){
           Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
@@ -530,13 +530,13 @@ Type objective_function<Type>::operator() ()
           (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-2,i,s)*(1-exp(-kappa_yk(y,phi_ik2(i),s))))) +
           N_yais_beg(y,nage-1,i,s)*
           (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s);
+            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
         
         Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
           (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
           N_yais_mid(y,nage-1,i,s)*
           (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s);
+            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
       } // end subareas i
     } // end sexes
     

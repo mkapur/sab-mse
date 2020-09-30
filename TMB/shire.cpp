@@ -116,11 +116,11 @@ Type objective_function<Type>::operator() ()
   // DATA_ARRAY(age_survey); // Age compositions, age x year
   DATA_ARRAY(ageerr_ExpAge); // nmgmt_reg x 100 ages
   DATA_ARRAY(ageerr_SD); // nmgmt_reg x 100 ages
-  
+  DATA_IVECTOR(acomp_flt_type); // 0 for commercial, 1 for survey
   DATA_ARRAY(survey_acomp_f_obs); // Observed survey compositions,  year x age x nfleets_acomp {right now just survnfleets}
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
   array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
-  array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from commercial fisheries
+  array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
   vector<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   
   // Catches
@@ -943,40 +943,55 @@ Type objective_function<Type>::operator() ()
       
       // predicted age comps, given error
       for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-        // age 0
-        // acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), ageerr_ExpAge(1,1), ageerr_SD(1,1));
-        
+        // age 0, note starts at column 2
         acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), ageerr_ExpAge(phi_acomp_fm2(acomp_flt),1), ageerr_SD(phi_acomp_fm2(acomp_flt),1));
         // Loop over ages
-        // for(int a=1;a<(nage-1);a++){ 
-        //   acomp_yaf_temp(y,a,acomp_flt) =
-        //     pnorm(Type(a+1),   ageerr_ExpAge(phi_acomp_fm2(acomp_flt),a),  ageerr_SD(phi_acomp_fm2(acomp_flt),a)) -
-        //     pnorm(age(a),   ageerr_ExpAge(phi_acomp_fm2(acomp_flt),a),  ageerr_SD(phi_acomp_fm2(acomp_flt),a));
-        // } // end ages
-        // acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) -
-        //   pnorm(Type(nage-1),   ageerr_ExpAge(phi_acomp_fm2(acomp_flt),nage-1),  ageerr_SD(phi_acomp_fm2(acomp_flt),nage-1));
-        // flag if this is a survey fleet or fishery fleet (define selex)
-        // for(int a=1;a<(nage);a++){
-        //   switch(acomp_flt_type(acomp_flt)){
-        //   case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
-        //     comm_acomp_yafs_pred(y,nage-1,acomp_flt) +=
-        //       acomp_yaf_temp(y,a,acomp_flt)*
-        //       fsh_slx_yafs(y,a,acomp_flt,s)*
-        //       phi_if_fish(acomp_flt,i)*
-        //       N_yais_mid(y,a+1,i,s))/Nsamp_acomp_f(acomp_flt);
-        //       break;
-        //   case 1:  // survey fleets. the selex for these start in position 5
-        //     surv_acomp_yafs_pred(y,nage-1,acomp_flt) +=
-        //       acomp_yaf_temp(y,a,acomp_flt)*
-        //       srv_slx_yafs(y,a,acomp_flt+4) *
-        //       phi_if_surv(acomp_flt,i)*
-        //       N_yais_mid(y,a+1,i))/Nsamp_acomp_f(acomp_flt);
-        //       break;
-        //   } // end acomp fleet type
-        // } // end ages
+        for(int a=1;a<(nage-1);a++){
+          acomp_yaf_temp(y,a,acomp_flt) =
+            pnorm(Type(a+1),   ageerr_ExpAge(phi_acomp_fm2(acomp_flt),a+1),  ageerr_SD(phi_acomp_fm2(acomp_flt),a+1)) -
+            pnorm(age(a),   ageerr_ExpAge(phi_acomp_fm2(acomp_flt),a+1),  ageerr_SD(phi_acomp_fm2(acomp_flt),a+1));
+        } // end ages
+        acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),  
+                       ageerr_ExpAge(phi_acomp_fm2(acomp_flt),nage),  
+                       ageerr_SD(phi_acomp_fm2(acomp_flt),nage));
         
-      }// end acomp fleets
-      } // temporary yend
+        for(int a=1;a<(nage);a++){
+          for(int i=0;i<(nspace);i++){
+            for(int s=0;s<2;s++){
+              switch(acomp_flt_type(acomp_flt)){
+              case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
+                comm_acomp_yafs_pred(y,nage-1,acomp_flt) +=
+                  acomp_yaf_temp(y,a,acomp_flt)*
+                  fsh_slx_yafs(y,a,acomp_flt,s)*
+                  phi_if_fish(acomp_flt,i)*
+                  N_yais_mid(y,a+1,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+                  break;
+              case 1:  // survey fleets. the selex for these start in position 5
+                if(selType_surv(acomp_flt+4) == 0){ 
+                  
+                  surv_acomp_yafs_pred(y,nage-1,acomp_flt) +=
+                    acomp_yaf_temp(y,a,acomp_flt)*
+                    srv_slx_yafs(y,a,acomp_flt+4) *
+                    phi_if_surv(acomp_flt,i)*
+                    N_yais_mid(y,a+1,i)/Nsamp_acomp_yf(y,acomp_flt);
+                } else{
+                  for(int l=1;l<(LBins);l++){
+                    surv_acomp_yafs_pred(y,nage-1,acomp_flt) +=
+                      acomp_yaf_temp(y,a,acomp_flt)*
+                      srv_slx_yafs(y,l,acomp_flt+4) *
+                      phi_if_surv(acomp_flt,i)*
+                      mla_yais(y,a,i,s)*
+                      N_yais_mid(y,a+1,i)/
+                        Nsamp_acomp_yf(y,acomp_flt);
+                  } // end lbins
+                } // end else
+                break;
+              } // end acomp fleet type
+            } // end sex
+          } // end space
+        } // end age
+      } // end acomp fleets   
+  } // temporary yend
       
 
   //     

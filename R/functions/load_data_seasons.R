@@ -82,8 +82,12 @@ load_data_seasons <- function(nspace = 6,
   fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
   fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
   
-  selType_fish <- fltnames$SELTYPE[fltnames$COMM]
-  selType_surv <- fltnames$SELTYPE[fltnames$SURV]
+  selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,10)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  
+  selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
+  ## note that the first two acomp fleets are already inside seltype fish
+  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][3:8]))-1
   
   
   nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
@@ -93,16 +97,25 @@ load_data_seasons <- function(nspace = 6,
 
   # Catch ----
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
-  
+  catch[is.na(catch)] <- -1
   ## Discard ----
   load(here("input","input_data","OM_discard.csv")) ## loads as omdis
   
-  ## Selex: still need SURVEY ----
+  ## Selex ----
   load(here('input','input_data',"OM_fish_selex_yafs.rdata"))
   load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
+  ## need to create
+  selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,10)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  
+  selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
+  ## note that the first two acomp fleets are already inside seltype fish
+  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][3:8]))-1
+  
   
   # Survey ----
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
+  survey[is.na(survey)] <- -1 ## flag for numeric TMB checks
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma.csv'))
 
 
@@ -150,7 +163,7 @@ load_data_seasons <- function(nspace = 6,
     colnames(phi_ki) <- spmat$subarea
     
     phi_ki[1,1] <-  phi_ki[2,2:3] <-  phi_ki[3,4:5]<-  phi_ki[4,6]  <- 1
-    phi_ki2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
+    phi_ik2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
     
     ## phi_ij [eq 6]
     phi_ij <-  matrix(1, ncol = nspace, nrow = nspace) ## 0 indicates  subareas comprise THE SAME stock
@@ -164,6 +177,26 @@ load_data_seasons <- function(nspace = 6,
     colnames(phi_fm) = c('AK','BC','WC')
     phi_fm[1:2,1] <- phi_fm[3:5,2]  <- phi_fm[6:9,3]  <- 1
     
+    ## same as above but for comps (mix of fisheries & surveys)
+    phi_acomp_fm <- matrix(0, nrow = nfleets_acomp, ncol = 3)
+    rownames(phi_acomp_fm) = fltnames_acomp
+    colnames(phi_acomp_fm) = c('AK','BC','WC')
+    phi_acomp_fm[1:3,1] <- phi_acomp_fm[4:6,2]  <- phi_acomp_fm[7:8,3]  <- 1
+    phi_acomp_fm2 <- apply(phi_acomp_fm,1, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are survey fleets
+    
+    acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
+    acomp_flt_type[3:8] <- 1
+    colnames(acomp_flt_type) <- fltnames_acomp
+    
+    
+    fltnames[fltnames$SURV & fltnames$ACOMP]
+    
+    phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
+    rownames(phi_lcomp_fm) = fltnames_lcomp
+    colnames(phi_lcomp_fm) = c('AK','BC','WC')
+    phi_lcomp_fm[1:6,1] <- phi_lcomp_fm[7:9,2]  <- phi_lcomp_fm[10,3]  <- 1
+    
+
     ## tau_ki
     tau_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     rownames(tau_ki) <- unique(spmat$stock)
@@ -229,9 +262,15 @@ load_data_seasons <- function(nspace = 6,
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
     logh_k = c(0.7,0.7,0.88,0.7),
-    logRinit = c(log(8*10e6),log(8*10e6),10,4), ## sum wc = 12
-    omega_0ij = omega_0ij
+    logR_0k = c(log(8*10e6),log(8*10e6),10,4), ## sum wc = 12
+    omega_0ij = omega_0ij,
+    logq_f = rep(log(0.5), 5),
+    b = rep(0,nyear),
+    logSDR = 1.4,
+    log_fsh_slx_pars = rep(0.4,nfleets_fish), 
+    log_srv_slx_pars = rep(0.4,nfleets_surv+nfleets_acomp)
   )
+
 
   # parms <- list( # Just start all the simluations with the same initial conditions 
   #      logRinit = parms.scalar$logRinit+log(rmul),
@@ -249,7 +288,9 @@ load_data_seasons <- function(nspace = 6,
   #      Rin = Rdev,
   #      PSEL = PSEL
   #    )
-
+  load(here('input','input_data','unfished_ALK.rdata'))
+  load(here('input','input_data','mla_yais.rdata')) ## from prelim runs, for ssb0
+  
  ## Return df ----
   df <-list(    
     #* MODEL STRUCTURE ----
@@ -262,13 +303,16 @@ load_data_seasons <- function(nspace = 6,
     nspace = nspace,
     LBins = LBins,
     move = move,
+    nmgmt_reg = ncol(phi_fm),
     
     #* FLEETS STRUCTURE ----
     nfleets_surv = nfleets_surv,
     nfleets_fish = nfleets_fish,
     nfleets_acomp = nfleets_acomp,
     nfleets_lcomp = nfleets_lcomp,
-    selType_fish = selType_fish,
+    selShape_fish = selShape_fish, ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+    selShape_surv = selShape_surv,
+    selType_fish = selType_fish, ## 0 for age, 1 for length-based
     selType_surv = selType_surv,
     
     fltnames_surv = fltnames_surv,
@@ -283,33 +327,39 @@ load_data_seasons <- function(nspace = 6,
     phi_ij = phi_ij,
     phi_fm = phi_fm,
     tau_ki = tau_ki,
+    phi_acomp_fm = phi_acomp_fm,
+    phi_acomp_fm2 =phi_acomp_fm2,
+    phi_lcomp_fm =phi_lcomp_fm,
     
     #* DEMOG ----
     X_ijas = X_ijas,
     omega_ais = omega_ais,
-    omega_0ij = omega_0ij,
     Linf_yk = growthPars$Linf_yk,
     kappa_yk = growthPars$kappa_yk,
     sigmaG_yk = growthPars$sigmaG_yk,
     L1_yk = growthPars$L1_yk,
     wtatlen_kab = wtatlen_kab,
-    mat_ak = mat_ak,
+    mat_ak = mat_ak, ## maturity
+    mat_age = rep(0.2,nage), ## mortality
+    unfished_ALK_F = unfished_ALK_F,
+    mla_yais=mla_yais,
+    
     #* DATA ----
-    survey = survey, # Make sure the survey has the same length as the catch time series
-    survey_err = survey_err, #ac.data$ss.error, # Make sure the survey has the same length as the catch time series
-    survey = survey, #ac.data$ss.survey,
+    surv_yf_obs = survey, # Make sure the survey has the same length as the catch time series
+    survey_err = survey_err, 
     age_error = ageerr_ExpAge,
     age_error_sd = ageerr_SD,
-    catch = catch,
+    catch_yf_obs = catch,
     discard = omdis,
+    
+    #* SELEX ----
     fish_selex_yafs = OM_fish_selex_yafs,
     surv_selex_yafs = OM_surv_selex_yafs,
-    
+    fsh_blks = tEnd, ## currently not ready to be fleet-specific
+    srv_blks = tEnd,
     #* ADDL PARS ----
     parms = parms,
-    b = b,
-    bfuture = bfuture,
-    logSDR = logSDR
+    bfuture = bfuture
   )
   return(df) ## this has all the data in a format ready for estimation
 }

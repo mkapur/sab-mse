@@ -774,7 +774,23 @@ Type objective_function<Type>::operator() ()
           } // end ages
         } // end subareas i
       } // end sexes
- 
+      
+      
+      // SSB_y ----
+      for(int i=0;i<(nspace);i++){
+        for(int a=1;a<(nage);a++){
+          SSB_yi(y,i) += N_yais_end(y,a,i,0)*
+            wtatlen_kab[phi_ik2[i],1]*
+            pow(Length_yais_beg[y,a,i,1],wtatlen_kab[phi_ik2[i],2])*
+            mat_ak[a,phi_ik2[i]];
+        } // end ages
+      } // end space
+      for(int k=0;k<(nstocks);k++){
+        for(int i=0;i<(nspace);i++){
+          SSB_yk[y,k] +=  phi_ki(k,i)*SSB_yi(y,i);
+        } // end stocks
+      } // end space
+      
           
       
       

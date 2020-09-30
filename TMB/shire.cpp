@@ -594,6 +594,39 @@ Type objective_function<Type>::operator() ()
               mat_age(a);
             } // end sex
           } // end age
+          
+          // Second Guess for F (EQ 24)
+          denom.setZero();
+          for(int s=0;s<2;s++){
+            for(int i=0;i<(nspace);i++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                for(int a=1;a<(nage);a++){
+                  denom += phi_if_fish(fish_flt,i)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i)*
+                    wtatlen_kab(phi_ik2(i),1)*
+                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2))*
+                    (1-exp(-Z_a_TEMP2(a))) * (F1_yf(y,fish_flt,k)/(Z_a_TEMP2(a)))
+                } // end age
+                break;
+              case 1: // length sel
+                for(int a=1;a<(nage);a++){
+                  for(int l=1;l<(LBins);l++){
+                    denom += phi_if_fish(fish_flt,i)*
+                      fsh_slx_yafs(y,a,fish_flt,s)*
+                      N_yais_mid(y,a,i)*
+                      LengthAge_alyis_mid(a,l,y,i,s)*
+                      wtatlen_kab(phi_ik2(i),1)*
+                      pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),2))*
+                      (1-exp(-Z_a_TEMP2(a))) * (F1_yf(y,fish_flt,k)/(Z_a_TEMP2(a)))
+                  } // end length
+                } // end age
+                break;
+              } // end selType_fish
+            } // end space
+          } // end sex
+          
       } // end k iters
       
       

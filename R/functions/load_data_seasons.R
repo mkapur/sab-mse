@@ -1,6 +1,4 @@
-## Load the hake data
-# year and age input 
-load_data_seasons <- function(nspace = 6, 
+load_data_OM <- function(nspace = 6, 
                               nstocks = 4,
                               myear = 2019,
                               move = TRUE, 
@@ -345,8 +343,8 @@ load_data_seasons <- function(nspace = 6,
     mla_yais=mla_yais,
     
     #* DATA ----
-    surv_yf_obs = survey, # Make sure the survey has the same length as the catch time series
-    survey_err = survey_err, 
+    surv_yf_obs = round(survey), # Make sure the survey has the same length as the catch time series
+    surv_yf_err = survey_err, 
     age_error = ageerr_ExpAge,
     age_error_sd = ageerr_SD,
     catch_yf_obs = catch,

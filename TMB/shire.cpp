@@ -34,18 +34,17 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
 
-  // DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
+  DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
   DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
-  DATA_ARRAY(tau_ki); // downscaling from stocks to sub-areas
+  DATA_ARRAY(tau_ki); // downscaling recruits from stocks to sub-areas
   DATA_ARRAY(phi_fm); //  fleets to mgmt areas
   
   // biology // 
   DATA_VECTOR(mat_age); // natural mortality at age
 
   // movement //
-  PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
   
@@ -67,9 +66,7 @@ Type objective_function<Type>::operator() ()
   array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
   array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
   
-  // repro //
-  PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  PARAMETER_VECTOR(logh_k); // Steepness by stock
+ 
   // DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
   DATA_ARRAY(mat_ak); // maturity at age for stock
   
@@ -79,7 +76,7 @@ Type objective_function<Type>::operator() ()
   array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
   
   // observations //
-  PARAMETER_VECTOR(b); // bias adjustment factor
+
   // DATA_INTEGER(nage); // Last age included in age comps
 
   // DATA_ARRAY(age_catch); // Age comps in catch -- should be by fleet
@@ -89,8 +86,7 @@ Type objective_function<Type>::operator() ()
   DATA_IVECTOR(selShape_fish); 
   DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
   DATA_IVECTOR(selShape_surv); 
-  PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
-  PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
+
   
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // DATA_INTEGER(slx_type)
@@ -104,7 +100,10 @@ Type objective_function<Type>::operator() ()
     
   // Survey Biomass
   // DATA_VECTOR(survey_err);
-  // DATA_VECTOR(survey); // Acoustic survey - vector of obs x year 
+  DATA_VECTOR(surv_yf_obs); 
+  array<Type> survey_yf_pred(nyear, nfleets_surv);          
+  
+  
   // DATA_ARRAY(survey_bio_f_obs); // year x fleets relbio
   // PARAMETER(logSDsurv); // Survey uncertainty
   
@@ -116,7 +115,7 @@ Type objective_function<Type>::operator() ()
   // DATA_ARRAY(survey_acomp_f_obs); // Observed survey compositions,  year x age x nfleets_acomp {right now just survnfleets}
   // array<Type> acomp_yaf_temp(tEnd, age_maxage, nfleets_acomp); // placeholder for aging error calcs
   // array<Type> survey_acomp_f_est(tEnd, age_maxage, nfleets_acomp); //when error multiplied by Nage
-  // vector<Type> Nsamp_acomp_f(nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
+  vector<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   
   // Catches
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
@@ -173,8 +172,17 @@ Type objective_function<Type>::operator() ()
   // array<Type> surv_yf_pred(tEnd,nfleets_surv); // this is actually predicted
   // array<Type> Zsave(nage,tEnd);
   
-  PARAMETER(logSDR);
+
   // PARAMETER(logphi_survey);
+  // PARAMS
+  PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
+  PARAMETER_VECTOR(logh_k); // Steepness by stock
+  PARAMETER_VECTOR(logq_f); // Q by survey fleet
+  PARAMETER_VECTOR(b); // bias adjustment factor
+  PARAMETER(logSDR);
+  PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
+  PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
   
   // Transform out of log space
   // Type SDsurv = exp(logSDsurv);
@@ -182,7 +190,7 @@ Type objective_function<Type>::operator() ()
   Type SDR = exp(logSDR);
   vector<Type> R_0k = exp(logR_0k);
   vector<Type> h_k = exp(logh_k);
-  // 
+  vector<Type> q_f = exp(logq_f);
   // Type Minit = exp(logMinit);
   // Type q = exp(logQ);
   // Type phi_survey = exp(logphi_survey);
@@ -805,67 +813,58 @@ Type objective_function<Type>::operator() ()
       } /// end space
       
       
+      // Estimate survey biomass at midyear
+      for(int i=0;i<(nspace);i++){
+        for(int s=0;s<2;s++){
+          for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
+            switch(selType_surv(sur_flt)){
+            case 0: // age sel
+              for(int a=0;a<nage;a++){
+                survey_yf_pred(y,sur_flt) += q_f(sur_flt)*
+                  srv_slx_yafs(y,a,sur_flt,s)*
+                  phi_if_surv(sur_flt,i)*
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),1)*
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2)); 
+                
+                Nsamp_acomp_yf(y,sur_flt) +=  srv_slx_yafs(y,a,sur_flt,s)*
+                  phi_if_surv(sur_flt,i)*
+                  N_yais_mid(y,a,i,s); 
+              } // end ages
+              break;
+            case 1:
+              for(int l=0;l<(LBins);l++){
+                for(int a=0;a<(nage);a++){
+                  survey_yf_pred(y,sur_flt) +=  q_f(sur_flt)*
+                    srv_slx_yafs(y,l,sur_flt,s)*
+                    phi_if_surv(sur_flt,i)*
+                    N_yais_mid(y,a,i,s)*
+                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    wtatlen_kab(phi_ik2(i),1)*
+                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),2)); 
+                  
+                  Nsamp_acomp_yf(y,sur_flt) +=  srv_slx_yafs(y,a,sur_flt,s)*
+                    phi_if_surv(sur_flt,i)*
+                    N_yais_mid(y,a,i,s); 
+                }
+              }
+              break;
+            } // end selType_fish
+          } // end survey fleets
+        } // end sexes
+      } // end nspace
+
+      
   } // temporary yend
-  
-    
-    
-  //   
-  //   // calculate SSB using N at beginning of year
-  // 
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int a=0;a<nage;a++){ // Loop over ages
-  //       SSB_yi(y,i) += N_yais_beg(y,a,i)*wage_ssb(a,y)*0.5; // for storage
-  //       for(int k=0;k<(nstocks);k++){  
-  //         SSB_yk(y,k) += phi_kik,i)*N_yais_beg(y,a,i)*wage_ssb(a,y)*0.5; // hat
-  //       } // end stocks
-  //     } // end ages
-  //   } // end space
-  //   
-  //   
-  //   // generate recruits (N age = 0) this year based on present SSB
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int k=0;k<(nstocks);k++){  
-  //       // SSB_yk already has summation
-  //       R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k)
-  //                                      /(SSB_0k(k)*(1-h_k(k))+ 
-  //         SSB_yk(y,k)*(5*h_k(k)-1)))*exp(-0.5*b(y)*SDR*SDR+tildeR_yk(y,k));
-  //     } // end stocks
-  //     R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i); // downscale to subarea including age-0 movement
-  //     N_yais_beg(y,0,i) =  R_yi(y,i); // fill age-0 recruits
-  //   } // end space
-  //   
-  
-  //     
-  //     // reweight length-at-age based on movement from other stocks
-  //     for(int i=0;i<(nspace);i++){
-  //       for(int a=1;a<(nage);a++){
-  //         Type LCome = 0.0; Type NCome = 0.0;
-  //         for(int j=0;j<(nspace);j++){
-  //           // sum up other areas applicable to this subarea + age
-  //           if(i != j){
-  //             LCome += phi_ij(i,j)*N_yais_beg(y,a,j)*Length_yai_beg(y,a,j); // for numerator
-  //             NCome += phi_ij(i,j)*N_yais_beg(y,a,j); // for denom
-  //           }
-  //         } // end subareas j
-  //         Length_yai_beg(y+1,a,i) = (N_yais_beg(y,a,i)*Length_yai_beg(y,a,i) + LCome)/(N_yais_beg(y,a,i)+NCome);
-  //       } // end ages
-  //     } // end subareas i
+
+
   //     
   //       
 
   //   
   
   //   
-  //   // Estimate survey biomass at midyear
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int a=0;a<nage;a++){   
-  //       for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
-  //         survey_bio_f_est(y,sur_flt) += surveyselc(a)*wage_survey(a,y)*phi_if_surv(sur_flt,i)*N_yais_mid(y,a,i)*q; // need to include phi matrix to conditionally sum biomass over i 
-  //         Nsamp_acomp_f(sur_flt) += surveyselc(a)*phi_if_surv(sur_flt,i)*N_yais_mid(y,a,i); // To use with age comps; may need to change phi to sum acomp surveys
-  //       } // end surv fleets
-  //     } // end ages
-  //   } // end nspace
-  //   
+
   //   
   //   
   //   

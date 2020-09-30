@@ -10,12 +10,21 @@ library(here)
 library(ggsidekick)
 source(here("R","functions",'load_files_OM.R'))
 
+compile(here("TMB","shire.cpp"))
+dyn.load(dynlib(here("TMB","shire")))
 
 plot.figures = FALSE # Set true for printing to file 
 ## OM MODEL INIT ----
 set.seed(731)
 
-df <- load_data_seasons(nspace = 6, move = TRUE) ## data that works with OM
+df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
+
+obj <- MakeADFun(df,
+                 parameters = df$parms,
+                 DLL= "shire") # Run the assessment, in TMB folder
+
+
+reps <- obj$report()
 
 # Initialize the model parameters. Make a version with movement and no seasons (simple)
 # df.simple <- load_data_seasons(nseason = 1, 
@@ -49,7 +58,7 @@ df <- load_data_seasons(nspace = 6, move = TRUE) ## data that works with OM
 # simyears <- 25 # Project 30 years into the future (2048 that year)
 # year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
 # N0 <- NA
-sim.data <- runOM_datagen(df) ##
+# sim.data <- runOM_datagen(df) ##
 # sim.data <- run.agebased.true.catch(df)
 
 # simdata0 <- sim.data # The other one is gonna get overwritten. 
@@ -72,14 +81,10 @@ sim.data <- runOM_datagen(df) ##
 # df.new$omega_ai[,] <- 0.5 ## stationary dist
 # df.new$X_ija[,] <- 
 
-compile(here("TMB","shire.cpp"))
-dyn.load(dynlib(here("TMB","shire")))
 
 
-obj <- MakeADFun(df,
-                 parms.new,
-                 DLL= "runsabassessment") # Run the assessment, in TMB folder
-reps <- obj$report()
+
+
 
 source(here("R","functions","plotChecks.R"))
 

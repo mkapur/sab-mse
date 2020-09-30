@@ -629,7 +629,13 @@ Type objective_function<Type>::operator() ()
           
           F2_yf(y, fish_flt, k) <- catch_yf_obs(y, fish_flt+1)/denom;
           
-      } // end k iters
+          // Modify the guess again Eq 25
+          term0 = 1/(1+exp(v2*( F2_yf(y,fish_flt,k )- v1*Fmax)));
+          term1 = F2_yf(y,fish_flt,k)*term0;
+          term2 = v1*(1-term0);
+          F2_yf(y, fish_flt, k) = -log(1-(term1+term2));
+          latest_guess =    F2_yf(y, fish_flt, k);
+        } // end hybrid F iterations
       
       
   } // temp yend

@@ -31,7 +31,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
   DATA_INTEGER(nfleets_acomp); // number of age comp fleets
-  DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
+  // DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
   
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
@@ -77,22 +77,13 @@ Type objective_function<Type>::operator() ()
   vector<Type> R(tEnd);
   array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
   array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
-  
-  // observations //
-  
-  // DATA_INTEGER(nage); // Last age included in age comps
-  
-  // DATA_ARRAY(age_catch); // Age comps in catch -- should be by fleet
-  
+
   // Selectivity
   DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
   DATA_IVECTOR(selShape_fish); 
   DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
   DATA_IVECTOR(selShape_surv); 
-  
-  
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
-  // DATA_INTEGER(slx_type)
   // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, nage, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, nage, nfleets_surv+nfleets_acomp,2);  // Survey selectivity-at-age by sex(on natural scale)
@@ -104,18 +95,12 @@ Type objective_function<Type>::operator() ()
   
   // Survey Biomass
   // DATA_VECTOR(survey_err);
-  DATA_ARRAY(surv_yf_obs); 
+  // DATA_ARRAY(surv_yf_obs);
   array<Type> survey_yf_pred(nyear, nfleets_surv);          
-  
-  
-  // DATA_ARRAY(survey_bio_f_obs); // year x fleets relbio
-  // PARAMETER(logSDsurv); // Survey uncertainty
-  
-  // Survey Comps
-  // DATA_VECTOR(survey); // Age comp sample size
-  // DATA_ARRAY(age_survey); // Age compositions, age x year
-  DATA_ARRAY(ageerr_ExpAge); // nmgmt_reg x 100 ages
-  DATA_ARRAY(ageerr_SD); // nmgmt_reg x 100 ages
+
+  // Age Comps
+  DATA_ARRAY(age_error); // nmgmt_reg x 100 ages
+  DATA_ARRAY(age_error_SD); // nmgmt_reg x 100 ages
   DATA_IVECTOR(acomp_flt_type); // 0 for commercial, 1 for survey
   DATA_ARRAY(survey_acomp_f_obs); // Observed survey compositions,  year x age x nfleets_acomp {right now just survnfleets}
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
@@ -125,13 +110,6 @@ Type objective_function<Type>::operator() ()
   
   // Catches
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
-  // DATA_SCALAR(logSDcatch); // Error on catch, should be by fleet
-  // PARAMETER(logphi_catch);
-  
-  // Catch Comps
-  // array<Type> catch_acomp_f_est(tEnd, age_maxage, nfleets_fish); // estimated catch comps; uses derived quants
-  
-  // Catch storage
   array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
   array<Type> catch_yf_pred(tEnd,nfleets_fish); 
   array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace); 
@@ -140,7 +118,7 @@ Type objective_function<Type>::operator() ()
   array<Type> N_avail_yf(tEnd, nfleets_fish);
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
   
-  // F tuning storage
+  // F tuning 
   int niter = 50;
   array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
   array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage 
@@ -468,9 +446,9 @@ Type objective_function<Type>::operator() ()
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<2;s++){
-          Length_yais_beg(0,0,i,s) <- L1_yk(y,phi_ik2(i),s);
-          N_yais_beg(0,0,i,s) <- Ninit_ais(0,i,s);
-          N_yais_mid(0,0,i,s) <- N_yais_beg(0,0,i,s)*exp(-mat_age(0)/2);
+          Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
+          N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
+          N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mat_age(0)/2);
           for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
             Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
             for(int j=0;j<(nspace);j++){ 
@@ -517,9 +495,9 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<4;a++){
           Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
         } // end linear age
-        Length_yais_beg(y,4,i,s) <-  L1_yk(y,phi_ik2(i),s);
+        Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
         for(int a=0;a<4;a++){
-          Length_yais_mid(y,a,i,s) <- Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
+          Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
         } // end linear age
         for(int a=1;a<(nage-1);a++){
@@ -552,13 +530,13 @@ Type objective_function<Type>::operator() ()
           (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-2,i,s)*(1-exp(-kappa_yk(y,phi_ik2(i),s))))) +
           N_yais_beg(y,nage-1,i,s)*
           (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-1,i))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i),s);
+            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s);
         
         Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
           (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
           N_yais_mid(y,nage-1,i,s)*
           (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i),s);
+            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s);
       } // end subareas i
     } // end sexes
     
@@ -727,7 +705,7 @@ Type objective_function<Type>::operator() ()
             } // end space
           } // end sex
           
-          F2_yf(y, fish_flt, k) <- catch_yf_obs(y, fish_flt+1)/denom;
+          F2_yf(y, fish_flt, k) = catch_yf_obs(y, fish_flt+1)/denom;
           
           // Modify the guess again Eq 25
           term0 = 1/(1+exp(v2*( F2_yf(y,fish_flt,k )- v1*Fmax)));
@@ -737,7 +715,7 @@ Type objective_function<Type>::operator() ()
           latest_guess =    F2_yf(y, fish_flt, k);
         } // end hybrid F iterations
         // Define F, Z and predicted catches 
-        Freal_yf(y, fish_flt) <- latest_guess; //final as Freal_yf
+        Freal_yf(y, fish_flt) = latest_guess; //final as Freal_yf
         
         // annoying multi-loops for F in area
         // get total N exploitable by this fleet
@@ -905,7 +883,7 @@ Type objective_function<Type>::operator() ()
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<2;s++){
         for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
-          if(surv_yf_obs(y,sur_flt) != -1){
+          // if(surv_yf_obs(y,sur_flt) != -1){
             switch(selType_surv(sur_flt)){
             case 0: // age sel
               for(int a=0;a<nage;a++){
@@ -939,7 +917,7 @@ Type objective_function<Type>::operator() ()
               }
               break;
             } // end selType_fish
-          } // end check that it's not an NA year
+          // } // end check that it's not an NA year
         } // end survey fleets
       } // end sexes
     } // end nspace
@@ -948,16 +926,16 @@ Type objective_function<Type>::operator() ()
     // predicted age comps, given error
     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
       // age 0, note starts at column 2
-      acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), ageerr_ExpAge(phi_acomp_fm2(acomp_flt),1), ageerr_SD(phi_acomp_fm2(acomp_flt),1));
+      acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_acomp_fm2(acomp_flt),0), age_error_SD(phi_acomp_fm2(acomp_flt),0));
       // Loop over ages
       for(int a=1;a<(nage-1);a++){
         acomp_yaf_temp(y,a,acomp_flt) =
-          pnorm(Type(a+1),   ageerr_ExpAge(phi_acomp_fm2(acomp_flt),a+1),  ageerr_SD(phi_acomp_fm2(acomp_flt),a+1)) -
-          pnorm(age(a),   ageerr_ExpAge(phi_acomp_fm2(acomp_flt),a+1),  ageerr_SD(phi_acomp_fm2(acomp_flt),a+1));
+          pnorm(Type(a+1),   age_error(phi_acomp_fm2(acomp_flt),a),  age_error_SD(phi_acomp_fm2(acomp_flt),a)) -
+          pnorm(age(a),   age_error(phi_acomp_fm2(acomp_flt),a),  age_error_SD(phi_acomp_fm2(acomp_flt),a));
       } // end ages
       acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),  
-                     ageerr_ExpAge(phi_acomp_fm2(acomp_flt),nage),  
-                     ageerr_SD(phi_acomp_fm2(acomp_flt),nage));
+                     age_error(phi_acomp_fm2(acomp_flt),nage-1),  
+                     age_error_SD(phi_acomp_fm2(acomp_flt),nage-1));
       
       for(int a=1;a<(nage);a++){
         for(int i=0;i<(nspace);i++){
@@ -1163,7 +1141,7 @@ Type objective_function<Type>::operator() ()
   // Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
   
   // Later Fix F in the likelihood and age comp in catch
-  // Type ans = 0.0;
+  Type ans = 0.0;
   // Report calculations
   // ADREPORT(logF)
   // ADREPORT(R)
@@ -1208,6 +1186,6 @@ Type objective_function<Type>::operator() ()
     //   REPORT(survey_bio_f_obs)
     //   REPORT(N_yais_mid)
     //   REPORT(Nsamp_acomp_f)
-    //   return ans;
+      return ans;
 }
 

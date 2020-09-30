@@ -39,7 +39,8 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
   DATA_ARRAY(tau_ki); // downscaling from stocks to sub-areas
-  // 
+  DATA_ARRAY(phi_fm); //  fleets to mgmt areas
+  
   // biology // 
   DATA_VECTOR(mat_age); // natural mortality at age
 
@@ -663,9 +664,13 @@ Type objective_function<Type>::operator() ()
         }
         
         // add together for mgmt regions
-        // for(int m=1;m<(nmgmt_reg);m++){     
-        //   F_ym(y,m) += F_ym[y,m]+phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
-        // }
+        for(int m=1;m<(nmgmt_reg);m++){
+          F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
+        }
+        
+        // generate predicted catches
+        
+        
   } // temp yend
   
       //   for(int a=0;a<nage;a++){

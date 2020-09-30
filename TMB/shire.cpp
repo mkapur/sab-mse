@@ -62,9 +62,11 @@ Type objective_function<Type>::operator() ()
   
   array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
   array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  array<Type> Length_yais_end(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
   array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
   array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
-
+  array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  
   // repro //
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER_VECTOR(logh_k); // Steepness by stock
@@ -752,6 +754,29 @@ Type objective_function<Type>::operator() ()
           N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
         } // end subareas i
       } // end sexes
+      
+      //reweight length-at-age given movement
+      for(int s=0;s<2;s++){
+        for(int i=0;i<(nspace);i++){
+          for(int a=1;a<(nage);a++){
+            Type LCome = 0.0; Type NCome = 0.0;
+            for(int j=0;j<(nspace);j++){
+              if(i != j){
+                LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
+                NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
+              }
+            } // end subareas j
+            Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+              (N_yais_end(y,a,i,s)+NCome);
+            Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+              (N_yais_end(y,a,i,s)+NCome);
+
+          } // end ages
+        } // end subareas i
+      } // end sexes
+ 
+          
+      
       
   } // temporary yend
   

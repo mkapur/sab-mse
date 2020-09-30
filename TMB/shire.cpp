@@ -128,8 +128,8 @@ Type objective_function<Type>::operator() ()
   array<Type> catch_yf_pred(tEnd,nfleets_fish); 
   array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace); 
   array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  
-  
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
+  array<Type> N_avail_yf(tEnd, nfleets_fish);
 
   // array<Type> CatchN(tEnd,nfleets_fish);
   
@@ -636,8 +636,34 @@ Type objective_function<Type>::operator() ()
           F2_yf(y, fish_flt, k) = -log(1-(term1+term2));
           latest_guess =    F2_yf(y, fish_flt, k);
         } // end hybrid F iterations
-      
-      
+        // Define F, Z and predicted catches 
+        Freal_yf(y, fish_flt) <- latest_guess; //final as Freal_yf
+        
+        // annoying multi-loops for F in area
+        // get total N exploitable by this fleet
+        for(int a=1;a<(nage);a++){
+          for(int i=0;i<(nspace);i++){
+            for(int s=0;s<2;s++){
+              N_avail_yf(y,fish_flt) += phi_if_fish(fish_flt, i)*N_yais_mid(y,a,i,s);
+            }
+          }
+        }
+        
+        // get ratio of N in area & reweight F
+        // will just return Freal and 1 for single-area fisheries
+        // for(int i=0;i<(nspace);i++){
+        //   for(int a=1;a<(nage);a++){
+        //     for(int s=0;s<2;s++){
+        //       N_weight_yfi(y,fish_flt, i)= sum(phi_if_fish(fish_flt, i)* sum(N_yais_mid(y,a,i,s)))/ N_avail_yf(y,fish_flt);
+        //     }
+        //   }
+        //   F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
+        // }        
+        
+        // add together for mgmt regions
+        // for(int m=1;m<(nmgmt_reg);m++){     
+        //   F_ym(y,m) += F_ym[y,m]+phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
+        // }
   } // temp yend
   
       //   for(int a=0;a<nage;a++){

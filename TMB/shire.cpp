@@ -130,6 +130,8 @@ Type objective_function<Type>::operator() ()
   array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
   array<Type> N_avail_yf(tEnd, nfleets_fish);
+  array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
+  
 
   // array<Type> CatchN(tEnd,nfleets_fish);
   
@@ -651,14 +653,14 @@ Type objective_function<Type>::operator() ()
         
         // get ratio of N in area & reweight F
         // will just return Freal and 1 for single-area fisheries
-        // for(int i=0;i<(nspace);i++){
-        //   for(int a=1;a<(nage);a++){
-        //     for(int s=0;s<2;s++){
-        //       N_weight_yfi(y,fish_flt, i)= sum(phi_if_fish(fish_flt, i)* sum(N_yais_mid(y,a,i,s)))/ N_avail_yf(y,fish_flt);
-        //     }
-        //   }
-        //   F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
-        // }        
+        for(int i=0;i<(nspace);i++){
+          for(int a=1;a<(nage);a++){
+            for(int s=0;s<2;s++){
+              N_weight_yfi(y,fish_flt, i) = (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
+            }
+          }
+          F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
+        }
         
         // add together for mgmt regions
         // for(int m=1;m<(nmgmt_reg);m++){     

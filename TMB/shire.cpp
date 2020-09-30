@@ -57,6 +57,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
   DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
   DATA_INTEGER(LBins); // maximum length bin in CM
+  DATA_ARRAY(mla_yais); // for early or late periods, most likely length at age(for selex)
   
   array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
   array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
@@ -538,7 +539,7 @@ Type objective_function<Type>::operator() ()
           for(int i=0;i<(nspace);i++){
             switch(selType_fish(fish_flt)){
             case 0: // age sel
-              for(int a=1;a<(nage);a++){
+              for(int a=0;a<(nage);a++){
                 // catch_afk_TEMP(a,fish_flt,k).setZero();
                 for(int s=0;s<2;s++){
                   Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
@@ -547,6 +548,7 @@ Type objective_function<Type>::operator() ()
                   catch_afk_TEMP(a,fish_flt,k) +=
                     F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
                     (1-exp(-Z_a_TEMP[a]))*
+                    phi_if_fish(fish_flt,i)*
                     fsh_slx_yafs(y,a,fish_flt,s)*
                     N_yais_mid(y,a,i)*
                     wtatlen_kab(phi_ik2(i),1)*
@@ -555,28 +557,32 @@ Type objective_function<Type>::operator() ()
               } // end age
               break;
             case 1: // length sel
-              vector<Type>MLAAblock(LBins);
               for(int a=1;a<(nage);a++){
                 for(int s=0;s<2;s++){
                   Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
                 } // end sex for z a temp
-                
-                // cheap way to get this year's age-length matrix
-              
-                  for(int l=1;l<(LBins);l++){
-                    MLAAblock[a] = LengthAge_alyis_mid(a,l,y,i,0); // just females for now
-                  } // end length
-                } // end age
-              // most likely length at age
-               Type MLAA =  max(MLAAblock);
-              // LAA = Type
-              //     for(int a=1;a<(nage);a++){
-              //       for(int l=1;l<(LBins);l++){
-           
-              // } // end sex
+              } // end age
+              for(int l=0;l<(LBins);l++){
+                for(int a=0;a<(nage);a++){
+                  for(int s=0;s<2;s++){
+                    catch_afk_TEMP(a,fish_flt,k) +=
+                      F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+                      (1-exp(-Z_a_TEMP[a]))*
+                      phi_if_fish(fish_flt,i)*
+                      fsh_slx_yafs(y,l,fish_flt,s)* 
+                      N_yais_mid(y,a,i)*
+                      LengthAge_alyis_mid(a,l,y,i,s)*
+                      wtatlen_kab(phi_ik2(i),1)*
+                      pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),2));
+                  } // end sex
+              } // end age
+              } // end lbins
               break;
             } // end selType_fish
           } // end space
+          
+          
+          
       } // end k iters
       
       

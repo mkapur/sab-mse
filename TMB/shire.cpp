@@ -34,15 +34,15 @@ Type objective_function<Type>::operator() ()
   // DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
   
-  DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
-  DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
-  DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
+  DATA_MATRIX(phi_if_surv); // turn on/off subareas for survey fleets
+  DATA_MATRIX(phi_if_fish); // turn on/off subareas for fishery fleets
+  DATA_MATRIX(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
-  DATA_ARRAY(tau_ki); // downscaling recruits from stocks to sub-areas
-  DATA_ARRAY(phi_fm); //  fleets to mgmt areas
-  DATA_ARRAY(phi_acomp_fm); //  fleets to mgmt areas
+  DATA_MATRIX(tau_ki); // downscaling recruits from stocks to sub-areas
+  DATA_MATRIX(phi_fm); //  fleets to mgmt areas
+  DATA_MATRIX(phi_acomp_fm); //  fleets to mgmt areas
   DATA_IVECTOR(phi_acomp_fm2); //  fleets to mgmt areas
-  DATA_ARRAY(phi_lcomp_fm); //  fleets to mgmt areas
+  DATA_MATRIX(phi_lcomp_fm); //  fleets to mgmt areas
   
   // biology // 
   DATA_VECTOR(mat_age); // natural mortality at age
@@ -99,8 +99,8 @@ Type objective_function<Type>::operator() ()
   array<Type> survey_yf_pred(nyear, nfleets_surv);          
 
   // Age Comps
-  DATA_ARRAY(age_error); // nmgmt_reg x 100 ages
-  DATA_ARRAY(age_error_SD); // nmgmt_reg x 100 ages
+  DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
+  DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
   DATA_IVECTOR(acomp_flt_type); // 0 for commercial, 1 for survey
   DATA_ARRAY(survey_acomp_f_obs); // Observed survey compositions,  year x age x nfleets_acomp {right now just survnfleets}
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries

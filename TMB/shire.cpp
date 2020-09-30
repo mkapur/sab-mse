@@ -673,8 +673,8 @@ Type objective_function<Type>::operator() ()
           switch(selType_fish(fish_flt)){
           case 0: // age sel
             for(int a=0;a<(nage);a++){
-              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a);
-              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a);
+              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
               
               for(int s=0;s<2;s++){
                 catch_yaf_pred(y,a,fish_flt) +=
@@ -688,7 +688,7 @@ Type objective_function<Type>::operator() ()
                 
                 catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
                   ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
-                    phi_if_fish[fish_flt, i]*
+                    phi_if_fish(fish_flt, i)*
                     fsh_slx_yafs(y,a,fish_flt,s)*
                     N_yais_mid(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),1)*
@@ -698,8 +698,8 @@ Type objective_function<Type>::operator() ()
             break;
           case 1: // length sel
             for(int a=0;a<(nage);a++){
-              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a);
-              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a);
+              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
             } // end age for Z
             for(int l=0;l<(LBins);l++){
               for(int a=0;a<(nage);a++){
@@ -732,35 +732,29 @@ Type objective_function<Type>::operator() ()
             catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
           }
         } // end space
-              
-              
         
-  } // end nfleets_fish
-  
-      //   for(int a=0;a<nage;a++){
+      } // end nfleets_fish
       
-      //       // make an initial guess for F using obs catch - need to update selex
-      //      
-      //         (phi_if_fish(fish_flt, i) * N_yais_beg(y,a,i)*wage_catch(a,y) *  selectivity_save(a,y) + catch_yf_obs(y, fish_flt));
-      // 
-      //       for(int fiter=0; fiter<10;fiter++){
-      //         // modify the guess (overwrite)
-      // 
-      //         term0 = 1/(1+exp(v2*( F1_yf(y,fish_flt) - v1)));
-      //         term1 = F1_yf(y,fish_flt)*term0;
-      //         term2 = v1*(1-term0);
-      //         F1_yf(y,fish_flt) = -log(1-(term1+term2));
-      // 
-      //       } // end hybrid F iterations
-      //       Catch_yaf_est(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i)*wage_catch(a,y); // do this by fleet with phi
-      //       CatchN_yaf(y,a,fish_flt) = (Freal(a)/(Z(a)))*(1-exp(-Z(a)))* phi_if_fish(fish_flt, i)* N_yais_beg(y,a,i);// Calculate the catch in kg
-      //       Catch_yf_est(y,fish_flt) += Catch_yaf_est(y,a,fish_flt); // sum over the current catch at age
-      //       CatchN(y,fish_flt) += CatchN_yaf(y,a,fish_flt);
-      //     } // end fishery fleets
-      //   } // end ages
-      // } // end nspace
-        } // temporary yend
-    
+      
+      
+      // N_yais_end ----
+      //fill EOY and beginning of next year using Ztuned
+      //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
+      //of the mortality and the tuned F extraction.
+      for(int s=0;s<2;s++){
+        for(int i=0;i<(nspace);i++){
+          for(int a=1;a<(nage);a++){
+            N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
+          }
+          for(int a=2;a<(nage-1);a++){
+            N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+          }
+          N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+        } // end subareas i
+      } // end sexes
+      
+  } // temporary yend
+  
     
     
   //   

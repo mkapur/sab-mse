@@ -484,6 +484,28 @@ substrRight <- function(x, n){
 }
 growPar$Sex <- substrRight(as.character(growPar$Sex), 1)## overwrite for loops
 
+
+## for TMB, get vectors of most likely length at age
+mla_early_ais = mla_late_ais = array(NA, dim = c(nage, nspace, 2 ))
+
+mla_yais = array(NA, dim = c(nyear,nage,nspace,2),  
+                 dimnames = list(year, age, inames, c('Fem','Mal')))
+for(a in 1:dim(init_LAA)[1]){
+  for(i in 1:dim(init_LAA)[3]){
+    for(s in 1:dim(init_LAA)[4]){
+      # return most likely length at each age
+      mla_early_ais[a,i,s] <- mla_yais[1:51,a,i,s] <- which.max(init_LAA[a,,i,s])[[1]]
+      mla_late_ais[a,i,s] <-  mla_yais[52:60,a,i,s] <-which.max(late_LAA[a,,i,s])[[1]]
+    }
+  }
+}
+
+
+save(mla_yais, file = here('input','input_data','mla_yais.rdata'))
+
+save(mla_early_ais, file = here('input','input_data','mla_early_ais.rdata'))
+save(mla_late_ais, file = here('input','input_data','mla_late_ais.rdata'))
+
 # array of year x stock x sex
 ## note that in ch1, R4 and R5 correspond to our R3 and R4; also R4 still means the same
 ## thing (alaska) but is in the first column per phi_ik2
@@ -652,15 +674,15 @@ nG <- length(alpha_g1)
 len <- 32:75
 sel_lg <- array(0, dim = c(length(len),5))
 for(g in 1:nG){
-  if(selType[g] == 1)
+  if(selType[g] == 1) ## asymp
   {
     sel_lg[,g] <- 1 / ( 1 + exp( - log(19) * (len - alpha_g1[g] + beta_g1[g]) / beta_g1[g] ) )
   }
-  if(selType[g] == 2)
+  if(selType[g] == 2) ## dome normal
   {
     sel_lg[,g] <- exp(-(0.5 * (len - alpha_g1[g])/beta_g1[g])^2 )
   }
-  if(selType[g] == 3)
+  if(selType[g] == 3) ## dome gamma
   {
     sel_lg[,g] <- len ^(alpha_g1[g] - 1) * exp(-len/beta_g1[g])
     sel_lg[,g] <- sel_lg[,g] / max(sel_lg[,g])

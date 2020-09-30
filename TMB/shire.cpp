@@ -727,6 +727,10 @@ Type objective_function<Type>::operator() ()
             } // end lbins
             break;
           } // end selType_fish
+          for(int a=0;a<(nage);a++){
+            catch_yfi_pred(y,fish_flt,i) += catch_yaif_pred(y,a,i,fish_flt);
+            catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
+          }
         } // end space
               
               

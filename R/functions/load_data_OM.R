@@ -185,9 +185,7 @@ load_data_OM <- function(nspace = 6,
     acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
     acomp_flt_type[3:8] <- 1
     colnames(acomp_flt_type) <- fltnames_acomp
-    
-    
-    fltnames[fltnames$SURV & fltnames$ACOMP]
+
     
     phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
     rownames(phi_lcomp_fm) = fltnames_lcomp
@@ -328,6 +326,7 @@ load_data_OM <- function(nspace = 6,
     phi_acomp_fm = phi_acomp_fm,
     phi_acomp_fm2 =phi_acomp_fm2,
     phi_lcomp_fm =phi_lcomp_fm,
+    acomp_flt_type = acomp_flt_type,
     
     #* DEMOG ----
     X_ijas = X_ijas,

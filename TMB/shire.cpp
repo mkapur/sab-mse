@@ -776,22 +776,33 @@ Type objective_function<Type>::operator() ()
       } // end sexes
       
       
-      // SSB_y ----
+      // SSB_yi, SSB_yk
       for(int i=0;i<(nspace);i++){
         for(int a=1;a<(nage);a++){
           SSB_yi(y,i) += N_yais_end(y,a,i,0)*
-            wtatlen_kab[phi_ik2[i],1]*
-            pow(Length_yais_beg[y,a,i,1],wtatlen_kab[phi_ik2[i],2])*
-            mat_ak[a,phi_ik2[i]];
+            wtatlen_kab(phi_ik2[i],1)*
+            pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2[i],2))*
+            mat_ak(a,phi_ik2(i));
         } // end ages
       } // end space
       for(int k=0;k<(nstocks);k++){
         for(int i=0;i<(nspace);i++){
-          SSB_yk[y,k] +=  phi_ki(k,i)*SSB_yi(y,i);
+          SSB_yk(y,k) +=  phi_ki(k,i)*SSB_yi(y,i);
         } // end stocks
       } // end space
       
-          
+      // R_yi, R_yk
+      for(int k=0;k<(nstocks);k++){
+        // SSB_yk already has summation
+        R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
+          (SSB_0k(k)*(1-h_k(k))+ 
+            SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk(y,k));
+      }  // end stocks
+      for(int i=0;i<(nspace);i++){
+        R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i); /// downscale to subarea including age-0 movement
+        N_yais_beg(y+1,1,i,0) = 0.5*R_yi(y,i); 
+        N_yais_beg(y+1,1,i,1) = 0.5*R_yi(y,i); 
+      } /// end space
       
       
   } // temporary yend

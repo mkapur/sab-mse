@@ -25,8 +25,8 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nage); // Plus group
   DATA_VECTOR(age); // ages
   DATA_INTEGER(tEnd); // number of years modeled
-  DATA_VECTOR(year); // number of years modeled
-  int nyear = year.size();
+  DATA_VECTOR(years); // number of years modeled
+  int nyear = years.size();
   
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets

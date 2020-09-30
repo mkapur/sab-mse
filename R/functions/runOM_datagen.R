@@ -47,6 +47,7 @@ runOM_datagen <- function(df, seed = 731){
   wtatlen_kab <- df$wtatlen_kab
   mat_ak <- df$mat_ak ## maturity by age and stock
   load(here('input','input_data','unfished_ALK.rdata')) ## from prelim runs, for ssb0
+  load(here('input','input_data','mla_yais.rdata')) ## from prelim runs, for ssb0
   ## Obs
   # catch_yf_obs <- df$Catch2
   catch_yf_obs <- df$catch

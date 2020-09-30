@@ -516,7 +516,7 @@ Type objective_function<Type>::operator() ()
                     N_yais_mid(y,a,i)*
                     LengthAge_alyis_mid(a,l,y,i,s)*
                     wtatlen_kab(phi_ik2(i),1)*
-                    pow(     LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),2))+
+                    pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),2))+
                     catch_yf_obs(y,fish_flt+1);
                 } // end length
               } // end age
@@ -580,9 +580,19 @@ Type objective_function<Type>::operator() ()
               break;
             } // end selType_fish
           } // end space
-          
-          
-          
+          vector<Type>Adj(niter);
+          for(int a=0;a<(nage);a++){
+            Adj[k] += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP[a,fish_flt,k];
+          }
+          // Get new Z given ADJ - need to add discard here
+          vector<Type>Z_a_TEMP2(nage);
+          Z_a_TEMP2.setZero();
+          // for(int a=0;a<(nage);a++){
+          //   for(int s=0;s<2;s++){
+          //   Z_a_TEMP2[a] += Adj[k] * 
+          //     sum(fish_selex_yafs[y, a, fish_flt, s] * F1_yf[y, fish_flt, k]) +
+          //     mat_age[a]
+          // }
       } // end k iters
       
       

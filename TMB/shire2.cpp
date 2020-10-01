@@ -179,13 +179,13 @@ Type objective_function<Type>::operator() ()
                         fsh_slx_pars(fish_flt,0,0,s))));
                     } // end ages
                     break;
-        //           // case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
-        //           //   //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-        //           //   for (int a= 0; a < nage; a++){
-        //           //     fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-        //           //        fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
-        //           //   } // end ages
-        //           //   break;
+                  case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
+                    //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+                    for (int a= 0; a < nage; a++){
+                      fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                         fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
+                    } // end ages
+                    break;
         //           // case 2: // Dome Normal with alpha (mean) and beta (sd)
         //           //   for (int a= 0; a < nage; a++){
         //           //     fsh_slx_yafs(i,a,fish_flt,s)  = exp(-(0.5 * (a - fsh_slx_pars(y,2,s))/pow(fsh_slx_pars(y,3,s),2)));

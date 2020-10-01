@@ -13,19 +13,21 @@ source(here("R","functions",'load_files_OM.R'))
 compile(here("TMB","shire.cpp"))
 dyn.load(dynlib(here("TMB","shire")))
 
-plot.figures = FALSE # Set true for printing to file 
-## OM MODEL INIT ----
-set.seed(731)
-
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
 obj <- MakeADFun(df,
                  parameters = df$parms,
+                 # parameters = list(logSDR = log(1.4), logh_k = rep(log(0.6,4))),
+                 # map = list("omega_0ij" = NA),
+                 checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
 
 
 reps <- obj$report()
 
+plot.figures = FALSE # Set true for printing to file 
+## OM MODEL INIT ----
+set.seed(731)
 # Initialize the model parameters. Make a version with movement and no seasons (simple)
 # df.simple <- load_data_seasons(nseason = 1, 
 #                                nspace = 2, 

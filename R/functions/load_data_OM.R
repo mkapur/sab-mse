@@ -104,8 +104,8 @@ load_data_OM <- function(nspace = 6,
   load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
   
   ## time blocks by fleet
-  srv_blks <- rep(tEnd, nfleets_surv+nfleets_acomp)
-  fsh_blks<- rep(tEnd, nfleets_fish)
+  srv_blks <- matrix(rep(tEnd, nfleets_surv+nfleets_acomp))
+  fsh_blks<- matrix(rep(tEnd, nfleets_fish))
   
   selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,10)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma

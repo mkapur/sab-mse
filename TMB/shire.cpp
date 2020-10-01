@@ -61,10 +61,10 @@ Type objective_function<Type>::operator() ()
   DATA_IVECTOR(selShape_fish);
   DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
   DATA_IVECTOR(selShape_surv);
-  // 
+
   // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
   // // each time block. Used for both selectivity and catchability
-  // DATA_IVECTOR(fsh_blks);        // fishery
+  DATA_IMATRIX(fsh_blks);        // fishery
   // DATA_IVECTOR(srv_blks);       // survey
   // 
   // // Survey Biomass

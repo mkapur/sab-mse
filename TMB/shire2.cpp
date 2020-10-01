@@ -165,21 +165,20 @@ Type objective_function<Type>::operator() ()
   // slx pars setup is fleet x alpha, beta x time block (1 for now) x sex 
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ // loop fleets
     int i = 0;
-    for(int y = 0; y < nyear; y++){ // loop years
+    for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
-        
-        //       switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
-        //       case 0: // enter age based sel
-        //         for (int s = 0; s < 2; s++) { // loop sexes
-        //           // Selectivity switch (case 0 or 1 references the value of slx_type)
-        //           switch (selShape_fish(fish_flt)) { // age sel
-        //           case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
-        //             for (int a= 0; a < nage; a++){
-        //               fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-        //                 (a -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) - 
-        //                 fsh_slx_pars(fish_flt,0,0,s))));
-        //             } // end ages
-        //             break;
+              switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
+              case 0: // enter age based sel
+                for (int s = 0; s < 2; s++) { // loop sexes
+                  // Selectivity switch (case 0 or 1 references the value of slx_type)
+                  switch (selShape_fish(fish_flt)) { // age sel
+                  case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
+                    for (int a= 0; a < nage; a++){
+                      fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
+                        (a -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -
+                        fsh_slx_pars(fish_flt,0,0,s))));
+                    } // end ages
+                    break;
         //           // case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
         //           //   //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
         //           //   for (int a= 0; a < nage; a++){
@@ -202,9 +201,9 @@ Type objective_function<Type>::operator() ()
         //           //   } // end ages
         //             break;
         //           } // end sex
-        //         } // end switch selShape
-        //         break; // break age sel
-        //       // case 1: // enter length based sel
+                } // end switch selShape
+                break; // break age sel
+              // case 1: // enter length based sel
         //       //   for (int s = 0; s < 2; s++) {
         //       //     switch (selShape_fish(fish_flt)) {
         //       //     case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
@@ -235,12 +234,11 @@ Type objective_function<Type>::operator() ()
         //       //       } // end len
         //       //       break;
         //       //     } // end switch selShape
-        //       //   } // end sex
-        //         break;
-        //       } // end switch selType
-        // 
+                } // end sex
+                break;
+              } // end switch selType
         i++;
-      } while (i <= fsh_blks(y,fish_flt));
+      } while (i <= fsh_blks(y,fish_flt)); // bracket i estimation for years designated by this block
     } // end y blocks
   } // end fish_flt
   

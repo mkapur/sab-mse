@@ -138,6 +138,31 @@ Type objective_function<Type>::operator() ()
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
 
+  // Fishery selectivity
+  // Number of parameters in the chosen selectivity type: 
+  int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
+  // Preliminary calcs to bring parameters out of log space
+  vector<int> a1_dim =log_fsh_slx_pars.dim;
+  array<Type> fsh_slx_pars(a1_dim);
+  fsh_slx_pars.setZero();
+  // for (int fish_flt = 0; fish_flt < nfleets_fish; fish_flt++) {
+  //   for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
+  //     for (int h = 0; h < fsh_blks.size(); h++) { // loop time blocks
+  //       for (int s = 0; s < 2; s++) { // loop sexes
+  //         fsh_slx_pars(fish_flt,n,h,s) = exp(log_fsh_slx_pars(fish_flt,n,h,s));
+  //       } // end sex
+  //     } // end blocks
+  //   } // end alpha, beta
+  // } // end fish fleets
+  // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
+  // "does" the looping over year and age "while" within the y block, then
+  // iterates to the next block. Year is not in a for loop because it is
+  // iterated by the do statement.
+
+  // The switch for slx_shape allows you to change parameterization SHAPE. This could
+  // easily be expanded to accomodate any selectivity type (the fsh_slx_pars
+  // allows for a flexible number of parameters and y blocks)
+  
   Type ans = 1.0;
   return ans;
 }

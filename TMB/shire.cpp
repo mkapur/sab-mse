@@ -71,7 +71,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(surv_yf_obs);
   // DATA_VECTOR(survey_err);
   array<Type> survey_yf_pred(nyear, nfleets_surv);
-  // 
+
   // // Age Comps
   DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
   DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
@@ -99,9 +99,10 @@ Type objective_function<Type>::operator() ()
   array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
   array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
   array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
+  array<Type> F_ymtest(tEnd,nmgmt_reg); // test
   array<Type> F_ym(tEnd,nmgmt_reg);
-  // 
-  // // biology storage
+
+  // biology storage
   // array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once
   // array<Type> N_0ais(nage, nspace,2); // numbers in year 0 at age in subarea
   // vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
@@ -126,7 +127,7 @@ Type objective_function<Type>::operator() ()
   // array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
   // array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
   // array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
-  // vector<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
+  // array<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
 
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
@@ -137,7 +138,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logSDR);
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
   PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
-  // 
+
   // // Transform out of log space
   // // Type SDsurv = exp(logSDsurv);
   // // Type SDcatch = exp(logSDcatch);

@@ -30,13 +30,14 @@ Type objective_function<Type>::operator() ()
   DATA_IMATRIX(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_IMATRIX(phi_if_fish); // turn on/off subareas for fishery fleets
   DATA_IMATRIX(phi_fm); //  fleets to mgmt areas
+  DATA_MATRIX(phi_fm_acomp); //  fleets to mgmt areas
   
   // DATA_IMATRIX(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   // DATA_MATRIX(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
   // DATA_MATRIX(tau_ki); // downscaling recruits from stocks to sub-areas
 
-  // DATA_MATRIX(phi_acomp_fm); //  fleets to mgmt areas
-  // DATA_MATRIX(phi_acomp_fm2); //  fleets to mgmt areas
+
+  // DATA_MATRIX(phi_fm_acomp2); //  fleets to mgmt areas
   // DATA_MATRIX(phi_lcomp_fm); //  fleets to mgmt areas
 
     // // DEMOGRAPHY // 
@@ -892,16 +893,16 @@ Type objective_function<Type>::operator() ()
   //   // predicted age comps, given error
   //   for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
   //     // age 0, note starts at column 2
-  //     acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_acomp_fm2(acomp_flt),0), age_error_SD(phi_acomp_fm2(acomp_flt),0));
+  //     acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
   //     // Loop over ages
   //     for(int a=1;a<(nage-1);a++){
   //       acomp_yaf_temp(y,a,acomp_flt) =
-  //         pnorm(Type(a+1),   age_error(phi_acomp_fm2(acomp_flt),a),  age_error_SD(phi_acomp_fm2(acomp_flt),a)) -
-  //         pnorm(age(a),   age_error(phi_acomp_fm2(acomp_flt),a),  age_error_SD(phi_acomp_fm2(acomp_flt),a));
+  //         pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
+  //         pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
   //     } // end ages
   //     acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),  
-  //                    age_error(phi_acomp_fm2(acomp_flt),nage-1),  
-  //                    age_error_SD(phi_acomp_fm2(acomp_flt),nage-1));
+  //                    age_error(phi_fm_acomp2(acomp_flt),nage-1),  
+  //                    age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
   //     
   //     for(int a=1;a<(nage);a++){
   //       for(int i=0;i<(nspace);i++){

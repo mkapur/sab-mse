@@ -180,11 +180,11 @@ load_data_OM <- function(nspace = 6,
     phi_fm[1:4,1] <- phi_fm[5:7,2]  <- phi_fm[8:9,3]  <- 1
     
     ## same as above but for comps (mix of fisheries & surveys)
-    phi_acomp_fm <- matrix(0, nrow = nfleets_acomp, ncol = 3)
-    rownames(phi_acomp_fm) = fltnames_acomp
-    colnames(phi_acomp_fm) = c('AK','BC','WC')
-    phi_acomp_fm[1:3,1] <- phi_acomp_fm[4:6,2]  <- phi_acomp_fm[7:8,3]  <- 1
-    phi_acomp_fm2 <- apply(phi_acomp_fm,1, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are survey fleets
+    phi_fm_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 3)
+    rownames(phi_fm_acomp) = fltnames_acomp
+    colnames(phi_fm_acomp) = c('AK','BC','WC')
+    phi_fm_acomp[1:3,1] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,3]  <- 1
+    phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are survey fleets
     
     acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
     acomp_flt_type[3:8] <- 1
@@ -327,12 +327,12 @@ load_data_OM <- function(nspace = 6,
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
     phi_ki = phi_ki,
-    phi_ik2 = phi_ik2,
+    phi_ik2 = t(phi_ik2),
     phi_ij = phi_ij,
     phi_fm = phi_fm,
     tau_ki = tau_ki,
-    phi_acomp_fm = phi_acomp_fm,
-    phi_acomp_fm2 =phi_acomp_fm2,
+    phi_fm_acomp = phi_fm_acomp,
+    phi_fm_acomp2 = t(phi_fm_acomp2),
     phi_lcomp_fm =phi_lcomp_fm,
     acomp_flt_type = acomp_flt_type,
     

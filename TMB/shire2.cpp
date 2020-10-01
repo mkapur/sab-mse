@@ -128,7 +128,16 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logSDR);
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
   PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
-  
+  // // Transform out of log space
+  // // Type SDsurv = exp(logSDsurv);
+  // // Type SDcatch = exp(logSDcatch);
+  Type SDR = exp(logSDR);
+  vector<Type> R_0k = exp(logR_0k);
+  vector<Type> h_k = exp(logh_k);
+  vector<Type> q_f = exp(logq_f);
+  array<Type> tildeR_yk(tEnd,nstocks); // recdevs
+  vector<Type> tildeR_initk(nstocks); // recdevs for init
+
   Type ans = 1.0;
   return ans;
 }

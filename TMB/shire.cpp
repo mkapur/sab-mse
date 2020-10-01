@@ -27,22 +27,22 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
   
-  DATA_MATRIX(phi_if_surv); // turn on/off subareas for survey fleets
-  DATA_MATRIX(phi_if_fish); // turn on/off subareas for fishery fleets
-  // DATA_MATRIX(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
-  // DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
+  DATA_IMATRIX(phi_if_surv); // turn on/off subareas for survey fleets
+  DATA_IMATRIX(phi_if_fish); // turn on/off subareas for fishery fleets
+  // DATA_IMATRIX(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
+  // DATA_MATRIX(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
   // DATA_MATRIX(tau_ki); // downscaling recruits from stocks to sub-areas
   // DATA_MATRIX(phi_fm); //  fleets to mgmt areas
   // DATA_MATRIX(phi_acomp_fm); //  fleets to mgmt areas
-  // DATA_IVECTOR(phi_acomp_fm2); //  fleets to mgmt areas
+  // DATA_MATRIX(phi_acomp_fm2); //  fleets to mgmt areas
   // DATA_MATRIX(phi_lcomp_fm); //  fleets to mgmt areas
 
     // // DEMOGRAPHY // 
-  // DATA_VECTOR(mat_age); // natural mortality at age
+  DATA_VECTOR(mat_age); // natural mortality at age
 
   // // movement //
-  // DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
-  // DATA_ARRAY(X_ijas); // prob trans between subareas at age
+  DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
+  DATA_ARRAY(X_ijas); // prob trans between subareas at age
   // 
   // // growth //
   // DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs

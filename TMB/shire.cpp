@@ -57,10 +57,10 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(mat_ak); // maturity at age for stock
   // 
   // // Selectivity
-  // DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
-  // DATA_IVECTOR(selShape_fish);
-  // DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
-  // DATA_IVECTOR(selShape_surv);
+  DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
+  DATA_IVECTOR(selShape_fish);
+  DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
+  DATA_IVECTOR(selShape_surv);
   // 
   // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
   // // each time block. Used for both selectivity and catchability

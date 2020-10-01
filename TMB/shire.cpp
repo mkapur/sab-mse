@@ -100,7 +100,7 @@ Type objective_function<Type>::operator() ()
   array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
   array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
   array<Type> F_ym(tEnd,nmgmt_reg); //dodo
-  array<Type> F_ydm(tEnd,nmgmt_reg); //dodo
+  array<Type> F_ydm(tEnd,2,nspace); //dodo
   
   // biology storage
   // array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once

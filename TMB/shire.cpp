@@ -68,9 +68,9 @@ Type objective_function<Type>::operator() ()
   DATA_IMATRIX(srv_blks);       // survey
   // 
   // // Survey Biomass
-  // DATA_ARRAY(surv_yf_obs);
+  DATA_ARRAY(surv_yf_obs);
   // DATA_VECTOR(survey_err);
-  // array<Type> survey_yf_pred(nyear, nfleets_surv);
+  array<Type> survey_yf_pred(nyear, nfleets_surv);
   // 
   // // Age Comps
   // DATA_MATRIX(age_error); // nmgmt_reg x 100 ages

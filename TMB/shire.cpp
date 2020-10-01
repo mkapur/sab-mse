@@ -362,18 +362,18 @@ Type objective_function<Type>::operator() ()
   } // end sex
 
   // Equilibrium Unfished SSB, stock (outside of y loop)
-  // for(int i=0;i<(nspace);i++){
-  //   for(int a=0;a<nage;a++){ // Loop over ages
-  //     SSB_0i(i) += mat_age(a)*
-  //       N_0ais(a,i,0)*
-  //       wtatlen_kab(phi_ik2(i),1)*
-  //       pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),2))*
-  //       mat_ak(a,phi_ik2(i));
-  //     for(int k=0;k<(nstocks);k++){
-  //       SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
-  //     } // end stocks
-  //   } // end ages
-  // } // end space
+  for(int i=0;i<(nspace);i++){
+    for(int a=0;a<nage;a++){ // Loop over ages
+      SSB_0i(i) += mat_age(a)*
+        N_0ais(a,i,0)*
+        wtatlen_kab(phi_ik2(i),0)*
+        pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),1))*
+        mat_ak(a,phi_ik2(i));
+      for(int k=0;k<(nstocks);k++){
+      SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
+      } // end stocks
+    } // end ages
+  } // end space
   // 
   // // The first year of the simulation is initialized with the following age distribution
   // Ninit_ais.setZero(); 

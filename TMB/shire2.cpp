@@ -93,6 +93,16 @@ Type objective_function<Type>::operator() ()
   array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
   array<Type> F_ym(tEnd,nmgmt_reg); //dodo
   array<Type> F_ydm(tEnd,nfleets_fish,nspace); //dodo
+  // biology storage
+  array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once
+  array<Type> N_0ais(nage, nspace,2); // numbers in year 0 at age in subarea
+  vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
+  vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
+  array<Type> N_yais_beg( tEnd+1, nage, nspace,2); N_yais_beg.setZero();
+  array<Type> N_yais_mid( tEnd+1, nage, nspace,2); N_yais_mid.setZero();
+  array<Type> N_yais_end( tEnd+1, nage, nspace,2); N_yais_end.setZero();
+  array<Type> SSB_yk(tEnd,nstocks);
+  array<Type> SSB_yi(tEnd,nspace);
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock

@@ -376,21 +376,22 @@ Type objective_function<Type>::operator() ()
   } // end space
   // 
   // // The first year of the simulation is initialized with the following age distribution
-  // Ninit_ais.setZero(); 
-  // for(int y=0;y<(10*nage);y++){
-  //   for(int s=0;s<2;s++){
-  //     for(int i=0;i<(nspace);i++){
-  //       for(int a=0;a<(nage-1);a++){
-  //         Ninit_ais(a,i,s) += 0.5* omega_ais(a,i,s) * 
-  //           tau_ki(phi_ik2(i),i) * 
-  //           R_0k(phi_ik2(i))* exp(-(mat_age(a)*age(a))) *
-  //           exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i)));
-  //       } // end ages
-  //       Ninit_ais(nage-1,i) += (omega_ais(nage-1,i,s) * Ninit_ais(nage-2,i,s) *
-  //         exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-sum(mat_age))* exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i))));
-  //     } // end space
-  //   } // end sex
-  // } // end yinit
+  Ninit_ais.setZero();
+  for(int y=0;y<(10*nage);y++){
+    for(int s=0;s<2;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage-1);a++){
+          Ninit_ais(a,i,s) += 0.5* omega_ais(a,i,s) *
+            tau_ki(phi_ik2(i),i) *
+            R_0k(phi_ik2(i))* exp(-(mat_age(a)*age(a))) *
+            exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i)));
+        } // end ages
+        Ninit_ais(nage-1,i,s) += (omega_ais(nage-1,i,s) * Ninit_ais(nage-2,i,s) *
+          exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-sum(mat_age))*
+          exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i))));
+      } // end space
+    } // end sex
+  } // end yinit
   // 
   // for(int y=0;y<(tEnd);y++){ // Start y loop
   //   // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)

@@ -83,7 +83,16 @@ Type objective_function<Type>::operator() ()
   // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+nfleets_acomp,2);  //
-  
+  // F tuning
+  int niter = 50;
+  array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
+  array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
+  array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
+  array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
+  array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
+  array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
+  array<Type> F_ym(tEnd,nmgmt_reg); //dodo
+  array<Type> F_ydm(tEnd,nfleets_fish,nspace); //dodo
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock

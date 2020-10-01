@@ -88,8 +88,8 @@ Type objective_function<Type>::operator() ()
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
   // // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // // Predicted selectivity
-  // array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
-  // array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+nfleets_acomp,2);  // Survey selectivity-at-age by sex(on natural scale)
+  array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
+  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+nfleets_acomp,2);  // Survey selectivity-at-age by sex(on natural scale)
   // 
   // // F tuning 
   // int niter = 50;

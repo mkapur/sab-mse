@@ -425,11 +425,12 @@ Type objective_function<Type>::operator() ()
               NCome += X_ijas(j,i,nage-1,s)*(Ninit_ais(nage-1,j,s) + Ninit_ais(nage-2,j,s)) ;
             } // end i != j
           } // end subareas j
-          // N_yais_beg(y,nage-1,i,s) =  ((1-pLeave)*(Ninit_ais(0,nage-1,i,s)+Ninit_ais(0,nage-2,i,s)) + NCome)*exp(-mat_age(nage-1));
-          // Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-          //   exp(-kappa_yk(0,phi_ik2(i))*(nage-1));
-          // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-          //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
+          N_yais_beg(y,nage-1,i,s) =  ((1-pLeave)*(Ninit_ais(nage-1,i,s)+Ninit_ais(nage-2,i,s)) + NCome)*
+            exp(-mat_age(nage-1));
+          Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            exp(-kappa_yk(0,phi_ik2(i),s)*(nage-1));
+          Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
         } // end sexes
       } // end subareas i
     } // end y == 0

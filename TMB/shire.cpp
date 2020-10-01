@@ -24,22 +24,22 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
   DATA_INTEGER(nfleets_acomp); // number of age comp fleets
-  // DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
+  DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
   
-  DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
-  // DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
-  // DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
+  DATA_MATRIX(phi_if_surv); // turn on/off subareas for survey fleets
+  DATA_MATRIX(phi_if_fish); // turn on/off subareas for fishery fleets
+  // DATA_MATRIX(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   // DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
-  // DATA_ARRAY(tau_ki); // downscaling recruits from stocks to sub-areas
-  // DATA_ARRAY(phi_fm); //  fleets to mgmt areas
-  // DATA_ARRAY(phi_acomp_fm); //  fleets to mgmt areas
+  // DATA_MATRIX(tau_ki); // downscaling recruits from stocks to sub-areas
+  // DATA_MATRIX(phi_fm); //  fleets to mgmt areas
+  // DATA_MATRIX(phi_acomp_fm); //  fleets to mgmt areas
   // DATA_IVECTOR(phi_acomp_fm2); //  fleets to mgmt areas
-  // DATA_ARRAY(phi_lcomp_fm); //  fleets to mgmt areas
-  // 
-  // // DEMOGRAPHY // 
+  // DATA_MATRIX(phi_lcomp_fm); //  fleets to mgmt areas
+
+    // // DEMOGRAPHY // 
   // DATA_VECTOR(mat_age); // natural mortality at age
-  // 
+
   // // movement //
   // DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   // DATA_ARRAY(X_ijas); // prob trans between subareas at age
@@ -58,37 +58,34 @@ Type objective_function<Type>::operator() ()
   // 
   // // Selectivity
   // DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
-  // DATA_IVECTOR(selShape_fish); 
+  // DATA_IVECTOR(selShape_fish);
   // DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
-  // DATA_IVECTOR(selShape_surv); 
+  // DATA_IVECTOR(selShape_surv);
   // 
   // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
   // // each time block. Used for both selectivity and catchability
-  // DATA_IVECTOR(fsh_blks);        // fishery  
+  // DATA_IVECTOR(fsh_blks);        // fishery
   // DATA_IVECTOR(srv_blks);       // survey
   // 
   // // Survey Biomass
   // DATA_ARRAY(surv_yf_obs);
-  // // DATA_VECTOR(survey_err);
-  // array<Type> survey_yf_pred(nyear, nfleets_surv);          
+  // DATA_VECTOR(survey_err);
+  // array<Type> survey_yf_pred(nyear, nfleets_surv);
   // 
   // // Age Comps
   // DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
   // DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
   // DATA_IVECTOR(acomp_flt_type); // 0 for commercial, 1 for survey
-  // 
   // // STORAGE ///
-  // 
   // // Catches
   // DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   // array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
-  // array<Type> catch_yf_pred(tEnd,nfleets_fish); 
-  // array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace); 
-  // array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  
+  // array<Type> catch_yf_pred(tEnd,nfleets_fish);
+  // array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);
+  // array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);
   // array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
   // array<Type> N_avail_yf(tEnd, nfleets_fish);
   // array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
-  // 
   // // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // // Predicted selectivity
   // array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
@@ -132,14 +129,14 @@ Type objective_function<Type>::operator() ()
   // vector<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // 
   // // PARAMETERS //
-  // PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
-  // PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  // PARAMETER_VECTOR(logh_k); // Steepness by stock
-  // PARAMETER_VECTOR(logq_f); // Q by survey fleet
-  // PARAMETER_VECTOR(b); // bias adjustment factor
-  // PARAMETER(logSDR);
-  // PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
-  // PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
+  PARAMETER_VECTOR(logh_k); // Steepness by stock
+  PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
+  PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  PARAMETER_VECTOR(logq_f); // Q by survey fleet
+  PARAMETER_VECTOR(b); // bias adjustment factor
+  PARAMETER(logSDR);
+  PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
+  PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
   // 
   // // Transform out of log space
   // // Type SDsurv = exp(logSDsurv);
@@ -1109,7 +1106,7 @@ Type objective_function<Type>::operator() ()
   // Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
   
   // Later Fix F in the likelihood and age comp in catch
-  Type ans = 0.0;
+  // Type ans = 0.0;
   // Report calculations
   // ADREPORT(logF)
   // ADREPORT(R)
@@ -1121,7 +1118,7 @@ Type objective_function<Type>::operator() ()
   // ADREPORT(age_survey)
   // ADREPORT(age_survey_est)
   // ADREPORT(ans_tot)
-  REPORT(N_0ais)
+  // REPORT(N_0ais)
     // REPORT(SSB_0k)
     //   REPORT(SSB_yk)
     //   REPORT(SSB_0i)
@@ -1154,6 +1151,6 @@ Type objective_function<Type>::operator() ()
     //   REPORT(survey_bio_f_obs)
     //   REPORT(N_yais_mid)
     //   REPORT(Nsamp_acomp_f)
-      return ans;
+      // return ans;
 }
 

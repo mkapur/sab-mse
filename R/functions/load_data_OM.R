@@ -102,7 +102,11 @@ load_data_OM <- function(nspace = 6,
   ## Selex ----
   load(here('input','input_data',"OM_fish_selex_yafs.rdata"))
   load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
-  ## need to create
+  
+  ## time blocks by fleet
+  srv_blks <- rep(tEnd, nfleets_surv+nfleets_acomp)
+  fsh_blks<- rep(tEnd, nfleets_fish)
+  
   selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,10)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   
@@ -263,11 +267,15 @@ load_data_OM <- function(nspace = 6,
     logq_f = rep(log(0.5), 5),
     b = rep(0,nyear),
     logSDR = 1.4,
-    log_fsh_slx_pars = rep(0.4,nfleets_fish), 
-    log_srv_slx_pars = rep(0.4,nfleets_surv+nfleets_acomp)
+    ## structure is fleet x alpha, beta x time block (1 for now)x sex 
+    log_fsh_slx_pars = array(0.2, dim = c(nfleets_fish,2,1,2)),
+    log_srv_slx_pars =  array(0.4, dim = c( nfleets_surv+nfleets_acomp,2,1,2))
   )
 
 
+  # alpha_g1 <- c(62.8329, 63.6959, 33.8898, 54.1045, 64.2127) ## trap ll twl std strs
+  # beta_g1 <- c(7.04483, 3.09715, 1.41494, 4.55724, 12.9197)
+  
   # parms <- list( # Just start all the simluations with the same initial conditions 
   #      logRinit = parms.scalar$logRinit+log(rmul),
   #      logh = parms.scalar$logh,
@@ -352,8 +360,8 @@ load_data_OM <- function(nspace = 6,
     #* SELEX ----
     fish_selex_yafs = OM_fish_selex_yafs,
     surv_selex_yafs = OM_surv_selex_yafs,
-    fsh_blks = tEnd, ## currently not ready to be fleet-specific
-    srv_blks = tEnd,
+    fsh_blks = fsh_blks, ## currently not ready to be fleet-specific
+    srv_blks = srv_blks,
     #* ADDL PARS ----
     parms = parms,
     bfuture = bfuture

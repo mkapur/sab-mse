@@ -103,6 +103,22 @@ Type objective_function<Type>::operator() ()
   array<Type> N_yais_end( tEnd+1, nage, nspace,2); N_yais_end.setZero();
   array<Type> SSB_yk(tEnd,nstocks);
   array<Type> SSB_yi(tEnd,nspace);
+  // Recruits
+  vector<Type> R(tEnd);
+  array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
+  array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
+  // Length at age
+  array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  array<Type> Length_yais_end(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  // age comps
+  array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
+  array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
+  array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
+  array<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock

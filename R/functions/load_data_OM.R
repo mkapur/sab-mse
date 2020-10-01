@@ -177,7 +177,7 @@ load_data_OM <- function(nspace = 6,
     phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
     rownames(phi_fm) = names(catch)[2:ncol(catch)]
     colnames(phi_fm) = c('AK','BC','WC')
-    phi_fm[1:2,1] <- phi_fm[3:5,2]  <- phi_fm[6:9,3]  <- 1
+    phi_fm[1:4,1] <- phi_fm[5:7,2]  <- phi_fm[8:9,3]  <- 1
     
     ## same as above but for comps (mix of fisheries & surveys)
     phi_acomp_fm <- matrix(0, nrow = nfleets_acomp, ncol = 3)

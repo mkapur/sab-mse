@@ -4,21 +4,14 @@
 #include <iostream>
 
 // TO DO
-// correct growth for early ages
-// make selex fleet specific
-// introduce selectivity estimation
 // need error on tau
-// everything sex specific
 // calculate reference points
-// M vs myear -- at age or what?
-// estimate SDR (currently parameter)
-
+// estimate SDR 
 
 template<class Type>
 Type objective_function<Type>::operator() ()
 {
-  // DATA AND PARAMETERS BY CATEGORY //
-  
+  // DATA INPUT //
   // structure //
   DATA_INTEGER(nspace); // number of subreas to track
   DATA_INTEGER(nstocks); // number of stocks (demography)
@@ -35,175 +28,146 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
   
   DATA_ARRAY(phi_if_surv); // turn on/off subareas for survey fleets
-  DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
-  DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
-  DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
-  DATA_ARRAY(tau_ki); // downscaling recruits from stocks to sub-areas
-  DATA_ARRAY(phi_fm); //  fleets to mgmt areas
-  DATA_ARRAY(phi_acomp_fm); //  fleets to mgmt areas
-  DATA_IVECTOR(phi_acomp_fm2); //  fleets to mgmt areas
-  DATA_ARRAY(phi_lcomp_fm); //  fleets to mgmt areas
-  
-  // biology // 
-  DATA_VECTOR(mat_age); // natural mortality at age
-  
-  // movement //
-  DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
-  DATA_ARRAY(X_ijas); // prob trans between subareas at age
-  
-  // growth //
-  DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs
-  DATA_ARRAY(wtatlen_kab); // aL^b values by stock
-  DATA_ARRAY(Linf_yk); // sex, stock, year specific
-  DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
-  DATA_ARRAY(kappa_yk);
-  DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
-  DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
-  DATA_INTEGER(LBins); // maximum length bin in CM
-  DATA_ARRAY(mla_yais); // for early or late periods, most likely length at age(for selex)
-  
-  array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
-  array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
-  array<Type> Length_yais_end(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
-  array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
-  array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
-  array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
-  
-  
-  // DATA_SCALAR(logSDR); // Can it be estimated as a fixed effect?
-  DATA_ARRAY(mat_ak); // maturity at age for stock
-  
-  // repro storage
-  vector<Type> R(tEnd);
-  array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
-  array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
-
-  // Selectivity
-  DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
-  DATA_IVECTOR(selShape_fish); 
-  DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
-  DATA_IVECTOR(selShape_surv); 
-  // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
-  // Predicted selectivity
-  array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
-  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+nfleets_acomp,2);  // Survey selectivity-at-age by sex(on natural scale)
-  
-  // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
-  // each time block. Used for both selectivity and catchability
-  DATA_IVECTOR(fsh_blks);        // fishery  
-  DATA_IVECTOR(srv_blks);       // survey
-  
-  // Survey Biomass
-  DATA_ARRAY(surv_yf_obs);
-  // DATA_VECTOR(survey_err);
-  array<Type> survey_yf_pred(nyear, nfleets_surv);          
-
-  // Age Comps
-  DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
-  DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
-  DATA_IVECTOR(acomp_flt_type); // 0 for commercial, 1 for survey
-  // DATA_ARRAY(survey_acomp_f_obs); // Observed survey compositions,  year x age x nfleets_acomp {right now just survnfleets}
-  array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
-  array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
-  array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
-  vector<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
-  
-  // Catches
-  DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
-  array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
-  array<Type> catch_yf_pred(tEnd,nfleets_fish); 
-  array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace); 
-  array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  
-  array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
-  array<Type> N_avail_yf(tEnd, nfleets_fish);
-  array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
-  
-  // F tuning 
-  int niter = 50;
-  array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
-  array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage 
-  array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
-  array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
-  array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
-  array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
-  array<Type> F_ym(tEnd,nmgmt_reg); 
-  
-  // array<Type> Ftuned_yf
-  // array<Type> Ftuned_ym(tEnd,nfleets_fish); // summation of Fs nested in mgmt regions
-  // array<Type> Ztuned_yf(tEnd, nage, nspace); // final tuned subarea and yr specific Z
-  // vector<Type> Fyear(tEnd);
-  // vector<Type> Freal(nage);
-  // vector<Type> Z(nage);
-  
-  // Priors
-  // DATA_SCALAR(Bprior);
-  // DATA_SCALAR(Aprior);
-  
-  
-  // biology storage
-  array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once
-  array<Type> N_0ais(nage, nspace,2); // numbers in year 0 at age in subarea
-  vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
-  vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
-  array<Type> N_yais_beg( tEnd+1, nage, nspace,2); N_yais_beg.setZero();
-  array<Type> N_yais_mid( tEnd+1, nage, nspace,2); N_yais_mid.setZero();
-  array<Type> N_yais_end( tEnd+1, nage, nspace,2); N_yais_end.setZero();
-  array<Type> SSB_yk(tEnd,nstocks);
-  array<Type> SSB_yi(tEnd,nspace);
-  // array<Type> surv_yf_pred(tEnd,nfleets_surv); // this is actually predicted
-  // array<Type> Zsave(nage,tEnd);
-  
-  
-  // PARAMETER(logphi_survey);
-  // PARAMS
-  PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
-  PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  PARAMETER_VECTOR(logh_k); // Steepness by stock
-  PARAMETER_VECTOR(logq_f); // Q by survey fleet
-  PARAMETER_VECTOR(b); // bias adjustment factor
-  PARAMETER(logSDR);
-  PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
-  PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
-  
-  // Transform out of log space
-  // Type SDsurv = exp(logSDsurv);
-  // Type SDcatch = exp(logSDcatch);
-  Type SDR = exp(logSDR);
-  vector<Type> R_0k = exp(logR_0k);
-  vector<Type> h_k = exp(logh_k);
-  vector<Type> q_f = exp(logq_f);
-  // Type Minit = exp(logMinit);
-  // Type q = exp(logQ);
-  // Type phi_survey = exp(logphi_survey);
-  // Type phi_catch = exp(logphi_catch);
-  
-  //  Minor calculations
-  // vector<Type> M = Minit*Msel; // Natural mortality
-  // vector<Type> Myear = M*Msel; // Natural mortality (if we want to change it later)
-  // vector<Type> Zzero = M; // total mortality without fishing
-  // vector<Type> logF(tEnd);
-  array<Type> tildeR_yk(tEnd,nstocks); // recdevs
-  vector<Type> tildeR_initk(nstocks); // recdevs for init
-  
-  
+  // DATA_ARRAY(phi_if_fish); // turn on/off subareas for fishery fleets
+  // DATA_ARRAY(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
+  // DATA_IVECTOR(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
+  // DATA_ARRAY(tau_ki); // downscaling recruits from stocks to sub-areas
+  // DATA_ARRAY(phi_fm); //  fleets to mgmt areas
+  // DATA_ARRAY(phi_acomp_fm); //  fleets to mgmt areas
+  // DATA_IVECTOR(phi_acomp_fm2); //  fleets to mgmt areas
+  // DATA_ARRAY(phi_lcomp_fm); //  fleets to mgmt areas
+  // 
+  // // DEMOGRAPHY // 
+  // DATA_VECTOR(mat_age); // natural mortality at age
+  // 
+  // // movement //
+  // DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
+  // DATA_ARRAY(X_ijas); // prob trans between subareas at age
+  // 
+  // // growth //
+  // DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs
+  // DATA_ARRAY(wtatlen_kab); // aL^b values by stock
+  // DATA_ARRAY(Linf_yk); // sex, stock, year specific
+  // DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
+  // DATA_ARRAY(kappa_yk);
+  // DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
+  // DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
+  // DATA_INTEGER(LBins); // maximum length bin in CM
+  // DATA_ARRAY(mla_yais); // for early or late periods, most likely length at age(for selex)
+  // DATA_ARRAY(mat_ak); // maturity at age for stock
+  // 
+  // // Selectivity
+  // DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
+  // DATA_IVECTOR(selShape_fish); 
+  // DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
+  // DATA_IVECTOR(selShape_surv); 
+  // 
+  // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
+  // // each time block. Used for both selectivity and catchability
+  // DATA_IVECTOR(fsh_blks);        // fishery  
+  // DATA_IVECTOR(srv_blks);       // survey
+  // 
+  // // Survey Biomass
+  // DATA_ARRAY(surv_yf_obs);
+  // // DATA_VECTOR(survey_err);
+  // array<Type> survey_yf_pred(nyear, nfleets_surv);          
+  // 
+  // // Age Comps
+  // DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
+  // DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
+  // DATA_IVECTOR(acomp_flt_type); // 0 for commercial, 1 for survey
+  // 
+  // // STORAGE ///
+  // 
+  // // Catches
+  // DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
+  // array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
+  // array<Type> catch_yf_pred(tEnd,nfleets_fish); 
+  // array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace); 
+  // array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  
+  // array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
+  // array<Type> N_avail_yf(tEnd, nfleets_fish);
+  // array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
+  // 
+  // // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
+  // // Predicted selectivity
+  // array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
+  // array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+nfleets_acomp,2);  // Survey selectivity-at-age by sex(on natural scale)
+  // 
+  // // F tuning 
+  // int niter = 50;
+  // array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
+  // array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage 
+  // array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
+  // array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
+  // array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
+  // array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
+  // array<Type> F_ym(tEnd,nmgmt_reg); 
+  // 
+  // // biology storage
+  // array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once
+  // array<Type> N_0ais(nage, nspace,2); // numbers in year 0 at age in subarea
+  // vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
+  // vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
+  // array<Type> N_yais_beg( tEnd+1, nage, nspace,2); N_yais_beg.setZero();
+  // array<Type> N_yais_mid( tEnd+1, nage, nspace,2); N_yais_mid.setZero();
+  // array<Type> N_yais_end( tEnd+1, nage, nspace,2); N_yais_end.setZero();
+  // array<Type> SSB_yk(tEnd,nstocks);
+  // array<Type> SSB_yi(tEnd,nspace);
+  // // Recruits
+  // vector<Type> R(tEnd);
+  // array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
+  // array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
+  // // Length at age
+  // array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  // array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  // array<Type> Length_yais_end(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
+  // array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  // array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  // array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
+  // // age comps
+  // array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
+  // array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
+  // array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
+  // vector<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
+  // 
+  // // PARAMETERS //
+  // PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  // PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
+  // PARAMETER_VECTOR(logh_k); // Steepness by stock
+  // PARAMETER_VECTOR(logq_f); // Q by survey fleet
+  // PARAMETER_VECTOR(b); // bias adjustment factor
+  // PARAMETER(logSDR);
+  // PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
+  // PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
+  // 
+  // // Transform out of log space
+  // // Type SDsurv = exp(logSDsurv);
+  // // Type SDcatch = exp(logSDcatch);
+  // Type SDR = exp(logSDR);
+  // vector<Type> R_0k = exp(logR_0k);
+  // vector<Type> h_k = exp(logh_k);
+  // vector<Type> q_f = exp(logq_f);
+  // array<Type> tildeR_yk(tEnd,nstocks); // recdevs
+  // vector<Type> tildeR_initk(nstocks); // recdevs for init
   // from SEAK
   
   // Fishery selectivity
   // Number of parameters in the chosen selectivity type: 
-  int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
-  // // Preliminary calcs to bring parameters out of log space
-  array<Type> fsh_slx_pars(log_fsh_slx_pars.dim);
-  fsh_slx_pars.setZero();
-  for (int fish_flt = 0; fish_flt < nfleets_fish; fish_flt++) { 
-    for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
-      for (int h = 0; h < fsh_blks.size(); h++) { // loop time blocks
-        for (int s = 0; s < 2; s++) { // loop sexes
-          
-          fsh_slx_pars(fish_flt,n,h,s) = exp(log_fsh_slx_pars(fish_flt,n,h,s));
-        } // end sex
-      } // end blocks
-    } // end alpha, beta
-  } // end fish fleets
+  // int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
+  // Preliminary calcs to bring parameters out of log space
+  // vector<int> a1_dim =log_fsh_slx_pars.dim;
+  // array<Type> fsh_slx_pars(a1_dim);
+  // fsh_slx_pars.setZero();
+  // for (int fish_flt = 0; fish_flt < nfleets_fish; fish_flt++) { 
+  //   for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
+  //     for (int h = 0; h < fsh_blks.size(); h++) { // loop time blocks
+  //       for (int s = 0; s < 2; s++) { // loop sexes
+  //         fsh_slx_pars(fish_flt,n,h,s) = exp(log_fsh_slx_pars(fish_flt,n,h,s));
+  //       } // end sex
+  //     } // end blocks
+  //   } // end alpha, beta
+  // } // end fish fleets
   // // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
   // // "does" the looping over year and age "while" within the y block, then
   // // iterates to the next block. Year is not in a for loop because it is

@@ -20,6 +20,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(tEnd); // number of years modeled
   DATA_VECTOR(years); // number of years modeled
   int nyear = years.size();
+  // int nsex = 2;
   
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
@@ -100,7 +101,7 @@ Type objective_function<Type>::operator() ()
   array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
   array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
   array<Type> F_ym(tEnd,nmgmt_reg); //dodo
-  array<Type> F_ydm(tEnd,2,nspace); //dodo
+  array<Type> F_ydm(tEnd,nfleets_fish,nspace); //dodo
   
   // biology storage
   // array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once

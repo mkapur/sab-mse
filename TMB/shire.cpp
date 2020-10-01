@@ -75,7 +75,7 @@ Type objective_function<Type>::operator() ()
   // // Age Comps
   DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
   DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
-  // DATA_IMATRIX(acomp_flt_type); // 0 for commercial, 1 for survey
+  DATA_IMATRIX(acomp_flt_type); // 0 for commercial, 1 for survey
   // // STORAGE ///
   // // Catches
   // DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet

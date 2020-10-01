@@ -335,17 +335,16 @@ Type objective_function<Type>::operator() ()
   } // end srv
   
   //  END DATA & PARS, BEGIN MODEL //
-  // 
-  // // recdevs placeholder
-  // for(int k=0;k<(nstocks);k++){
-  //   for(int y=0;y<(tEnd-1);y++){
-  //     tildeR_yk(y,k) =0;
-  //   }
-  //   tildeR_yk(tEnd-1,k) =0;
-  // }
-  // for(int k=0;k<(nstocks);k++){
-  //   tildeR_initk(k) =0;
-  // }
+  // recdevs placeholder
+  for(int k=0;k<(nstocks);k++){
+    for(int y=0;y<(tEnd-1);y++){
+      tildeR_yk(y,k) =0;
+    }
+    tildeR_yk(tEnd-1,k) =0;
+  }
+  for(int k=0;k<(nstocks);k++){
+    tildeR_initk(k) =0;
+  }
   // 
   // // Equilibrium Unfished numbers-at-age, subarea (outside of y loop) 
   // // identical to Ninit except no recdevs

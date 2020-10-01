@@ -522,62 +522,71 @@ Type objective_function<Type>::operator() ()
         } // end ages
       } // end nspace
     } // end sex
-    } // temp yend
+
   //   // Catch at beginning of year
   //   // Hybrid F tuning inputs & temp storage
-  //   Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
-  //   int niter = 50;
-  //   
-  //   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
-  //   
-  //   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-  //     if(catch_yf_obs(y,fish_flt+1) != -1){
-  //       catch_yaf_pred.setZero();
-  //       catch_yf_pred.setZero();
-  //       catch_yfi_pred.setZero();
-  //       catch_yaif_pred.setZero();
+    Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
+    array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
+    
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if(catch_yf_obs(y,fish_flt+1) != -1){
+        catch_yaf_pred.setZero();
+        catch_yf_pred.setZero();
+        catch_yfi_pred.setZero();
+        catch_yaif_pred.setZero();
+        
+        Type denom = 0;
+        for(int s=0;s<2;s++){
+          for(int i=0;i<(nspace);i++){
+            switch(selType_fish(fish_flt)){
+            case 0: // age sel
+              for(int a=1;a<(nage);a++){
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
+                  catch_yf_obs(y,fish_flt+1);
+              } // end age
+              break;
+            case 1: // length sel
+              for(int a=1;a<(nage);a++){
+                for(int l=1;l<(LBins);l++){
+                  denom += phi_if_fish(fish_flt,i)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i,s)*
+                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    wtatlen_kab(phi_ik2(i),0)*
+                    pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),1))+
+                    catch_yf_obs(y,fish_flt+1);
+                } // end length
+              } // end age
+              break;
+            } // end selType_fish          
+          } // end space
+        } // end sex
+        F1_yf(y,fish_flt,1) = catch_yf_obs(y, fish_flt)/denom;
+        Type latest_guess = F1_yf(y,fish_flt,1);
+        
+        // k iterations
+        for(int k=2;k<(niter+1);k++){
+          // modify the guess Eq 20
+          Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
+          Type term1 = latest_guess*term0;
+          Type term2 = v1*(1-term0);
+          F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
+          vector<Type>Z_a_TEMP(nage);
+          
+        } // temp k iters
+      } // temp if na
+    } // temp fish fleets
+  } // temp yend
+  
+
+
+
   //       
-  //       Type denom = 0;
-  //       for(int s=0;s<2;s++){
-  //         for(int i=0;i<(nspace);i++){
-  //           switch(selType_fish(fish_flt)){
-  //           case 0: // age sel
-  //             for(int a=1;a<(nage);a++){
-  //               denom += phi_if_fish(fish_flt,i)*
-  //                 fsh_slx_yafs(y,a,fish_flt,s)*
-  //                 N_yais_mid(y,a,i,s)*
-  //                 wtatlen_kab(phi_ik2(i),1)*
-  //                 pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2))+
-  //                 catch_yf_obs(y,fish_flt+1);
-  //             } // end age
-  //             break;
-  //           case 1: // length sel
-  //             for(int a=1;a<(nage);a++){
-  //               for(int l=1;l<(LBins);l++){
-  //                 denom += phi_if_fish(fish_flt,i)*
-  //                   fsh_slx_yafs(y,a,fish_flt,s)*
-  //                   N_yais_mid(y,a,i,s)*
-  //                   LengthAge_alyis_mid(a,l,y,i,s)*
-  //                   wtatlen_kab(phi_ik2(i),1)*
-  //                   pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),2))+
-  //                   catch_yf_obs(y,fish_flt+1);
-  //               } // end length
-  //             } // end age
-  //             break;
-  //           } // end selType_fish
-  //         } // end space
-  //       } // end sex
-  //       F1_yf(y,fish_flt,1) = catch_yf_obs(y, fish_flt)/denom;
-  //       Type latest_guess = F1_yf(y,fish_flt,1);
-  //       
-  //       // k iterations 
-  //       for(int k=2;k<(niter+1);k++){    
-  //         // modify the guess Eq 20
-  //         Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
-  //         Type term1 = latest_guess*term0;
-  //         Type term2 = v1*(1-term0);
-  //         F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
-  //         vector<Type>Z_a_TEMP(nage);
+
   //         
   //         for(int i=0;i<(nspace);i++){
   //           switch(selType_fish(fish_flt)){

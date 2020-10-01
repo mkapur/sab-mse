@@ -10,10 +10,17 @@ library(here)
 library(ggsidekick)
 source(here("R","functions",'load_files_OM.R'))
 
+df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
+# df$phi_ik2; class(df$phi_ik2)
+# df$phi_ki; class(df$phi_ki)
+# df$tau_ki; class(df$tau_ki)
+# df$phi_fm_acomp; class(df$phi_fm_acomp)
+# df$phi_fm_acomp2; class(df$phi_fm_acomp2)
+# df$acomp_flt_type; class(df$acomp_flt_type)
+# df$fsh_blks; class(df$fsh_blks)
+
 compile(here("TMB","shire.cpp"))
 dyn.load(dynlib(here("TMB","shire")))
-
-df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
 obj <- MakeADFun(df,
                  parameters = df$parms,
@@ -22,6 +29,7 @@ obj <- MakeADFun(df,
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
 
+opt <- TMBhelper::fit_tmb(obj)
 
 reps <- obj$report()
 

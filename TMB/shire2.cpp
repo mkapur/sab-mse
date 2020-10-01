@@ -186,22 +186,22 @@ Type objective_function<Type>::operator() ()
                          fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
                     } // end ages
                     break;
-        //           // case 2: // Dome Normal with alpha (mean) and beta (sd)
-        //           //   for (int a= 0; a < nage; a++){
-        //           //     fsh_slx_yafs(i,a,fish_flt,s)  = exp(-(0.5 * (a - fsh_slx_pars(y,2,s))/pow(fsh_slx_pars(y,3,s),2)));
-        //           //   } // end ages
-        //           //   break;
-        //           // case 3: // Dome Gamma with alpha (mean) and beta (sd)
-        //           //   vector<Type>selG(nage);
-        //           //   for (int a= 0; a < nage; a++) {
-        //           //     selG(a)= pow(a, (fsh_slx_pars(y,2,s) - 1)) * exp(-a/fsh_slx_pars(y,3,s));
-        //           //   } // end ages
-        //           //   for (int a= 0;a < nage; a++) {
-        //           //     fsh_slx_yafs(i,a,fish_flt,s) = selG(a) / max(selG);
-        //           //   } // end ages
-        //             break;
-        //           } // end sex
-                } // end switch selShape
+                  case 2: // Dome Normal with alpha (mean) and beta (sd)
+                    for (int a= 0; a < nage; a++){
+                      fsh_slx_yafs(i,a,fish_flt,s)  = exp(-(0.5 * (a -    fsh_slx_pars(fish_flt,0,0,s))/pow(   fsh_slx_pars(fish_flt,1,0,s),2)));
+                    } // end ages
+                    break;
+                  case 3: // Dome Gamma with alpha (mean) and beta (sd)
+                    vector<Type>selG(nage);
+                    for (int a= 0; a < nage; a++) {
+                      selG(a)= pow(a, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-a/   fsh_slx_pars(fish_flt,1,0,s));
+                    } // end ages
+                    for (int a= 0;a < nage; a++) {
+                      fsh_slx_yafs(i,a,fish_flt,s) = selG(a) / max(selG);
+                    } // end ages
+                    break;
+                  } // end switch selShape 
+                } // end sex
                 break; // break age sel
               // case 1: // enter length based sel
         //       //   for (int s = 0; s < 2; s++) {
@@ -221,20 +221,20 @@ Type objective_function<Type>::operator() ()
         //       //       break;
         //       //     case 2: // Dome Normal with alpha (mean) and beta (sd)
         //       //       for (int l = 0; l < LBins; l++){
-        //       //         fsh_slx_yafs(i,l,fish_flt,s)  = exp(-(0.5 * (l - fsh_slx_pars(y,2,s))/pow(fsh_slx_pars(y,3,s),2)));
+        //       //         fsh_slx_yafs(i,l,fish_flt,s)  = exp(-(0.5 * (l -    fsh_slx_pars(fish_flt,0,0,s))/pow(   fsh_slx_pars(fish_flt,1,0,s),2)));
         //       //       } // end len
         //       //       break;
         //       //     case 3: // Dome Gamma with alpha (mean) and beta (sd)
         //       //       vector<Type>selG(LBins);
         //       //       for (int l = 0; l < LBins; l++){
-        //       //         selG(l)= pow(l, (fsh_slx_pars(y,2,s) - 1)) * exp(-l/fsh_slx_pars(y,3,s));
+        //       //         selG(l)= pow(l, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-l/   fsh_slx_pars(fish_flt,1,0,s));
         //       //       } // end len
         //       //       for (int l = 0; l < LBins; l++){
         //       //         fsh_slx_yafs(i,l,fish_flt,s) = selG(l) / max(selG);
         //       //       } // end len
         //       //       break;
         //       //     } // end switch selShape
-                } // end sex
+                // } // end sex for case 1
                 break;
               } // end switch selType
         i++;

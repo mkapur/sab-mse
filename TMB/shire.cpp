@@ -86,20 +86,20 @@ Type objective_function<Type>::operator() ()
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
   array<Type> N_avail_yf(tEnd, nfleets_fish);
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
-  // // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
-  // // Predicted selectivity
+  // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
+  // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+nfleets_acomp,2);  // Survey selectivity-at-age by sex(on natural scale)
-  // 
-  // // F tuning 
-  // int niter = 50;
-  // array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
-  // array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage 
-  // array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
-  // array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
-  // array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
-  // array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
-  // array<Type> F_ym(tEnd,nmgmt_reg); 
+   
+  // F tuning
+  int niter = 50;
+  array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
+  array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
+  array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
+  array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
+  array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
+  array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
+  array<Type> F_ym(tEnd,nmgmt_reg);
   // 
   // // biology storage
   // array<Type> Ninit_ais(nage,nspace,2); // initial numbers at age in subarea, just once
@@ -111,23 +111,23 @@ Type objective_function<Type>::operator() ()
   // array<Type> N_yais_end( tEnd+1, nage, nspace,2); N_yais_end.setZero();
   // array<Type> SSB_yk(tEnd,nstocks);
   // array<Type> SSB_yi(tEnd,nspace);
-  // // Recruits
+  // Recruits
   // vector<Type> R(tEnd);
   // array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
   // array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
-  // // Length at age
+  // Length at age
   // array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
   // array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
   // array<Type> Length_yais_end(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
   // array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
   // array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
   // array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,2); // placeholder for true age-length dist
-  // // age comps
+  // age comps
   // array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
   // array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
   // array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
   // vector<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
-  // 
+
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock

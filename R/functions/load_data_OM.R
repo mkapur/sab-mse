@@ -165,7 +165,7 @@ load_data_OM <- function(nspace = 6,
     colnames(phi_ki) <- spmat$subarea
     
     phi_ki[1,1] <-  phi_ki[2,2:3] <-  phi_ki[3,4:5]<-  phi_ki[4,6]  <- 1
-    phi_ik2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
+    phi_ik2 <- matrix(apply(phi_ki,2, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are subareas
     
     ## phi_ij [eq 6]
     phi_ij <-  matrix(1, ncol = nspace, nrow = nspace) ## 0 indicates  subareas comprise THE SAME stock

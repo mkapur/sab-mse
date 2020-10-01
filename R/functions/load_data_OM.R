@@ -360,8 +360,8 @@ load_data_OM <- function(nspace = 6,
     #* SELEX ----
     fish_selex_yafs = OM_fish_selex_yafs,
     surv_selex_yafs = OM_surv_selex_yafs,
-    fsh_blks = fsh_blks, ## currently not ready to be fleet-specific
-    srv_blks = srv_blks,
+    fsh_blks = t(fsh_blks), ## currently not ready to be fleet-specific
+    srv_blks = t(srv_blks),
     #* ADDL PARS ----
     parms = parms,
     bfuture = bfuture

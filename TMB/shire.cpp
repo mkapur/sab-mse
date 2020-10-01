@@ -65,7 +65,7 @@ Type objective_function<Type>::operator() ()
   // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
   // // each time block. Used for both selectivity and catchability
   DATA_IMATRIX(fsh_blks);        // fishery
-  // DATA_IVECTOR(srv_blks);       // survey
+  DATA_IMATRIX(srv_blks);       // survey
   // 
   // // Survey Biomass
   // DATA_ARRAY(surv_yf_obs);

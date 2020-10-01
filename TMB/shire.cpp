@@ -78,14 +78,14 @@ Type objective_function<Type>::operator() ()
   DATA_IMATRIX(acomp_flt_type); // 0 for commercial, 1 for survey
   // // STORAGE ///
   // // Catches
-  // DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
-  // array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
-  // array<Type> catch_yf_pred(tEnd,nfleets_fish);
-  // array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);
-  // array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);
-  // array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
-  // array<Type> N_avail_yf(tEnd, nfleets_fish);
-  // array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
+  DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
+  array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
+  array<Type> catch_yf_pred(tEnd,nfleets_fish);
+  array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);
+  array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);
+  array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
+  array<Type> N_avail_yf(tEnd, nfleets_fish);
+  array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
   // // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // // Predicted selectivity
   // array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)

@@ -45,16 +45,16 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
   // 
   // // growth //
-  // DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs
-  // DATA_ARRAY(wtatlen_kab); // aL^b values by stock
-  // DATA_ARRAY(Linf_yk); // sex, stock, year specific
-  // DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
-  // DATA_ARRAY(kappa_yk);
-  // DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
-  // DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
-  // DATA_INTEGER(LBins); // maximum length bin in CM
-  // DATA_ARRAY(mla_yais); // for early or late periods, most likely length at age(for selex)
-  // DATA_ARRAY(mat_ak); // maturity at age for stock
+  DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs
+  DATA_ARRAY(wtatlen_kab); // aL^b values by stock
+  DATA_ARRAY(Linf_yk); // sex, stock, year specific
+  DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
+  DATA_ARRAY(kappa_yk);
+  DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
+  DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
+  DATA_INTEGER(LBins); // maximum length bin in CM
+  DATA_ARRAY(mla_yais); // for early or late periods, most likely length at age(for selex)
+  DATA_ARRAY(mat_ak); // maturity at age for stock
   // 
   // // Selectivity
   // DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL

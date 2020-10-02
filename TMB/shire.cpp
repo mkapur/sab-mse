@@ -929,42 +929,42 @@ Type objective_function<Type>::operator() ()
                      age_error(phi_fm_acomp2(acomp_flt),nage-1),
                      age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
       
-      // for(int a=1;a<(nage);a++){
-      //   for(int i=0;i<(nspace);i++){
-      //     for(int s=0;s<2;s++){
-      //       switch(acomp_flt_type(acomp_flt)){
-      //       case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
-            //   comm_acomp_yafs_pred(y,a,acomp_flt,s) +=
-            //     acomp_yaf_temp(y,a,acomp_flt)*
-            //     fsh_slx_yafs(y,a,acomp_flt,s)*
-            //     phi_if_fish(acomp_flt,i)*
-            //     N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
-              // break;
-            // case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
-              // if(selType_surv(acomp_flt+3) == 0){
-              //   surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
-              //     acomp_yaf_temp(y,a,acomp_flt)*
-              //     srv_slx_yafs(y,a,acomp_flt+3,s) *
-              //     phi_if_surv(acomp_flt,i)*
-              //     N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
-            //   } else{
-            //     for(int l=1;l<(LBins);l++){
-            //       surv_acomp_yafs_pred(y,nage-1,acomp_flt) +=
-            //         acomp_yaf_temp(y,a,acomp_flt)*
-            //         srv_slx_yafs(y,l,acomp_flt+4) *
-            //         phi_if_surv(acomp_flt,i)*
-            //         mla_yais(y,a,i,s)*
-            //         N_yais_mid(y,a+1,i)/
-            //           Nsamp_acomp_yf(y,acomp_flt);
-            //     } // end lbins
-              // } // end else
-              // break;
-        //     } // end acomp fleet type
-        //   } // end sex
-        // } // end space
-      // } // end age
+      for(int a=1;a<(nage);a++){
+        for(int i=0;i<(nspace);i++){
+          for(int s=0;s<2;s++){
+            switch(acomp_flt_type(acomp_flt)){
+            case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
+              comm_acomp_yafs_pred(y,a,acomp_flt,s) +=
+                acomp_yaf_temp(y,a,acomp_flt)*
+                fsh_slx_yafs(y,a,acomp_flt,s)*
+                phi_if_fish(acomp_flt,i)*
+                N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+              break;
+              case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
+              if(selType_surv(acomp_flt) == 0){
+                surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
+                  acomp_yaf_temp(y,a,acomp_flt)*
+                  srv_slx_yafs(y,a,acomp_flt+5,s) *
+                  phi_if_acomp(acomp_flt,i)*
+                  N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+                // } else{
+                //   for(int l=1;l<(LBins);l++){
+                //     surv_acomp_yafs_pred(y,nage,acomp_flt) +=
+                //       acomp_yaf_temp(y,a,acomp_flt)*
+                //       srv_slx_yafs(y,l,acomp_flt+5) *
+                //       phi_if_acomp(acomp_flt,i)*
+                //       mla_yais(y,a,i,s)*
+                //       N_yais_mid(y,a,i)/
+                //         Nsamp_acomp_yf(y,acomp_flt);
+                //   } // end lbins
+              } // end else
+              break;
+            } // end acomp fleet type
+          } // end sex
+        } // end space
+      } // end age
     } // end acomp fleets
-
+    
   } // END YEARS; END MODEL RUN
   
   // // LIKELIHOODS //

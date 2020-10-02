@@ -20,7 +20,6 @@ obj <- MakeADFun(df,
                  # map = list("omega_0ij" = NA),
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
-AAA
 opt <- TMBhelper::fit_tmb(obj)
 
 reps <- obj$report()

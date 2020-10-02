@@ -25,6 +25,7 @@ Type objective_function<Type>::operator() ()
   DATA_IMATRIX(phi_if_acomp); // turn on/off subareas for fishery fleets
   DATA_IMATRIX(phi_fm); //  fleets to mgmt areas
   DATA_IMATRIX(phi_fm_acomp); // acomp fleets to mgmt areas
+  DATA_IMATRIX(phi_im); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IMATRIX(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
   DATA_IMATRIX(phi_ik2); // vector stating which subarea (col) belongs to each stock k (value)
   DATA_MATRIX(tau_ki); // downscaling recruits from stocks to sub-areas
@@ -104,10 +105,12 @@ Type objective_function<Type>::operator() ()
   array<Type> N_yais_end( tEnd+1, nage, nspace,2); N_yais_end.setZero();
   array<Type> SSB_yk(tEnd,nstocks);
   array<Type> SSB_yi(tEnd,nspace);
+  array<Type> SSB_ym(tEnd,nmgmt_reg);
   // Recruits
-  vector<Type> R(tEnd);
   array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
   array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
+  array<Type>  R_ym(tEnd,nmgmt_reg); // subarea-level recruitment (downscaled)
+  
   // Length at age
   array<Type> Length_yais_beg(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
   array<Type> Length_yais_mid(tEnd+1,nage,nspace,2); // placeholder for true lengths-at-age
@@ -821,12 +824,19 @@ Type objective_function<Type>::operator() ()
           pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2(i),1))*
           mat_ak(a,phi_ik2(i));
       } // end ages
+  
     } // end space
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
         SSB_yk(y,k) +=  phi_ki(k,i)*SSB_yi(y,i);
       } // end stocks
     } // end space
+    for(int m=0;m<(nmgmt_reg);m++){
+      for(int i=0;i<(nspace);i++){
+        SSB_ym(y,m) += phi_im(i,m)*SSB_yi(y,i);
+      } // end space
+    } //end mgmt
+    
     // R_yi, R_yk
     for(int k=0;k<(nstocks);k++){
       // SSB_yk already has summation
@@ -839,7 +849,11 @@ Type objective_function<Type>::operator() ()
       N_yais_beg(y+1,1,i,0) = 0.5*R_yi(y,i);
       N_yais_beg(y+1,1,i,1) = 0.5*R_yi(y,i);
     } /// end space
-    
+    for(int m=0;m<(nmgmt_reg);m++){
+      for(int i=0;i<(nspace);i++){
+        R_ym(y,m) += phi_im(i,m)*R_yi(y,i);
+      } // end space
+    } //end mgmt
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<2;s++){
@@ -987,18 +1001,18 @@ Type objective_function<Type>::operator() ()
   
   // // LIKELIHOODS //
   // // using namespace density;
-  // Type ans_survey=0.0;
-  // ////Save the observation model estimates
+  Type ans_survey=0.0;
+  // Save the observation model estimates
   // 
-  // // Likelihood: survey biomass
+  // Likelihood: survey biomass
   // for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
   //   for(int y=1;y<tEnd;y++){ // Survey Surveyobs
   //     if(flag_surv_bio(y) == 2){
-  //       ans_survey += -dnorm(log(survey_bio_f_est(y,surv_flt)), 
-  //                            log(survey_bio_f_obs(y,surv_flt)), 
+  //       ans_survey += -dnorm(log(surv_ (y,surv_flt)),
+  //                            log(survey_bio_f_obs(y,surv_flt)),
   //                            SDsurv+survey_err(y), TRUE); // the err also needs to be by flt
   //     } // end survey flag
-  //     
+  // 
   //   } // end y
   // } // end surv_flt
   // 
@@ -1115,30 +1129,39 @@ Type objective_function<Type>::operator() ()
   // 
   // // Likelihood: TOTAL
   // Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
-  
-  // Later Fix F in the likelihood and age comp in catch
-  // Type ans = 0.0;
+  Type ans = 0.0;
   // Report calculations
+  
+  // numbers @ age
+  REPORT(Ninit_ais);
+  REPORT(N_0ais);
+  REPORT(N_yais_beg);
+  REPORT(N_yais_mid);
+  REPORT(N_yais_end);
+  
+  // len at age
+    REPORT(Length_yais_beg);
+    REPORT(Length_yais_mid);
+    REPORT(Length_yais_end);
+    REPORT(LengthAge_alyis_beg);
+    REPORT(LengthAge_alyis_mid);
+    REPORT(LengthAge_alyis_end);
+    
+    // SSB and recruits
+    ADREPORT(SSB_yi);
+    ADREPORT(SSB_ym);
+    ADREPORT(SSB_yk);
+    REPORT(SSB_0i)
+      //   REPORT(R_yk);
+      //   REPORT(R_yi);
+      //   REPORT(R_0k);
   // ADREPORT(logF)
   // ADREPORT(R)
   // ADREPORT(Fyear)
-  // ADREPORT(surveyselc)
-  // ADREPORT(catchselec)
-  // ADREPORT(age_catch)
-  // ADREPORT(age_catch_est)
-  // ADREPORT(age_survey)
-  // ADREPORT(age_survey_est)
-  // ADREPORT(ans_tot)
-  // REPORT(N_0ais)
   // REPORT(SSB_0k)
-  //   REPORT(SSB_yk)
-  //   REPORT(SSB_0i)
-  //   REPORT(SSB_yi)
-  //   REPORT(Ninit_ai)
-  //   REPORT(Fyear)
-  //   REPORT(R_yk)
-  //   REPORT(R_yi)
-  //   REPORT(R_0k)
+
+
+
   //   REPORT(logR_0k)
   //   REPORT(omega_0ij)
   //   REPORT(tildeR_yk)
@@ -1154,14 +1177,12 @@ Type objective_function<Type>::operator() ()
   //   REPORT(PSEL.cols())
   //   REPORT(selectivity_save)
   //   REPORT(surveyselc)
-  //   REPORT(Length_yai_beg)
-  //   REPORT(LengthAge_alyi_beg)
+
   //   REPORT(Length_yai_mid)
   //   REPORT(N_yais_beg)
   //   REPORT(survey_bio_f_est)
   //   REPORT(survey_bio_f_obs)
-  //   REPORT(N_yais_mid)
+
   //   REPORT(Nsamp_acomp_f)
-  Type ans = 1.0;
   return ans;
 }

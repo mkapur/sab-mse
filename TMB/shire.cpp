@@ -577,6 +577,56 @@ Type objective_function<Type>::operator() ()
           F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
           vector<Type>Z_a_TEMP(nage);
           
+          
+          for(int i=0;i<(nspace);i++){
+            switch(selType_fish(fish_flt)){
+            case 0: // age sel
+              for(int a=0;a<(nage-1);a++){
+                // catch_afk_TEMP(a,fish_flt,k).setZero();
+                for(int s=0;s<2;s++){
+                  Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+                } // end sex for z a temp
+                // for(int s=0;s<2;s++){
+                //   catch_afk_TEMP(a,fish_flt,k) +=
+                //     F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+                //     (1-exp(-Z_a_TEMP[a]))*
+                //     phi_if_fish(fish_flt,i)*
+                //     fsh_slx_yafs(y,a,fish_flt,s)*
+                //     N_yais_mid(y,a,i,s)*
+                //     wtatlen_kab(phi_ik2(i),0)*
+                //     pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                // } // end sex
+              } // end age
+              break;
+            case 1: // length sel
+              // for(int a=1;a<(nage);a++){
+              //   for(int s=0;s<2;s++){
+              //     Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+              //   } // end sex for z a temp
+              // } // end age for z a temp
+              // for(int l=0;l<(LBins);l++){
+              //   for(int a=0;a<(nage);a++){
+              //     for(int s=0;s<2;s++){
+              //       catch_afk_TEMP(a,fish_flt,k) +=
+              //         F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+              //         (1-exp(-Z_a_TEMP[a]))*
+              //         phi_if_fish(fish_flt,i)*
+              //         // fsh_slx_yafs(y,l,fish_flt,s)*
+              //         N_yais_mid(y,a,i,s)*
+              //         LengthAge_alyis_mid(a,l,y,i,s)*
+              //         wtatlen_kab(phi_ik2(i),0)*
+              //         pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+              //     } // end sex
+              //   } // end age
+              // } // end lbins
+              break;
+            } // end selType_fish
+          } // end space
+          vector<Type>Adj(niter+1);
+          for(int a=0;a<(nage-1);a++){
+            Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
+          }
+
         } // temp k iters
       } // temp if na
     } // temp fish fleets
@@ -587,55 +637,10 @@ Type objective_function<Type>::operator() ()
 
   //       
 
-  //         
-  //         for(int i=0;i<(nspace);i++){
-  //           switch(selType_fish(fish_flt)){
-  //           case 0: // age sel
-  //             for(int a=0;a<(nage);a++){
-  //               // catch_afk_TEMP(a,fish_flt,k).setZero();
-  //               for(int s=0;s<2;s++){
-  //                 Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
-  //               } // end sex for z a temp
-  //               for(int s=0;s<2;s++){
-  //                 catch_afk_TEMP(a,fish_flt,k) +=
-  //                   F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
-  //                   (1-exp(-Z_a_TEMP[a]))*
-  //                   phi_if_fish(fish_flt,i)*
-  //                   fsh_slx_yafs(y,a,fish_flt,s)*
-  //                   N_yais_mid(y,a,i,s)*
-  //                   wtatlen_kab(phi_ik2(i),1)*
-  //                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2));
-  //               } // end sex
-  //             } // end age
-  //             break;
-  //           case 1: // length sel
-  //             for(int a=1;a<(nage);a++){
-  //               for(int s=0;s<2;s++){
-  //                 Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
-  //               } // end sex for z a temp
-  //             } // end age
-  //             for(int l=0;l<(LBins);l++){
-  //               for(int a=0;a<(nage);a++){
-  //                 for(int s=0;s<2;s++){
-  //                   catch_afk_TEMP(a,fish_flt,k) +=
-  //                     F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
-  //                     (1-exp(-Z_a_TEMP[a]))*
-  //                     phi_if_fish(fish_flt,i)*
-  //                     fsh_slx_yafs(y,l,fish_flt,s)* 
-  //                     N_yais_mid(y,a,i,s)*
-  //                     LengthAge_alyis_mid(a,l,y,i,s)*
-  //                     wtatlen_kab(phi_ik2(i),1)*
-  //                     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),2));
-  //                 } // end sex
-  //               } // end age
-  //             } // end lbins
-  //             break;
-  //           } // end selType_fish
-  //         } // end space
-  //         vector<Type>Adj(niter);
-  //         for(int a=0;a<(nage);a++){
-  //           Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
-  //         }
+ 
+
+
+
   //         // Get new Z given ADJ - need to add discard here
   //         vector<Type>Z_a_TEMP2(nage);
   //         Z_a_TEMP2.setZero();

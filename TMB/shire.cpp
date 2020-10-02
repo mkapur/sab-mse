@@ -857,23 +857,23 @@ Type objective_function<Type>::operator() ()
                       N_yais_mid(y,a,i,s);
                   } // end ages
                   break;
-      //           case 1:
-      //             for(int l=0;l<(LBins);l++){
-      //               for(int a=0;a<(nage);a++){
-      //                 survey_yf_pred(y,sur_flt) +=  q_f(sur_flt)*
-      //                   srv_slx_yafs(y,l,sur_flt,s)*
-      //                   phi_if_surv(sur_flt,i)*
-      //                   N_yais_mid(y,a,i,s)*
-      //                   LengthAge_alyis_mid(a,l,y,i,s)*
-      //                   wtatlen_kab(phi_ik2(i),0)*
-      //                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1)); 
-      //                 
-      //                 Nsamp_acomp_yf(y,sur_flt) +=  srv_slx_yafs(y,l,sur_flt,s)*
-      //                   phi_if_surv(sur_flt,i)*
-      //                   N_yais_mid(y,a,i,s); 
-      //               }
-      //             }
-      //             break;
+                case 1:
+                  for(int l=0;l<(LBins);l++){
+                    for(int a=0;a<(nage);a++){
+                      survey_yf_pred(y,sur_flt) +=  q_f(sur_flt)*
+                        srv_slx_yafs(y,l,sur_flt,s)*
+                        phi_if_surv(sur_flt,i)*
+                        N_yais_mid(y,a,i,s)*
+                        LengthAge_alyis_mid(a,l,y,i,s)*
+                        wtatlen_kab(phi_ik2(i),0)*
+                        pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+
+                      Nsamp_acomp_yf(y,sur_flt) +=  srv_slx_yafs(y,l,sur_flt,s)*
+                        phi_if_surv(sur_flt,i)*
+                        N_yais_mid(y,a,i,s);
+                    }
+                  }
+                  break;
                 } // end selType_fish
               } // end check that it's not an NA year
             } // end survey fleets

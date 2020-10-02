@@ -80,18 +80,14 @@ load_data_OM <- function(nspace = 6,
   fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
   fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
   
-  selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  selShape_surv <- c(rep(0,10)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  
-  selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
-  ## note that the first two acomp fleets are already inside seltype fish
-  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][3:8]))-1
-  
+
   
   nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
   nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
   nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
   nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
+
+  
 
   # Catch ----
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
@@ -109,12 +105,13 @@ load_data_OM <- function(nspace = 6,
   srv_blks <- matrix(0, nrow = tEnd, ncol = nfleets_surv+(nfleets_acomp-2))
   fsh_blks <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
   
-  selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-2))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  
   selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
   ## note that the first two acomp fleets are already inside seltype fish
-  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][3:8]))-1
+  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(3,5,6)]))-1
+  selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-5))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  
+
   
   if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
@@ -128,10 +125,11 @@ load_data_OM <- function(nspace = 6,
   load(here("input","input_data",'OM_lencomps_female.rdata'))
   load(here("input","input_data",'OM_lencomps_male.rdata'))
   
-  ## Age comps. Note that AK is not sex-specific, and therefore duplicatd
-  load(here("input","input_data",'OM_agecomps_female.rdata'))
-  load(here("input","input_data",'OM_agecomps_male.rdata'))
-
+  ## Age comps. Note that AK is not sex-specific
+  ## need to make these -1 for NA years
+  # load(here("input","input_data",'OM_agecomps_female.rdata'))
+  # load(here("input","input_data",'OM_agecomps_male.rdata'))
+  load(here("input","input_data",'OM_agecomps_yafs.rdata'))
   ## Aging Error ----
   ## M X age
   load(here("input","input_data",'ageerr_ExpAge.rdata'))
@@ -158,6 +156,16 @@ load_data_OM <- function(nspace = 6,
     colnames(phi_if_acomp) <- spmat$subarea
     phi_if_acomp[1,1] <-  phi_if_acomp[2:3,2] <-  
       phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,5:6] <- 1
+    
+    phi_ff_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 2) ## indicates the position of acomp fleet
+    rownames(phi_ff_acomp) <- fltnames_acomp
+    colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos')
+    phi_ff_acomp[,1] <- c(0,1,-1,5,-1,-1,7,8)
+    phi_ff_acomp[,2] <- c(-1,-1,5,-1,6,7,-1,-1)
+    
+    ## in the fish or selex surv, to be selected depending on the acomp flttype swtich
+    
+    
     ## phi_fish
     phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
     rownames(phi_if_fish) <- names(catch)[2:ncol(catch)]
@@ -200,7 +208,7 @@ load_data_OM <- function(nspace = 6,
     phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are survey fleets
     
     acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
-    acomp_flt_type[3:8] <- 1
+    acomp_flt_type[c(3,5,6)] <- 1
     colnames(acomp_flt_type) <- fltnames_acomp
 
     
@@ -340,6 +348,7 @@ load_data_OM <- function(nspace = 6,
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
     phi_if_acomp = phi_if_acomp,
+    phi_ff_acomp=phi_ff_acomp,
     phi_ki = phi_ki,
     phi_im = phi_im,
     phi_ik2 = t(phi_ik2),
@@ -365,6 +374,7 @@ load_data_OM <- function(nspace = 6,
     mla_yais=mla_yais,
     
     #* DATA ----
+    acomp_yafs_obs = OM_agecomps_yafs,
     surv_yf_obs = as.matrix(round(survey)), # Make sure the survey has the same length as the catch time series
     surv_yf_err = as.matrix(survey_err), 
     age_error = as.matrix(ageerr_ExpAge[,2:ncol(ageerr_ExpAge)]),

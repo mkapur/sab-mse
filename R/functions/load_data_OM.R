@@ -104,17 +104,17 @@ load_data_OM <- function(nspace = 6,
   load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
   
   ## time blocks by fleet
-  srv_blks <- matrix(0, nrow = tEnd, ncol = nfleets_surv+nfleets_acomp)
-  fsh_blks<- matrix(0, nrow = tEnd, ncol = nfleets_fish)
+  srv_blks <- matrix(0, nrow = tEnd, ncol = nfleets_surv+(nfleets_acomp-2))
+  fsh_blks <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
   
   selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  selShape_surv <- c(rep(0,nfleets_surv+5)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-2))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   
   selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
   ## note that the first two acomp fleets are already inside seltype fish
   selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][3:8]))-1
   
-  
+  if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
   survey[is.na(survey)] <- -1 ## flag for numeric TMB checks

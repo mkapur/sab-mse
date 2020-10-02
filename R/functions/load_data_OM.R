@@ -108,7 +108,7 @@ load_data_OM <- function(nspace = 6,
   fsh_blks<- matrix(0, nrow = tEnd, ncol = nfleets_fish)
   
   selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  selShape_surv <- c(rep(0,10)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,nfleets_surv+5)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   
   selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
   ## note that the first two acomp fleets are already inside seltype fish

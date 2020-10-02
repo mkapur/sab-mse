@@ -83,7 +83,7 @@ Type objective_function<Type>::operator() ()
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
-  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+nfleets_acomp,2);  //
+  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+5,2);  // five of the acomp fleets are surveys; the other two are fsh
   // F tuning
   int niter = 50;
   array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
@@ -246,7 +246,7 @@ Type objective_function<Type>::operator() ()
   vector<int> a2_dim =log_srv_slx_pars.dim;
   array<Type> srv_slx_pars(a2_dim);
   srv_slx_pars.setZero();
-  for (int srv_flt = 0; srv_flt < nfleets_surv; srv_flt++) {
+  for (int srv_flt = 0; srv_flt < nfleets_surv+5; srv_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
       // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
       for (int s = 0; s < 2; s++) { // loop sexes
@@ -255,8 +255,8 @@ Type objective_function<Type>::operator() ()
       // } // end blocks
     } // end alpha, beta
   } // end srv fleets
-  
-  for(int srv_flt =0;srv_flt<(nfleets_surv);srv_flt++){ // loop fleets
+  // doing five of these to account for five surveys w acomp
+  for(int srv_flt =0;srv_flt<(nfleets_surv+5);srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0 
     for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
@@ -897,16 +897,16 @@ Type objective_function<Type>::operator() ()
         } // end nsamp age loop
       } // end nspace
     } // end if first two fish fleets, which have agecomps
-    // for positions 7 onwards in nsamp acomp, we need nsamp from these surveys
-    // meaning acomp fleet 2 corresponds to nasmp acomp position 7
+    // slx is offset by 5-2, so acomp flt position 2 is at pos 5
+    // nsamp offset by 5 so 2 is 7
     // finally note that the first two elements in the phi_acomp obj are the fixed gear Ak fleets
     // sp by starting the acomp index at 2 we are aligned with that struct
     for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
       for(int i=0;i< nspace;i++){
         for(int a=0;a<(nage-1);a++){
           for(int s=0;s<2;s++){
-            Nsamp_acomp_yf(y,acomp_flt+5) +=
-              srv_slx_yafs(y,a,acomp_flt+5,s)*
+            Nsamp_acomp_yf(y,acomp_flt+7) +=
+              srv_slx_yafs(y,a,acomp_flt+3,s)*
               phi_if_acomp(acomp_flt,i)*
               N_yais_mid(y,a,i,s);
           } // end nsamp sex loop
@@ -916,54 +916,54 @@ Type objective_function<Type>::operator() ()
     
     
     // predicted age comps, given error
-    for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-      // age 0
-      acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
-      // Loop over ages
-      for(int a=1;a<(nage-1);a++){
-        acomp_yaf_temp(y,a,acomp_flt) =
-          pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
-          pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
-      } // end ages
-      acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
-                     age_error(phi_fm_acomp2(acomp_flt),nage-1),
-                     age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
-      
-      for(int a=1;a<(nage);a++){
-        for(int i=0;i<(nspace);i++){
-          for(int s=0;s<2;s++){
-            switch(acomp_flt_type(acomp_flt)){
-            case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
-              comm_acomp_yafs_pred(y,a,acomp_flt,s) +=
-                acomp_yaf_temp(y,a,acomp_flt)*
-                fsh_slx_yafs(y,a,acomp_flt,s)*
-                phi_if_fish(acomp_flt,i)*
-                N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
-              break;
-            case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
-              if(selType_surv(acomp_flt) == 0){
-                surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
-                  acomp_yaf_temp(y,a,acomp_flt)*
-                  srv_slx_yafs(y,a,acomp_flt+5,s) *
-                  phi_if_acomp(acomp_flt,i)*
-                  N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
-              } else{
-                for(int l=1;l<(LBins);l++){
-                  surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
-                    acomp_yaf_temp(y,a,acomp_flt)*
-                    srv_slx_yafs(y,l,acomp_flt+5,s)*
-                    phi_if_acomp(acomp_flt,i)*
-                    // mla_yais(y,a,i,s)*
-                    N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
-                } // end lbins
-              } // end else
-              break;
-            } // end acomp fleet type
-          } // end sex
-        } // end space
-      } // end age
-    } // end acomp fleets
-    
+    // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+    //   // age 0
+    //   acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
+    //   // Loop over ages
+    //   for(int a=1;a<(nage-1);a++){
+    //     acomp_yaf_temp(y,a,acomp_flt) =
+    //       pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
+    //       pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
+    //   } // end ages
+    //   acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
+    //                  age_error(phi_fm_acomp2(acomp_flt),nage-1),
+    //                  age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
+    //   
+    //   for(int a=1;a<(nage);a++){
+    //     for(int i=0;i<(nspace);i++){
+    //       for(int s=0;s<2;s++){
+    //         switch(acomp_flt_type(acomp_flt)){
+    //         case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
+    //           comm_acomp_yafs_pred(y,a,acomp_flt,s) +=
+    //             acomp_yaf_temp(y,a,acomp_flt)*
+    //             fsh_slx_yafs(y,a,acomp_flt,s)*
+    //             phi_if_fish(acomp_flt,i)*
+    //             N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+    //           break;
+    //         case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
+              // if(selType_surv(acomp_flt) == 0){
+                // surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
+                //   acomp_yaf_temp(y,a,acomp_flt)*
+                //   srv_slx_yafs(y,a,acomp_flt+5,s) *
+                //   phi_if_acomp(acomp_flt,i)*
+                //   N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+              // } else{
+                // for(int l=1;l<(LBins);l++){
+                  // surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
+                  //   acomp_yaf_temp(y,a,acomp_flt)*
+                  //   srv_slx_yafs(y,l,acomp_flt+5,s)*
+                  //   phi_if_acomp(acomp_flt,i)*
+                  //   // LengthAge_alyis_mid(a,l,y,i,s)*
+                  //   // mla_yais(y,a,i,s)*
+                  //   N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+    //             } // end lbins
+    //           } // end else
+    //           break;
+    //         } // end acomp fleet type
+    //       } // end sex
+    //     } // end space
+    //   } // end age
+    // } // end acomp fleets
   } // END YEARS; END MODEL RUN
   
   // // LIKELIHOODS //

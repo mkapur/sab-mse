@@ -12,7 +12,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(tEnd); // number of years modeled
   DATA_VECTOR(years); // number of years modeled
   int nyear = years.size();
-  // int nsex = 2;
+  int nsex = 2;
   
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
@@ -34,7 +34,7 @@ Type objective_function<Type>::operator() ()
   
   // // DEMOGRAPHY // 
   DATA_VECTOR(mat_age); // natural mortality at age
-  
+
   // // movement //
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
@@ -64,8 +64,8 @@ Type objective_function<Type>::operator() ()
   // 
   // // Survey Biomass
   DATA_ARRAY(surv_yf_obs);
-  // DATA_VECTOR(survey_err);
-  array<Type> survey_yf_pred(nyear, nfleets_surv);
+  DATA_ARRAY(surv_yf_err);
+  array<Type> surv_yf_pred(nyear, nfleets_surv);
   
   // // Age Comps
   DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
@@ -83,7 +83,7 @@ Type objective_function<Type>::operator() ()
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // Predicted selectivity
-  array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
+  array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,nsex);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-2),2);  // five of the acomp fleets are surveys; the other two are fsh
   // F tuning
   int niter = 50;
@@ -862,7 +862,7 @@ Type objective_function<Type>::operator() ()
             switch(selType_surv(sur_flt)){
             case 0: // age sel
               for(int a=0;a<nage;a++){
-                survey_yf_pred(y,sur_flt) += q_f(sur_flt)*
+                surv_yf_pred(y,sur_flt) += q_f(sur_flt)*
                   srv_slx_yafs(y,a,sur_flt,s)*
                   phi_if_surv(sur_flt,i)*
                   N_yais_mid(y,a,i,s)*
@@ -877,7 +877,7 @@ Type objective_function<Type>::operator() ()
             case 1:
               for(int l=0;l<(LBins);l++){
                 for(int a=0;a<(nage);a++){
-                  survey_yf_pred(y,sur_flt) +=  q_f(sur_flt)*
+                  surv_yf_pred(y,sur_flt) +=  q_f(sur_flt)*
                     srv_slx_yafs(y,l,sur_flt,s)*
                     phi_if_surv(sur_flt,i)*
                     N_yais_mid(y,a,i,s)*
@@ -1005,16 +1005,16 @@ Type objective_function<Type>::operator() ()
   // Save the observation model estimates
   // 
   // Likelihood: survey biomass
-  // for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-  //   for(int y=1;y<tEnd;y++){ // Survey Surveyobs
-  //     if(flag_surv_bio(y) == 2){
-  //       ans_survey += -dnorm(log(surv_ (y,surv_flt)),
-  //                            log(survey_bio_f_obs(y,surv_flt)),
-  //                            SDsurv+survey_err(y), TRUE); // the err also needs to be by flt
-  //     } // end survey flag
-  // 
-  //   } // end y
-  // } // end surv_flt
+  for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
+    for(int y=1;y<tEnd;y++){ // Survey Surveyobs
+      if(surv_yf_obs(surv_flt) != -1){
+        ans_survey += -dnorm(log(surv_yf_pred(y,surv_flt)),
+                             log(surv_yf_obs(y,surv_flt)),
+                             surv_yf_err(y,surv_flt), TRUE); // the err also needs to be by flt
+      } // end survey for neg 1
+
+    } // end y
+  } // end surv_flt
   // 
   // 
   // // Likelihood: catches
@@ -1140,49 +1140,47 @@ Type objective_function<Type>::operator() ()
   REPORT(N_yais_end);
   
   // len at age
-    REPORT(Length_yais_beg);
-    REPORT(Length_yais_mid);
-    REPORT(Length_yais_end);
-    REPORT(LengthAge_alyis_beg);
-    REPORT(LengthAge_alyis_mid);
-    REPORT(LengthAge_alyis_end);
+  REPORT(Length_yais_beg);
+  REPORT(Length_yais_mid);
+  REPORT(Length_yais_end);
+  REPORT(LengthAge_alyis_beg);
+  REPORT(LengthAge_alyis_mid);
+  REPORT(LengthAge_alyis_end);
+  
+  // SSB and recruits
+  ADREPORT(SSB_yi);
+  ADREPORT(SSB_ym);
+  ADREPORT(SSB_yk);
+  REPORT(SSB_0i);
+  REPORT(SSB_0k);
+  REPORT(R_yi);
+  REPORT(R_ym);
+  REPORT(R_yk);
+  REPORT(R_0k);
+  
+  // catches
+  REPORT(catch_yaf_pred);  
+  REPORT(catch_yf_pred);  
+  REPORT(catch_yfi_pred);  
+  REPORT(catch_yaif_pred);  
+
+  // survey biomass
+  REPORT(surv_yf_pred);
+  
+  // age comps
+  REPORT(comm_acomp_yafs_pred);
+  REPORT(surv_acomp_yafs_pred);
+  REPORT(Nsamp_acomp_yf);
+  
+  // REPORT PARS
+  ADREPORT(logR_0k);
+  ADREPORT(omega_0ij);
+  ADREPORT(logh_k);
+  ADREPORT(logq_f);
+  REPORT(tildeR_yk);
+  REPORT(tildeR_initk)
     
-    // SSB and recruits
-    ADREPORT(SSB_yi);
-    ADREPORT(SSB_ym);
-    ADREPORT(SSB_yk);
-    REPORT(SSB_0i)
-      //   REPORT(R_yk);
-      //   REPORT(R_yi);
-      //   REPORT(R_0k);
   // ADREPORT(logF)
-  // ADREPORT(R)
-  // ADREPORT(Fyear)
-  // REPORT(SSB_0k)
 
-
-
-  //   REPORT(logR_0k)
-  //   REPORT(omega_0ij)
-  //   REPORT(tildeR_yk)
-  //   REPORT(tildeR_initk)
-  //   
-  //   REPORT(Catch_yaf_est)
-  //   REPORT(CatchN_yaf)
-  //   REPORT(ans_tot)
-  //   REPORT(Zsave)
-  //   REPORT(survey_acomp_f_est)
-  //   REPORT(catch_acomp_f_est)
-  //   REPORT(flag_sel)
-  //   REPORT(PSEL.cols())
-  //   REPORT(selectivity_save)
-  //   REPORT(surveyselc)
-
-  //   REPORT(Length_yai_mid)
-  //   REPORT(N_yais_beg)
-  //   REPORT(survey_bio_f_est)
-  //   REPORT(survey_bio_f_obs)
-
-  //   REPORT(Nsamp_acomp_f)
   return ans;
 }

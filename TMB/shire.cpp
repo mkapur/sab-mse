@@ -83,7 +83,7 @@ Type objective_function<Type>::operator() ()
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,2);           // Fishery selectivity-at-age by sex (on natural scale)
-  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+5,2);  // five of the acomp fleets are surveys; the other two are fsh
+  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-2),2);  // five of the acomp fleets are surveys; the other two are fsh
   // F tuning
   int niter = 50;
   array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
@@ -243,10 +243,10 @@ Type objective_function<Type>::operator() ()
     } // end y blocks
   } // end fish_flt
   
-  vector<int> a2_dim =log_srv_slx_pars.dim;
+  vector<int> a2_dim = log_srv_slx_pars.dim;
   array<Type> srv_slx_pars(a2_dim);
   srv_slx_pars.setZero();
-  for (int srv_flt = 0; srv_flt < nfleets_surv+5; srv_flt++) {
+  for (int srv_flt = 0; srv_flt < nfleets_surv+(nfleets_acomp-2); srv_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
       // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
       for (int s = 0; s < 2; s++) { // loop sexes
@@ -256,7 +256,7 @@ Type objective_function<Type>::operator() ()
     } // end alpha, beta
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
-  for(int srv_flt =0;srv_flt<(nfleets_surv+5);srv_flt++){ // loop fleets
+  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-2));srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0 
     for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
@@ -901,18 +901,18 @@ Type objective_function<Type>::operator() ()
     // nsamp offset by 5 so 2 is 7
     // finally note that the first two elements in the phi_acomp obj are the fixed gear Ak fleets
     // sp by starting the acomp index at 2 we are aligned with that struct
-    for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
-      for(int i=0;i< nspace;i++){
-        for(int a=0;a<(nage-1);a++){
-          for(int s=0;s<2;s++){
-            Nsamp_acomp_yf(y,acomp_flt+7) +=
-              srv_slx_yafs(y,a,acomp_flt+3,s)*
-              phi_if_acomp(acomp_flt,i)*
-              N_yais_mid(y,a,i,s);
-          } // end nsamp sex loop
-        } // end nsamp age loop
-      } // end nspace
-    } // end 2:nfleets_acomp
+    // for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
+    //   for(int i=0;i< nspace;i++){
+    //     for(int a=0;a<(nage-1);a++){
+    //       for(int s=0;s<2;s++){
+    //         Nsamp_acomp_yf(y,acomp_flt+7) +=
+    //           srv_slx_yafs(y,a,acomp_flt+3,s)*
+    //           phi_if_acomp(acomp_flt,i)*
+    //           N_yais_mid(y,a,i,s);
+    //       } // end nsamp sex loop
+    //     } // end nsamp age loop
+    //   } // end nspace
+    // } // end 2:nfleets_acomp
     
     
     // predicted age comps, given error

@@ -17,7 +17,6 @@ dyn.load(dynlib(here("TMB","shire")))
 
 obj <- MakeADFun(df,
                  parameters = df$parms,
-                 # parameters = list(logSDR = log(1.4), logh_k = rep(log(0.6,4))),
                  # map = list("omega_0ij" = NA),
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder

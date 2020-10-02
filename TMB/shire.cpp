@@ -735,6 +735,8 @@ Type objective_function<Type>::operator() ()
             } // end age
             break;
             
+            // for positions 5 and 6 within nsamp acomp, need # fish for ak fix w and e (fish flts 0 and 1)
+            
           case 1: // length sel
             for(int a=0;a<(nage);a++){
               Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;

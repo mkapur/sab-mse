@@ -773,6 +773,24 @@ Type objective_function<Type>::operator() ()
                 } // end space
             } // end -1 NA trap
           }// end nfleets_fish
+    
+      // N_yais_end ----
+      //fill EOY and beginning of next year using Ztuned
+      //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
+      //of the mortality and the tuned F extraction.
+      for(int s=0;s<2;s++){
+        for(int i=0;i<(nspace);i++){
+          for(int a=1;a<(nage-1);a++){
+            N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
+          }
+          for(int a=2;a<(nage-1);a++){
+            N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+          }
+          N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+        } // end subareas i
+      } // end sexes
+    
+    
   } // temp yend
   
   //       
@@ -785,21 +803,7 @@ Type objective_function<Type>::operator() ()
   //   
   //   
   //   
-  //   // N_yais_end ----
-  //   //fill EOY and beginning of next year using Ztuned
-  //   //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
-  //   //of the mortality and the tuned F extraction.
-  //   for(int s=0;s<2;s++){
-  //     for(int i=0;i<(nspace);i++){
-  //       for(int a=1;a<(nage);a++){
-  //         N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
-  //       }
-  //       for(int a=2;a<(nage-1);a++){
-  //         N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
-  //       }
-  //       N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
-  //     } // end subareas i
-  //   } // end sexes
+ 
   //   
   //   //reweight length-at-age given movement
   //   for(int s=0;s<2;s++){

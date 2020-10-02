@@ -2,6 +2,7 @@
 ## This does NOT have functions for ploting OM/EM outputs, just raw input data and maps
 ## Kapur M 
 library(sf)
+library(here)
 library(tibble)
 require(ggplot2)
 require(dplyr)
@@ -39,12 +40,9 @@ currents.col <- c("#000000", "#009E73", "#0072B2","#e79f00","#e79f00")
 x1 <- rep(180, 4); x1end <- rep(190, 4)
 y1 <- rev(seq(30,35,length.out = 4))
 
-ggplot(data = regions) +
+stocklab = ggplot(data = regions) +
   # kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
   theme_classic(base_size = 14) +
-  
-
-   
   ## mgmt fills
   # geom_sf(data = clips[[1]], fill = mgmtPal[1], alpha = 0.9, color = NA) +
   # geom_sf(data =  clips[[2]], fill = mgmtPal[1], alpha = 0.9, color = NA) +
@@ -62,20 +60,20 @@ ggplot(data = regions) +
           # fill = NA, lwd = 1.1,  color = 'white', linetype = 'dashed') +
   
   ## subarea fills
-  geom_sf(data = clips[[1]], fill = subareaPal[1], alpha = 0.9, color = NA) +
-  geom_sf(data =  clips[[2]], fill = subareaPal[2], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[3]], fill = subareaPal[3], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[4]], fill = subareaPal[4], alpha = 0.9, color = NA ) +
-  geom_sf(data = clips[[5]], fill = subareaPal[5], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[6]], fill = subareaPal[6], alpha = 0.9,color = NA) +
+  # geom_sf(data = clips[[1]], fill = subareaPal[1], alpha = 0.9, color = NA) +
+  # geom_sf(data =  clips[[2]], fill = subareaPal[2], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[3]], fill = subareaPal[3], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[4]], fill = subareaPal[4], alpha = 0.9, color = NA ) +
+  # geom_sf(data = clips[[5]], fill = subareaPal[5], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[6]], fill = subareaPal[6], alpha = 0.9,color = NA) +
   
   ## stock fills
-  # geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
-  # geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
-  # geom_sf(data = clips[[3]], fill = demPal[2], alpha = 0.9, color = NA) +
-  # geom_sf(data = clips[[4]], fill = demPal[3], alpha = 0.9, color = NA ) +
-  # geom_sf(data = clips[[5]], fill = demPal[3], alpha = 0.9, color = NA) +
-  # geom_sf(data = clips[[6]], fill = demPal[4], alpha = 0.9,color = NA) +
+  geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
+  geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[3]], fill = demPal[2], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[4]], fill = demPal[3], alpha = 0.9, color = NA ) +
+  geom_sf(data = clips[[5]], fill = demPal[3], alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[6]], fill = demPal[4], alpha = 0.9,color = NA) +
   
 
   ## EEZ
@@ -100,26 +98,29 @@ ggplot(data = regions) +
   # geom_label(data = data.frame(), aes( x = c(238, 233, 232, 225, 220, 200),
   #   y = c(33, 40, 49, 52, 57, 53)),
   #   label = list(c(6:1),
-  #                c(paste0('Subarea ',c("C1", "C2", "B1","B2","A2", "A1"))))[[2]] ,
-  #   fill = 'grey88',
+  #                c(paste0('Subarea ',c("C1", "C2", "B1","B2","A2", "A1"))),
+  #              c("C1", "C2", "B1","B2","A2", "A1"))[[2]] ,
+  #   fill = rev(subareaPal),
   #   color = 'black') +
   
   ## OM Stock labels
-  # geom_label(data = data.frame(), aes( x = c(238, 233, 223,  200),
-  #                                      y = c(33, 48,  54, 53)),
-  #            label = list(c(4:1),c(paste0('Stock ',c("R1", "R2", "R3","R4"))))[[2]] ,
-  #            fill = 'grey88',
-  #            color = 'black') +
+  geom_label(data = data.frame(), aes( x = c(238, 233, 223,  200),
+                                       y = c(33, 48,  54, 53)),
+             label = list(c(4:1),
+                          c(paste0('Stock ',c("R1", "R2", "R3","R4"))),
+                        c("R1", "R2", "R3","R4"))[[2]] ,
+             fill = rev(demPal),
+             color = 'black') +
   coord_sf(xlim = c(165, 245), ylim = c(26, 65)) +
   labs(x ="",y="")
 
 # Save
-ggsave(here::here("figs", "map-EEZ_strata_nolab.png"), 
-       width = 10, height = 8)
+ggsave(here::here("figs", "map-EEZ_strata_stock.png"), 
+       width = 22, height = 10)
 
-ggsave(subalab,  
-       file = here::here("figs", "map-EEZ_stocklab2.png"),
-       width = 10, height = 8)
+ggsave(subalab | stocklab,  
+       file = here::here("figs", "map-EEZ_strata_stock.png"),
+       width = 22, height = 10)
 
 
 

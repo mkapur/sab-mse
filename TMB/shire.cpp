@@ -840,7 +840,7 @@ Type objective_function<Type>::operator() ()
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<2;s++){
-        for(int sur_flt =0;sur_flt<(nfleets_surv+nfleets_acomp);sur_flt++){
+        for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
           if(surv_yf_obs(y,sur_flt) != -1){
             switch(selType_surv(sur_flt)){
             case 0: // age sel
@@ -895,18 +895,18 @@ Type objective_function<Type>::operator() ()
     
     
     // predicted age comps, given error
-    for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-      // age 0
-      acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
-      // Loop over ages
-      for(int a=1;a<(nage-1);a++){
-        acomp_yaf_temp(y,a,acomp_flt) =
-          pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
-          pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
-      } // end ages
-      acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
-                     age_error(phi_fm_acomp2(acomp_flt),nage-1),
-                     age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
+    // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+    //   // age 0
+    //   acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
+    //   // Loop over ages
+    //   for(int a=1;a<(nage-1);a++){
+    //     acomp_yaf_temp(y,a,acomp_flt) =
+    //       pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
+    //       pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
+    //   } // end ages
+    //   acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
+    //                  age_error(phi_fm_acomp2(acomp_flt),nage-1),
+    //                  age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
       
       // for(int a=1;a<(nage);a++){
       //   for(int i=0;i<(nspace);i++){
@@ -942,7 +942,7 @@ Type objective_function<Type>::operator() ()
         //   } // end sex
         // } // end space
       // } // end age
-    } // end acomp fleets
+    // } // end acomp fleets
     
     //   
     //   // estimate age comps in catches

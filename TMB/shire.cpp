@@ -901,18 +901,18 @@ Type objective_function<Type>::operator() ()
     // meaning acomp fleet 2 corresponds to nasmp acomp position 7
     // finally note that the first two elements in the phi_acomp obj are the fixed gear Ak fleets
     // sp by starting the acomp index at 2 we are aligned with that struct
-    // for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
-    // for(int i=0;i< nspace;i++){
-    //   for(int a=0;a<(nage-1);a++){
-    //     for(int s=0;s<2;s++){
-    //       Nsamp_acomp_yf(y,acomp_flt+5) +=
-    //         srv_slx_yafs(y,a,acomp_flt+5,s)*
-    //         phi_if_acomp(acomp_flt,i)*
-    //         N_yais_mid(y,a,i,s);
-    //     } // end nsamp sex loop
-    //   } // end nsamp age loop
-  // } // end nspace
-    // } // end if first two fish fleets, which have agecomps
+    for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
+      for(int i=0;i< nspace;i++){
+        for(int a=0;a<(nage-1);a++){
+          for(int s=0;s<2;s++){
+            Nsamp_acomp_yf(y,acomp_flt+5) +=
+              srv_slx_yafs(y,a,acomp_flt+5,s)*
+              phi_if_acomp(acomp_flt,i)*
+              N_yais_mid(y,a,i,s);
+          } // end nsamp sex loop
+        } // end nsamp age loop
+      } // end nspace
+    } // end 2:nfleets_acomp
     
     
     // predicted age comps, given error

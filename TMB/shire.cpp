@@ -735,18 +735,6 @@ Type objective_function<Type>::operator() ()
             } // end age
             break;
             
-            // for positions 5 and 6 within nsamp acomp, need # fish for ak fix w and e (fish flts 0 and 1)
-            if(fish_flt == 0   | fish_flt == 1){
-              for(int a=0;a<(nage-1);a++){
-                for(int s=0;s<2;s++){
-                  Nsamp_acomp_yf(y,fish_flt+5) +=
-                    fsh_slx_yafs(y,a,fish_flt,s)*
-                    phi_if_fish(fish_flt,i)*
-                    N_yais_mid(y,a,i,s);
-                } // end nsamp sex loop
-              } // end nsamp age loop
-            } // end if first two fish fleets, which have agecomps
-            
           case 1: // length sel
             for(int a=0;a<(nage);a++){
               Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
@@ -892,6 +880,20 @@ Type objective_function<Type>::operator() ()
       } // end sexes
     } // end nspace
     
+    // for positions 5 and 6 within nsamp acomp, need # fish for ak fix w and e (fish flts 0 and 1)
+    // this means that when fish fleet == 0, we should fill nsamp position 5
+    // for(int fish_flt=0;fish_flt<(2);a++){
+    //   for(int a=0;a<(nage-1);a++){
+    //     for(int s=0;s<2;s++){
+    //       Nsamp_acomp_yf(y,fish_flt+5) +=
+    //         fsh_slx_yafs(y,a,fish_flt,s)*
+    //         phi_if_fish(fish_flt,i)*
+    //         N_yais_mid(y,a,i,s);
+    //     } // end nsamp sex loop
+    //   } // end nsamp age loop
+    // } // end if first two fish fleets, which have agecomps
+    
+    
     // predicted age comps, given error
     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
       // age 0
@@ -906,11 +908,11 @@ Type objective_function<Type>::operator() ()
                      age_error(phi_fm_acomp2(acomp_flt),nage-1),
                      age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
       
-      for(int a=1;a<(nage);a++){
-        for(int i=0;i<(nspace);i++){
-          for(int s=0;s<2;s++){
-            switch(acomp_flt_type(acomp_flt)){
-            // case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
+      // for(int a=1;a<(nage);a++){
+      //   for(int i=0;i<(nspace);i++){
+      //     for(int s=0;s<2;s++){
+      //       switch(acomp_flt_type(acomp_flt)){
+      //       case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
             //   comm_acomp_yafs_pred(y,a,acomp_flt,s) +=
             //     acomp_yaf_temp(y,a,acomp_flt)*
             //     fsh_slx_yafs(y,a,acomp_flt,s)*
@@ -936,10 +938,10 @@ Type objective_function<Type>::operator() ()
             //     } // end lbins
               // } // end else
               // break;
-            } // end acomp fleet type
-          } // end sex
-        } // end space
-      } // end age
+        //     } // end acomp fleet type
+        //   } // end sex
+        // } // end space
+      // } // end age
     } // end acomp fleets
     
     //   

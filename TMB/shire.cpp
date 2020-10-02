@@ -940,23 +940,22 @@ Type objective_function<Type>::operator() ()
                 phi_if_fish(acomp_flt,i)*
                 N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
               break;
-              case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
+            case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
               if(selType_surv(acomp_flt) == 0){
                 surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
                   acomp_yaf_temp(y,a,acomp_flt)*
                   srv_slx_yafs(y,a,acomp_flt+5,s) *
                   phi_if_acomp(acomp_flt,i)*
                   N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
-                // } else{
-                //   for(int l=1;l<(LBins);l++){
-                //     surv_acomp_yafs_pred(y,nage,acomp_flt) +=
-                //       acomp_yaf_temp(y,a,acomp_flt)*
-                //       srv_slx_yafs(y,l,acomp_flt+5) *
-                //       phi_if_acomp(acomp_flt,i)*
-                //       mla_yais(y,a,i,s)*
-                //       N_yais_mid(y,a,i)/
-                //         Nsamp_acomp_yf(y,acomp_flt);
-                //   } // end lbins
+              } else{
+                for(int l=1;l<(LBins);l++){
+                  surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
+                    acomp_yaf_temp(y,a,acomp_flt)*
+                    srv_slx_yafs(y,l,acomp_flt+5,s)*
+                    phi_if_acomp(acomp_flt,i)*
+                    // mla_yais(y,a,i,s)*
+                    N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+                } // end lbins
               } // end else
               break;
             } // end acomp fleet type

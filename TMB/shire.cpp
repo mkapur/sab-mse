@@ -958,7 +958,7 @@ Type objective_function<Type>::operator() ()
                 N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt+5);
               break;
             case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
-              // switch(selType_surv(acomp_flt+3)){
+              switch(selType_surv(acomp_flt+3)){
               // case 0: // age sel
               // surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
               // acomp_yaf_temp(y,a,acomp_flt) ;//*
@@ -975,8 +975,8 @@ Type objective_function<Type>::operator() ()
               //       LengthAge_alyis_mid(a,l,y,i,s)*
               //       N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt+5);
               //   } // end lbins
-              // break;
-              // } // end seltype switch
+              break;
+              } // end seltype switch
               break;
             } // end acomp fleet type
           } // end sex

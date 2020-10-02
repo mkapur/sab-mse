@@ -118,7 +118,7 @@ Type objective_function<Type>::operator() ()
   // age comps
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
   array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
-  array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
+  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-2, 2); // predicted acomps from surveys (without biomass)
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
@@ -246,7 +246,9 @@ Type objective_function<Type>::operator() ()
   vector<int> a2_dim = log_srv_slx_pars.dim;
   array<Type> srv_slx_pars(a2_dim);
   srv_slx_pars.setZero();
-  for (int srv_flt = 0; srv_flt < nfleets_surv+(nfleets_acomp-2); srv_flt++) {
+  for (int srv_flt = 0; srv_flt < a2_dim(0); srv_flt++) {
+    
+  // for (int srv_flt = 0; srv_flt < nfleets_surv+(nfleets_acomp-2); srv_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
       // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
       for (int s = 0; s < 2; s++) { // loop sexes
@@ -901,18 +903,19 @@ Type objective_function<Type>::operator() ()
     // nsamp offset by 5 so 2 is 7
     // finally note that the first two elements in the phi_acomp obj are the fixed gear Ak fleets
     // sp by starting the acomp index at 2 we are aligned with that struct
-    // for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
-    //   for(int i=0;i< nspace;i++){
-    //     for(int a=0;a<(nage-1);a++){
-    //       for(int s=0;s<2;s++){
-    //         Nsamp_acomp_yf(y,acomp_flt+7) +=
-    //           srv_slx_yafs(y,a,acomp_flt+3,s)*
-    //           phi_if_acomp(acomp_flt,i)*
-    //           N_yais_mid(y,a,i,s);
-    //       } // end nsamp sex loop
-    //     } // end nsamp age loop
-    //   } // end nspace
-    // } // end 2:nfleets_acomp
+    // need to add a selswitch here
+    for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
+      for(int i=0;i< nspace;i++){
+        for(int a=0;a<(nage-1);a++){
+          for(int s=0;s<2;s++){
+            Nsamp_acomp_yf(y,acomp_flt+5) +=
+              srv_slx_yafs(y,a,acomp_flt+3,s)*
+              phi_if_acomp(acomp_flt,i)*
+              N_yais_mid(y,a,i,s);
+          } // end nsamp sex loop
+        } // end nsamp age loop
+      } // end nspace
+    } // end 2:nfleets_acomp
     
     
     // predicted age comps, given error

@@ -20,9 +20,13 @@ obj <- MakeADFun(df,
                  # map = list("omega_0ij" = NA),
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
-opt <- TMBhelper::fit_tmb(obj)
 
-reps <- obj$report()
+opt <- TMBhelper::fit_tmb(obj) ## estimate
+
+reps <- obj$report() ## return values with uncertainty
+
+
+
 
 plot.figures = FALSE # Set true for printing to file 
 ## OM MODEL INIT ----

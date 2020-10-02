@@ -903,15 +903,29 @@ Type objective_function<Type>::operator() ()
     // nsamp offset by 5 so 2 is 7
     // finally note that the first two elements in the phi_acomp obj are the fixed gear Ak fleets
     // sp by starting the acomp index at 2 we are aligned with that struct
-    // need to add a selswitch here
+
     for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
       for(int i=0;i< nspace;i++){
-        for(int a=0;a<(nage-1);a++){
-          for(int s=0;s<2;s++){
-            Nsamp_acomp_yf(y,acomp_flt+5) +=
-              srv_slx_yafs(y,a,acomp_flt+3,s)*
-              phi_if_acomp(acomp_flt,i)*
-              N_yais_mid(y,a,i,s);
+        for(int s=0;s<2;s++){
+          for(int a=0;a<(nage-1);a++){
+            switch(selType_surv(acomp_flt+3)){
+            case 0:
+              Nsamp_acomp_yf(y,acomp_flt+5) +=
+                srv_slx_yafs(y,a,acomp_flt+3,s)*
+                phi_if_acomp(acomp_flt,i)*
+                N_yais_mid(y,a,i,s);
+              break;
+            case 1:
+              for(int l=0;l< LBins;l++){
+                Nsamp_acomp_yf(y,acomp_flt+5) +=
+                  srv_slx_yafs(y,l,acomp_flt+3,s)*
+                  phi_if_acomp(acomp_flt,i)*
+                  LengthAge_alyis_mid(a,l,y,i,s)*
+                  N_yais_mid(y,a,i,s);
+                
+              } // end LBins
+              break;
+            } //end selType switch
           } // end nsamp sex loop
         } // end nsamp age loop
       } // end nspace

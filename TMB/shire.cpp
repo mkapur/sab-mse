@@ -901,8 +901,8 @@ Type objective_function<Type>::operator() ()
             case 0: //commercial fleet, use fish selex. note fixW and fixE are also the first two in fsh slx
               comm_acomp_yafs_pred(y,a,acomp_flt,s) +=
                 acomp_yaf_temp(y,a,acomp_flt)*
-                fsh_slx_yafs(y,a,acomp_flt,s);//*
-                // phi_if_fish(acomp_flt,i)*
+                fsh_slx_yafs(y,a,acomp_flt,s)*
+                phi_if_fish(acomp_flt,i);//*
                 // N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
               break;
             // case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2

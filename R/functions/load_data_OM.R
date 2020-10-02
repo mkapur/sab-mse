@@ -274,7 +274,7 @@ load_data_OM <- function(nspace = 6,
     logSDR = 1.4,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 
     log_fsh_slx_pars = array(0.2, dim = c(nfleets_fish,2,1,2)),
-    log_srv_slx_pars =  array(0.4, dim = c( nfleets_surv+nfleets_acomp,2,1,2))
+    log_srv_slx_pars =  array(0.4, dim = c( nfleets_surv+(nfleets_acomp-2),2,1,2))
   )
 
 

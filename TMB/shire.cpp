@@ -706,39 +706,46 @@ Type objective_function<Type>::operator() ()
           F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
         } // end mgmt regions
         
+        // generate predicted catches
+        for(int i=0;i<(nspace);i++){
+          switch(selType_fish(fish_flt)){
+          case 0: // age sel
+            for(int a=0;a<(nage-1);a++){
+              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+              
+              for(int s=0;s<2;s++){
+                catch_yaf_pred(y,a,fish_flt) +=
+                  Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
+                  (1-exp(- Zreal_ya(y,a) ))*
+                  phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                
+                catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
+                  ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+                    phi_if_fish(fish_flt, i)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i,s)*
+                    wtatlen_kab(phi_ik2(i),0)*
+                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+              } // end sex
+            } // end age
+            break;
+          } // temp seltype
+        } // temp space
+        
+        
       } // temp if na
     } // temp fish fleets
   } // temp yend
-
+  
   //       
-  //       // generate predicted catches
-  //       for(int i=0;i<(nspace);i++){
-  //         switch(selType_fish(fish_flt)){
-  //         case 0: // age sel
-  //           for(int a=0;a<(nage);a++){
-  //             Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-  //             Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
-  //             
-  //             for(int s=0;s<2;s++){
-  //               catch_yaf_pred(y,a,fish_flt) +=
-  //                 Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
-  //                 (1-exp(- Zreal_ya(y,a) ))*
-  //                 phi_if_fish(fish_flt,i)*
-  //                 fsh_slx_yafs(y,a,fish_flt,s)*
-  //                 N_yais_mid(y,a,i,s)*
-  //                 wtatlen_kab(phi_ik2(i),1)*
-  //                 pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2));
-  //               
-  //               catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
-  //                 ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
-  //                   phi_if_fish(fish_flt, i)*
-  //                   fsh_slx_yafs(y,a,fish_flt,s)*
-  //                   N_yais_mid(y,a,i,s)*
-  //                   wtatlen_kab(phi_ik2(i),1)*
-  //                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),2));
-  //             } // end sex
-  //           } // end age
-  //           break;
+
+
+
   //         case 1: // length sel
   //           for(int a=0;a<(nage);a++){
   //             Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;

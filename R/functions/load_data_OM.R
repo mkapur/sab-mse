@@ -96,6 +96,8 @@ load_data_OM <- function(nspace = 6,
   # Catch ----
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
   catch[is.na(catch)] <- -1
+  catch_yf_error = array(0.1, dim = dim(catch))
+  
   ## Discard ----
   load(here("input","input_data","OM_discard.csv")) ## loads as omdis
   
@@ -368,6 +370,7 @@ load_data_OM <- function(nspace = 6,
     age_error = as.matrix(ageerr_ExpAge[,2:ncol(ageerr_ExpAge)]),
     age_error_SD = as.matrix(ageerr_SD[,2:ncol(ageerr_SD)]),
     catch_yf_obs = as.matrix(catch),
+    catch_yf_error = as.matrix(catch_yf_error),
     discard = omdis,
     
     #* SELEX ----

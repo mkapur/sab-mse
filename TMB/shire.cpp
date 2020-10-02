@@ -916,18 +916,18 @@ Type objective_function<Type>::operator() ()
     
     
     // predicted age comps, given error
-    // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    //   // age 0
-    //   acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
-    //   // Loop over ages
-    //   for(int a=1;a<(nage-1);a++){
-    //     acomp_yaf_temp(y,a,acomp_flt) =
-    //       pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
-    //       pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
-    //   } // end ages
-    //   acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
-    //                  age_error(phi_fm_acomp2(acomp_flt),nage-1),
-    //                  age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
+    for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+      // age 0
+      acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
+      // Loop over ages
+      for(int a=1;a<(nage-1);a++){
+        acomp_yaf_temp(y,a,acomp_flt) =
+          pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
+          pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
+      } // end ages
+      acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
+                     age_error(phi_fm_acomp2(acomp_flt),nage-1),
+                     age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
       
       // for(int a=1;a<(nage);a++){
       //   for(int i=0;i<(nspace);i++){
@@ -963,23 +963,8 @@ Type objective_function<Type>::operator() ()
         //   } // end sex
         // } // end space
       // } // end age
-    // } // end acomp fleets
-    
-    //   
-    //   // estimate age comps in catches
-    //   // need to include error here
-    //   if(flag_catch(y) == 1){ // Flag if  there was a measurement that year
-    //     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //       for(int a=0;a<(nage-1);a++){ // Loop over ages for catch comp
-    //         if(a<age_maxage){
-    //           catch_acomp_f_est(y,a,fish_flt) = (CatchN_yaf(y,a+1,fish_flt)/CatchN(y,fish_flt)); // Catch comp (1 bc the data starts at age = 1)
-    //         }else{
-    //           catch_acomp_f_est(y,age_maxage-1,fish_flt) += (CatchN_yaf(y,a+1,fish_flt)/CatchN(y,fish_flt));
-    //         } // end else
-    //       } // end ages
-    //     } // end fish_flt
-    //   } // end flag
-    
+    } // end acomp fleets
+
   } // END YEARS; END MODEL RUN
   
   // // LIKELIHOODS //

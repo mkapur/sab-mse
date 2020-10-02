@@ -576,8 +576,6 @@ Type objective_function<Type>::operator() ()
           Type term2 = v1*(1-term0);
           F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
           vector<Type>Z_a_TEMP(nage);
-          
-          
           for(int i=0;i<(nspace);i++){
             switch(selType_fish(fish_flt)){
             case 0: // age sel
@@ -586,16 +584,16 @@ Type objective_function<Type>::operator() ()
                 for(int s=0;s<2;s++){
                   Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
                 } // end sex for z a temp
-                // for(int s=0;s<2;s++){
-                //   catch_afk_TEMP(a,fish_flt,k) +=
-                //     F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
-                //     (1-exp(-Z_a_TEMP[a]))*
-                //     phi_if_fish(fish_flt,i)*
-                //     fsh_slx_yafs(y,a,fish_flt,s)*
-                //     N_yais_mid(y,a,i,s)*
-                //     wtatlen_kab(phi_ik2(i),0)*
-                //     pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                // } // end sex
+                for(int s=0;s<2;s++){
+                  catch_afk_TEMP(a,fish_flt,k) +=
+                    F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+                    (1-exp(-Z_a_TEMP[a]))*
+                    phi_if_fish(fish_flt,i)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i,s) *
+                    wtatlen_kab(phi_ik2(i),0) *
+                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                } // end sex
               } // end age
               break;
             case 1: // length sel

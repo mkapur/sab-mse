@@ -22,6 +22,7 @@ Type objective_function<Type>::operator() ()
   
   DATA_IMATRIX(phi_if_surv); // turn on/off subareas for survey fleets
   DATA_IMATRIX(phi_if_fish); // turn on/off subareas for fishery fleets
+  DATA_IMATRIX(phi_if_acomp); // turn on/off subareas for fishery fleets
   DATA_IMATRIX(phi_fm); //  fleets to mgmt areas
   DATA_IMATRIX(phi_fm_acomp); // acomp fleets to mgmt areas
   DATA_IMATRIX(phi_ki); // 0/1 nesting of subareas i into stocks k (rows)
@@ -898,13 +899,15 @@ Type objective_function<Type>::operator() ()
     } // end if first two fish fleets, which have agecomps
     // for positions 7 onwards in nsamp acomp, we need nsamp from these surveys
     // meaning acomp fleet 2 corresponds to nasmp acomp position 7
+    // finally note that the first two elements in the phi_acomp obj are the fixed gear Ak fleets
+    // sp by starting the acomp index at 2 we are aligned with that struct
     // for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
     // for(int i=0;i< nspace;i++){
     //   for(int a=0;a<(nage-1);a++){
     //     for(int s=0;s<2;s++){
     //       Nsamp_acomp_yf(y,acomp_flt+5) +=
     //         srv_slx_yafs(y,a,acomp_flt+5,s)*
-    //         phi_if_fish(acomp_flt,i)*
+    //         phi_if_acomp(acomp_flt,i)*
     //         N_yais_mid(y,a,i,s);
     //     } // end nsamp sex loop
     //   } // end nsamp age loop

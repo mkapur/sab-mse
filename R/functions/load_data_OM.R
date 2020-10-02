@@ -154,8 +154,8 @@ load_data_OM <- function(nspace = 6,
     phi_if_acomp <- matrix(0, nrow = nfleets_acomp, ncol = nspace)
     rownames(phi_if_acomp) <- fltnames_acomp
     colnames(phi_if_acomp) <- spmat$subarea
-    phi_if_surv[1,1] <-  phi_if_surv[2:3,2] <-  
-      phi_if_surv[4:6,3:4]<-  phi_if_surv[7:9,5:6] <- 1
+    phi_if_acomp[1,1] <-  phi_if_acomp[2:3,2] <-  
+      phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,5:6] <- 1
     ## phi_fish
     phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
     rownames(phi_if_fish) <- names(catch)[2:ncol(catch)]

@@ -118,7 +118,7 @@ Type objective_function<Type>::operator() ()
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // predicted acomps from commercial fisheries
   array<Type> comm_acomp_yafs_pred(tEnd, nage, 2, 2); // predicted acomps from commercial fisheries
   array<Type> surv_acomp_yafs_pred(tEnd, nage, 6, 2); // predicted acomps from surveys (without biomass)
-  array<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
+  array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
@@ -840,7 +840,7 @@ Type objective_function<Type>::operator() ()
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<2;s++){
-        for(int sur_flt =0;sur_flt<(nfleets_surv);sur_flt++){
+        for(int sur_flt =0;sur_flt<(nfleets_surv+nfleets_acomp);sur_flt++){
           if(surv_yf_obs(y,sur_flt) != -1){
             switch(selType_surv(sur_flt)){
             case 0: // age sel
@@ -902,8 +902,8 @@ Type objective_function<Type>::operator() ()
               comm_acomp_yafs_pred(y,a,acomp_flt,s) +=
                 acomp_yaf_temp(y,a,acomp_flt)*
                 fsh_slx_yafs(y,a,acomp_flt,s)*
-                phi_if_fish(acomp_flt,i);//*
-                // N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt);
+                phi_if_fish(acomp_flt,i)*
+                N_yais_mid(y,a,i,s);///Nsamp_acomp_yf(y,acomp_flt);
               break;
             // case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
               // if(selType_surv(acomp_flt+3) == 0){

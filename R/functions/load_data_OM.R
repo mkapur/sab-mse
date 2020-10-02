@@ -140,7 +140,7 @@ load_data_OM <- function(nspace = 6,
   ## MAKE A NSPACE == 3 AND 1 OPTION FOR COMBINING
   spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
-                      mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
+                      mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
   if(nspace == 6){ ## OM
     
     ## phi_survy
@@ -164,7 +164,13 @@ load_data_OM <- function(nspace = 6,
     phi_if_fish[c(1,3),1] <- phi_if_fish[c(2,4),2] <-   phi_if_fish[5:7,3:4] <-  
       phi_if_fish[c(8,9),5:6] <-  1
     
-    ## phi_ik
+   ## phi_im
+    phi_im <- matrix(0, ncol = 3, nrow = nspace)
+    colnames(phi_im) <- unique(spmat$mgmt)
+    rownames(phi_im) <- spmat$subarea
+    phi_im[1:2,1] <- phi_im[3:4,2] <- phi_im[5:6,3] <- 1
+    
+     ## phi_ik
     phi_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     rownames(phi_ki) <- unique(spmat$stock)
     colnames(phi_ki) <- spmat$subarea
@@ -333,6 +339,7 @@ load_data_OM <- function(nspace = 6,
     phi_if_fish = phi_if_fish,
     phi_if_acomp = phi_if_acomp,
     phi_ki = phi_ki,
+    phi_im = phi_im,
     phi_ik2 = t(phi_ik2),
     phi_ij = phi_ij,
     phi_fm = phi_fm,

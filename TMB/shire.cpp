@@ -958,13 +958,15 @@ Type objective_function<Type>::operator() ()
                 N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt+5);
               break;
             case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
-              // if(selType_surv(acomp_flt) == 0){
-              //   surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
-              //     acomp_yaf_temp(y,a,acomp_flt)*
-              //     srv_slx_yafs(y,a,acomp_flt+3,s) *
-              //     phi_if_acomp(acomp_flt,i)*
-              //     N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt+5);
-              // } else{
+              // switch(selType_surv(acomp_flt+3)){
+              // case 0: // age sel
+              // surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
+              // acomp_yaf_temp(y,a,acomp_flt) ;//*
+              // srv_slx_yafs(y,a,acomp_flt+3,s)*
+              // phi_if_acomp(acomp_flt,i)*
+              // N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt+5);
+              // break;
+              // case 1:
               //   for(int l=1;l<(LBins);l++){
               //     surv_acomp_yafs_pred(y,a,acomp_flt,s) +=
               //       acomp_yaf_temp(y,a,acomp_flt)*
@@ -973,12 +975,13 @@ Type objective_function<Type>::operator() ()
               //       LengthAge_alyis_mid(a,l,y,i,s)*
               //       N_yais_mid(y,a,i,s)/Nsamp_acomp_yf(y,acomp_flt+5);
               //   } // end lbins
-              // } // end else
+              // break;
+              // } // end seltype switch
               break;
             } // end acomp fleet type
           } // end sex
         } // end space
-      } // end age
+    } // end age
     } // end acomp fleets
   } // END YEARS; END MODEL RUN
   

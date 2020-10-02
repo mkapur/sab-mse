@@ -880,17 +880,35 @@ Type objective_function<Type>::operator() ()
       } // end sexes
     } // end nspace
     
+    // names(nsamp_acomp_yf) = VAST fleets (0:5), ak fix w and e, then acomp fleet surveys
+    
     // for positions 5 and 6 within nsamp acomp, need # fish for ak fix w and e (fish flts 0 and 1)
     // this means that when fish fleet == 0, we should fill nsamp position 5
-    // for(int fish_flt=0;fish_flt<(2);a++){
+    for(int fish_flt=0;fish_flt<(2);fish_flt++){
+      for(int i=0;i< nspace;i++){
+        for(int a=0;a<(nage-1);a++){
+          for(int s=0;s<2;s++){
+            Nsamp_acomp_yf(y,fish_flt+5) +=
+              fsh_slx_yafs(y,a,fish_flt,s)*
+              phi_if_fish(fish_flt,i)*
+              N_yais_mid(y,a,i,s);
+          } // end nsamp sex loop
+        } // end nsamp age loop
+      } // end nspace
+    } // end if first two fish fleets, which have agecomps
+    // for positions 7 onwards in nsamp acomp, we need nsamp from these surveys
+    // meaning acomp fleet 2 corresponds to nasmp acomp position 7
+    // for(int acomp_flt=2;acomp_flt<(nfleets_acomp);acomp_flt++){
+    // for(int i=0;i< nspace;i++){
     //   for(int a=0;a<(nage-1);a++){
     //     for(int s=0;s<2;s++){
-    //       Nsamp_acomp_yf(y,fish_flt+5) +=
-    //         fsh_slx_yafs(y,a,fish_flt,s)*
-    //         phi_if_fish(fish_flt,i)*
+    //       Nsamp_acomp_yf(y,acomp_flt+5) +=
+    //         srv_slx_yafs(y,a,acomp_flt+5,s)*
+    //         phi_if_fish(acomp_flt,i)*
     //         N_yais_mid(y,a,i,s);
     //     } // end nsamp sex loop
     //   } // end nsamp age loop
+  // } // end nspace
     // } // end if first two fish fleets, which have agecomps
     
     

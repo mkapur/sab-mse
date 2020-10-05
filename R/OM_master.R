@@ -13,7 +13,7 @@ source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
 p = proc.time()
-compile(here("TMB","shire.cpp"))
+# compile(here("TMB","shire.cpp"))
 dyn.load(dynlib(here("TMB","shire")))
 
 obj <- MakeADFun(df,

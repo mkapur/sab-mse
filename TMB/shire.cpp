@@ -1029,7 +1029,7 @@ Type objective_function<Type>::operator() ()
     } // end y
   } // end fish_flt
     
-  // Likelihood: age comps in survey
+  // Likelihood: age comps in surveys & catches
   Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
   vector<Type>sum1(tEnd); // survey comp likelihood
@@ -1077,93 +1077,65 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
-              
-              
             } // end switch for comm or surv type
-            
-        
           } // end acomp flag
         } // end age
       } // end sex
     } // end y
   } // end acomp fleets
-  // 
-  // 
-  // vector<Type>sum3(tEnd);
-  // vector<Type>sum4(tEnd);
-  // //
-  // sum3.setZero();
-  // sum4.setZero();
-  // 
-  // // Likelihood: age comps in catches
-  // // need to remove/change this phi_Catch thing and provide fish catch comps by fleet
-  // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ 
-  //   for(int y=1;y<tEnd;y++){ // Loop over available years
-  //     if(catch_yf_obs(y,fish_flt)>0){ // only bother if we caught something
-  //       if(flag_catch(y) == 1){ // Flag if  there was a measurement that year
-  //         for(int a=0;a<(age_catch.rows()-1);a++){ // Loop over ages for catch comp (there are only 15 in obs)
-  //           sum3(y) += lgamma(catch_yf_obs(y,fish_flt)*age_catch(a,y)+1);
-  //           sum4(y) += lgamma(catch_yf_obs(y,fish_flt)*age_catch(a,y) + phi_catch*catch_yf_obs(y,fish_flt)*catch_acomp_f_est(y,a,fish_flt)) -
-  //             lgamma(phi_catch*catch_yf_obs(y,fish_flt)*catch_acomp_f_est(y,a,fish_flt));
-  //         } // end ages
-  //         ans_catchcomp += lgamma(catch_yf_obs(y,fish_flt)+1)-sum3(y)+lgamma(phi_catch*catch_yf_obs(y,fish_flt))
-  //           -lgamma(catch_yf_obs(y,fish_flt)+phi_catch*catch_yf_obs(y,fish_flt))+sum4(y);
-  //       } // end catch flag 
-  //     } // end if catches > 0
-  //   } // end y
-  // } // end fish fleets 
-  // 
-  // // Likelihood: SD Recruitment (hyperprior)
-  // Type ans_SDR = 0.0;
-  // for(int k=0;k<(nstocks);k++){
-  //   for(int y=0;y<(tEnd-1);y++){ // Start y loop
-  //     ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
-  //   }
-  // }
-  // 
+
+  // Likelihood: SD Recruitment (hyperprior)
+  Type ans_SDR = 0.0;
+  for(int k=0;k<(nstocks);k++){
+    for(int y=0;y<(tEnd-1);y++){ // Start y loop
+      ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
+    }
+  }
   // // Likelihood: Error for Selectivity
-  // Type ans_psel = 0.0;
+  Type ans_psel = 0.0;
   // for(int y=0;y<year_sel;y++){ // Start y loop
   //   for(int i=0;i<psel_fish.size();i++){ // Start y loop
   //     ans_psel += Type(0.5)*(PSEL(i,y)*PSEL(i,y))/(sigma_psel*sigma_psel);
   //   }
   // }
-  // 
+  
   // // Likelihood: Priors on h and M
-  // Type ans_priors = 0.0;
-  // for(int y=0;y<(nage);y++){ // Start y loop
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
-  //       ans_priors += Type(0.5)*(Ninit_ai(a,i)*Ninit_ai(a,i))/(SDR*SDR);
-  //     } // end ages
-  //   } // end space
-  // } // end y
-  // 
-  // // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
-  // 
-  // // Likelihood: Prior on h
-  // // ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
-  // 
+  Type ans_priors = 0.0;
+  // for(int i=0;i<(nspace);i++){
+  //   for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
+  //     for(int s=0;s<nsex;s++){
+  //       ans_priors += Type(0.5)*(Ninit_ais(a,i,s)*Ninit_ai(a,i,s))/(SDR*SDR);
+  //     } // end sex
+  //   } // end ages
+  // } // end space
+  
+  // Likelihood: Prior on h
+  // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
+  // ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
   // if(sum_zero == 1){
   //   ans_priors += ((Type(0.0)-sum(tildeR_yk))*(Type(0.0)-sum(tildeR_yk)))/Type(0.01);
   // }
-  // 
-  // 
-  // // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
+  // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
   // ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
   // 
-  // vector<Type>ans_tot(7);
-  // ans_tot(0) = ans_SDR;
-  // ans_tot(1) = ans_psel;
-  // ans_tot(2) = ans_catch;
-  // ans_tot(3) = ans_survey;
-  // ans_tot(4) = ans_survcomp;
-  // ans_tot(5) = ans_catchcomp;
-  // ans_tot(6) = ans_priors;
+  vector<Type>ans_tot(7);
+  ans_tot(0) = ans_SDR;
+  ans_tot(1) = ans_psel;
+  ans_tot(2) = ans_catch;
+  ans_tot(3) = ans_survey;
+  ans_tot(4) = ans_survcomp;
+  ans_tot(5) = ans_catchcomp;
+  ans_tot(6) = ans_priors;
   // 
   // // Likelihood: TOTAL
-  // Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
-  Type ans = 0.0;
+  Type ans = ans_SDR+
+    ans_psel+
+    ans_catch+
+    ans_survey-
+    ans_survcomp-
+    ans_catchcomp+
+    ans_priors;
+  // Type ans = 0.0;
   // Report calculations
   
   // numbers @ age

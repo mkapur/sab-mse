@@ -1047,10 +1047,10 @@ Type objective_function<Type>::operator() ()
                 acomp_yafs_obs(y,a,acomp_flt,s) +
                pi_acomp(acomp_flt)*
                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-               comm_acomp_yafs_pred(y,a,acomp_flt,s)) -
+               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
                - lgamma(pi_acomp(acomp_flt)*
                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-               comm_acomp_yafs_pred(y,a,acomp_flt,s));
+               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
               
               ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
                 sum1(y)+
@@ -1065,10 +1065,10 @@ Type objective_function<Type>::operator() ()
                 acomp_yafs_obs(y,a,acomp_flt,s) +
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                surv_acomp_yafs_pred(y,a,acomp_flt,s)) -
-                - lgamma(pi_acomp(acomp_flt)*
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
+                lgamma(pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                surv_acomp_yafs_pred(y,a,acomp_flt,s));
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
               
               ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
                 sum1(y)+

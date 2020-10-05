@@ -971,12 +971,12 @@ Type objective_function<Type>::operator() ()
                 break;
               case 1: // len sel fish fleet
                 for(int l=0;l< LBins;l++){
-                  // comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
-                  //   acomp_yaf_temp(y,a,acomp_flt)*
-                  //   fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
-                  //   phi_if_acomp(acomp_flt,i)*
-                  //   LengthAge_alyis_mid(a,l,y,i,s)*
-                  //   N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+                  comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
+                    acomp_yaf_temp(y,a,acomp_flt)*
+                    fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
+                    phi_if_acomp(acomp_flt,i)*
+                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
                 } // end LBins
                 break;
               } //end selType switch for comms

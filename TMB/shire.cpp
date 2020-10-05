@@ -957,6 +957,7 @@ Type objective_function<Type>::operator() ()
       //     } // end ages for nsamp
       //   } // end sex loop for nsamp
       // } // end nspace for nsamp
+      
       for(int a=1;a<(nage);a++){
         for(int i=0;i<(nspace);i++){
           for(int s=0;s<nsex;s++){
@@ -981,28 +982,27 @@ Type objective_function<Type>::operator() ()
                 } // end LBins
                 break;
               } //end selType switch for comms
-              break;
-                    // case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
+            case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
               // switch(selType_surv(phi_ff_acomp(acomp_flt,1))){
               // case 0: // age sel
-              //   surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
-              //     acomp_yaf_temp(y,a,acomp_flt)*
-              //     srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
-              //     phi_if_acomp(acomp_flt,i)*
-              //     N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-              //   break;
-              //   case 1:
-              //     for(int l=1;l<(LBins);l++){
-              //       surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4,s) +=
-              //         acomp_yaf_temp(y,a,acomp_flt)*
-              //         srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
-              //         phi_if_acomp(acomp_flt,i)*
-              //         LengthAge_alyis_mid(a,l,y,i,s)*
-              //         N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-              //     } // end lbins
-              //   break;
+                surv_acomp_yafs_pred(y,a,2,s) += 1.0;
+                //   acomp_yaf_temp(y,a,acomp_flt)*
+                //   srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
+                //   phi_if_acomp(acomp_flt,i)*
+                //   N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+                // break;
+              // case 1:
+                // for(int l=1;l<(LBins);l++){
+                //   surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4,s) +=
+                //     acomp_yaf_temp(y,a,acomp_flt)*
+                //     srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
+                //     phi_if_acomp(acomp_flt,i)*
+                //     LengthAge_alyis_mid(a,l,y,i,s)*
+                //     N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+                // } // end lbins
+                // break;
               // } // end seltype switch
-              //         break;
+              break;
             } // end acomp fleet type
           } // end sex
         } // end space

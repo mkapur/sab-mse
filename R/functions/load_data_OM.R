@@ -290,11 +290,12 @@ load_data_OM <- function(nspace = 6,
     logR_0k = c(log(8*10e6),log(8*10e6),10,4), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
+    logpi_acomp = rep(log(50),nfleets_acomp),
     b = rep(0,nyear),
     logSDR = 1.4,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 
     log_fsh_slx_pars = array(0.2, dim = c(nfleets_fish,2,1,2)),
-    log_srv_slx_pars =  array(0.4, dim = c( nfleets_surv+(nfleets_acomp-2),2,1,2))
+    log_srv_slx_pars =  array(0.4, dim = c( nfleets_surv+(nfleets_acomp-5),2,1,2))
   )
 
 

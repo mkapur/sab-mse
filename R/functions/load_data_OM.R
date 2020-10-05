@@ -130,7 +130,6 @@ load_data_OM <- function(nspace = 6,
   # load(here("input","input_data",'OM_agecomps_female.rdata'))
   # load(here("input","input_data",'OM_agecomps_male.rdata'))
   load(here("input","input_data",'OM_agecomps_yafs.rdata'))
-  OM_agecomps_yafs[is.na(OM_agecomps_yafs)] <- -1
   ## Aging Error ----
   ## M X age
   load(here("input","input_data",'ageerr_ExpAge.rdata'))

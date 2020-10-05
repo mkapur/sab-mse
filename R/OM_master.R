@@ -12,6 +12,7 @@ source(here("R","functions",'load_files_OM.R'))
 
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
+p = proc.time()
 compile(here("TMB","shire.cpp"))
 dyn.load(dynlib(here("TMB","shire")))
 
@@ -20,7 +21,7 @@ obj <- MakeADFun(df,
                  # map = list("omega_0ij" = NA),
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
-
+proc.time() -p
 opt <- TMBhelper::fit_tmb(obj) ## estimate
 
 reps <- obj$report() ## return values with uncertainty

@@ -157,12 +157,15 @@ load_data_OM <- function(nspace = 6,
     phi_if_acomp[1,1] <-  phi_if_acomp[2:3,2] <-  
       phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,5:6] <- 1
     
-    phi_ff_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 3) ## indicates the position of acomp fleet
+    phi_ff_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 5) ## indicates the position of acomp fleet
     rownames(phi_ff_acomp) <- fltnames_acomp
-    colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos',"nsamp_pos")
+    colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos',"nsamp_pos","commacomp_pos","survacomp_pos")
     phi_ff_acomp[,1] <- c(0,1,-1,5,-1,-1,7,8) ## position in fishery selex (-1 means not applicable)
     phi_ff_acomp[,2] <- c(-1,-1,5,-1,6,7,-1,-1) ## Pos in survey
     phi_ff_acomp[,3] <- c(5:12) ## ordering for nsamp
+    phi_ff_acomp[,4] <- c(0,1,-1,2,-1,-1,3,4) ## ordering for comm comps
+    phi_ff_acomp[,5] <- c(-1,-1,5,-1,6,7,-1,-1) ## ordering for surv comps
+    
     ## in the fish or selex surv, to be selected depending on the acomp flttype swtich
     
     

@@ -963,7 +963,7 @@ Type objective_function<Type>::operator() ()
             case 0: // fish fleets
               switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
               case 0: // age sel fish fleet
-                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,0),s) += 1.0;
+                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) += 1.0;
                 // acomp_yaf_temp(y,a,acomp_flt)*
                 // fsh_slx_yafs(y,a,acomp_flt,s)*
                 // phi_if_fish(acomp_flt,i)*

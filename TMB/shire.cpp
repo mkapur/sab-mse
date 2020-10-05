@@ -961,8 +961,9 @@ Type objective_function<Type>::operator() ()
       for(int a=1;a<(nage);a++){
         for(int i=0;i<(nspace);i++){
           for(int s=0;s<nsex;s++){
-            switch(acomp_flt_type(acomp_flt)){ // switch between comms and surveys
-            case 0: // fish fleets
+            // switch(acomp_flt_type(acomp_flt)){ // switch between comms and surveys
+            if(acomp_flt_type(acomp_flt) == 0){
+            // case 0: // fish fleets
               switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
               case 0: // age sel fish fleet
                 comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
@@ -982,10 +983,11 @@ Type objective_function<Type>::operator() ()
                 } // end LBins
                 break;
               } //end selType switch for comms
-            case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
+            }else{
+            // case 1: 
               // switch(selType_surv(phi_ff_acomp(acomp_flt,1))){
               // case 0: // age sel
-                surv_acomp_yafs_pred(y,a,2,s) += 1.0;
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) += 1.0;
                 //   acomp_yaf_temp(y,a,acomp_flt)*
                 //   srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
                 //   phi_if_acomp(acomp_flt,i)*
@@ -1002,7 +1004,7 @@ Type objective_function<Type>::operator() ()
                 // } // end lbins
                 // break;
               // } // end seltype switch
-              break;
+              // break;
             } // end acomp fleet type
           } // end sex
         } // end space

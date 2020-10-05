@@ -1051,18 +1051,37 @@ Type objective_function<Type>::operator() ()
                - lgamma(pi_acomp(acomp_flt)*
                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                comm_acomp_yafs_pred(y,a,acomp_flt,s));
-            // } else{
-              // sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*acomp_yafs_obs(y,a,acomp_flt,s) + 
-                // phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*surv_acomp_yafs_pred(y,a,surv_flt_acomp,s)); 
+              
+              ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+                sum1(y)+
+                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+                sum2(y);
+              
+            } else{
+              sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                acomp_yafs_obs(y,a,acomp_flt,s) +
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                surv_acomp_yafs_pred(y,a,acomp_flt,s)) -
+                - lgamma(pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                surv_acomp_yafs_pred(y,a,acomp_flt,s));
+              
+              ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+                sum1(y)+
+                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+                sum2(y);
+              
+              
             } // end switch for comm or surv type
             
-            // ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)+1)-
-            //   sum1(y)+
-            //   lgamma(phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))-
-            //   lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)+
-            //   phi_survey*
-            //   Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-            //   sum2(y);
+        
           } // end acomp flag
         } // end age
       } // end sex

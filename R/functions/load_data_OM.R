@@ -164,7 +164,7 @@ load_data_OM <- function(nspace = 6,
     phi_ff_acomp[,2] <- c(-1,-1,5,-1,6,7,-1,-1) ## Pos in survey
     phi_ff_acomp[,3] <- c(5:12) ## ordering for nsamp
     phi_ff_acomp[,4] <- c(0,1,-1,2,-1,-1,3,4) ## ordering for comm comps
-    phi_ff_acomp[,5] <- c(-1,-1,5,-1,6,7,-1,-1) ## ordering for surv comps
+    phi_ff_acomp[,5] <- c(-1,-1,0,-1,1,2,-1,-1) ## ordering for surv comps (only 3)
     
     ## in the fish or selex surv, to be selected depending on the acomp flttype swtich
     

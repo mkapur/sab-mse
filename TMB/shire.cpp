@@ -1050,7 +1050,7 @@ Type objective_function<Type>::operator() ()
                comm_acomp_yafs_pred(y,a,acomp_flt,s)) -
                - lgamma(pi_acomp(acomp_flt)*
                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-               comm_acomp_yafs_pred(y,a,acomp_flt,s));;
+               comm_acomp_yafs_pred(y,a,acomp_flt,s));
             // } else{
               // sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*acomp_yafs_obs(y,a,acomp_flt,s) + 
                 // phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*surv_acomp_yafs_pred(y,a,surv_flt_acomp,s)); 

@@ -987,11 +987,11 @@ Type objective_function<Type>::operator() ()
             // case 1: 
               // switch(selType_surv(phi_ff_acomp(acomp_flt,1))){
               // case 0: // age sel
-                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) += 1.0;
-                //   acomp_yaf_temp(y,a,acomp_flt)*
-                //   srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
-                //   phi_if_acomp(acomp_flt,i)*
-                //   N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) += 
+                  acomp_yaf_temp(y,a,acomp_flt)*
+                  srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
+                  phi_if_acomp(acomp_flt,i)*
+                  N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
                 // break;
               // case 1:
                 // for(int l=1;l<(LBins);l++){

@@ -963,8 +963,8 @@ Type objective_function<Type>::operator() ()
             case 0: // fish fleets
               switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
               case 0: // age sel fish fleet
-                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) += Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-                // acomp_yaf_temp(y,a,acomp_flt)*
+                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) += Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                acomp_yaf_temp(y,a,acomp_flt);//*
                 // fsh_slx_yafs(y,a,acomp_flt,s)*
                 // phi_if_fish(acomp_flt,i)*
                 // N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
@@ -975,7 +975,7 @@ Type objective_function<Type>::operator() ()
                 break;
               } //end selType switch for comms
               break;
-              //       case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
+                    // case 1:  // survey fleets. the selex for these start in position 5, which corresponds to acomp fleet 2
               // switch(selType_surv(phi_ff_acomp(acomp_flt,1))){
               // case 0: // age sel
               //   surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=

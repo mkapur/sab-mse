@@ -132,6 +132,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
   PARAMETER_VECTOR(logq_f); // Q by survey fleet
   PARAMETER_VECTOR(b); // bias adjustment factor
+  PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
   PARAMETER(logSDR);
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
   PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
@@ -142,6 +143,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> R_0k = exp(logR_0k);
   vector<Type> h_k = exp(logh_k);
   vector<Type> q_f = exp(logq_f);
+  vector<Type> pi_acomp = exp(logpi_acomp);
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
   
@@ -1040,13 +1042,19 @@ Type objective_function<Type>::operator() ()
         for(int a=1;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) == -1){ // Flag if  there was a measurement that year
             sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
-            // if(acomp_flt_type(acomp_flt) == 0){
-              // sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*acomp_yafs_obs(y,a,acomp_flt,s) + 
-                // phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*comm_acomp_yafs_pred(y,a,surv_flt_acomp,s)); 
+            if(acomp_flt_type(acomp_flt) == 0){
+              sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                acomp_yafs_obs(y,a,acomp_flt,s) +
+               pi_acomp(acomp_flt)*
+               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+               comm_acomp_yafs_pred(y,a,acomp_flt,s)) -
+               - lgamma(pi_acomp(acomp_flt)*
+               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+               comm_acomp_yafs_pred(y,a,acomp_flt,s));;
             // } else{
               // sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*acomp_yafs_obs(y,a,acomp_flt,s) + 
                 // phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*surv_acomp_yafs_pred(y,a,surv_flt_acomp,s)); 
-            // } // end switch for comm or surv type
+            } // end switch for comm or surv type
             
             // ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)+1)-
             //   sum1(y)+

@@ -72,7 +72,7 @@ Type objective_function<Type>::operator() ()
   DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
   DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
   DATA_IMATRIX(acomp_flt_type); // 0 for commercial, 1 for survey
-  
+  DATA_ARRAY(acomp_yafs_obs);
   // // STORAGE ///
   // // Catches
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
@@ -1027,28 +1027,39 @@ Type objective_function<Type>::operator() ()
     } // end y
   } // end fish_flt
     
-  // // Likelihood: age comps in survey
-  // Type ans_survcomp = 0.0;
-  // Type ans_catchcomp = 0.0;
-  // vector<Type>sum1(tEnd);
-  // vector<Type>sum2(tEnd);
-  // sum1.setZero();
-  // sum2.setZero();
-  // 
-  // for(int surv_flt_acomp =0;surv_flt_acomp<(nfleets_acomp);surv_flt_acomp++){
-  //   for(int y=1;y<tEnd;y++){ // Loop over available years
-  //     if(flag_surv_acomp(y) == 1){ // Flag if  there was a measurement that year
-  //       for(int a=1;a<age_maxage;a++){ // Loop over other ages (first one is empty for survey)
-  //         // NOTE THAT THE survey_acomp_f_obs ARE IN A X y X FLEET, which is not the typical ordering
-  //         // need to replace SS_survey(y) with the number of samples from each year x fleet
-  //         sum1(y) += lgamma(ss_survey(y)*survey_acomp_f_obs(a,y,surv_flt_acomp)+1);
-  //         sum2(y) += lgamma(ss_survey(y)*survey_acomp_f_obs(a,y,surv_flt_acomp) + phi_survey*ss_survey(y)*survey_acomp_f_est(y,a,surv_flt_acomp)) -
-  //           lgamma(phi_survey*ss_survey(y)*survey_acomp_f_est(y,a,surv_flt_acomp));
-  //       } // end ages
-  //       ans_survcomp += lgamma(ss_survey(y)+1)-sum1(y)+lgamma(phi_survey*ss_survey(y))-lgamma(ss_survey(y)+phi_survey*ss_survey(y))+sum2(y);
-  //     } // end acomp flag
-  //   } // end y
-  // } // end survey acomp fleets
+  // Likelihood: age comps in survey
+  Type ans_survcomp = 0.0;
+  Type ans_catchcomp = 0.0;
+  vector<Type>sum1(tEnd); // survey comp likelihood
+  vector<Type>sum2(tEnd); // fishery comp likelihood
+  sum1.setZero();
+  sum2.setZero();
+  for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+    for(int y=1;y<tEnd;y++){ // Loop over available years      
+      for(int s=0;s<nsex;s++){
+        for(int a=1;a<nage;a++){ // Loop over other ages (first one is empty for survey)
+          if(acomp_yafs_obs(y,a,acomp_flt,s) == -1){ // Flag if  there was a measurement that year
+            sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
+            // if(acomp_flt_type(acomp_flt) == 0){
+              // sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*acomp_yafs_obs(y,a,acomp_flt,s) + 
+                // phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*comm_acomp_yafs_pred(y,a,surv_flt_acomp,s)); 
+            // } else{
+              // sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*acomp_yafs_obs(y,a,acomp_flt,s) + 
+                // phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)*surv_acomp_yafs_pred(y,a,surv_flt_acomp,s)); 
+            // } // end switch for comm or surv type
+            
+            // ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)+1)-
+            //   sum1(y)+
+            //   lgamma(phi_survey*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))-
+            //   lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)+
+            //   phi_survey*
+            //   Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+            //   sum2(y);
+          } // end acomp flag
+        } // end age
+      } // end sex
+    } // end y
+  } // end acomp fleets
   // 
   // 
   // vector<Type>sum3(tEnd);

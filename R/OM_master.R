@@ -1,6 +1,10 @@
 ## OM_Master.R
-## M S Kapur mod from N Jacobsen Summer 2020
+## M S Kapur 
+## Inspiration  from J Sullivan N Jacobsen Summer 2020
 ## kapurm@uw.edu
+file.copy("C:/Users/public/shire.cpp",here("TMB","shire.cpp"),
+          overwrite = TRUE)
+
 library(TMB)
 library(dplyr)
 library(reshape2)
@@ -11,8 +15,7 @@ library(ggsidekick)
 # compile(here("TMB","shire.cpp"))
 # compile("C:/Users/Maia\ Kapur/Dropbox/UW/sab-mse/TMB/shire.cpp")
 # dyn.load(dynlib(here("TMB","shire")))
-file.copy("C:/Users/public/shire.cpp",here("TMB","shire.cpp"),
-overwrite = TRUE)
+
 
 compile("C:/Users/public/shire.cpp")
 dyn.load(dynlib("C:/Users/public/shire"))

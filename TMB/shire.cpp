@@ -89,7 +89,7 @@ Type objective_function<Type>::operator() ()
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,nsex);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-5),nsex);  // five of the acomp fleets are surveys; the other two are fsh
   // F tuning
-  int niter = 50;
+  int niter = 5;
   array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
   array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
   array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
@@ -588,19 +588,19 @@ Type objective_function<Type>::operator() ()
           for(int i=0;i<(nspace);i++){
             switch(selType_fish(fish_flt)){
             case 0: // age sel
-              for(int a=0;a<(nage-1);a++){
+              for(int a=0;a<(nage);a++){
                 for(int s=0;s<nsex;s++){
                   Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
                 } // end sex for z a temp
                 for(int s=0;s<nsex;s++){
-                  // catch_afk_TEMP(a,fish_flt,k) +=
-                  //   F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
-                  //   (1-exp(-Z_a_TEMP[a]))*
-                  //   phi_if_fish(fish_flt,i)*
-                  //   fsh_slx_yafs(y,a,fish_flt,s)*
-                  //   N_yais_mid(y,a,i,s) *
-                  //   wtatlen_kab(phi_ik2(i),0) *
-                  //   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  catch_afk_TEMP(a,fish_flt,k) +=
+                    F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+                    (1-exp(-Z_a_TEMP[a]))*
+                    phi_if_fish(fish_flt,i)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i,s) *
+                    wtatlen_kab(phi_ik2(i),0) *
+                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 } // end sex
               } // end age
               break;
@@ -611,17 +611,17 @@ Type objective_function<Type>::operator() ()
                 } // end sex for z a temp
               } // end age for z a temp
               for(int l=0;l<(LBins);l++){
-                for(int a=0;a<(nage-1);a++){
+                for(int a=0;a<(nage);a++){
                   for(int s=0;s<nsex;s++){
-                    // catch_afk_TEMP(a,fish_flt,k) +=
-                    //   F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
-                    //   (1-exp(-Z_a_TEMP[a]))*
-                    //   phi_if_fish(fish_flt,i)*
-                    //   fsh_slx_yafs(y,l,fish_flt,s)*
-                    //   N_yais_mid(y,a,i,s)*
-                    //   LengthAge_alyis_mid(a,l,y,i,s)*
-                    //   wtatlen_kab(phi_ik2(i),0)*
-                    //   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                    catch_afk_TEMP(a,fish_flt,k) +=
+                      F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+                      (1-exp(-Z_a_TEMP[a]))*
+                      phi_if_fish(fish_flt,i)*
+                      fsh_slx_yafs(y,l,fish_flt,s)*
+                      N_yais_mid(y,a,i,s)*
+                      LengthAge_alyis_mid(a,l,y,i,s)*
+                      wtatlen_kab(phi_ik2(i),0)*
+                      pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                   } // end sex
                 } // end age
               } // end lbins
@@ -629,7 +629,7 @@ Type objective_function<Type>::operator() ()
             } // end selType_fish
           } // end space
           vector<Type>Adj(niter+1);
-          for(int a=0;a<(nage-1);a++){
+          for(int a=0;a<(nage);a++){
             Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
           }
           // Get new Z given ADJ - need to add discard here
@@ -685,7 +685,7 @@ Type objective_function<Type>::operator() ()
           latest_guess =    F2_yf(y, fish_flt, k);
         } // end hybrid F iterations
         // Define F, Z and predicted catches 
-        Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter-1); //final as Freal_yf
+        Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter); //final as Freal_yf
         
         // annoying multi-loops for F in area
         // get total N exploitable by this fleet

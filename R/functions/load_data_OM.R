@@ -102,8 +102,10 @@ load_data_OM <- function(nspace = 6,
   load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
   
   ## time blocks by fleet
-  srv_blks <- matrix(0, nrow = tEnd, ncol = nfleets_surv+(nfleets_acomp-2))
+  srv_blks <- matrix(0, nrow = tEnd, ncol = nfleets_surv+(nfleets_acomp-5))
   fsh_blks <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
+  # srv_blks <- matrix(tEnd-1, ncol = 1, nrow = nfleets_surv+(nfleets_acomp-5))
+  # fsh_blks <-  matrix(tEnd-1, ncol = 1, nrow = nfleets_fish)
   
   selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
   ## note that the first two acomp fleets are already inside seltype fish
@@ -392,6 +394,8 @@ load_data_OM <- function(nspace = 6,
     surv_selex_yafs = OM_surv_selex_yafs,
     fsh_blks = fsh_blks, ## currently not ready to be fleet-specific
     srv_blks = srv_blks,
+    # fsh_blks = t(fsh_blks), ## currently not ready to be fleet-specific
+    # srv_blks = t(srv_blks),
     #* ADDL PARS ----
     parms = parms,
     bfuture = bfuture

@@ -402,13 +402,13 @@ Type objective_function<Type>::operator() ()
       } // end space
     } // end sex
   } // end yinit
-
+  
   for(int y=0;y<(tEnd);y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
     // note that in tmb, plus group is in slot nage-1
     // so the incoming plus-groupers will be in slots nage-1 or nage-2 in prior year
-
+    
     
     // if (y == 0){
     //   for(int i=0;i<(nspace);i++){
@@ -539,7 +539,7 @@ Type objective_function<Type>::operator() ()
     // //   // Hybrid F tuning inputs & temp storage
     // Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
     // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      // if(catch_yf_obs(y,fish_flt+1) != -1){
+    // if(catch_yf_obs(y,fish_flt+1) != -1){
     // //     catch_yaf_pred.setZero();
     // //     catch_yf_pred.setZero();
     // //     catch_yfi_pred.setZero();
@@ -797,7 +797,7 @@ Type objective_function<Type>::operator() ()
     //     N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
     //   } // end subareas i
     // } // end sexes
-
+    
     // //reweight length-at-age given movement
     // for(int s=0;s<nsex;s++){
     //   for(int i=0;i<(nspace);i++){
@@ -1184,10 +1184,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(logh_k);
   ADREPORT(logq_f);
   REPORT(tildeR_yk);
-  REPORT(tildeR_initk)
-    
+  REPORT(tildeR_initk);
   REPORT(ans_tot);
-  
-    
-    return ans;
+  return ans;
 }

@@ -1,13 +1,13 @@
 load_data_OM <- function(nspace = 6, 
-                              nstocks = 4,
-                              myear = 2019,
-                              move = TRUE, 
-                              LBins = 81,
-                              logSDR = 1.4, 
-                              bfuture = 0.5,
-                              yr_future  = 0,
-                              b = 0.5
-                              ){
+                         nstocks = 4,
+                         myear = 2019,
+                         move = TRUE, 
+                         LBins = 81,
+                         logSDR = 1.4, 
+                         bfuture = 0.5,
+                         yr_future  = 0,
+                         b = 0.5
+){
   
   #' @nspace = Spatial areas
   #' @nstocks = demographic stocks
@@ -23,12 +23,12 @@ load_data_OM <- function(nspace = 6,
   
   
   
-   years <- 1960:(myear+yr_future)
+  years <- 1960:(myear+yr_future)
   nyear <- length(years)
   tEnd <- length(years)
   age <- 0:70 
   nage <- length(age)
- 
+  
   # Maturity ----
   load(here("input","input_data","OM_maturity_ak.rdata")) ## ak is age, stock
   # movement ----
@@ -45,7 +45,7 @@ load_data_OM <- function(nspace = 6,
   if(move == TRUE) {
     load(here("input","input_data","X_ijas.rdata"))
   } ## end move == TRUE
-
+  
   omega_ais <- array(0, dim = c(nage,nspace,2))## eigenvector for stable spatial distribution at age
   for(s in 1:2){
     for(a in 1:nage){
@@ -69,7 +69,7 @@ load_data_OM <- function(nspace = 6,
   
   ## Mortality ----
   load(here('input','input_data','M_k.rdata'))
-
+  
   ## Fleet [names and nfleets] ----
   ## build fleets
   ## makes the master flag_fleets matrix
@@ -80,15 +80,15 @@ load_data_OM <- function(nspace = 6,
   fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
   fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
   
-
+  
   
   nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
   nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
   nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
   nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
-
   
-
+  
+  
   # Catch ----
   catch <- read.csv(here("input","input_data","OM_catch.csv"))
   catch[is.na(catch)] <- -1
@@ -113,15 +113,15 @@ load_data_OM <- function(nspace = 6,
   selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-5))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   
-
+  
   
   if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
   survey[is.na(survey)] <- -1 ## flag for numeric TMB checks
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma.csv'))
-
-
+  
+  
   ## Comps ----
   ## Len comps [these are arrays by fleet]
   load(here("input","input_data",'OM_lencomps_female.rdata'))
@@ -136,7 +136,7 @@ load_data_OM <- function(nspace = 6,
   ## M X age
   load(here("input","input_data",'ageerr_ExpAge.rdata'))
   load(here("input","input_data",'ageerr_SD.rdata'))
-
+  
   ## Phi objects ----
   ## setup phi (spatial matching matrix) depending on spatial setup
   ## MAKE A NSPACE == 3 AND 1 OPTION FOR COMBINING
@@ -149,7 +149,7 @@ load_data_OM <- function(nspace = 6,
     phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
     rownames(phi_if_surv) <- names(survey)
     colnames(phi_if_surv) <- spmat$subarea
-
+    
     phi_if_surv[1,1] <-  phi_if_surv[2,2] <-  
       phi_if_surv[3:4,3:4]<-  phi_if_surv[5,5:6] <- 1
     
@@ -179,13 +179,13 @@ load_data_OM <- function(nspace = 6,
     phi_if_fish[c(1,3),1] <- phi_if_fish[c(2,4),2] <-   phi_if_fish[5:7,3:4] <-  
       phi_if_fish[c(8,9),5:6] <-  1
     
-   ## phi_im
+    ## phi_im
     phi_im <- matrix(0, ncol = 3, nrow = nspace)
     colnames(phi_im) <- unique(spmat$mgmt)
     rownames(phi_im) <- spmat$subarea
     phi_im[1:2,1] <- phi_im[3:4,2] <- phi_im[5:6,3] <- 1
     
-     ## phi_ik
+    ## phi_ik
     phi_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     rownames(phi_ki) <- unique(spmat$stock)
     colnames(phi_ki) <- spmat$subarea
@@ -198,7 +198,7 @@ load_data_OM <- function(nspace = 6,
     rownames(phi_ij) = colnames(phi_ij) = spmat$subarea
     diag(phi_ij) <- phi_ij[4,5] <- phi_ij[5,4] <- 0
     
-      
+    
     ## phi_fm
     phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
     rownames(phi_fm) = names(catch)[2:ncol(catch)]
@@ -215,14 +215,14 @@ load_data_OM <- function(nspace = 6,
     acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
     acomp_flt_type[c(3,5,6)] <- 1
     colnames(acomp_flt_type) <- fltnames_acomp
-
+    
     
     phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
     rownames(phi_lcomp_fm) = fltnames_lcomp
     colnames(phi_lcomp_fm) = c('AK','BC','WC')
     phi_lcomp_fm[1:6,1] <- phi_lcomp_fm[7:9,2]  <- phi_lcomp_fm[10,3]  <- 1
     
-
+    
     ## tau_ki
     tau_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     rownames(tau_ki) <- unique(spmat$stock)
@@ -234,12 +234,12 @@ load_data_OM <- function(nspace = 6,
     phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
     phi_ki <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
     phi_ik2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
-   
+    
     # phi_fm <- matrix(0, nrow = nspace, ncol = 2)
     # phi_fm[1,1] <- phi_fm[2,2] <- 1
     phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
     phi_fm[1:2,1] <- phi_fm[3,3]  <- 1
-     ## autogenerate stock-distinction matrix
+    ## autogenerate stock-distinction matrix
     phi_ij <-  matrix(NA, byrow = TRUE, ncol = nspace, nrow = nspace)
     for(i in 1:nspace){
       for(j in 1:nspace){
@@ -248,7 +248,7 @@ load_data_OM <- function(nspace = 6,
     }
     tau_ki <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
   }
-
+  
   # b <- matrix(NA, nyear)
   # Yr <- 1946:max(years)
   # # Parameters 
@@ -282,8 +282,8 @@ load_data_OM <- function(nspace = 6,
   #   #   stop('why')
   #   # }
   # }  
-
-
+  
+  
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
@@ -298,8 +298,8 @@ load_data_OM <- function(nspace = 6,
     log_fsh_slx_pars = array(0.2, dim = c(nfleets_fish,2,1,2)),
     log_srv_slx_pars =  array(0.4, dim = c( nfleets_surv+(nfleets_acomp-5),2,1,2))
   )
-
-
+  
+  
   # alpha_g1 <- c(62.8329, 63.6959, 33.8898, 54.1045, 64.2127) ## trap ll twl std strs
   # beta_g1 <- c(7.04483, 3.09715, 1.41494, 4.55724, 12.9197)
   
@@ -322,7 +322,7 @@ load_data_OM <- function(nspace = 6,
   load(here('input','input_data','unfished_ALK.rdata'))
   load(here('input','input_data','mla_yais.rdata')) ## from prelim runs, for ssb0
   
- ## Return df ----
+  ## Return df ----
   df <-list(    
     #* MODEL STRUCTURE ----
     nage = nage,
@@ -350,7 +350,7 @@ load_data_OM <- function(nspace = 6,
     fltnames_fish = fltnames_fish,
     fltnames_acomp = fltnames_acomp,
     fltnames_lcomp = fltnames_lcomp,
-
+    
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
     phi_if_acomp = phi_if_acomp,

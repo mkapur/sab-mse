@@ -29,15 +29,15 @@ mappy <- list(
   logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60)),  
   logpi_acomp = factor(rep(NA,df$nfleets_acomp)),
-  logSDR = factor(NA),
+  logSDR = factor(NA)#,
   ## structure is fleet x alpha, beta x time block (1 for now)x sex 
-  log_fsh_slx_pars = factor(array(NA, dim = c(df$nfleets_fish,2,1,2))),
-  log_srv_slx_pars =  factor(array(NA, dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2)))
+  # log_fsh_slx_pars = factor(array(NA, dim = c(df$nfleets_fish,2,1,2))),
+  # log_srv_slx_pars =  factor(array(NA, dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2)))
 )
 p = proc.time()
 obj <- MakeADFun(df,
                  parameters = df$parms,
-                 # map = mappy, ## fix everything
+                 map = mappy, ## fix everything
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
 proc.time()-p

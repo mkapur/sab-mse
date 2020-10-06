@@ -403,7 +403,7 @@ Type objective_function<Type>::operator() ()
     } // end sex
   } // end yinit
   
-  for(int y=35;y<(tEnd);y++){ // Start y loop
+  for(int y=55;y<(tEnd);y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
     // note that in tmb, plus group is in slot nage-1

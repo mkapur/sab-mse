@@ -781,7 +781,7 @@ Type objective_function<Type>::operator() ()
     // //     } // end space
     //   } // end -1 NA trap
     // }// end nfleets_fish
-    // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
+    std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
     // N_yais_end ----
     //fill EOY and beginning of next year using Ztuned
     //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder

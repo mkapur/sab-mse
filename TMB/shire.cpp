@@ -1091,11 +1091,11 @@ Type objective_function<Type>::operator() ()
   }
   // Likelihood: Error for Selectivity
   Type ans_psel = 0.0;
-  for(int y=0;y<year_sel;y++){ // Start y loop
-    for(int i=0;i<psel_fish.size();i++){ // Start y loop
-      ans_psel += Type(0.5)*(PSEL(i,y)*PSEL(i,y))/(sigma_psel*sigma_psel);
-    }
-  }
+  // for(int y=0;y<year_sel;y++){ // Start y loop
+  //   for(int i=0;i<psel_fish.size();i++){ // Start y loop
+  //     ans_psel += Type(0.5)*(PSEL(i,y)*PSEL(i,y))/(sigma_psel*sigma_psel);
+  //   }
+  // }
   
   // // Likelihood: Priors on h and M
   Type ans_priors = 0.0;

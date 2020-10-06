@@ -9,6 +9,9 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 compile(here("TMB","shire.cpp"))
+compile("C:/Users/Maia<WS*>Kapur/Dropbox/UW/sab-mse/TMB/shire.cpp")
+
+
 dyn.load(dynlib(here("TMB","shire")))
 
 source(here("R","functions",'load_files_OM.R'))

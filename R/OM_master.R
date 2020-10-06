@@ -8,25 +8,50 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-compile(here("TMB","shire.cpp"))
-compile("C:/Users/Maia<WS*>Kapur/Dropbox/UW/sab-mse/TMB/shire.cpp")
-
-
+# compile(here("TMB","shire.cpp"))
+# compile("C:/Users/Maia\ Kapur/Dropbox/UW/sab-mse/TMB/shire.cpp")
 dyn.load(dynlib(here("TMB","shire")))
+
+
+compile("C:/Users/public/shire.cpp")
+dyn.load(dynlib("C:/Users/public/shire"))
+
+
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
 p = proc.time()
+
+mappy <- list(
+  logh_k = rep(NA, 4),
+  logR_0k = rep(NA, 4), ## sum wc = 12
+  omega_0ij = matrix(NA, nrow = nrow(df$parms$omega_0ij), ncol = nrow(df$parms$omega_0ij)),
+  logq_f = rep(NA, 5),
+  b =rep(NA, 60),  
+  logpi_acomp = rep(NA,df$nfleets_acomp),
+  logSDR = NA,
+  ## structure is fleet x alpha, beta x time block (1 for now)x sex 
+  log_fsh_slx_pars = array(NA, dim = c(df$nfleets_fish,2,1,2)),
+  log_srv_slx_pars =  array(NA, dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2))
+)
+
 obj <- MakeADFun(df,
                  parameters = df$parms,
-                 # map = list("omega_0ij" = NA),Z
+                 map =mappy, ## fix everything
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
 opt <- TMBhelper::fit_tmb(obj) ## estimate
 proc.time()-p
 
+
+p = proc.time()
 reps <- obj$report() ## return values with uncertainty
+proc.time()-p
+
+
+reps$R_yk
+reps$N_yais_end
 
 save(obj, file = here("TMB",paste0('obj_',Sys.Date(),".rdata")))
 save(opt, file = here("TMB",paste0('opt_',Sys.Date(),".rdata")))

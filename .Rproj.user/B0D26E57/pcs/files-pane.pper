@@ -1,6 +1,10 @@
 {
-    "path" : "C:/Users/Maia Kapur/Dropbox/UW/sab-mse/PacifichakeMSE-master/Spatial MSE",
+    "path" : "C:/Users/Maia Kapur/Dropbox/UW/sab-mse/TMB",
     "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
         {
             "ascending" : true,
             "columnIndex" : 2

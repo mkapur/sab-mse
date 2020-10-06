@@ -8,26 +8,27 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-source(here("R","functions",'load_files_OM.R'))
+compile(here("TMB","shire.cpp"))
+dyn.load(dynlib(here("TMB","shire")))
 
+source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
 p = proc.time()
-# compile(here("TMB","shire.cpp"))
-dyn.load(dynlib(here("TMB","shire")))
 obj <- MakeADFun(df,
                  parameters = df$parms,
-                 # map = list("omega_0ij" = NA),
+                 # map = list("omega_0ij" = NA),Z
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
+opt <- TMBhelper::fit_tmb(obj) ## estimate
 proc.time()-p
 
+reps <- obj$report() ## return values with uncertainty
 
 save(obj, file = here("TMB",paste0('obj_',Sys.Date(),".rdata")))
+save(opt, file = here("TMB",paste0('opt_',Sys.Date(),".rdata")))
+save(reps, file = here("TMB",paste0('reps_',Sys.Date(),".rdata")))
 
-opt <- TMBhelper::fit_tmb(obj) ## estimate
-
-reps <- obj$report() ## return values with uncertainty
 
 
 

@@ -90,6 +90,7 @@ Type objective_function<Type>::operator() ()
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-5),nsex);  // five of the acomp fleets are surveys; the other two are fsh
   // F tuning
   int niter = 2;
+  array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
   array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
   array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
   array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
@@ -246,7 +247,7 @@ Type objective_function<Type>::operator() ()
           } // end sex for case 1
           break;
         } // end switch selType
-        i++;
+      i++;
       } while (i <= fsh_blks(y,fish_flt)); // bracket i estimation for years designated by this block
     } // end y blocks
   } // end fish_flt
@@ -265,7 +266,7 @@ Type objective_function<Type>::operator() ()
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
   for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-5));srv_flt++){ // loop fleets
-    int i = 0; // re-set i to 0 
+    int i = 0; // re-set i to 0
     for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
         switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
@@ -407,6 +408,8 @@ Type objective_function<Type>::operator() ()
     // note we are assuming unfished here as the exponent is M only
     // note that in tmb, plus group is in slot nage-1
     // so the incoming plus-groupers will be in slots nage-1 or nage-2 in prior year
+    std::cout << y << "main model year loop" << "\n";
+    
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
@@ -443,563 +446,563 @@ Type objective_function<Type>::operator() ()
         } // end sexes
       } // end subareas i
     } // end y == 0
-    
-    Type lenstep = 0.0; Type lenslope = 0.0;
-    // N- and Nominal Length - at-age for the middle of this year and beginning of next
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
-        // linear growth below A4 as in synthesis
-        if(L1_yk(y,phi_ik2(i),s) < 3){
-          lenstep = L1_yk(y,phi_ik2(i),s);
-          lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
-        } else if(L1_yk(y,phi_ik2(i),s) >= 3){
-          lenstep = 3.0;
-          lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
-        }
-        for(int a=0;a<4;a++){
-          Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
-        } // end linear age
-        Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
-        for(int a=0;a<4;a++){
-          Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
-            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
-        } // end linear age
-        for(int a=1;a<(nage-1);a++){
-          Type pLeave = 0.0; Type NCome = 0.0;
-          for(int j=0;j<(nspace);j++){
-            if(i != j){
-              pLeave += X_ijas(i,j,a,s);
-              NCome += X_ijas(j,i,a,s)*N_yais_beg(y,a,j,s);
-            } // end i != j
-          } // end subareas j
-          N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mat_age(a)/2);
-        } // end ages for N
-        for(int a=5;a<(nage-1);a++){
-          Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) + 
-            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
-            (1-exp(-kappa_yk(y,phi_ik2(i),s)));
-          Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
-            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-        } // end nonlinear growth ages
-        // plus groups
-        Type pLeave = 0.0; Type NCome = 0.0;
-        for(int j=0;j<(nspace);j++){
-          if(i != j){
-            pLeave += X_ijas(i,j,nage-1,s);
-            NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s) + N_yais_beg(y,nage-2,j,s));
-          } // end i != j
-        } // end subareas j
-        N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mat_age(nage-1)/2);
-        // plus group weighted average (we already have the numbers at age)
-        Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
-          (Length_yais_beg(y,nage-2,i,s)+
-          (Linf_yk(y,phi_ik2(i),s))-
-          Length_yais_beg(y,nage-2,i,s)*
-          (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
-          N_yais_beg(y,nage-1,i,s)  *
-          (Length_yais_beg(y,nage-1,i,s) +
-          (Linf_yk(y,phi_ik2(i),s) -
-          Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
-        // 
-        Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
-          (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-          Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
-          N_yais_mid(y,nage-1,i,s)*
-          (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-          Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
-      } // end subareas i
-    } // end sexes
-    
-    // prob of length-at-age
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage);a++){
-          LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          for(int l=1;l<(LBins-1);l++){
-            LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-              pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-            LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-              pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          } // end LBins
-          LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-        } // end ages
-      } // end nspace
-    } // end sex
-    
-    //   // Catch at beginning of year
-    //   // Hybrid F tuning inputs & temp storage
-    Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
-    array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
-    
-    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(y,fish_flt+1) != -1){
-        catch_yaf_pred.setZero();
-        catch_yf_pred.setZero();
-        catch_yfi_pred.setZero();
-        catch_yaif_pred.setZero();
-        
-        Type denom = 0;
-        for(int s=0;s<nsex;s++){
-          for(int i=0;i<(nspace);i++){
-            switch(selType_fish(fish_flt)){
-            case 0: // age sel
-              for(int a=1;a<(nage);a++){
-                denom += phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y,a,fish_flt,s)*
-                  N_yais_mid(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
-                  catch_yf_obs(y,fish_flt+1);
-              } // end age
-              break;
-            case 1: // length sel
-              for(int a=1;a<(nage);a++){
-                for(int l=1;l<(LBins);l++){
-                  denom += phi_if_fish(fish_flt,i)*
-                    fsh_slx_yafs(y,a,fish_flt,s)*
-                    N_yais_mid(y,a,i,s)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),1))+
-                    catch_yf_obs(y,fish_flt+1);
-                } // end length
-              } // end age
-              break;
-            } // end selType_fish          
-          } // end space
-        } // end sex
-        F1_yf(y,fish_flt,1) = catch_yf_obs(y, fish_flt)/denom;
-        Type latest_guess = F1_yf(y,fish_flt,1);
-        
-        // k iterations
-        for(int k=2;k<(niter+1);k++){
-          // modify the guess Eq 20
-          Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
-          Type term1 = latest_guess*term0;
-          Type term2 = v1*(1-term0);
-          F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
-          vector<Type>Z_a_TEMP(nage);
-          for(int i=0;i<(nspace);i++){
-            switch(selType_fish(fish_flt)){
-            case 0: // age sel
-              for(int a=0;a<(nage);a++){
-                for(int s=0;s<nsex;s++){
-                  Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
-                } // end sex for z a temp
-                for(int s=0;s<nsex;s++){
-                  catch_afk_TEMP(a,fish_flt,k) +=
-                    F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
-                    (1-exp(-Z_a_TEMP[a]))*
-                    phi_if_fish(fish_flt,i)*
-                    fsh_slx_yafs(y,a,fish_flt,s)*
-                    N_yais_mid(y,a,i,s) *
-                    wtatlen_kab(phi_ik2(i),0) *
-                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                } // end sex
-              } // end age
-              break;
-            case 1: // length sel
-              for(int a=1;a<(nage-1);a++){
-                for(int s=0;s<nsex;s++){
-                  Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
-                } // end sex for z a temp
-              } // end age for z a temp
-              for(int l=0;l<(LBins);l++){
-                for(int a=0;a<(nage);a++){
-                  for(int s=0;s<nsex;s++){
-                    catch_afk_TEMP(a,fish_flt,k) +=
-                      F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
-                      (1-exp(-Z_a_TEMP[a]))*
-                      phi_if_fish(fish_flt,i)*
-                      fsh_slx_yafs(y,l,fish_flt,s)*
-                      N_yais_mid(y,a,i,s)*
-                      LengthAge_alyis_mid(a,l,y,i,s)*
-                      wtatlen_kab(phi_ik2(i),0)*
-                      pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                  } // end sex
-                } // end age
-              } // end lbins
-              break;
-            } // end selType_fish
-          } // end space
-          vector<Type>Adj(niter+1);
-          for(int a=0;a<(nage);a++){
-            Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
-          }
-          // Get new Z given ADJ - need to add discard here
-          vector<Type>Z_a_TEMP2(nage);
-          Z_a_TEMP2.setZero();
-          for(int a=0;a<(nage);a++){
-            for(int s=0;s<nsex;s++){
-              Z_a_TEMP2(a) += Adj(k)  *
-                fsh_slx_yafs(y, a, fish_flt, s) * F1_yf(y, fish_flt, k) +
-                mat_age(a);
-            } // end sex
-          } // end age
-          
-          // Second Guess for F (EQ 24)
-          Type denom = 0;
-          for(int s=0;s<nsex;s++){
-            for(int i=0;i<(nspace);i++){
-              switch(selType_fish(fish_flt)){
-              case 0: // age sel
-                for(int a=1;a<(nage);a++){
-                  denom += phi_if_fish(fish_flt,i)*
-                    fsh_slx_yafs(y,a,fish_flt,s)*
-                    N_yais_mid(y,a,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1))*
-                    (1-exp(-Z_a_TEMP2(a))) * (F1_yf(y,fish_flt,k)/(Z_a_TEMP2(a)));
-                } // end age
-                break;
-              case 1: // length sel
-                for(int a=1;a<(nage);a++){
-                  for(int l=1;l<(LBins);l++){
-                    denom += phi_if_fish(fish_flt,i)*
-                      fsh_slx_yafs(y,a,fish_flt,s)*
-                      N_yais_mid(y,a,i,s)*
-                      LengthAge_alyis_mid(a,l,y,i,s)*
-                      wtatlen_kab(phi_ik2(i),0)*
-                      pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),1))*
-                      (1-exp(-Z_a_TEMP2(a))) * (F1_yf(y,fish_flt,k)/(Z_a_TEMP2(a)));
-                  } // end length
-                } // end age
-                break;
-              } // end selType_fish
-            } // end space
-          } // end sex
-          
-          F2_yf(y, fish_flt, k) = catch_yf_obs(y, fish_flt+1)/denom;
-          
-          // Modify the guess again Eq 25
-          term0 = 1/(1+exp(v2*( F2_yf(y,fish_flt,k )- v1*Fmax)));
-          term1 = F2_yf(y,fish_flt,k)*term0;
-          term2 = v1*(1-term0);
-          F2_yf(y, fish_flt, k) = -log(1-(term1+term2));
-          latest_guess =    F2_yf(y, fish_flt, k);
-        } // end hybrid F iterations
-        // Define F, Z and predicted catches 
-        Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter); //final as Freal_yf
-        
-        // annoying multi-loops for F in area
-        // get total N exploitable by this fleet
-        for(int a=1;a<(nage-1);a++){
-          for(int i=0;i<(nspace);i++){
-            for(int s=0;s<nsex;s++){
-              N_avail_yf(y,fish_flt) += phi_if_fish(fish_flt, i)*N_yais_mid(y,a,i,s);
-            } // end sex
-          } // end nspace
-        } // end nage
-        
-        // get ratio of N in area & reweight F
-        // will just return Freal and 1 for single-area fisheries
-        for(int i=0;i<(nspace);i++){
-          for(int a=1;a<(nage-1);a++){
-            for(int s=0;s<nsex;s++){
-              N_weight_yfi(y,fish_flt, i) = (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
-            } // end sex
-          } // end age
-          F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
-        } // end space
-        
-        // add together for mgmt regions
-        for(int m=1;m<(nmgmt_reg);m++){
-          F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
-        } // end mgmt regions
-        
-        // generate predicted catches
-        for(int i=0;i<(nspace);i++){
-          switch(selType_fish(fish_flt)){
-          case 0: // age sel
-            for(int a=0;a<(nage-1);a++){
-              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
-              
-              for(int s=0;s<nsex;s++){
-                catch_yaf_pred(y,a,fish_flt) +=
-                  Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
-                  (1-exp(- Zreal_ya(y,a) ))*
-                  phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y,a,fish_flt,s)*
-                  N_yais_mid(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                
-                catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
-                  ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
-                    phi_if_fish(fish_flt, i)*
-                    fsh_slx_yafs(y,a,fish_flt,s)*
-                    N_yais_mid(y,a,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-              } // end sex
-            } // end age
-            break;
-            
-          case 1: // length sel
-            for(int a=0;a<(nage);a++){
-              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
-            } // end age for Z
-            for(int l=0;l<(LBins);l++){
-              for(int a=0;a<(nage);a++){
-                for(int s=0;s<nsex;s++){
-                  catch_yaf_pred(y,a,fish_flt) +=
-                    Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
-                    (1-exp(- Zreal_ya(y,a) ))*
-                    phi_if_fish(fish_flt,i)*
-                    fsh_slx_yafs(y,l,fish_flt,s)*
-                    N_yais_mid(y,a,i,s)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                  
-                  catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
-                    ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
-                      phi_if_fish(fish_flt,i)*
-                      fsh_slx_yafs(y,l,fish_flt,s)*
-                      N_yais_mid(y,a,i,s)*
-                      LengthAge_alyis_mid(a,l,y,i,s)*
-                      wtatlen_kab(phi_ik2(i),0)*
-                      pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                } // end sex
-              } // end age
-            } // end lbins
-            break;
-          } // end selType_fish
-          for(int a=0;a<(nage);a++){
-            catch_yfi_pred(y,fish_flt,i) += catch_yaif_pred(y,a,i,fish_flt);
-            catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
-          } // end age
-        } // end space
-      } // end -1 NA trap
-    }// end nfleets_fish
-    
-    // N_yais_end ----
-    //fill EOY and beginning of next year using Ztuned
-    //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
-    //of the mortality and the tuned F extraction.
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage-1);a++){
-          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
-        }
-        for(int a=2;a<(nage-1);a++){
-          N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
-        }
-        N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
-      } // end subareas i
-    } // end sexes
-    
-    //reweight length-at-age given movement
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage);a++){
-          Type LCome = 0.0; Type NCome = 0.0;
-          for(int j=0;j<(nspace);j++){
-            if(i != j){
-              LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
-              NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
-            }
-          } // end subareas j
-          Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-            (N_yais_end(y,a,i,s)+NCome);
-          Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-            (N_yais_end(y,a,i,s)+NCome);
-          
-        } // end ages
-      } // end subareas i
-    } // end sexes
-    
-    // SSB_yi, SSB_yk
-    for(int i=0;i<(nspace);i++){
-      for(int a=1;a<(nage);a++){
-        SSB_yi(y,i) += N_yais_end(y,a,i,0)*
-          wtatlen_kab(phi_ik2(i),0)*
-          pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2(i),1))*
-          mat_ak(a,phi_ik2(i));
-      } // end ages
-      
-    } // end space
-    for(int k=0;k<(nstocks);k++){
-      for(int i=0;i<(nspace);i++){
-        SSB_yk(y,k) +=  phi_ki(k,i)*SSB_yi(y,i);
-      } // end stocks
-    } // end space
-    for(int m=0;m<(nmgmt_reg);m++){
-      for(int i=0;i<(nspace);i++){
-        SSB_ym(y,m) += phi_im(i,m)*SSB_yi(y,i);
-      } // end space
-    } //end mgmt
-    
-    // R_yi, R_yk
-    for(int k=0;k<(nstocks);k++){
-      // SSB_yk already has summation
-      R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
-        (SSB_0k(k)*(1-h_k(k))+
-          SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk(y,k));
-    }  // end stocks
-    for(int i=0;i<(nspace);i++){
-      R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i); /// downscale to subarea including age-0 movement
-      N_yais_beg(y+1,1,i,0) = 0.5*R_yi(y,i);
-      N_yais_beg(y+1,1,i,1) = 0.5*R_yi(y,i);
-    } /// end space
-    for(int m=0;m<(nmgmt_reg);m++){
-      for(int i=0;i<(nspace);i++){
-        R_ym(y,m) += phi_im(i,m)*R_yi(y,i);
-      } // end space
-    } //end mgmt
-    // Estimate survey biomass at midyear
-    for(int i=0;i<(nspace);i++){
-      for(int s=0;s<nsex;s++){
-        for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-          if(surv_yf_obs(y,surv_flt) != -1){
-            switch(selType_surv(surv_flt)){
-            case 0: // age sel
-              for(int a=0;a<nage;a++){
-                surv_yf_pred(y,surv_flt) += q_f(surv_flt)*
-                  srv_slx_yafs(y,a,surv_flt,s)*
-                  phi_if_surv(surv_flt,i)*
-                  N_yais_mid(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                
-                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
-                  phi_if_surv(surv_flt,i)*
-                  N_yais_mid(y,a,i,s);
-              } // end ages
-              break;
-            case 1:
-              for(int l=0;l<(LBins);l++){
-                for(int a=0;a<(nage);a++){
-                  surv_yf_pred(y,surv_flt) +=  q_f(surv_flt)*
-                    srv_slx_yafs(y,l,surv_flt,s)*
-                    phi_if_surv(surv_flt,i)*
-                    N_yais_mid(y,a,i,s)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                  
-                  Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,l,surv_flt,s)*
-                    phi_if_surv(surv_flt,i)*
-                    N_yais_mid(y,a,i,s);
-                }
-              }
-              break;
-            } // end selType_fish
-          } // end check that it's not an NA year
-        } // end survey fleets
-      } // end sexes
-    } // end nspace
-    
-    // predicted age comps, given error
-    for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-      // age 0
-      acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
-      // Loop over ages
-      for(int a=1;a<(nage-1);a++){
-        acomp_yaf_temp(y,a,acomp_flt) =
-          pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
-          pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
-      } // end ages
-      acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
-                     age_error(phi_fm_acomp2(acomp_flt),nage-1),
-                     age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
-      
-      // calculate nsamp within this loop
-      for(int i=0;i< nspace;i++){
-        for(int s=0;s<nsex;s++){
-          for(int a=0;a<(nage-1);a++){
-            if(acomp_flt_type(acomp_flt) == 0){
-              switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
-              case 0: // age sel fish fleet
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-                  fsh_slx_yafs(y,a,phi_ff_acomp(acomp_flt,0),s)*
-                  phi_if_acomp(acomp_flt,i)*
-                  N_yais_mid(y,a,i,s);
-                break;
-              case 1: // len sel fish fleet
-                for(int l=0;l< LBins;l++){
-                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-                    fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
-                    phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
-                    N_yais_mid(y,a,i,s);
-                } // end LBins
-                break;
-              } //end selType switch for comms
-            }else{
-              if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-                  srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
-                  phi_if_acomp(acomp_flt,i)*
-                  N_yais_mid(y,a,i,s);
-              }else{
-                for(int l=0;l< LBins;l++){
-                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-                    srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
-                    phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
-                    N_yais_mid(y,a,i,s);
-                } // end LBins
-              } // end selType switch for survs
-            } // end fltType switch
-          } // end ages for nsamp
-        } // end sex loop for nsamp
-      } // end nspace for nsamp
-      
-      for(int a=1;a<(nage);a++){
-        for(int i=0;i<(nspace);i++){
-          for(int s=0;s<nsex;s++){
-            if(acomp_flt_type(acomp_flt) == 0){
-              switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
-              case 0: // age sel fish fleet
-                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
-                  acomp_yaf_temp(y,a,acomp_flt)*
-                  fsh_slx_yafs(y,a,acomp_flt,s)*
-                  phi_if_acomp(acomp_flt,i)*
-                  N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-                break;
-              case 1: // len sel fish fleet
-                for(int l=0;l< LBins;l++){
-                  comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
-                    acomp_yaf_temp(y,a,acomp_flt)*
-                    fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
-                    phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
-                    N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-                } // end LBins
-                break;
-              } //end selType switch for comms
-            }else{
-              if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
-                
-                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) += 
-                  acomp_yaf_temp(y,a,acomp_flt)*
-                  srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
-                  phi_if_acomp(acomp_flt,i)*
-                  N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-              }else{
-                for(int l=1;l<(LBins);l++){
-                  surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
-                    acomp_yaf_temp(y,a,acomp_flt)*
-                    srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
-                    phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
-                    N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-                } // end lbins
-              } // end seltype surv ifelse
-            } // end acomp fleet type
-          } // end sex
-        } // end space
-      } // end age
-    } // end acomp fleets
+    // 
+    // Type lenstep = 0.0; Type lenslope = 0.0;
+    // // N- and Nominal Length - at-age for the middle of this year and beginning of next
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
+    //     // linear growth below A4 as in synthesis
+    //     if(L1_yk(y,phi_ik2(i),s) < 3){
+    //       lenstep = L1_yk(y,phi_ik2(i),s);
+    //       lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+    //     } else if(L1_yk(y,phi_ik2(i),s) >= 3){
+    //       lenstep = 3.0;
+    //       lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+    //     }
+    //     for(int a=0;a<4;a++){
+    //       Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
+    //     } // end linear age
+    //     Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
+    //     for(int a=0;a<4;a++){
+    //       Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
+    //         (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
+    //     } // end linear age
+    //     for(int a=1;a<(nage-1);a++){
+    //       Type pLeave = 0.0; Type NCome = 0.0;
+    //       for(int j=0;j<(nspace);j++){
+    //         if(i != j){
+    //           pLeave += X_ijas(i,j,a,s);
+    //           NCome += X_ijas(j,i,a,s)*N_yais_beg(y,a,j,s);
+    //         } // end i != j
+    //       } // end subareas j
+    //       N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mat_age(a)/2);
+    //     } // end ages for N
+    //     for(int a=5;a<(nage-1);a++){
+    //       Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) + 
+    //         (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
+    //         (1-exp(-kappa_yk(y,phi_ik2(i),s)));
+    //       Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
+    //         (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+    //         (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+    //     } // end nonlinear growth ages
+    //     // plus groups
+    //     Type pLeave = 0.0; Type NCome = 0.0;
+    //     for(int j=0;j<(nspace);j++){
+    //       if(i != j){
+    //         pLeave += X_ijas(i,j,nage-1,s);
+    //         NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s) + N_yais_beg(y,nage-2,j,s));
+    //       } // end i != j
+    //     } // end subareas j
+    //     N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mat_age(nage-1)/2);
+    //     // plus group weighted average (we already have the numbers at age)
+    //     Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
+    //       (Length_yais_beg(y,nage-2,i,s)+
+    //       (Linf_yk(y,phi_ik2(i),s))-
+    //       Length_yais_beg(y,nage-2,i,s)*
+    //       (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
+    //       N_yais_beg(y,nage-1,i,s)  *
+    //       (Length_yais_beg(y,nage-1,i,s) +
+    //       (Linf_yk(y,phi_ik2(i),s) -
+    //       Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
+    //         (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
+    //     // 
+    //     Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
+    //       (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+    //       Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
+    //       N_yais_mid(y,nage-1,i,s)*
+    //       (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+    //       Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
+    //         (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
+    //   } // end subareas i
+    // } // end sexes
+    // 
+    // // prob of length-at-age
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=1;a<(nage);a++){
+    //       LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       for(int l=1;l<(LBins-1);l++){
+    //         LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //         LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       } // end LBins
+    //       LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //     } // end ages
+    //   } // end nspace
+    // } // end sex
+    // 
+    // //   // Catch at beginning of year
+    // //   // Hybrid F tuning inputs & temp storage
+    // Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
+    // 
+    // 
+    // // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    // //   if(catch_yf_obs(y,fish_flt+1) != -1){
+    // //     catch_yaf_pred.setZero();
+    // //     catch_yf_pred.setZero();
+    // //     catch_yfi_pred.setZero();
+    // //     catch_yaif_pred.setZero();
+    // //     // catch_afk_TEMP.setZero();
+    // //     Type denom = 0;
+    // //     for(int s=0;s<nsex;s++){
+    // //       for(int i=0;i<(nspace);i++){
+    // //         switch(selType_fish(fish_flt)){
+    // //         case 0: // age sel
+    // //           for(int a=1;a<(nage);a++){
+    // //             denom += phi_if_fish(fish_flt,i)*
+    // //               fsh_slx_yafs(y,a,fish_flt,s)*
+    // //               N_yais_mid(y,a,i,s)*
+    // //               wtatlen_kab(phi_ik2(i),0)*
+    // //               pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
+    // //               catch_yf_obs(y,fish_flt+1);
+    // //           } // end age
+    // //           break;
+    // //         case 1: // length sel
+    // //           for(int a=1;a<(nage);a++){
+    // //             for(int l=1;l<(LBins);l++){
+    // //               denom += phi_if_fish(fish_flt,i)*
+    // //                 fsh_slx_yafs(y,a,fish_flt,s)*
+    // //                 N_yais_mid(y,a,i,s)*
+    // //                 LengthAge_alyis_mid(a,l,y,i,s)*
+    // //                 wtatlen_kab(phi_ik2(i),0)*
+    // //                 pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),1))+
+    // //                 catch_yf_obs(y,fish_flt+1);
+    // //             } // end length
+    // //           } // end age
+    // //           break;
+    // //         } // end selType_fish          
+    // //       } // end space
+    // //     } // end sex
+    // //     F1_yf(y,fish_flt,1) = catch_yf_obs(y, fish_flt)/denom;
+    // //     Type latest_guess = F1_yf(y,fish_flt,1);
+    // //     
+    // //     // k iterations
+    // //     for(int k=2;k<(niter+1);k++){
+    // //       // modify the guess Eq 20
+    // //       Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
+    // //       Type term1 = latest_guess*term0;
+    // //       Type term2 = v1*(1-term0);
+    // //       F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
+    // //       vector<Type>Z_a_TEMP(nage);
+    // //       for(int i=0;i<(nspace);i++){
+    // //         switch(selType_fish(fish_flt)){
+    // //         case 0: // age sel
+    // //           for(int a=0;a<(nage);a++){
+    // //             for(int s=0;s<nsex;s++){
+    // //               Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+    // //             } // end sex for z a temp
+    // //             for(int s=0;s<nsex;s++){
+    // //               catch_afk_TEMP(a,fish_flt,k) +=
+    // //                 F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+    // //                 (1-exp(-Z_a_TEMP[a]))*
+    // //                 phi_if_fish(fish_flt,i)*
+    // //                 fsh_slx_yafs(y,a,fish_flt,s)*
+    // //                 N_yais_mid(y,a,i,s) *
+    // //                 wtatlen_kab(phi_ik2(i),0) *
+    // //                 pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    // //             } // end sex
+    // //           } // end age
+    // //           break;
+    // //         case 1: // length sel
+    // //           for(int a=1;a<(nage-1);a++){
+    // //             for(int s=0;s<nsex;s++){
+    // //               Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+    // //             } // end sex for z a temp
+    // //           } // end age for z a temp
+    // //           for(int l=0;l<(LBins);l++){
+    // //             for(int a=0;a<(nage);a++){
+    // //               for(int s=0;s<nsex;s++){
+    // //                 catch_afk_TEMP(a,fish_flt,k) +=
+    // //                   F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
+    // //                   (1-exp(-Z_a_TEMP[a]))*
+    // //                   phi_if_fish(fish_flt,i)*
+    // //                   fsh_slx_yafs(y,l,fish_flt,s)*
+    // //                   N_yais_mid(y,a,i,s)*
+    // //                   LengthAge_alyis_mid(a,l,y,i,s)*
+    // //                   wtatlen_kab(phi_ik2(i),0)*
+    // //                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    // //               } // end sex
+    // //             } // end age
+    // //           } // end lbins
+    // //           break;
+    // //         } // end selType_fish
+    // //       } // end space
+    // //       vector<Type>Adj(niter+1);
+    // //       for(int a=0;a<(nage);a++){
+    // //         Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
+    // //       }
+    // //       // Get new Z given ADJ - need to add discard here
+    // //       vector<Type>Z_a_TEMP2(nage);
+    // //       Z_a_TEMP2.setZero();
+    // //       for(int a=0;a<(nage);a++){
+    // //         for(int s=0;s<nsex;s++){
+    // //           Z_a_TEMP2(a) += Adj(k)  *
+    // //             fsh_slx_yafs(y, a, fish_flt, s) * F1_yf(y, fish_flt, k) +
+    // //             mat_age(a);
+    // //         } // end sex
+    // //       } // end age
+    // //       
+    // //       // Second Guess for F (EQ 24)
+    // //       Type denom = 0;
+    // //       for(int s=0;s<nsex;s++){
+    // //         for(int i=0;i<(nspace);i++){
+    // //           switch(selType_fish(fish_flt)){
+    // //           case 0: // age sel
+    // //             for(int a=1;a<(nage);a++){
+    // //               denom += phi_if_fish(fish_flt,i)*
+    // //                 fsh_slx_yafs(y,a,fish_flt,s)*
+    // //                 N_yais_mid(y,a,i,s)*
+    // //                 wtatlen_kab(phi_ik2(i),0)*
+    // //                 pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1))*
+    // //                 (1-exp(-Z_a_TEMP2(a))) * (F1_yf(y,fish_flt,k)/(Z_a_TEMP2(a)));
+    // //             } // end age
+    // //             break;
+    // //           case 1: // length sel
+    // //             for(int a=1;a<(nage);a++){
+    // //               for(int l=1;l<(LBins);l++){
+    // //                 denom += phi_if_fish(fish_flt,i)*
+    // //                   fsh_slx_yafs(y,a,fish_flt,s)*
+    // //                   N_yais_mid(y,a,i,s)*
+    // //                   LengthAge_alyis_mid(a,l,y,i,s)*
+    // //                   wtatlen_kab(phi_ik2(i),0)*
+    // //                   pow(LengthAge_alyis_mid(a,l,y,i,s),wtatlen_kab(phi_ik2(i),1))*
+    // //                   (1-exp(-Z_a_TEMP2(a))) * (F1_yf(y,fish_flt,k)/(Z_a_TEMP2(a)));
+    // //               } // end length
+    // //             } // end age
+    // //             break;
+    // //           } // end selType_fish
+    // //         } // end space
+    // //       } // end sex
+    // //       
+    // //       F2_yf(y, fish_flt, k) = catch_yf_obs(y, fish_flt+1)/denom;
+    // //       
+    // //       // Modify the guess again Eq 25
+    // //       term0 = 1/(1+exp(v2*( F2_yf(y,fish_flt,k )- v1*Fmax)));
+    // //       term1 = F2_yf(y,fish_flt,k)*term0;
+    // //       term2 = v1*(1-term0);
+    // //       F2_yf(y, fish_flt, k) = -log(1-(term1+term2));
+    // //       latest_guess =    F2_yf(y, fish_flt, k);
+    // //     } // end hybrid F iterations
+    // //     // Define F, Z and predicted catches 
+    // //     Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter); //final as Freal_yf
+    // //     
+    // //     // annoying multi-loops for F in area
+    // //     // get total N exploitable by this fleet
+    // //     for(int a=1;a<(nage-1);a++){
+    // //       for(int i=0;i<(nspace);i++){
+    // //         for(int s=0;s<nsex;s++){
+    // //           N_avail_yf(y,fish_flt) += phi_if_fish(fish_flt, i)*N_yais_mid(y,a,i,s);
+    // //         } // end sex
+    // //       } // end nspace
+    // //     } // end nage
+    // //     
+    // //     // get ratio of N in area & reweight F
+    // //     // will just return Freal and 1 for single-area fisheries
+    // //     for(int i=0;i<(nspace);i++){
+    // //       for(int a=1;a<(nage-1);a++){
+    // //         for(int s=0;s<nsex;s++){
+    // //           N_weight_yfi(y,fish_flt, i) = (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
+    // //         } // end sex
+    // //       } // end age
+    // //       F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
+    // //     } // end space
+    // //     
+    // //     // add together for mgmt regions
+    // //     for(int m=1;m<(nmgmt_reg);m++){
+    // //       F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
+    // //     } // end mgmt regions
+    // //     
+    // //     // generate predicted catches
+    // //     for(int i=0;i<(nspace);i++){
+    // //       switch(selType_fish(fish_flt)){
+    // //       case 0: // age sel
+    // //         for(int a=0;a<(nage-1);a++){
+    // //           Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+    // //           Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+    // //           
+    // //           for(int s=0;s<nsex;s++){
+    // //             catch_yaf_pred(y,a,fish_flt) +=
+    // //               Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
+    // //               (1-exp(- Zreal_ya(y,a) ))*
+    // //               phi_if_fish(fish_flt,i)*
+    // //               fsh_slx_yafs(y,a,fish_flt,s)*
+    // //               N_yais_mid(y,a,i,s)*
+    // //               wtatlen_kab(phi_ik2(i),0)*
+    // //               pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    // //             
+    // //             catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
+    // //               ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+    // //                 phi_if_fish(fish_flt, i)*
+    // //                 fsh_slx_yafs(y,a,fish_flt,s)*
+    // //                 N_yais_mid(y,a,i,s)*
+    // //                 wtatlen_kab(phi_ik2(i),0)*
+    // //                 pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    // //           } // end sex
+    // //         } // end age
+    // //         break;
+    // //         
+    // //       case 1: // length sel
+    // //         for(int a=0;a<(nage);a++){
+    // //           Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+    // //           Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+    // //         } // end age for Z
+    // //         for(int l=0;l<(LBins);l++){
+    // //           for(int a=0;a<(nage);a++){
+    // //             for(int s=0;s<nsex;s++){
+    // //               catch_yaf_pred(y,a,fish_flt) +=
+    // //                 Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
+    // //                 (1-exp(- Zreal_ya(y,a) ))*
+    // //                 phi_if_fish(fish_flt,i)*
+    // //                 fsh_slx_yafs(y,l,fish_flt,s)*
+    // //                 N_yais_mid(y,a,i,s)*
+    // //                 LengthAge_alyis_mid(a,l,y,i,s)*
+    // //                 wtatlen_kab(phi_ik2(i),0)*
+    // //                 pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    // //               
+    // //               catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
+    // //                 ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+    // //                   phi_if_fish(fish_flt,i)*
+    // //                   fsh_slx_yafs(y,l,fish_flt,s)*
+    // //                   N_yais_mid(y,a,i,s)*
+    // //                   LengthAge_alyis_mid(a,l,y,i,s)*
+    // //                   wtatlen_kab(phi_ik2(i),0)*
+    // //                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    // //             } // end sex
+    // //           } // end age
+    // //         } // end lbins
+    // //         break;
+    // //       } // end selType_fish
+    // //       for(int a=0;a<(nage);a++){
+    // //         catch_yfi_pred(y,fish_flt,i) += catch_yaif_pred(y,a,i,fish_flt);
+    // //         catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
+    // //       } // end age
+    // //     } // end space
+    // //   } // end -1 NA trap
+    // // }// end nfleets_fish
+    // // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
+    // // N_yais_end ----
+    // //fill EOY and beginning of next year using Ztuned
+    // //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
+    // //of the mortality and the tuned F extraction.
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=1;a<(nage-1);a++){
+    //       N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
+    //     }
+    //     for(int a=2;a<(nage-1);a++){
+    //       N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+    //     }
+    //     N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+    //   } // end subareas i
+    // } // end sexes
+    // 
+    // //reweight length-at-age given movement
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=1;a<(nage);a++){
+    //       Type LCome = 0.0; Type NCome = 0.0;
+    //       for(int j=0;j<(nspace);j++){
+    //         if(i != j){
+    //           LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
+    //           NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
+    //         }
+    //       } // end subareas j
+    //       Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+    //         (N_yais_end(y,a,i,s)+NCome);
+    //       Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+    //         (N_yais_end(y,a,i,s)+NCome);
+    //       
+    //     } // end ages
+    //   } // end subareas i
+    // } // end sexes
+    // 
+    // // SSB_yi, SSB_yk
+    // for(int i=0;i<(nspace);i++){
+    //   for(int a=1;a<(nage);a++){
+    //     SSB_yi(y,i) += N_yais_end(y,a,i,0)*
+    //       wtatlen_kab(phi_ik2(i),0)*
+    //       pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2(i),1))*
+    //       mat_ak(a,phi_ik2(i));
+    //   } // end ages
+    //   
+    // } // end space
+    // for(int k=0;k<(nstocks);k++){
+    //   for(int i=0;i<(nspace);i++){
+    //     SSB_yk(y,k) +=  phi_ki(k,i)*SSB_yi(y,i);
+    //   } // end stocks
+    // } // end space
+    // for(int m=0;m<(nmgmt_reg);m++){
+    //   for(int i=0;i<(nspace);i++){
+    //     SSB_ym(y,m) += phi_im(i,m)*SSB_yi(y,i);
+    //   } // end space
+    // } //end mgmt
+    // 
+    // // R_yi, R_yk
+    // for(int k=0;k<(nstocks);k++){
+    //   // SSB_yk already has summation
+    //   R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
+    //     (SSB_0k(k)*(1-h_k(k))+
+    //       SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk(y,k));
+    // }  // end stocks
+    // for(int i=0;i<(nspace);i++){
+    //   R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i); /// downscale to subarea including age-0 movement
+    //   N_yais_beg(y+1,1,i,0) = 0.5*R_yi(y,i);
+    //   N_yais_beg(y+1,1,i,1) = 0.5*R_yi(y,i);
+    // } /// end space
+    // for(int m=0;m<(nmgmt_reg);m++){
+    //   for(int i=0;i<(nspace);i++){
+    //     R_ym(y,m) += phi_im(i,m)*R_yi(y,i);
+    //   } // end space
+    // } //end mgmt
+    // // Estimate survey biomass at midyear
+    // for(int i=0;i<(nspace);i++){
+    //   for(int s=0;s<nsex;s++){
+    //     for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
+    //       if(surv_yf_obs(y,surv_flt) != -1){
+    //         switch(selType_surv(surv_flt)){
+    //         case 0: // age sel
+    //           for(int a=0;a<nage;a++){
+    //             surv_yf_pred(y,surv_flt) += q_f(surv_flt)*
+    //               srv_slx_yafs(y,a,surv_flt,s)*
+    //               phi_if_surv(surv_flt,i)*
+    //               N_yais_mid(y,a,i,s)*
+    //               wtatlen_kab(phi_ik2(i),0)*
+    //               pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    //             
+    //             Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
+    //               phi_if_surv(surv_flt,i)*
+    //               N_yais_mid(y,a,i,s);
+    //           } // end ages
+    //           break;
+    //         case 1:
+    //           for(int l=0;l<(LBins);l++){
+    //             for(int a=0;a<(nage);a++){
+    //               surv_yf_pred(y,surv_flt) +=  q_f(surv_flt)*
+    //                 srv_slx_yafs(y,l,surv_flt,s)*
+    //                 phi_if_surv(surv_flt,i)*
+    //                 N_yais_mid(y,a,i,s)*
+    //                 LengthAge_alyis_mid(a,l,y,i,s)*
+    //                 wtatlen_kab(phi_ik2(i),0)*
+    //                 pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    //               
+    //               Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,l,surv_flt,s)*
+    //                 phi_if_surv(surv_flt,i)*
+    //                 N_yais_mid(y,a,i,s);
+    //             }
+    //           }
+    //           break;
+    //         } // end selType_fish
+    //       } // end check that it's not an NA year
+    //     } // end survey fleets
+    //   } // end sexes
+    // } // end nspace
+    // 
+    // // predicted age comps, given error
+    // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+    //   // age 0
+    //   acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
+    //   // Loop over ages
+    //   for(int a=1;a<(nage-1);a++){
+    //     acomp_yaf_temp(y,a,acomp_flt) =
+    //       pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
+    //       pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
+    //   } // end ages
+    //   acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
+    //                  age_error(phi_fm_acomp2(acomp_flt),nage-1),
+    //                  age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
+    //   
+    //   // calculate nsamp within this loop
+    //   for(int i=0;i< nspace;i++){
+    //     for(int s=0;s<nsex;s++){
+    //       for(int a=0;a<(nage-1);a++){
+    //         if(acomp_flt_type(acomp_flt) == 0){
+    //           switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
+    //           case 0: // age sel fish fleet
+    //             Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+    //               fsh_slx_yafs(y,a,phi_ff_acomp(acomp_flt,0),s)*
+    //               phi_if_acomp(acomp_flt,i)*
+    //               N_yais_mid(y,a,i,s);
+    //             break;
+    //           case 1: // len sel fish fleet
+    //             for(int l=0;l< LBins;l++){
+    //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+    //                 fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
+    //                 phi_if_acomp(acomp_flt,i)*
+    //                 LengthAge_alyis_mid(a,l,y,i,s)*
+    //                 N_yais_mid(y,a,i,s);
+    //             } // end LBins
+    //             break;
+    //           } //end selType switch for comms
+    //         }else{
+    //           if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
+    //             Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+    //               srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
+    //               phi_if_acomp(acomp_flt,i)*
+    //               N_yais_mid(y,a,i,s);
+    //           }else{
+    //             for(int l=0;l< LBins;l++){
+    //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+    //                 srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
+    //                 phi_if_acomp(acomp_flt,i)*
+    //                 LengthAge_alyis_mid(a,l,y,i,s)*
+    //                 N_yais_mid(y,a,i,s);
+    //             } // end LBins
+    //           } // end selType switch for survs
+    //         } // end fltType switch
+    //       } // end ages for nsamp
+    //     } // end sex loop for nsamp
+    //   } // end nspace for nsamp
+    //   
+    //   for(int a=1;a<(nage);a++){
+    //     for(int i=0;i<(nspace);i++){
+    //       for(int s=0;s<nsex;s++){
+    //         if(acomp_flt_type(acomp_flt) == 0){
+    //           switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
+    //           case 0: // age sel fish fleet
+    //             comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
+    //               acomp_yaf_temp(y,a,acomp_flt)*
+    //               fsh_slx_yafs(y,a,acomp_flt,s)*
+    //               phi_if_acomp(acomp_flt,i)*
+    //               N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+    //             break;
+    //           case 1: // len sel fish fleet
+    //             for(int l=0;l< LBins;l++){
+    //               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
+    //                 acomp_yaf_temp(y,a,acomp_flt)*
+    //                 fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
+    //                 phi_if_acomp(acomp_flt,i)*
+    //                 LengthAge_alyis_mid(a,l,y,i,s)*
+    //                 N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+    //             } // end LBins
+    //             break;
+    //           } //end selType switch for comms
+    //         }else{
+    //           if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
+    //             
+    //             surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) += 
+    //               acomp_yaf_temp(y,a,acomp_flt)*
+    //               srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
+    //               phi_if_acomp(acomp_flt,i)*
+    //               N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+    //           }else{
+    //             for(int l=1;l<(LBins);l++){
+    //               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
+    //                 acomp_yaf_temp(y,a,acomp_flt)*
+    //                 srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
+    //                 phi_if_acomp(acomp_flt,i)*
+    //                 LengthAge_alyis_mid(a,l,y,i,s)*
+    //                 N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+    //             } // end lbins
+    //           } // end seltype surv ifelse
+    //         } // end acomp fleet type
+    //       } // end sex
+    //     } // end space
+    //   } // end age
+    // } // end acomp fleets
   } // END YEARS; END MODEL RUN
   
   // // LIKELIHOODS //

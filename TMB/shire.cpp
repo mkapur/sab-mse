@@ -89,7 +89,7 @@ Type objective_function<Type>::operator() ()
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,nsex);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-5),nsex);  // five of the acomp fleets are surveys; the other two are fsh
   // F tuning
-  int niter = 2;
+  int niter = 5;
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
   array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
   array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
@@ -789,18 +789,18 @@ Type objective_function<Type>::operator() ()
     //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
     //of the mortality and the tuned F extraction.
 
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=1;a<(nage-1);a++){
-    //       N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
-    //     }
-    //     for(int a=2;a<(nage-1);a++){
-    //       N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
-    //     }
-    //     N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
-    //   } // end subareas i
-    // } // end sexes
-    // std::cout << y << " N yais end" << "\n";
+    for(int s=0;s<nsex;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=1;a<(nage-1);a++){
+          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
+        }
+        for(int a=2;a<(nage-1);a++){
+          N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+        }
+        N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+      } // end subareas i
+    } // end sexes
+    std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement
     // for(int s=0;s<nsex;s++){
     //   for(int i=0;i<(nspace);i++){

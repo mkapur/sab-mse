@@ -20,12 +20,10 @@ dyn.load(dynlib(here("TMB","shire")))
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
-
-
 mappy <- list(
   logh_k = factor(rep(NA, 4)),
   logR_0k = factor(rep(NA, 4)), ## sum wc = 12
-  omega_0ij = factor(matrix(NA, nrow = nrow(df$parms$omega_0ij), ncol = nrow(df$parms$omega_0ij))),
+  # omega_0ij = factor(matrix(NA, nrow = nrow(df$parms$omega_0ij), ncol = nrow(df$parms$omega_0ij))),
   logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60)),  
   logpi_acomp = factor(rep(NA,df$nfleets_acomp)),

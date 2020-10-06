@@ -802,25 +802,25 @@ Type objective_function<Type>::operator() ()
     } // end sexes
     std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=1;a<(nage);a++){
-    //       Type LCome = 0.0; Type NCome = 0.0;
-    //       for(int j=0;j<(nspace);j++){
-    //         if(i != j){
-    //           LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
-    //           NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
-    //         }
-    //       } // end subareas j
-    //       Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-    //         (N_yais_end(y,a,i,s)+NCome);
-    //       Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-    //         (N_yais_end(y,a,i,s)+NCome);
-    // 
-    //     } // end ages
-    //   } // end subareas i
-    // } // end sexes
-    //     std::cout << y << " reweight length-at-age given movement" << "\n";
+    for(int s=0;s<nsex;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=1;a<(nage);a++){
+          Type LCome = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
+              NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
+            }
+          } // end subareas j
+          Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+            (N_yais_end(y,a,i,s)+NCome);
+          Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+            (N_yais_end(y,a,i,s)+NCome);
+
+        } // end ages
+      } // end subareas i
+    } // end sexes
+        std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     // for(int i=0;i<(nspace);i++){
     //   for(int a=1;a<(nage);a++){

@@ -403,7 +403,7 @@ Type objective_function<Type>::operator() ()
     } // end sex
   } // end yinit
   
-  for(int y=0;y<(tEnd);y++){ // Start y loop
+  for(int y=35;y<(tEnd);y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
     // note that in tmb, plus group is in slot nage-1
@@ -782,10 +782,12 @@ Type objective_function<Type>::operator() ()
       } // end -1 NA trap
     }// end nfleets_fish
     std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
+    
     // N_yais_end ----
     //fill EOY and beginning of next year using Ztuned
     //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
     //of the mortality and the tuned F extraction.
+
     // for(int s=0;s<nsex;s++){
     //   for(int i=0;i<(nspace);i++){
     //     for(int a=1;a<(nage-1);a++){
@@ -797,7 +799,7 @@ Type objective_function<Type>::operator() ()
     //     N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
     //   } // end subareas i
     // } // end sexes
-    
+    // std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement
     // for(int s=0;s<nsex;s++){
     //   for(int i=0;i<(nspace);i++){
@@ -813,11 +815,11 @@ Type objective_function<Type>::operator() ()
     //         (N_yais_end(y,a,i,s)+NCome);
     //       Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
     //         (N_yais_end(y,a,i,s)+NCome);
-    //       
+    // 
     //     } // end ages
     //   } // end subareas i
     // } // end sexes
-    // 
+    //     std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     // for(int i=0;i<(nspace);i++){
     //   for(int a=1;a<(nage);a++){
@@ -826,7 +828,7 @@ Type objective_function<Type>::operator() ()
     //       pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2(i),1))*
     //       mat_ak(a,phi_ik2(i));
     //   } // end ages
-    //   
+    // 
     // } // end space
     // for(int k=0;k<(nstocks);k++){
     //   for(int i=0;i<(nspace);i++){
@@ -870,7 +872,7 @@ Type objective_function<Type>::operator() ()
     //               N_yais_mid(y,a,i,s)*
     //               wtatlen_kab(phi_ik2(i),0)*
     //               pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             
+    // 
     //             Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
     //               phi_if_surv(surv_flt,i)*
     //               N_yais_mid(y,a,i,s);
@@ -886,7 +888,7 @@ Type objective_function<Type>::operator() ()
     //                 LengthAge_alyis_mid(a,l,y,i,s)*
     //                 wtatlen_kab(phi_ik2(i),0)*
     //                 pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //               
+    // 
     //               Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,l,surv_flt,s)*
     //                 phi_if_surv(surv_flt,i)*
     //                 N_yais_mid(y,a,i,s);
@@ -912,7 +914,7 @@ Type objective_function<Type>::operator() ()
     //   acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
     //                  age_error(phi_fm_acomp2(acomp_flt),nage-1),
     //                  age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
-    //   
+    // 
     //   // calculate nsamp within this loop
     //   for(int i=0;i< nspace;i++){
     //     for(int s=0;s<nsex;s++){
@@ -954,7 +956,6 @@ Type objective_function<Type>::operator() ()
     //       } // end ages for nsamp
     //     } // end sex loop for nsamp
     //   } // end nspace for nsamp
-    //   
     //   for(int a=1;a<(nage);a++){
     //     for(int i=0;i<(nspace);i++){
     //       for(int s=0;s<nsex;s++){
@@ -980,8 +981,8 @@ Type objective_function<Type>::operator() ()
     //           } //end selType switch for comms
     //         }else{
     //           if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
-    //             
-    //             surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) += 
+    // 
+    //             surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
     //               acomp_yaf_temp(y,a,acomp_flt)*
     //               srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
     //               phi_if_acomp(acomp_flt,i)*

@@ -88,8 +88,13 @@ Type objective_function<Type>::operator() ()
   // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,nsex);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-5),nsex);  // five of the acomp fleets are surveys; the other two are fsh
+  vector<Type>selG(nage);
+  vector<Type>selGL(LBins);
+  
   // F tuning
   int niter = 5;
+  vector<Type>Z_a_TEMP(nage);
+  vector<Type>Z_a_TEMP2(nage);
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
   array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
   array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
@@ -202,7 +207,7 @@ Type objective_function<Type>::operator() ()
               } // end ages
               break;
             case 3: // Dome Gamma with alpha (mean) and beta (sd)
-              vector<Type>selG(nage);
+              selG.setZero();
               for (int a= 0; a < nage; a++) {
                 selG(a)= pow(a, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-a/   fsh_slx_pars(fish_flt,1,0,s));
               } // end ages
@@ -235,12 +240,12 @@ Type objective_function<Type>::operator() ()
               } // end len
               break;
             case 3: // Dome Gamma with alpha (mean) and beta (sd)
-              vector<Type>selG(LBins);
+              selGL.setZero();
               for (int l = 0; l < LBins; l++){
-                selG(l)= pow(l, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-l/   fsh_slx_pars(fish_flt,1,0,s));
+                selGL(l)= pow(l, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-l/   fsh_slx_pars(fish_flt,1,0,s));
               } // end len
               for (int l = 0; l < LBins; l++){
-                fsh_slx_yafs(i,l,fish_flt,s) = selG(l) / max(selG);
+                fsh_slx_yafs(i,l,fish_flt,s) = selGL(l) / max(selGL);
               } // end len
               break;
             } // end switch selShape
@@ -294,7 +299,7 @@ Type objective_function<Type>::operator() ()
               } // end ages
               break;
             case 3: // Dome Gamma with alpha (mean) and beta (sd)
-              vector<Type>selG(nage);
+              selG.setZero();
               for (int a= 0; a < nage; a++) {
                 selG(a)= pow(a, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-a/   srv_slx_pars(srv_flt,1,0,s));
               } // end ages
@@ -327,7 +332,7 @@ Type objective_function<Type>::operator() ()
               } // end len
               break;
             case 3: // Dome Gamma with alpha (mean) and beta (sd)
-              vector<Type>selG(LBins);
+              selGL.setZero();
               for (int l = 0; l < LBins; l++){
                 selG(l)= pow(l, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-l/   srv_slx_pars(srv_flt,1,0,s));
               } // end len
@@ -586,7 +591,7 @@ Type objective_function<Type>::operator() ()
           Type term1 = latest_guess*term0;
           Type term2 = v1*(1-term0);
           F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
-          vector<Type>Z_a_TEMP(nage);
+          Z_a_TEMP.setZero();
           for(int i=0;i<(nspace);i++){
             switch(selType_fish(fish_flt)){
             case 0: // age sel
@@ -635,7 +640,6 @@ Type objective_function<Type>::operator() ()
             Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
           }
           // Get new Z given ADJ - need to add discard here
-          vector<Type>Z_a_TEMP2(nage);
           Z_a_TEMP2.setZero();
           for(int a=0;a<(nage);a++){
             for(int s=0;s<nsex;s++){
@@ -1009,7 +1013,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: survey biomass
   Type ans_survey=0.0;
   for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-    for(int y=1;y<tEnd;y++){ // Survey Surveyobs
+    for(int y=0;y<tEnd;y++){ // Survey Surveyobs
       if(surv_yf_obs(surv_flt) != -1){
         ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)),
                             log(surv_yf_obs(y,surv_flt)),

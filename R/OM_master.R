@@ -10,7 +10,7 @@ library(here)
 library(ggsidekick)
 # compile(here("TMB","shire.cpp"))
 # compile("C:/Users/Maia\ Kapur/Dropbox/UW/sab-mse/TMB/shire.cpp")
-dyn.load(dynlib(here("TMB","shire")))
+# dyn.load(dynlib(here("TMB","shire")))
 
 
 compile("C:/Users/public/shire.cpp")
@@ -24,16 +24,16 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 p = proc.time()
 
 mappy <- list(
-  logh_k = rep(NA, 4),
-  logR_0k = rep(NA, 4), ## sum wc = 12
-  omega_0ij = matrix(NA, nrow = nrow(df$parms$omega_0ij), ncol = nrow(df$parms$omega_0ij)),
-  logq_f = rep(NA, 5),
-  b =rep(NA, 60),  
-  logpi_acomp = rep(NA,df$nfleets_acomp),
-  logSDR = NA,
+  logh_k = rep(factor(NA), 4),
+  logR_0k = rep(factor(NA), 4), ## sum wc = 12
+  omega_0ij = matrix(factor(NA), nrow = nrow(df$parms$omega_0ij), ncol = nrow(df$parms$omega_0ij)),
+  logq_f = rep(factor(NA), 5),
+  b =rep(factor(NA), 60),  
+  logpi_acomp = rep(factor(NA),df$nfleets_acomp),
+  logSDR = factor(NA),
   ## structure is fleet x alpha, beta x time block (1 for now)x sex 
-  log_fsh_slx_pars = array(NA, dim = c(df$nfleets_fish,2,1,2)),
-  log_srv_slx_pars =  array(NA, dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2))
+  log_fsh_slx_pars = array(factor(NA), dim = c(df$nfleets_fish,2,1,2)),
+  log_srv_slx_pars =  array(factor(NA), dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2))
 )
 
 obj <- MakeADFun(df,

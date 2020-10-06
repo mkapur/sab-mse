@@ -2,8 +2,7 @@
 ## M S Kapur 
 ## Inspiration  from J Sullivan N Jacobsen Summer 2020
 ## kapurm@uw.edu
-file.copy("C:/Users/public/shire.cpp",here("TMB","shire.cpp"),
-          overwrite = TRUE)
+# file.copy("C:/Users/public/shire.cpp",here("TMB","shire.cpp"),overwrite = TRUE)
 
 library(TMB)
 library(dplyr)
@@ -12,20 +11,16 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-# compile(here("TMB","shire.cpp"))
-# compile("C:/Users/Maia\ Kapur/Dropbox/UW/sab-mse/TMB/shire.cpp")
-# dyn.load(dynlib(here("TMB","shire")))
+compile(here("TMB","shire.cpp"))
+dyn.load(dynlib(here("TMB","shire")))
 
-
-compile("C:/Users/public/shire.cpp")
-dyn.load(dynlib("C:/Users/public/shire"))
-
-
+# compile("C:/Users/public/shire.cpp")
+# dyn.load(dynlib("C:/Users/public/shire"))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
-p = proc.time()
+
 
 mappy <- list(
   logh_k = factor(rep(NA, 4)),
@@ -39,18 +34,23 @@ mappy <- list(
   log_fsh_slx_pars = factor(array(NA, dim = c(df$nfleets_fish,2,1,2))),
   log_srv_slx_pars =  factor(array(NA, dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2)))
 )
-
+p = proc.time()
 obj <- MakeADFun(df,
                  parameters = df$parms,
                  # map = mappy, ## fix everything
                  checkParameterOrder = TRUE,
                  DLL= "shire") # Run the assessment, in TMB folder
-opt <- TMBhelper::fit_tmb(obj) ## estimate
 proc.time()-p
 
 
-p = proc.time()
 reps <- obj$report() ## return values with uncertainty
+reps$R_0k
+
+opt <- TMBhelper::fit_tmb(obj) ## estimate
+
+
+p = proc.time()
+
 proc.time()-p
 
 

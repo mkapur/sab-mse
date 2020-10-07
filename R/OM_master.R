@@ -51,6 +51,8 @@ reps$Freal_yf[1:3,]
 reps$F1_yf[1:3,,]
 reps$F2_yf[1:3,,]
 
+reps$Length_yais_beg[1:3,,,1]
+
 likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 

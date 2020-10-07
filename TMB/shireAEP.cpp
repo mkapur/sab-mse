@@ -457,7 +457,8 @@ Type objective_function<Type>::operator() ()
         } // end sexes
       } // end subareas i
     } // end y == 0
-    //
+    std::cout << y << " did year zero" << "\n";
+    
     Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year 
     for(int s=0;s<nsex;s++){
@@ -476,7 +477,6 @@ Type objective_function<Type>::operator() ()
         } // end linear age
         Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
         // for(int a=0;a<4;a++){
-        
           // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
           //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
         // } // end linear age
@@ -492,7 +492,7 @@ Type objective_function<Type>::operator() ()
         } // end ages for N
         for(int a=5;a<(nage-1);a++){
           Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-            exp(-kappa_yk(y,phi_ik2(i),s)*a)
+            exp(-kappa_yk(y,phi_ik2(i),s)*a);
           // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
           //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
           //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
@@ -529,7 +529,7 @@ Type objective_function<Type>::operator() ()
             (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
       } // end subareas i
     } // end sexes
-    //
+    std::cout << y << " before prob LAA" << "\n";
     // prob of length-at-age
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
@@ -547,7 +547,7 @@ Type objective_function<Type>::operator() ()
         } // end ages
       } // end nspace
     } // end sex
-
+    std::cout << y << " after LengthAge_alyis_mid" << "\n";
     // Catch at beginning of year
     // Hybrid F tuning inputs & temp storage
     Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
@@ -592,7 +592,7 @@ Type objective_function<Type>::operator() ()
 
           // k iterations
           for(int k=1;k<(niter+1);k++){
-            // std::cout << y << "\t" << k << " f tuning iteration" << "\n";
+            std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
             // modify the guess Eq 20
             Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
             Type term1 = latest_guess*term0;
@@ -686,7 +686,7 @@ Type objective_function<Type>::operator() ()
             F2_yf(y, fish_flt, k) = -log(1-(term1+term2));
             latest_guess =    F2_yf(y, fish_flt, k);
           } // end k hybrid F iterations
-          
+          std::cout << y << "\t" << "end k iters" << "\n";
           // Define F, Z and predicted catches
           Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter); //final as Freal_yf
           // annoying multi-loops for F in area  get total N exploitable by this fleet
@@ -697,6 +697,7 @@ Type objective_function<Type>::operator() ()
               } // end sex
             } // end nspace
           } // end nage
+          std::cout << y << "\t" << "end navail" << "\n";
           // get ratio of N in area & reweight F; will just return Freal and 1 for single-area fisheries
           for(int i=0;i<(nspace);i++){
             for(int a=0;a<(nage);a++){
@@ -706,16 +707,17 @@ Type objective_function<Type>::operator() ()
             } // end age
             F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
           } // end space
+          std::cout << y << "\t" << "end N_weight_yfi" << "\n";
           // add together for mgmt regions
           for(int m=1;m<(nmgmt_reg);m++){
             F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
           } // end mgmt regions
         // generate predicted catches
-        
+        std::cout << y << "\t" << "end F_ym" << "\n";
         for(int i=0;i<(nspace);i++){
           switch(selType_fish(fish_flt)){
           case 0: // age sel
-            for(int a=0;a<(nage-1);a++){
+            for(int a=0;a<(nage);a++){
               Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
               Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
 
@@ -776,26 +778,28 @@ Type objective_function<Type>::operator() ()
         } // end space
       } // end -1 NA trap
     }// end nfleets_fish
-    // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
+      
+    std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
            
     // N_yais_end ----
     //fill EOY and beginning of next year using Ztuned
     //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
     //of the mortality and the tuned F extraction.
+    
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
           N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
         }
-        for(int a=0;a<(nage-1);a++){
-          N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
-          std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
-        }
-        N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
-        // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
+        // for(int a=0;a<(nage-1);a++){
+        //   N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+        //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
+        // }
+        // N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+        // // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
       } // end subareas i
     } // end sexes
-    // std::cout << y << " N yais end" << "\n";
+    std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
@@ -815,7 +819,7 @@ Type objective_function<Type>::operator() ()
         } // end ages
       } // end subareas i
     } // end sexes
-        // std::cout << y << " reweight length-at-age given movement" << "\n";
+        std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<(nage);a++){
@@ -824,19 +828,20 @@ Type objective_function<Type>::operator() ()
           pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2(i),1))*
           mat_ak(a,phi_ik2(i));
       } // end ages
-
     } // end space
+    std::cout << y << "\t" << "end SSB_yi" << "\n";
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
         SSB_yk(y,k) +=  phi_ki(k,i)*SSB_yi(y,i);
       } // end stocks
     } // end space
+    std::cout << y << "\t" << "end SSB_yk" << "\n";
     for(int m=0;m<(nmgmt_reg);m++){
       for(int i=0;i<(nspace);i++){
         SSB_ym(y,m) += phi_im(i,m)*SSB_yi(y,i);
       } // end space
     } //end mgmt
-
+    std::cout << y << "\t" << "end SSB_ym" << "\n";
     // R_yi, R_yk
     for(int k=0;k<(nstocks);k++){
       // SSB_yk already has summation
@@ -844,17 +849,19 @@ Type objective_function<Type>::operator() ()
         (SSB_0k(k)*(1-h_k(k))+
           SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk(y,k));
     }  // end stocks
+    std::cout << y << "\t" << "end R_yk" << "\n";
     for(int i=0;i<(nspace);i++){
       R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i);//*omega_0ij(i); /// downscale to subarea including age-0 movement
       N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
       N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
     } /// end space
+    std::cout << y << "\t" << "end R_yi" << "\n";
     for(int m=0;m<(nmgmt_reg);m++){
       for(int i=0;i<(nspace);i++){
         R_ym(y,m) += phi_im(i,m)*R_yi(y,i);
       } // end space
     } //end mgmt
-    
+    std::cout << y << "\t" << "end R_ym" << "\n";
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
@@ -895,7 +902,7 @@ Type objective_function<Type>::operator() ()
         } // end survey fleets
       } // end sexes
     } // end nspace
-    //
+    std::cout << y << "\t" << "end surv_yf_pred" << "\n";
     // predicted age comps, given error
     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
       // age 0

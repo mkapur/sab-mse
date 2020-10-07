@@ -791,10 +791,10 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<(nage);a++){
           N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
         }
-        // for(int a=0;a<(nage-1);a++){
-        //   N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+        for(int a=1;a<(nage-1);a++){
+          N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
         //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
-        // }
+        }
         N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
         // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
       } // end subareas i

@@ -86,7 +86,7 @@ Type objective_function<Type>::operator() ()
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // Predicted selectivity
-  array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish,nsex);           // Fishery selectivity-at-age by sex (on natural scale)
+  array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish, nsex);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-5),nsex);  // five of the acomp fleets are surveys; the other two are fsh
   vector<Type>selG(nage);
   vector<Type>selGL(LBins);
@@ -350,8 +350,8 @@ Type objective_function<Type>::operator() ()
       } while (i <= srv_blks(y,srv_flt)); // bracket i estimation for years designated by this block
     } // end y blocks
   } // end srv
-
-
+  REPORT(fsh_slx_yafs);
+  REPORT(srv_slx_yafs);
   //  END DATA & PARS, BEGIN MODEL //
   // recdevs placeholder
   for(int k=0;k<(nstocks);k++){
@@ -413,7 +413,7 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
 
   // std::cout << " Here" << "\n";
-  for(int y=0;y<(tEnd);y++){ // Start y loop
+  for(int y=52;y<(tEnd);y++){ // Start y loop
   //for(int y=0;y<6;y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -548,49 +548,51 @@ Type objective_function<Type>::operator() ()
     // Catch at beginning of year
     // Hybrid F tuning inputs & temp storage
     Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
-    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++)
-     std::cout << y << 	" " << fish_flt << 	" " << catch_yf_obs(y,fish_flt+1) << std::endl;
-    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    if(catch_yf_obs(y,fish_flt+1) != -1){
-      std::cout << fish_flt << " F TUNING" << "\n";
-        catch_yaf_pred.setZero();
-        catch_yf_pred.setZero();
-        catch_yfi_pred.setZero();
-        catch_yaif_pred.setZero();
-        // catch_afk_TEMP.setZero();
-        Type denom = 0;
-        for(int s=0;s<nsex;s++){
-          for(int i=0;i<(nspace);i++){
-            switch(selType_fish(fish_flt)){
-            case 0: // age sel
-              for(int a=1;a<(nage);a++){
-                denom += phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y,a,fish_flt,s)*
-                  N_yais_mid(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
-                  catch_yf_obs(y,fish_flt+1);
-              } // end age
-              break;
-            case 1: // length sel
+    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){}
+      // std::cout << y << 	" " << fish_flt << 	" " << catch_yf_obs(y,fish_flt+1) << std::endl;
+      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+        if(catch_yf_obs(y,fish_flt+1) != -1){
+          std::cout << fish_flt << " F TUNING" << "\n";
+          catch_yaf_pred.setZero();
+          catch_yf_pred.setZero();
+          catch_yfi_pred.setZero();
+          catch_yaif_pred.setZero();
+          // catch_afk_TEMP.setZero();
+          Type denom = 0;
+          for(int s=0;s<nsex;s++){
+            for(int i=0;i<(nspace);i++){
               for(int a=1;a<(nage);a++){
                 int mla = mla_yais(y,a,i,s);
-                // for(int l=1;l<(LBins);l++){
+                // switch(selType_fish(fish_flt)){
+                // case 0: // age sel
+                if(selType_fish(fish_flt) == 0){
                   denom += phi_if_fish(fish_flt,i)*
-                    // fsh_slx_yafs(y,mla,fish_flt,s)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    N_yais_mid(y,a,i,s)*
+                    wtatlen_kab(phi_ik2(i),0)*
+                    pow(mla,wtatlen_kab(phi_ik2(i),1))+
+                    catch_yf_obs(y,fish_flt+1);
+                  // } // end age
+                  // break;
+                  // case 1: // length sel
+                }else{
+                  // for(int a=1;a<(nage);a++){
+                  // for(int l=1;l<(LBins);l++){
+                  denom += phi_if_fish(fish_flt,i)*
+                    fsh_slx_yafs(y,mla,fish_flt,s)*
                     N_yais_mid(y,a,i,s)*
                     mla_yais(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla,wtatlen_kab(phi_ik2(i),1))+
                     catch_yf_obs(y,fish_flt+1);
-                // } // end length
+                  // } // end length
+                  // break;
+                } // end selType_fish
               } // end age
-              break;
-            } // end selType_fish
-          } // end space
-        } // end sex
-    } // temp end fish flt
-    } // temp end fish flt
+            } // end space
+          } // end sex
+        } // temp end fish flag
+      } // temp end fish flt
         /*
         F1_yf(y,fish_flt,1) = catch_yf_obs(y, fish_flt)/denom;
         Type latest_guess = F1_yf(y,fish_flt,1);

@@ -38,6 +38,8 @@ obj <- MakeADFun(df,
 proc.time()-p
 
 # reps <- obj$report() ## return values with uncertainty
+
+
 # opt <- TMBhelper::fit_tmb(obj) ## estimate
 # compile("C:/Users/public/shire.cpp")
 # dyn.load(dynlib("C:/Users/public/shire"))

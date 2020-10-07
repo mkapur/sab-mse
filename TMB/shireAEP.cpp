@@ -96,8 +96,8 @@ Type objective_function<Type>::operator() ()
   vector<Type>Z_a_TEMP(nage);
   vector<Type>Z_a_TEMP2(nage);
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
-  array<Type> F1_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
-  array<Type> F2_yf(tEnd,nfleets_fish+1, niter+1); // intermediate f guess storage
+  array<Type> F1_yf(tEnd,nfleets_fish, niter+1); // intermediate f guess storage
+  array<Type> F2_yf(tEnd,nfleets_fish, niter+1); // intermediate f guess storage
   array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
   array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
   array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
@@ -1142,9 +1142,9 @@ Type objective_function<Type>::operator() ()
   REPORT(LengthAge_alyis_end);
   
   // SSB and recruits
-  ADREPORT(SSB_yi);
-  ADREPORT(SSB_ym);
-  ADREPORT(SSB_yk);
+  REPORT(SSB_yi);
+  REPORT(SSB_ym);
+  REPORT(SSB_yk);
   REPORT(SSB_0i);
   REPORT(SSB_0k);
   REPORT(R_yi);
@@ -1152,7 +1152,7 @@ Type objective_function<Type>::operator() ()
   REPORT(R_yk);
   REPORT(R_0k);
   
-  // catches
+  // catches and tuning
   REPORT(catch_yaf_pred);  
   REPORT(catch_yf_pred);  
   REPORT(catch_yfi_pred);  
@@ -1160,6 +1160,9 @@ Type objective_function<Type>::operator() ()
   REPORT(Freal_yf);
   REPORT(F1_yf)
   REPORT(F2_yf);
+  REPORT(Zreal_yai);
+  REPORT(F_area_yfi);
+  
   // survey biomass
   REPORT(surv_yf_pred);
   
@@ -1169,7 +1172,7 @@ Type objective_function<Type>::operator() ()
   REPORT(Nsamp_acomp_yf);
   
   // other stuff
-  REPORT(Zreal_yai);
+
   
   // REPORT PARS
   ADREPORT(logR_0k);

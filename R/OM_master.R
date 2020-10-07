@@ -41,6 +41,9 @@ proc.time()-p
 reps$N_yais_beg[1:3,,,1]
 reps$N_yais_mid[1:3,,,1]
 reps$N_yais_end[1:3,,,1]
+reps$SSB_yk[1:3,]
+reps$R_yk[1:3,]
+reps$R_yi[1:3,]
 
 reps$Zreal_yai[1:3,,]
 reps$Freal_yf[1:3,]

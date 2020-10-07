@@ -475,10 +475,11 @@ Type objective_function<Type>::operator() ()
           Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
         } // end linear age
         Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
-        for(int a=0;a<4;a++){
-          Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
-            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
-        } // end linear age
+        // for(int a=0;a<4;a++){
+        
+          // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
+          //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
+        // } // end linear age
         for(int a=1;a<(nage-1);a++){
           Type pLeave = 0.0; Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){
@@ -490,6 +491,8 @@ Type objective_function<Type>::operator() ()
           N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mat_age(a)/2);
         } // end ages for N
         for(int a=5;a<(nage-1);a++){
+          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+            exp(-kappa_yk(y,phi_ik2(i),s)*a)
           // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
           //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
           //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));

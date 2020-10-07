@@ -606,7 +606,7 @@ for(y in 1:dim(mla_yais)[1]){
     }
   }
 }
-mla_yais[mla_yais<0] <- 1 ## coerce to 1 so tmb makes it zero
+mla_yais[mla_yais<0] <- 1 ## coerce to 1 so tmb makes it
 save(mla_yais, file = here('input','input_data','mla_yais.rdata')) ## integers so can subset
 ## weight at length, kg
 wtatlen_kab <- matrix(NA, nrow = 4, ncol = 2) ## stock x a,b for aL^b

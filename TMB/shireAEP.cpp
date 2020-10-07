@@ -413,7 +413,7 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
 
   // std::cout << " Here" << "\n";
-  for(int y=5;y<(tEnd);y++){ // Start y loop
+  for(int y=50;y<(tEnd);y++){ // Start y loop
   //for(int y=0;y<6;y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -563,8 +563,8 @@ Type objective_function<Type>::operator() ()
             for(int i=0;i<(nspace);i++){
               for(int a=1;a<(nage);a++){
                 int mla = mla_yais(y,a,i,s);
-                // switch(selType_fish(fish_flt)){
-                // case 0: // age sel
+                switch(selType_fish(fish_flt)){
+                case 0: // age sel
                 if(selType_fish(fish_flt) == 0){
                   denom += phi_if_fish(fish_flt,i)*
                     fsh_slx_yafs(y,a,fish_flt,s)*
@@ -572,10 +572,8 @@ Type objective_function<Type>::operator() ()
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla,wtatlen_kab(phi_ik2(i),1))+
                     catch_yf_obs(y,fish_flt+1);
-                  // } // end age
-                  // break;
-                  // case 1: // length sel
-                }else if(selType_fish(fish_flt) == 1){
+                  break;
+                  case 1: // length sel
                   denom += phi_if_fish(fish_flt,i)*
                     fsh_slx_yafs(y,mla,fish_flt,s)*
                     N_yais_mid(y,a,i,s)*
@@ -583,8 +581,8 @@ Type objective_function<Type>::operator() ()
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla,wtatlen_kab(phi_ik2(i),1))+
                     catch_yf_obs(y,fish_flt+1);
-                  // } // end length
-                  // break;
+                  } // end length
+                  break;
                 } // end selType_fish
               } // end age
             } // end space

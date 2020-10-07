@@ -39,7 +39,7 @@ proc.time()-p
 
 # reps <- obj$report() ## return values with uncertainty
 
-
+# reps$fsh_slx_yafs[4:6,,5,1]
 # opt <- TMBhelper::fit_tmb(obj) ## estimate
 # compile("C:/Users/public/shire.cpp")
 # dyn.load(dynlib("C:/Users/public/shire"))

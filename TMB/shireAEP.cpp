@@ -413,7 +413,7 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
 
   // std::cout << " Here" << "\n";
-  for(int y=52;y<(tEnd);y++){ // Start y loop
+  for(int y=5;y<(tEnd);y++){ // Start y loop
   //for(int y=0;y<6;y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -575,9 +575,7 @@ Type objective_function<Type>::operator() ()
                   // } // end age
                   // break;
                   // case 1: // length sel
-                }else{
-                  // for(int a=1;a<(nage);a++){
-                  // for(int l=1;l<(LBins);l++){
+                }else if(selType_fish(fish_flt) == 1){
                   denom += phi_if_fish(fish_flt,i)*
                     fsh_slx_yafs(y,mla,fish_flt,s)*
                     N_yais_mid(y,a,i,s)*

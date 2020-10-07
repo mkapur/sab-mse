@@ -577,11 +577,11 @@ Type objective_function<Type>::operator() ()
                 int mla = mla_yais(y,a,i,s);
                 // for(int l=1;l<(LBins);l++){
                   denom += phi_if_fish(fish_flt,i)*
-                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    // fsh_slx_yafs(y,mla,fish_flt,s)*
                     N_yais_mid(y,a,i,s)*
                     mla_yais(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),0)*
-                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
+                    pow(mla,wtatlen_kab(phi_ik2(i),1))+
                     catch_yf_obs(y,fish_flt+1);
                 // } // end length
               } // end age

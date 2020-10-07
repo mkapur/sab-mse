@@ -11,8 +11,8 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-compile(here("TMB","shire.cpp"))
-dyn.load(dynlib(here("TMB","shire")))
+compile(here("TMB","shireAEP.cpp"))
+dyn.load(dynlib(here("TMB","shireAEP")))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
@@ -34,7 +34,7 @@ obj <- MakeADFun(df,
                  parameters = df$parms,
                  map = mappy, ## fix everything
                  checkParameterOrder = TRUE,
-                 DLL= "shire") # Run the assessment, in TMB folder
+                 DLL= "shireAEP") # Run the assessment, in TMB folder
 proc.time()-p
 
 # reps <- obj$report() ## return values with uncertainty

@@ -413,7 +413,7 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
 
   // std::cout << " Here" << "\n";
-  for(int y=50;y<(tEnd);y++){ // Start y loop
+  for(int y=0;y<(tEnd);y++){ // Start y loop
   //for(int y=0;y<6;y++){ // Start y loop
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -779,7 +779,6 @@ Type objective_function<Type>::operator() ()
     //fill EOY and beginning of next year using Ztuned
     //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
     //of the mortality and the tuned F extraction.
-     /*
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=1;a<(nage-1);a++){
@@ -850,6 +849,7 @@ Type objective_function<Type>::operator() ()
         R_ym(y,m) += phi_im(i,m)*R_yi(y,i);
       } // end space
     } //end mgmt
+    
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
@@ -863,7 +863,7 @@ Type objective_function<Type>::operator() ()
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
 
                 Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
                   phi_if_surv(surv_flt,i)*
@@ -871,20 +871,18 @@ Type objective_function<Type>::operator() ()
               } // end ages
               break;
             case 1:
-              for(int l=0;l<(LBins);l++){
                 for(int a=0;a<(nage);a++){
                   surv_yf_pred(y,surv_flt) +=  q_f(surv_flt)*
-                    srv_slx_yafs(y,l,surv_flt,s)*
+                    srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
                     phi_if_surv(surv_flt,i)*
                     N_yais_mid(y,a,i,s)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    mla_yais(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
 
-                  Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,l,surv_flt,s)*
+                  Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
                     phi_if_surv(surv_flt,i)*
                     N_yais_mid(y,a,i,s);
-                }
               }
               break;
             } // end selType_fish
@@ -920,13 +918,11 @@ Type objective_function<Type>::operator() ()
                   N_yais_mid(y,a,i,s);
                 break;
               case 1: // len sel fish fleet
-                for(int l=0;l< LBins;l++){
                   Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-                    fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
+                    fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
                     phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    mla_yais(y,a,i,s)*
                     N_yais_mid(y,a,i,s);
-                } // end LBins
                 break;
               } //end selType switch for comms
             }else{
@@ -936,13 +932,11 @@ Type objective_function<Type>::operator() ()
                   phi_if_acomp(acomp_flt,i)*
                   N_yais_mid(y,a,i,s);
               }else{
-                for(int l=0;l< LBins;l++){
                   Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-                    srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
+                    srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
                     phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    mla_yais(y,a,i,s)*
                     N_yais_mid(y,a,i,s);
-                } // end LBins
               } // end selType switch for survs
             } // end fltType switch
           } // end ages for nsamp
@@ -961,14 +955,12 @@ Type objective_function<Type>::operator() ()
                   N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
                 break;
               case 1: // len sel fish fleet
-                for(int l=0;l< LBins;l++){
                   comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
                     acomp_yaf_temp(y,a,acomp_flt)*
-                    fsh_slx_yafs(y,l,phi_ff_acomp(acomp_flt,0),s)*
+                    fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
                     phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    mla_yais(y,a,i,s)*
                     N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-                } // end LBins
                 break;
               } //end selType switch for comms
             }else{
@@ -983,9 +975,9 @@ Type objective_function<Type>::operator() ()
                 for(int l=1;l<(LBins);l++){
                   surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
                     acomp_yaf_temp(y,a,acomp_flt)*
-                    srv_slx_yafs(y,l,phi_ff_acomp(acomp_flt,1),s)*
+                    srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
                     phi_if_acomp(acomp_flt,i)*
-                    LengthAge_alyis_mid(a,l,y,i,s)*
+                    mla_yais(y,a,i,s)*
                     N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
                 } // end lbins
               } // end seltype surv ifelse
@@ -994,7 +986,6 @@ Type objective_function<Type>::operator() ()
         } // end space
       } // end age
     } // end acomp fleets
- */
   } // END YEARS; END MODEL RUN
 
 

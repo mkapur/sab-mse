@@ -844,8 +844,8 @@ Type objective_function<Type>::operator() ()
     }  // end stocks
     for(int i=0;i<(nspace);i++){
       R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i); /// downscale to subarea including age-0 movement
-      N_yais_beg(y+1,1,i,0) = 0.5*R_yi(y,i);
-      N_yais_beg(y+1,1,i,1) = 0.5*R_yi(y,i);
+      N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
+      N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
     } /// end space
     for(int m=0;m<(nmgmt_reg);m++){
       for(int i=0;i<(nspace);i++){

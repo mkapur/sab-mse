@@ -781,10 +781,9 @@ Type objective_function<Type>::operator() ()
     //of the mortality and the tuned F extraction.
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage-1);a++){
+        for(int a=1;a<(nage);a++){
           N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
         }
-
         for(int a=2;a<(nage-1);a++){
           N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
           std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";

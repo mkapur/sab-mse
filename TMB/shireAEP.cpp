@@ -796,7 +796,7 @@ Type objective_function<Type>::operator() ()
     // //reweight length-at-age given movement
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage);a++){
+        for(int a=0;a<(nage);a++){
           Type LCome = 0.0; Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){
             if(i != j){
@@ -815,7 +815,7 @@ Type objective_function<Type>::operator() ()
         // std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){
-      for(int a=1;a<(nage);a++){
+      for(int a=0;a<(nage);a++){
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
           wtatlen_kab(phi_ik2(i),0)*
           pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2(i),1))*

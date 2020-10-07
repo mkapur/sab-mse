@@ -377,7 +377,7 @@ load_data_OM <- function(nspace = 6,
     mat_ak = mat_ak, ## maturity
     mat_age = rep(0.2,nage), ## mortality
     unfished_ALK_F = unfished_ALK_F,
-    mla_yais=mla_yais,
+    mla_yais=mla_yais-1,
     
     #* DATA ----
     acomp_yafs_obs = OM_agecomps_yafs,

@@ -35,9 +35,20 @@ obj <- MakeADFun(df,
                  map = mappy, ## fix everything
                  checkParameterOrder = TRUE,
                  DLL= "shireAEP") # Run the assessment, in TMB folder
+reps <- obj$report() ## return values with uncertainty
 proc.time()-p
 
-# reps <- obj$report() ## return values with uncertainty
+reps$N_yais_beg[1:3,,,1]
+reps$N_yais_mid[1:3,,,1]
+reps$N_yais_end[1:3,,,1]
+
+reps$Zreal_yai[1:3,,]
+reps$Freal_yf[1:3,]
+reps$F1_yf[1:3,,]
+reps$F2_yf[1:3,,]
+
+likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 
 # reps$fsh_slx_yafs[4:6,,5,1]
 # opt <- TMBhelper::fit_tmb(obj) ## estimate

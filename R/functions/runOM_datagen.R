@@ -33,8 +33,8 @@ runOM_datagen <- function(df, seed = 731){
   phi_if_fish <- df$phi_if_fish 
   phi_fm <- df$phi_fm
   phi_ki <- df$phi_ki
-  inames <- colnames(phi_ik)
-  knames <- rownames(phi_ik)
+  inames <- colnames(phi_ki)
+  knames <- rownames(phi_ki)
   mnames <- colnames(phi_fm)
   phi_ik2 <- df$phi_ik2 + 1 ## zero-indexed, add one
   tau_ki <- df$tau_ki 
@@ -50,8 +50,8 @@ runOM_datagen <- function(df, seed = 731){
   load(here('input','input_data','mla_yais.rdata')) ## from prelim runs, for ssb0
   ## Obs
   # catch_yf_obs <- df$Catch2
-  catch_yf_obs <- df$catch
-  surv_yf_obs <- df$survey
+  catch_yf_obs <- df$catch_yf_obs
+  surv_yf_obs <- df$surv_yf_obs
   
   # // movement //
   omega_ais <- df$omega_ais
@@ -74,13 +74,13 @@ runOM_datagen <- function(df, seed = 731){
   surv_selex_yafs <- df$surv_selex_yafs
   
 
-  SDR <- exp(df$logSDR)
+  SDR <- exp(df$parms$logSDR)
   b <- rep(1, tEnd)
   q = 0.5 ## placeholder
   # True values 
   # M0 <- 0.2 #exp(df$parms$logMinit) # no difference between males and females
   h_k <- df$parms$logh_k ## srr wants this in log space
-  R_0k <- exp(df$parms$logRinit) ## srr wants this in normal space
+  R_0k <- exp(df$parms$logR_0k) ## srr wants this in normal space
   
   ## NA0 & SB0 ----
   ## note that omega makes this non-smooth
@@ -198,8 +198,8 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  for(y in 1:(tEnd-1)){
-  # for(y in 1:15){
+  # for(y in 1:(tEnd-1)){
+  for(y in 1:5){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){ 
@@ -373,19 +373,19 @@ runOM_datagen <- function(df, seed = 731){
     # for(fish_flt in 1:nfleets_fish){
       catch_yaf_pred[y,,fish_flt] <- catch_yf_pred[y,fish_flt] <- catch_yfi_pred[y,fish_flt,] <-
         catch_yaif_pred[y,,,fish_flt] <- 0
-      if(is.na(catch_yf_obs[y, fish_flt+1])  | catch_yf_obs[y, fish_flt+1] == 0 ) next() ## skip if no catch
+      if(catch_yf_obs[y, fish_flt+1] == -1 ) next() ## skip if no catch
       ## putative biomass available
       denom = 0
       for(i in 1:nspace){
         # if(phi_imat_age[i, m] == 0) next() ## skip area if not in mgmt reg
         ## this needs to deal accurately with sex-selex length OR age
-        if(selType_fish[fish_flt] == 'AGE'){
+        if(selType_fish[fish_flt] == 0){
           denom <- denom + (phi_if_fish[fish_flt, i] *
                               sum(selMult*fish_selex_yafs[y,,fish_flt,]*N_yais_mid[y,,i,]*
                                     wtatlen_kab[phi_ik2[i],1]*
                                     Length_yais_mid[y,,i,]^wtatlen_kab[phi_ik2[i],2],
                               catch_yf_obs[y, fish_flt+1]))
-        } else if(selType_fish[fish_flt] == 'LEN'){
+        } else if(selType_fish[fish_flt] == 1){
           # per AEP 
           denom <- denom + (phi_if_fish[fish_flt, i] *
                               ## not sure about this; M and F n_age x most likely len at age into weight = biomass??
@@ -419,7 +419,7 @@ runOM_datagen <- function(df, seed = 731){
           #                     catch_yf_obs[y, fish_flt + 1]))
      
         } ## end len sel
-        # cat(i,denom,"\n")
+        cat(i,denom,"\n")
       }
       ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now
       ## make this guess by M, and sum over phi_im
@@ -440,7 +440,7 @@ runOM_datagen <- function(df, seed = 731){
         for(i in 1:nspace){
           for(a in 1:nage){
             Z_a_TEMP[a] <- sum(fish_selex_yafs[y, a, fish_flt, ]*F1_yf[y,fish_flt,k]) + mat_age[a]
-            if(selType_fish[fish_flt] == 'AGE'){
+            if(selType_fish[fish_flt] == 0){
               
               catch_afk_TEMP[a,fish_flt,k] <-    catch_afk_TEMP[a,fish_flt,k] +
                 (F1_yf[y,fish_flt,k]/(Z_a_TEMP[a]))*
@@ -451,7 +451,7 @@ runOM_datagen <- function(df, seed = 731){
                       Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
               
               
-            } else if(selType_fish[fish_flt] == 'LEN'){
+            } else if(selType_fish[fish_flt] == 1){
               LAA <- ifelse( which.max(LengthAge_alyis_mid[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
                              length(fish_selex_yafs[y,      , fish_flt, 1]),
                              which.max(LengthAge_alyis_mid[a, , y, i, 1]))
@@ -507,13 +507,13 @@ runOM_datagen <- function(df, seed = 731){
         denom = 0
         for(i in 1:nspace){
           for(a in 1:nage){
-            if(selType_fish[fish_flt] == 'AGE'){
+            if(selType_fish[fish_flt] == 0){
               denom <- denom + phi_if_fish[fish_flt, i] *
                 sum(selMult*fish_selex_yafs[y,a,fish_flt,]* N_yais_mid[y,a,i,]*
                       wtatlen_kab[phi_ik2[i],1]*
                       Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])*
                 (1-exp(-Z_a_TEMP2[a])) * (F1_yf[y,fish_flt,k]/(Z_a_TEMP2[a]))
-            } else if(selType_fish[fish_flt] == 'LEN'){
+            } else if(selType_fish[fish_flt] == 1){
               LAA <- ifelse( which.max(LengthAge_alyis_mid[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
                              length(fish_selex_yafs[y,      , fish_flt, 1]),
                              which.max(LengthAge_alyis_mid[a, , y, i, 1]))
@@ -577,7 +577,7 @@ runOM_datagen <- function(df, seed = 731){
    
       for(i in 1:nspace){
         for(a in 1:nage){
-          if(selType_fish[fish_flt] == 'AGE'){
+          if(selType_fish[fish_flt] == 0){
             Zreal_ya[y,a] <-   Freal_yf[y, fish_flt] + mat_age[a] ## should this include all fleets?
             
             catch_yaf_pred[y,a,fish_flt] <- catch_yaf_pred[y,a,fish_flt] +
@@ -598,7 +598,7 @@ runOM_datagen <- function(df, seed = 731){
                     wtatlen_kab[phi_ik2[i],1]*
                     Length_yais_mid[y,a,i,]^wtatlen_kab[phi_ik2[i],2])
             
-          } else if(selType_fish[fish_flt] == 'LEN'){
+          } else if(selType_fish[fish_flt] == 1){
             ## if the expected length at age is greater than we have selex for, just use the last value
             LAA <- ifelse( which.max(LengthAge_alyis_mid[a, , y, i, 1]) > length(fish_selex_yafs[y,      , fish_flt, 1]),
                            length(fish_selex_yafs[y,      , fish_flt, 1]),
@@ -744,7 +744,7 @@ runOM_datagen <- function(df, seed = 731){
       
       for(i in 1:nspace){
         for(a in 1:nage){
-          # if(selType_surv[sur_flt] == 'AGE'){
+          # if(selType_surv[sur_flt] == 0){
           survey_yf_pred[y,sur_flt] <-  survey_yf_pred[y,sur_flt] +
             q*
             phi_if_surv[sur_flt,i]*
@@ -763,7 +763,7 @@ runOM_datagen <- function(df, seed = 731){
       #       surv_yf_obs[y,sur_flt]," ",sur_flt,' RATIO ', 
       #       survey_yf_pred[y,sur_flt]/surv_yf_obs[y,sur_flt],  "\n")
     } ## end surv fleets
-        # } else if(selType_surv[sur_flt] == 'LEN'){
+        # } else if(selType_surv[sur_flt] == 1){
         #     LAA <- ifelse( which.max(LengthAge_alyis_beg[a, , y, i, 1]) > length(fish_selex_yafs[y,      , sur_flt, 1]),
         #                    length(fish_selex_yafs[y,    nage  , sur_flt, 1]),
         #                    which.max(LengthAge_alyis_beg[a, , y, i, 1]))

@@ -413,8 +413,9 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
 
   // std::cout << " Here" << "\n";
-  for(int y=0;y<(tEnd);y++){ // Start y loop
-  //for(int y=0;y<6;y++){ // Start y loop
+  // for(int y=0;y<(tEnd);y++){ // Start y loop
+    for(int y=0;y<(5);y++){ // Start y loop
+      
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
     // note that in tmb, plus group is in slot nage-1
@@ -458,7 +459,7 @@ Type objective_function<Type>::operator() ()
     } // end y == 0
     //
     Type lenstep = 0.0; Type lenslope = 0.0;
-    // N- and Nominal Length - at-age for the middle of this year and beginning of next
+    // N- and Nominal Length - at-age for the middle of this year 
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
@@ -516,7 +517,6 @@ Type objective_function<Type>::operator() ()
           (Linf_yk(y,phi_ik2(i),s) -
           Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
             (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
-        //
         Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
           (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
           Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
@@ -552,12 +552,12 @@ Type objective_function<Type>::operator() ()
       // std::cout << y << 	" " << fish_flt << 	" " << catch_yf_obs(y,fish_flt+1) << std::endl;
       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
         if(catch_yf_obs(y,fish_flt+1) != -1){
-          std::cout << fish_flt << " F TUNING" << "\n";
+          // std::cout << fish_flt << " F TUNING" << "\n";
           catch_yaf_pred.setZero();
           catch_yf_pred.setZero();
           catch_yfi_pred.setZero();
           catch_yaif_pred.setZero();
-          // catch_afk_TEMP.setZero();
+          catch_afk_TEMP.setZero();
           Type denom = 0;
           for(int s=0;s<nsex;s++){
             for(int i=0;i<(nspace);i++){
@@ -584,12 +584,12 @@ Type objective_function<Type>::operator() ()
               } // end age
             } // end space
           } // end sex
-          F1_yf(y,fish_flt,1) = catch_yf_obs(y, fish_flt)/denom;
-          Type latest_guess = F1_yf(y,fish_flt,1);
+          F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt)/denom;
+          Type latest_guess = F1_yf(y,fish_flt,0);
 
           // k iterations
-          for(int k=2;k<(niter+1);k++){
-            std::cout << y << "\t" << k << " f tuning iteration" << "\n";
+          for(int k=1;k<(niter+1);k++){
+            // std::cout << y << "\t" << k << " f tuning iteration" << "\n";
             // modify the guess Eq 20
             Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
             Type term1 = latest_guess*term0;
@@ -773,7 +773,7 @@ Type objective_function<Type>::operator() ()
         } // end space
       } // end -1 NA trap
     }// end nfleets_fish
-    std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
+    // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
            
     // N_yais_end ----
     //fill EOY and beginning of next year using Ztuned
@@ -784,13 +784,16 @@ Type objective_function<Type>::operator() ()
         for(int a=1;a<(nage-1);a++){
           N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
         }
+
         for(int a=2;a<(nage-1);a++){
           N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+          std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
         }
         N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+        // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
       } // end subareas i
     } // end sexes
-    std::cout << y << " N yais end" << "\n";
+    // std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
@@ -810,7 +813,7 @@ Type objective_function<Type>::operator() ()
         } // end ages
       } // end subareas i
     } // end sexes
-        std::cout << y << " reweight length-at-age given movement" << "\n";
+        // std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){
       for(int a=1;a<(nage);a++){
@@ -965,7 +968,6 @@ Type objective_function<Type>::operator() ()
               } //end selType switch for comms
             }else{
               if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
-
                 surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
                   acomp_yaf_temp(y,a,acomp_flt)*
                   srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
@@ -988,9 +990,194 @@ Type objective_function<Type>::operator() ()
     } // end acomp fleets
   } // END YEARS; END MODEL RUN
 
-
-
-  Type ans;
-  ans = 1.0;
+  
+  // // LIKELIHOODS //
+  // Likelihood: survey biomass
+  Type ans_survey=0.0;
+  for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
+    for(int y=0;y<tEnd;y++){ // Survey Surveyobs
+      if(surv_yf_obs(surv_flt) != -1){
+        ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)),
+                            log(surv_yf_obs(y,surv_flt)),
+                            surv_yf_err(y,surv_flt), TRUE); 
+      } // end survey for neg 1
+    } // end y
+  } // end surv_flt
+  
+  // Likelihood: catches
+  Type ans_catch = 0.0;
+  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    for(int y=0;y<tEnd;y++){
+      if(catch_yf_obs(fish_flt) != -1){
+        ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt)),
+                           log(catch_yf_obs(y,fish_flt)),
+                           catch_yf_error(y,fish_flt), TRUE); 
+      }
+    } // end y
+  } // end fish_flt
+  
+  // Likelihood: age comps in surveys & catches
+  Type ans_survcomp = 0.0;
+  Type ans_catchcomp = 0.0;
+  vector<Type>sum1(tEnd); // survey comp likelihood
+  vector<Type>sum2(tEnd); // fishery comp likelihood
+  sum1.setZero();
+  sum2.setZero();
+  for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+    for(int y=1;y<tEnd;y++){ // Loop over available years      
+      for(int s=0;s<nsex;s++){
+        for(int a=1;a<nage;a++){ // Loop over other ages (first one is empty for survey)
+          if(acomp_yafs_obs(y,a,acomp_flt,s) == -1){ // Flag if  there was a measurement that year
+            sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
+            if(acomp_flt_type(acomp_flt) == 0){
+              sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                acomp_yafs_obs(y,a,acomp_flt,s) +
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
+                - lgamma(pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
+              
+              ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+                sum1(y)+
+                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+                sum2(y);
+              
+            } else{
+              sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                acomp_yafs_obs(y,a,acomp_flt,s) +
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
+                lgamma(pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
+              
+              ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+                sum1(y)+
+                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+                sum2(y);
+            } // end switch for comm or surv type
+          } // end acomp flag
+        } // end age
+      } // end sex
+    } // end y
+  } // end acomp fleets
+  
+  // Likelihood: SD Recruitment (hyperprior)
+  Type ans_SDR = 0.0;
+  for(int k=0;k<(nstocks);k++){
+    for(int y=0;y<(tEnd-1);y++){ // Start y loop
+      ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
+    }
+  }
+  // Likelihood: Error for Selectivity
+  Type ans_psel = 0.0;
+  // for(int y=0;y<year_sel;y++){ // Start y loop
+  //   for(int i=0;i<psel_fish.size();i++){ // Start y loop
+  //     ans_psel += Type(0.5)*(PSEL(i,y)*PSEL(i,y))/(sigma_psel*sigma_psel);
+  //   }
+  // }
+  
+  // // Likelihood: Priors on h and M
+  Type ans_priors = 0.0;
+  // for(int i=0;i<(nspace);i++){
+  //   for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
+  //     for(int s=0;s<nsex;s++){
+  //       ans_priors += Type(0.5)*(Ninit_ais(a,i,s)*Ninit_ai(a,i,s))/(SDR*SDR);
+  //     } // end sex
+  //   } // end ages
+  // } // end space
+  
+  // Likelihood: Prior on h
+  // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
+  // ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
+  // if(sum_zero == 1){
+  //   ans_priors += ((Type(0.0)-sum(tildeR_yk))*(Type(0.0)-sum(tildeR_yk)))/Type(0.01);
+  // }
+  // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
+  // ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
+  // 
+  vector<Type>ans_tot(7);
+  ans_tot(0) = ans_SDR;
+  ans_tot(1) = ans_psel;
+  ans_tot(2) = ans_catch;
+  ans_tot(3) = ans_survey;
+  ans_tot(4) = ans_survcomp;
+  ans_tot(5) = ans_catchcomp;
+  ans_tot(6) = ans_priors;
+  // 
+  // // Likelihood: TOTAL
+  Type ans = 1.0;
+  // ans_SDR+
+  // ans_psel+
+  // ans_catch;//+
+  // ans_survey-
+  // ans_survcomp-
+  // ans_catchcomp+
+  // ans_priors;
+  // Type ans = 0.0;
+  // Report calculations
+  
+  // numbers @ age
+  REPORT(Ninit_ais);
+  REPORT(N_0ais);
+  REPORT(N_yais_beg);
+  REPORT(N_yais_mid);
+  REPORT(N_yais_end);
+  
+  // len at age
+  REPORT(Length_yais_beg);
+  REPORT(Length_yais_mid);
+  REPORT(Length_yais_end);
+  REPORT(LengthAge_alyis_beg);
+  REPORT(LengthAge_alyis_mid);
+  REPORT(LengthAge_alyis_end);
+  
+  // SSB and recruits
+  ADREPORT(SSB_yi);
+  ADREPORT(SSB_ym);
+  ADREPORT(SSB_yk);
+  REPORT(SSB_0i);
+  REPORT(SSB_0k);
+  REPORT(R_yi);
+  REPORT(R_ym);
+  REPORT(R_yk);
+  REPORT(R_0k);
+  
+  // catches
+  REPORT(catch_yaf_pred);  
+  REPORT(catch_yf_pred);  
+  REPORT(catch_yfi_pred);  
+  REPORT(catch_yaif_pred);  
+  REPORT(Freal_yf);
+  REPORT(F1_yf)
+  REPORT(F2_yf);
+  // survey biomass
+  REPORT(surv_yf_pred);
+  
+  // age comps
+  REPORT(comm_acomp_yafs_pred);
+  REPORT(surv_acomp_yafs_pred);
+  REPORT(Nsamp_acomp_yf);
+  
+  // other stuff
+  REPORT(Zreal_yai);
+  
+  // REPORT PARS
+  ADREPORT(logR_0k);
+  ADREPORT(omega_0ij);
+  ADREPORT(logh_k);
+  ADREPORT(logq_f);
+  REPORT(tildeR_yk);
+  REPORT(tildeR_initk);
+  REPORT(ans_tot);
   return ans;
 }

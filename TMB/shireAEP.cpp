@@ -530,7 +530,7 @@ Type objective_function<Type>::operator() ()
     // prob of length-at-age
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
-        for(int a=1;a<(nage);a++){
+        for(int a=0;a<(nage);a++){
           LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
           LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
           for(int l=1;l<(LBins-1);l++){
@@ -561,7 +561,7 @@ Type objective_function<Type>::operator() ()
           Type denom = 0;
           for(int s=0;s<nsex;s++){
             for(int i=0;i<(nspace);i++){
-              for(int a=1;a<(nage);a++){
+              for(int a=0;a<(nage);a++){
                 switch(selType_fish(fish_flt)){
                 case 0: // age sel
                     denom += phi_if_fish(fish_flt,i)*
@@ -652,7 +652,7 @@ Type objective_function<Type>::operator() ()
             Type denom = 0;
             for(int s=0;s<nsex;s++){
               for(int i=0;i<(nspace);i++){
-                for(int a=1;a<(nage);a++){
+                for(int a=0;a<(nage);a++){
                   switch(selType_fish(fish_flt)){
                   case 0: // age sel
                     denom += phi_if_fish(fish_flt,i)*
@@ -687,7 +687,7 @@ Type objective_function<Type>::operator() ()
           // Define F, Z and predicted catches
           Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter); //final as Freal_yf
           // annoying multi-loops for F in area  get total N exploitable by this fleet
-          for(int a=1;a<(nage-1);a++){
+          for(int a=0;a<(nage);a++){
             for(int i=0;i<(nspace);i++){
               for(int s=0;s<nsex;s++){
                 N_avail_yf(y,fish_flt) += phi_if_fish(fish_flt, i)*N_yais_mid(y,a,i,s);
@@ -696,7 +696,7 @@ Type objective_function<Type>::operator() ()
           } // end nage
           // get ratio of N in area & reweight F; will just return Freal and 1 for single-area fisheries
           for(int i=0;i<(nspace);i++){
-            for(int a=1;a<(nage-1);a++){
+            for(int a=0;a<(nage);a++){
               for(int s=0;s<nsex;s++){
                 N_weight_yfi(y,fish_flt, i) = (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
               } // end sex
@@ -784,7 +784,7 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<(nage);a++){
           N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
         }
-        for(int a=1;a<(nage-1);a++){
+        for(int a=0;a<(nage-1);a++){
           N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
           std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
         }
@@ -898,7 +898,7 @@ Type objective_function<Type>::operator() ()
       // age 0
       acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
       // Loop over ages
-      for(int a=1;a<(nage-1);a++){
+      for(int a=0;a<(nage-1);a++){
         acomp_yaf_temp(y,a,acomp_flt) =
           pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
           pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
@@ -944,7 +944,7 @@ Type objective_function<Type>::operator() ()
           } // end ages for nsamp
         } // end sex loop for nsamp
       } // end nspace for nsamp
-      for(int a=1;a<(nage);a++){
+      for(int a=0;a<(nage);a++){
         for(int i=0;i<(nspace);i++){
           for(int s=0;s<nsex;s++){
             if(acomp_flt_type(acomp_flt) == 0){
@@ -1025,7 +1025,7 @@ Type objective_function<Type>::operator() ()
   for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
     for(int y=1;y<tEnd;y++){ // Loop over available years      
       for(int s=0;s<nsex;s++){
-        for(int a=1;a<nage;a++){ // Loop over other ages (first one is empty for survey)
+        for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) == -1){ // Flag if  there was a measurement that year
             sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
             if(acomp_flt_type(acomp_flt) == 0){

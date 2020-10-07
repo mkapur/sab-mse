@@ -490,9 +490,9 @@ Type objective_function<Type>::operator() ()
           N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mat_age(a)/2);
         } // end ages for N
         for(int a=5;a<(nage-1);a++){
-          Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
-            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
-            (1-exp(-kappa_yk(y,phi_ik2(i),s)));
+          // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
+          //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
+          //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
           Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));

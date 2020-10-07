@@ -520,31 +520,12 @@ substrRight <- function(x, n){
 growPar$Sex <- substrRight(as.character(growPar$Sex), 1)## overwrite for loops
 
 
-## for TMB, get vectors of most likely length at age
-mla_early_ais = mla_late_ais = array(NA, dim = c(nage, nspace, 2 ))
 
-mla_yais = array(NA, dim = c(nyear,nage,nspace,2),  
-                 dimnames = list(year, age, inames, c('Fem','Mal')))
-for(a in 1:dim(init_LAA)[1]){
-  for(i in 1:dim(init_LAA)[3]){
-    for(s in 1:dim(init_LAA)[4]){
-      # return most likely length at each age
-      mla_early_ais[a,i,s] <- mla_yais[1:51,a,i,s] <- which.max(init_LAA[a,,i,s])[[1]]
-      mla_late_ais[a,i,s] <-  mla_yais[52:60,a,i,s] <-which.max(late_LAA[a,,i,s])[[1]]
-    }
-  }
-}
-
-
-save(mla_yais, file = here('input','input_data','mla_yais.rdata'))
-
-save(mla_early_ais, file = here('input','input_data','mla_early_ais.rdata'))
-save(mla_late_ais, file = here('input','input_data','mla_late_ais.rdata'))
 
 # array of year x stock x sex
 ## note that in ch1, R4 and R5 correspond to our R3 and R4; also R4 still means the same
 ## thing (alaska) but is in the first column per phi_ik2
-Linf_yk <- L1_yk <- kappa_yk <- sigmaG_yk <- array(NA, 
+Linf_yk <- L1_yk <- kappa_yk <- sigmaG_yk <- t0_yk <- array(NA, 
                                                    dim = c(length(1960:2019),
                                                            length(unique(growPar$Region)),2),
                                                    dimnames = list(c(year),
@@ -559,10 +540,14 @@ for(s in 1:2){
       L1_yk[,r,s] <- temp$L1
       kappa_yk[,r,s] <- temp$k
       sigmaG_yk[,r,s] <- temp$Sigma
+      t0_yk[,r,s] <- temp$t0
       next()
     }
     Linf_yk[1:(2009-1960),r,s] <- temp$Linf[temp$Period == 'early']
     Linf_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$Linf[temp$Period == 'late']
+    
+    t0_yk[1:(2009-1960),r,s] <- temp$t0[temp$Period == 'early']
+    t0_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$t0[temp$Period == 'late']
     
     L1_yk[1:(2009-1960),r,s] <- temp$L1[temp$Period == 'early']
     L1_yk[(2009-1960):nrow(L1_yk),r,s] <- temp$L1[temp$Period == 'late']
@@ -575,6 +560,8 @@ for(s in 1:2){
   }
 }
 
+
+
 ## sanity check: the first subarea (i == 1) should return the first stock (k =1)
 ## and thus the highest Linfs
 Linf_yk[1,phi_ik2[1],1]
@@ -585,7 +572,41 @@ growthPars <- list("Linf_yk"=Linf_yk, "L1_yk"=L1_yk,
 save(growthPars, 
      file = here('input','input_data',"OM_growthPars.rdata"))
 
-
+## for TMB, get vectors of most likely length at age,
+## and most likely age at length
+# mla_early_ais = mla_late_ais = array(NA, dim = c(nage, nspace, 2 ))
+# 
+# mla_yais = array(NA, dim = c(nyear,nage,nspace,2),  
+#                  dimnames = list(years, age, inames, c('Fem','Mal')))
+# for(a in 1:dim(init_LAA)[1]){
+#   for(i in 1:dim(init_LAA)[3]){
+#     for(s in 1:dim(init_LAA)[4]){
+#       # return most likely length at each age
+#       mla_early_ais[a,i,s] <- mla_yais[1:51,a,i,s] <- which.max(init_LAA[a,,i,s])[[1]]
+#       mla_late_ais[a,i,s] <-  mla_yais[52:60,a,i,s] <-which.max(late_LAA[a,,i,s])[[1]]
+#     }
+#   }
+# }
+# 
+# save(mla_yais, file = here('input','input_data','mla_yais.rdata'))
+# save(mla_early_ais, file = here('input','input_data','mla_early_ais.rdata'))
+# save(mla_late_ais, file = here('input','input_data','mla_late_ais.rdata'))
+## most likely length at age using deterministic growth curve
+phi_ik2 <- df$phi_ik2+1 ## pull it out of here and add 1 for R
+mla_yais = array(NA, dim = c(nyear,nage,nspace,2),  
+                 dimnames = list(years, age, inames, c('Fem','Mal')))
+for(y in 1:dim(mla_yais)[1]){
+  for(a in 1:dim(mla_yais)[2]){
+    for(i in 1:dim(mla_yais)[3]){
+      for(s in 1:dim(mla_yais)[4]){
+        # return most likely length at each age
+        mla_yais[y,a,i,s] <- round(Linf_yk[y,phi_ik2[i],s]*(1-exp(-kappa_yk[y,phi_ik2[i],s]*
+                                                               (a - t0_yk[y,phi_ik2[i],s])))); 
+      }
+    }
+  }
+}
+save(mla_yais, file = here('input','input_data','mla_yais.rdata')) ## integers so can subset
 ## weight at length, kg
 wtatlen_kab <- matrix(NA, nrow = 4, ncol = 2) ## stock x a,b for aL^b
 rownames(wtatlen_kab) <- paste0("R",4:1)

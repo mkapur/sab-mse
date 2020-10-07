@@ -843,7 +843,7 @@ Type objective_function<Type>::operator() ()
           SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk(y,k));
     }  // end stocks
     for(int i=0;i<(nspace);i++){
-      R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i); /// downscale to subarea including age-0 movement
+      R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i);//*omega_0ij(i); /// downscale to subarea including age-0 movement
       N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
       N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
     } /// end space

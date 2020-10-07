@@ -574,15 +574,16 @@ Type objective_function<Type>::operator() ()
               break;
             case 1: // length sel
               for(int a=1;a<(nage);a++){
-                for(int l=1;l<(LBins);l++){
+                int mla = mla_yais(y,a,i,s);
+                // for(int l=1;l<(LBins);l++){
                   denom += phi_if_fish(fish_flt,i)*
-                    // fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
                     N_yais_mid(y,a,i,s)*
                     mla_yais(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
                     catch_yf_obs(y,fish_flt+1);
-                } // end length
+                // } // end length
               } // end age
               break;
             } // end selType_fish

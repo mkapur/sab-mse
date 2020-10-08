@@ -51,6 +51,7 @@ runOM_datagen <- function(df, seed = 731){
   ## Obs
   # catch_yf_obs <- df$Catch2
   catch_yf_obs <- df$catch_yf_obs
+  
   surv_yf_obs <- df$surv_yf_obs
   
   # // movement //
@@ -169,7 +170,7 @@ runOM_datagen <- function(df, seed = 731){
   rownames(SSB_yi) <- rownames(SSB_yk) <- rownames(R_yi) <- rownames(R_yk) <- year
   
   
-  niter <- 50 ## F iterations
+  niter <- 7 ## F iterations
   F1_yf <- F2_yf <- array(0, dim = c(tEnd, nfleets_fish, niter+1),
                           dimnames = list(c(year),
                                           c(fltnames_fish),
@@ -198,8 +199,8 @@ runOM_datagen <- function(df, seed = 731){
   Nsamp_acomp_yf <-  survey_yf_pred <- matrix(0, nrow= tEnd, ncol = nfleets_surv,
                                               dimnames = list(c(year), paste(fltnames_surv)))
   ## start year loop ----
-  # for(y in 1:(tEnd-1)){
-  for(y in 1:5){
+  for(y in 1:(tEnd-1)){
+  # for(y in 1:5){
     cat(y,"\n")
     ## Year 0 ----
     if(y == 1){ 
@@ -367,7 +368,7 @@ runOM_datagen <- function(df, seed = 731){
     # for(fish_flt in 5:7){
     for(fish_flt in 1:nfleets_fish){
       # selMult = rep(1,nfleets_fish)[fish_flt]
-      # selMult = c(0.5,0.3,1,1,1/4,1/4,1/10,1,1)[fish_flt]
+      selMult = c(0.5,0.3,1,1,1/4,1/4,1/10,1,1)[fish_flt]
       # selMult <- ifelse(fish_flt %in% c(1,2),0.5,ifelse(fish_flt %in% 5:7,0.25,1)) ## trying to tweak selex to fit
       
     # for(fish_flt in 1:nfleets_fish){
@@ -419,7 +420,7 @@ runOM_datagen <- function(df, seed = 731){
           #                     catch_yf_obs[y, fish_flt + 1]))
      
         } ## end len sel
-        cat(i,denom,"\n")
+        # cat(i,denom,"\n")
       }
       ## make an initial guess for Ff using obs catch - need to update selex whihc is 1.0 now
       ## make this guess by M, and sum over phi_im
@@ -725,7 +726,7 @@ runOM_datagen <- function(df, seed = 731){
     N_yais_beg[y+1,1,i,1:2] = 0.5*R_yi[y,i] #// fill age-0 recruits for next year
   } ### end space
     # head(catch_yf_pred)
-    cat(y," ",R_yi[y,],"\n")
+    # cat(y," ",R_yi[y,],"\n")
     
     
     

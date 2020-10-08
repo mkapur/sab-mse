@@ -96,7 +96,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>selGL(LBins);
 
   // F tuning
-  int niter = 3;
+  int niter = 50;
   vector<Type>Z_a_TEMP(nage);
   vector<Type>Z_a_TEMP2(nage);
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();
@@ -733,7 +733,7 @@ Type objective_function<Type>::operator() ()
             F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
           } // end mgmt regions
           // generate predicted catches
-          std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
+          // std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
           for(int a=0;a<(nage);a++){
             for(int i=0;i<(nspace);i++){
               for(int s=0;s<nsex;s++){
@@ -1035,8 +1035,8 @@ Type objective_function<Type>::operator() ()
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int y=0;y<5;y++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
-        // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
+        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
+        std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt)),
                            log(catch_yf_obs(y,fish_flt+1)),
                            catch_yf_error(y,fish_flt), TRUE);

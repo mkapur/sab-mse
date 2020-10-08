@@ -39,25 +39,27 @@ reps <- obj$report() ## return values with uncertainty
 # for (k in 1:3) opt <- TMBhelper::fit_tmb(obj) ## estimate
 proc.time()-p
 # # 
-reps$N_yais_beg[1:7,c(0:4,71),,1]
-reps$N_yais_mid[1:7,c(0:4,71),,1]
-reps$N_yais_end[1:7,c(0:4,71),,1]
-reps$SSB_yi[1:7,]
-reps$SSB_yk[1:7,]
-reps$R_yk[1:7,]
-reps$R_yi[1:7,]
-# 
-reps$catch_afk_TEMP[,8:9,]
-reps$Zreal_yai[1:3,c(0:4,71),]
+# reps$N_yais_beg[1:7,c(0:4,71),,1]
+# reps$N_yais_mid[1:7,c(0:4,71),,1]
+# reps$N_yais_end[1:7,c(0:4,71),,1]
+# reps$SSB_yi[1:7,]
+# reps$SSB_yk[1:7,]
+# reps$R_yk[1:7,]
+# reps$R_yi[1:7,]
+# # 
+# reps$catch_afk_TEMP[,8:9,]
+# reps$catch_yaf_pred[1:5,,8]
+reps$catch_yf_pred[1:5,]
+reps$Zreal_yai[1:3,c(0:4,71),] ## no fleets here!
 reps$Freal_yf[1:3,]
-reps$F1_yf[1:3,,]
-reps$F2_yf[1:3,,]
+# reps$F1_yf[1:3,,]
+# reps$F2_yf[1:3,,]
 # 
 # reps$Length_yais_beg[1:3,,,1]
 # 
 likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
-
+likes
 # reps$fsh_slx_yafs[4:6,,5,1]
 
 # compile("C:/Users/public/shire.cpp")

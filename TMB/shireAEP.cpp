@@ -553,7 +553,7 @@ Type objective_function<Type>::operator() ()
     Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
     // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){}
       // std::cout << y << 	" " << fish_flt << 	" " << catch_yf_obs(y,fish_flt+1) << std::endl;
-      for(int fish_flt =1;fish_flt<(nfleets_fish);fish_flt++){
+      for(int fish_flt =1;fish_flt<(nfleets_fish+1);fish_flt++){
         if(catch_yf_obs(y,fish_flt) != Type(-1.0)){
           // std::cout << fish_flt << " F TUNING" << "\n";
           // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt) << std::endl;
@@ -1022,21 +1022,22 @@ Type objective_function<Type>::operator() ()
   // // LIKELIHOODS //
   // Likelihood: survey biomass
   Type ans_survey=0.0;
-  for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-    for(int y=0;y<tEnd;y++){ // Survey Surveyobs
+  for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
+    for(int y=0;y<5;y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
+        std::cout << y << "\t" << surv_flt << "\t THIS # IS NOT -1" <<   surv_yf_obs(y,surv_flt)   << "\n";
         ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)),
                             log(surv_yf_obs(y,surv_flt)),
                             surv_yf_err(y,surv_flt), TRUE); 
-        std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
+        // std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
       } // end survey for neg 1
     } // end y
   } // end surv_flt
   
   // Likelihood: catches
   Type ans_catch = 0.0;
-  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    for(int y=0;y<tEnd;y++){
+  for(int fish_flt =1;fish_flt<(nfleets_fish+1);fish_flt++){
+    for(int y=0;y<5;y++){
       if(catch_yf_obs(y,fish_flt) != Type(-1.0)){
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt)),
                            log(catch_yf_obs(y,fish_flt)),

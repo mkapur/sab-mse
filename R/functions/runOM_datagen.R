@@ -367,7 +367,7 @@ runOM_datagen <- function(df, seed = 731){
     # for(fish_flt in 5:7){
     for(fish_flt in 1:nfleets_fish){
       # selMult = rep(1,nfleets_fish)[fish_flt]
-      selMult = c(0.5,0.3,1,1,1/4,1/4,1/10,1,1)[fish_flt]
+      # selMult = c(0.5,0.3,1,1,1/4,1/4,1/10,1,1)[fish_flt]
       # selMult <- ifelse(fish_flt %in% c(1,2),0.5,ifelse(fish_flt %in% 5:7,0.25,1)) ## trying to tweak selex to fit
       
     # for(fish_flt in 1:nfleets_fish){

@@ -641,18 +641,23 @@ Type objective_function<Type>::operator() ()
                 // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a]  = " << catch_afk_TEMP(a,fish_flt,k) << "\n";
               } // end age
             } // end space
-            // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
-            // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
-            // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
-            // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
             // std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
             
             vector<Type>Adj(niter+1);
             for(int a=0;a<(nage);a++){
-              //this throws negative on occation
-              Adj(k) += catch_yf_obs(y,fish_flt+1)/(catch_afk_TEMP(a,fish_flt,k));
+
+              // buffer in case catch is straight up zero for any age, leading to NaN
+              if(catch_afk_TEMP(a,fish_flt,k) == 0){
+                Adj(k) += catch_yf_obs(y,fish_flt+1)/1e-9;
+              } else{
+                Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
+              }
             }
-            // std::cout << y << "\t" << k << "\t" << "\t  Adjk  = " <<   Adj(k)  << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  Adjk  = " <<   Adj(k)  << "\n";
             
             // Get new Z given ADJ - need to add discard here and switch selex
             Z_a_TEMP2.setZero();
@@ -696,15 +701,16 @@ Type objective_function<Type>::operator() ()
             F2_yf(y, fish_flt, k) = catch_yf_obs(y, fish_flt+1)/denom;
             // std::cout << y << "\t" << k << "\t" << "\t  denom for F2  = " <<   denom  << "\n";
             
-            // std::cout << y << "\t" << k << "\t    F2_yf(y, fish_flt, k) = " <<    F2_yf(y, fish_flt, k)   << "\n";
+            std::cout << y << "\t" << k << "\t    F2_yf(y, fish_flt, k) = " <<    F2_yf(y, fish_flt, k)   << "\n";
             // Modify the guess again Eq 25
             term0 = 1/(1+exp(v2*( F2_yf(y,fish_flt,k )- v1*Fmax)));
             term1 = F2_yf(y,fish_flt,k)*term0;
             term2 = v1*(1-term0);
             F2_yf(y, fish_flt, k) = -log(1-(term1+term2));
             latest_guess =    F2_yf(y, fish_flt, k);
-            // std::cout << y << "\t" << k << "\t latest guess (mod   F2_yf(y, fish_flt, k) )= " << latest_guess << "\n";
+            std::cout << y << "\t" << k << "\t latest guess (mod   F2_yf(y, fish_flt, k) )= " << latest_guess << "\n";
           } // end k hybrid F iterations
+          
           // std::cout << y << "\t" << "end k iters" << "\n";
           // Define F, Z and predicted catches
           Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter); //final as Freal_yf
@@ -733,7 +739,7 @@ Type objective_function<Type>::operator() ()
             F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
           } // end mgmt regions
           // generate predicted catches
-          // std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
+          std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
           for(int a=0;a<(nage);a++){
             for(int i=0;i<(nspace);i++){
               for(int s=0;s<nsex;s++){
@@ -788,8 +794,7 @@ Type objective_function<Type>::operator() ()
             catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
           } // end age
         } // end -1 NA trap
-        // std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
-        // std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
+        std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
     } // end nfleets_fish
       
     // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
@@ -1020,7 +1025,7 @@ Type objective_function<Type>::operator() ()
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
     for(int y=0;y<20;y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
-        std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt+1)   << "\n";
+        std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
         std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
         ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)),
                             log(surv_yf_obs(y,surv_flt)),
@@ -1035,8 +1040,8 @@ Type objective_function<Type>::operator() ()
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int y=0;y<20;y++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
-        std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
+        // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
+        // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt)),
                            log(catch_yf_obs(y,fish_flt+1)),
                            catch_yf_error(y,fish_flt), TRUE);

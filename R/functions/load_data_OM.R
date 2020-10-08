@@ -118,7 +118,9 @@ load_data_OM <- function(nspace = 6,
   if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
-  survey[is.na(survey)] <- -1.0 ## flag for numeric TMB checks
+  survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
+  survey[,"BC_EARLY"] <-  survey[,"BC_EARLY"] +0.0111 ## flag for numeric TMB checks
+  survey <- round(survey,  1)
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma.csv'))
   
   

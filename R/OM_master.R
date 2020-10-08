@@ -32,7 +32,7 @@ mappy <- list(
 p = proc.time()
 obj <- MakeADFun(df,
                  parameters = df$parms,
-                 # map = mappy, ## fix everything
+                 map = mappy, ## fix everything
                  checkParameterOrder = TRUE,
                  DLL= "shireAEP") # Run the assessment, in TMB folder
 reps <- obj$report() ## return values with uncertainty

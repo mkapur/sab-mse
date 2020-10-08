@@ -553,9 +553,10 @@ Type objective_function<Type>::operator() ()
     Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
     // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){}
       // std::cout << y << 	" " << fish_flt << 	" " << catch_yf_obs(y,fish_flt+1) << std::endl;
-      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-        if(catch_yf_obs(y,fish_flt+1) >0){
+      for(int fish_flt =1;fish_flt<(nfleets_fish);fish_flt++){
+        if(catch_yf_obs(y,fish_flt) != Type(-1.0)){
           // std::cout << fish_flt << " F TUNING" << "\n";
+          std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt) << std::endl;
           catch_yaf_pred.setZero();
           catch_yf_pred.setZero();
           catch_yfi_pred.setZero();

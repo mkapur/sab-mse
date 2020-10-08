@@ -47,7 +47,7 @@ reps$SSB_yk[1:7,]
 reps$R_yk[1:7,]
 reps$R_yi[1:7,]
 # 
-reps$catch_afk_TEMP[1:3,,]
+reps$catch_afk_TEMP[,8:9,]
 reps$Zreal_yai[1:3,c(0:4,71),]
 reps$Freal_yf[1:3,]
 reps$F1_yf[1:3,,]

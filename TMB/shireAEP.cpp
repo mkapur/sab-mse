@@ -96,7 +96,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>selGL(LBins);
 
   // F tuning
-  int niter = 50;
+  int niter = 11;
   vector<Type>Z_a_TEMP(nage);
   vector<Type>Z_a_TEMP2(nage);
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();

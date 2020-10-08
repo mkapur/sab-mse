@@ -38,6 +38,10 @@ obj <- MakeADFun(df,
 reps <- obj$report() ## return values with uncertainty
 # for (k in 1:3) opt <- TMBhelper::fit_tmb(obj) ## estimate
 proc.time()-p
+
+likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
+likes
 # # 
 # reps$N_yais_beg[1:7,c(0:4,71),,1]
 # reps$N_yais_mid[1:7,c(0:4,71),,1]
@@ -57,9 +61,7 @@ reps$Freal_yf[1:3,]
 # 
 # reps$Length_yais_beg[1:3,,,1]
 # 
-likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
-names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
-likes
+
 # reps$fsh_slx_yafs[4:6,,5,1]
 
 # compile("C:/Users/public/shire.cpp")

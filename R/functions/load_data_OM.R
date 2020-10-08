@@ -289,8 +289,8 @@ load_data_OM <- function(nspace = 6,
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   parms <- list(
-    logh_k = log(c(0.7,0.7,0.88,0.7)),
-    logR_0k = c(log(8*10e6),log(8*10e6),10,4), ## sum wc = 12
+    logh_k = log(c(1,1,1,1)),
+    logR_0k = c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
     b = rep(0,nyear),  

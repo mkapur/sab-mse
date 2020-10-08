@@ -32,7 +32,7 @@ mappy <- list(
 p = proc.time()
 obj <- MakeADFun(df,
                  parameters = df$parms,
-                 map = mappy, ## fix everything
+                 # map = mappy, ## fix everything
                  checkParameterOrder = TRUE,
                  DLL= "shireAEP") # Run the assessment, in TMB folder
 reps <- obj$report() ## return values with uncertainty
@@ -46,17 +46,17 @@ likes
 # # 
 # reps$N_yais_beg[1:7,c(0:4,71),,1]
 # reps$N_yais_mid[1:7,c(0:4,71),,1]
-# reps$N_yais_end[1:7,c(0:4,71),,1]
+reps$N_yais_end[1:25,c(0:4,71),,1]
 # reps$SSB_yi[1:7,]
-# reps$SSB_yk[1:7,]
-# reps$R_yk[1:7,]
+reps$SSB_yk[1:25,]
+reps$R_yk[1:25,]
 # reps$R_yi[1:7,]
 # # 
 # reps$catch_afk_TEMP[,8:9,]
 # reps$catch_yaf_pred[1:5,,8]
-# reps$catch_yf_pred[1:5,]
+reps$catch_yf_pred
 # reps$Zreal_yai[1:3,c(0:4,71),] ## no fleets here!
-# reps$Freal_yf[1:3,]
+reps$Freal_yf
 # reps$F1_yf[1:3,,]
 # reps$F2_yf[1:3,,]
 # 

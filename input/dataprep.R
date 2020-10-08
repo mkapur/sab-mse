@@ -61,8 +61,12 @@ omcatch <- merge(omcatch0, akcatch,  by = "Year", all = TRUE) %>%
 write.csv(omcatch %>% select(Year,fltnames_fish) , file = here("input","input_data","OM_catch.csv"), row.names = FALSE)
 
 omcatch <- read.csv(here("input","input_data","OM_catch.csv") )
-## plot values
+## plot values, GROUPING AK FOR CONFIDENTIALITY
 omcatch %>%
+  group_by(Year) %>%
+  mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
+         "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
+  select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
@@ -1117,3 +1121,30 @@ survey %>%
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_survey.png'),
        width = 4, height = 6, unit = 'in', dpi = 420)
+
+fltnamesCol <- merge(fltnames, melt(fishfltPal), by.x = 'NAME', by.y = 'Var2' ) %>%
+  rbind(.,
+merge(fltnames, melt(survfltPal), by.x = 'NAME', by.y = 'Var2' ) ) %>%
+  merge(., fltnames, all.y = TRUE)
+levels(fltnamesCol$value) <- c(levels(fltnamesCol$value), "#015b58","#2c6184","#ba7999")
+
+fltnamesCol$value[is.na(fltnamesCol$value)] <- c(rep("#015b58",3),
+                                           rep("#2c6184",2),  "#ba7999")
+
+fltnames[fltnames==FALSE] <- NA
+fltsub <- fltnames %>%
+  select(-SELTYPE) %>%
+  reshape2::melt(., id = c('M','NAME')) 
+ggplot(fltsub,aes(x = variable, y = NAME, fill = NAME )) +
+  theme_sleek() +
+  theme(legend.position = 'none',
+        axis.text.x = element_text(angle = 90))+
+  scale_fill_manual(values = paste(fltnamesCol$value)) +
+  geom_tile(color = 'white') +
+  geom_tile(data = subset(fltsub, is.na(value)),fill = 'white') +
+  labs(y = 'Fleet Name', x = '') +
+  facet_wrap(.~M)
+
+ggsave(last_plot(),
+       file = here('input','input_data','input_figs','datplot_fleets.png'),
+       width = 8, height = 6, unit = 'in', dpi = 420)

@@ -55,8 +55,8 @@ reps$F2_yf[1:3,,]
 # 
 # reps$Length_yais_beg[1:3,,,1]
 # 
-# likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
-# names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
+likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 
 # reps$fsh_slx_yafs[4:6,,5,1]
 

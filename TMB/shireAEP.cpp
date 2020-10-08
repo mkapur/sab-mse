@@ -414,7 +414,7 @@ Type objective_function<Type>::operator() ()
 
   // std::cout << " Here" << "\n";
   // for(int y=0;y<(tEnd);y++){ // Start y loop
-    for(int y=0;y<(5);y++){ // Start y loop
+    for(int y=0;y<5;y++){ // Start y loop
       
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -589,7 +589,8 @@ Type objective_function<Type>::operator() ()
           } // end sex
           F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt)/denom;
           Type latest_guess = F1_yf(y,fish_flt,0);
-
+          std::cout << y  <<"\t  pre-iter   denom  = " <<  denom  << "\n";
+          std::cout << y  <<"\t  pre-iter   F1_yf(y,fish_flt,k)  = " <<  latest_guess  << "\n";
           // k iterations
           for(int k=1;k<(niter+1);k++){
             std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
@@ -598,6 +599,7 @@ Type objective_function<Type>::operator() ()
             Type term1 = latest_guess*term0;
             Type term2 = v1*(1-term0);
             F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
+            std::cout << y << "\t" << k << "\t     F1_yf(y,fish_flt,k)  = " <<   F1_yf(y,fish_flt,k)  << "\n";
             Z_a_TEMP.setZero();
             for(int i=0;i<(nspace);i++){
               for(int a=0;a<(nage);a++){
@@ -633,14 +635,20 @@ Type objective_function<Type>::operator() ()
                     break;
                   } // end selType_fish
                 } // end sex
+                std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a]  = " << catch_afk_TEMP(a,fish_flt,k) << "\n";
               } // end age
             } // end space
-            
+            // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
+            // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
+            // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
             
             vector<Type>Adj(niter+1);
             for(int a=0;a<(nage);a++){
               Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
             }
+            std::cout << y << "\t" << k << "\t" << "\t  Adjk  = " <<   Adj(k)  << "\n";
+            
             // Get new Z given ADJ - need to add discard here and switch selex
             Z_a_TEMP2.setZero();
             for(int a=0;a<(nage);a++){
@@ -650,6 +658,7 @@ Type objective_function<Type>::operator() ()
                   mat_age(a);
               } // end sex
             } // end age
+            std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP2[0]  = " <<   Z_a_TEMP2(0)  << "\n";
             
             // Second Guess for F (EQ 24)
             Type denom = 0;
@@ -676,17 +685,22 @@ Type objective_function<Type>::operator() ()
                     break;
                   } // end selType_fish
                 } // end age
+                std::cout << y << "\t" << k << "\t" << i << "\t  space accumdenom for F2  = " <<   denom  << "\n";
               } // end space
             } // end sex
             F2_yf(y, fish_flt, k) = catch_yf_obs(y, fish_flt+1)/denom;
+            // std::cout << y << "\t" << k << "\t" << "\t  denom for F2  = " <<   denom  << "\n";
+            
+            std::cout << y << "\t" << k << "\t    F2_yf(y, fish_flt, k) = " <<    F2_yf(y, fish_flt, k)   << "\n";
             // Modify the guess again Eq 25
             term0 = 1/(1+exp(v2*( F2_yf(y,fish_flt,k )- v1*Fmax)));
             term1 = F2_yf(y,fish_flt,k)*term0;
             term2 = v1*(1-term0);
             F2_yf(y, fish_flt, k) = -log(1-(term1+term2));
             latest_guess =    F2_yf(y, fish_flt, k);
+            std::cout << y << "\t" << k << "\t latest guess (mod   F2_yf(y, fish_flt, k) )= " << latest_guess << "\n";
           } // end k hybrid F iterations
-          std::cout << y << "\t" << "end k iters" << "\n";
+          // std::cout << y << "\t" << "end k iters" << "\n";
           // Define F, Z and predicted catches
           Freal_yf(y, fish_flt) = F2_yf(y, fish_flt, niter); //final as Freal_yf
           // annoying multi-loops for F in area  get total N exploitable by this fleet
@@ -789,7 +803,9 @@ Type objective_function<Type>::operator() ()
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
-          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a)/2+Zreal_yai(y,a,i)));
+          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(0.2));
+          
+          // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
         }
         for(int a=1;a<(nage-1);a++){
           N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
@@ -825,7 +841,7 @@ Type objective_function<Type>::operator() ()
       for(int a=0;a<(nage);a++){
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
           wtatlen_kab(phi_ik2(i),0)*
-          pow(Length_yais_beg(y,a,i,1),wtatlen_kab(phi_ik2(i),1))*
+          pow(mla_yais(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
           mat_ak(a,phi_ik2(i));
       } // end ages
     } // end space

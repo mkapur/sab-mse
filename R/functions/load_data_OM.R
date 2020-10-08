@@ -58,8 +58,7 @@ load_data_OM <- function(nspace = 6,
       ## I forced this to be 166 vs 167 because it was causing too many individuals
     }
   }
-  omega_0ij = matrix(0, nrow = nspace, ncol = nspace)
-  diag(omega_0ij) <- 1
+  omega_0ij = matrix(0, nrow = 1, ncol = nspace)
   
   # Weight at length ----
   load(here("input","input_data","OM_wtatlen_kab.rdata")) ## a and be are pars of al^b

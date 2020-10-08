@@ -79,10 +79,6 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(catch_yf_error); // right now just 0.1 for all fleets and all years
   array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  catch_yaf_pred.setZero();  // estimated catches at age by fleet
   array<Type> catch_yf_pred(tEnd,nfleets_fish);  catch_yf_pred.setZero();       
-  
-
-
-
   array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);  catch_yfi_pred.setZero();
   array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  catch_yaif_pred.setZero();
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);

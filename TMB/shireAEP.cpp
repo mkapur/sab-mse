@@ -371,9 +371,9 @@ Type objective_function<Type>::operator() ()
     for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){
-          N_0ais(a,i,s) = 0.5*omega_ais(a,i,s)*R_0k(k)*tau_ki(k,i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
+          N_0ais(a,i,s) = 0.5*R_0k(k)*tau_ki(k,i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
         }  // note the A+ group will be in slot A-1
-        N_0ais(nage-1,i,s) = omega_ais(nage-1,i,s)* N_0ais(nage-2,i,s)*exp(-sum(mat_age))
+        N_0ais(nage-1,i,s) =  N_0ais(nage-2,i,s)*exp(-sum(mat_age))
           /(Type(1.0)-exp(-mat_age(nage-1)));
       } // end subareas
     } // end stocks
@@ -414,7 +414,7 @@ Type objective_function<Type>::operator() ()
 
   // std::cout << " Here" << "\n";
   // for(int y=0;y<(tEnd);y++){ // Start y loop
-    for(int y=0;y<5;y++){ // Start y loop
+    for(int y=0;y<3;y++){ // Start y loop
       
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -804,7 +804,6 @@ Type objective_function<Type>::operator() ()
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
           N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(0.2));
-          
           // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
         }
         for(int a=1;a<(nage-1);a++){

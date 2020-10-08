@@ -42,7 +42,7 @@ omcatch0 <- data.frame(Year = 1960:2019)
 ## read files
 akcatch <- read.csv(here("input","raw_data","catch","AK_comm_catch.csv")) ## this is separated at 145W, corresponding to A1 and A2
 names(akcatch)[2:ncol(akcatch)] = rev(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$COMM]))
-
+names(akcatch)[1] <- 'Year'
 bccatch <- read.csv(here("input","raw_data","catch","BC_om_landingCatch.csv"))[,c(1,4,3,5)] ## year, trap trawl and LL
 names(bccatch)[2:4] = paste(fltnames$NAME[fltnames$M == 'BC' & fltnames$COMM]  )
 
@@ -1109,20 +1109,6 @@ ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_survey.png'),
        width = 4, height = 6, unit = 'in', dpi = 420)
 
-survey %>%
-  mutate(Year = df$years) %>%
-  reshape2::melt(., id = c('Year')) %>% 
-  filter(!is.na(value)) %>%
-  ggplot(.,aes(x = Year, y = variable, color = variable)) +
-  theme_sleek() +
-  theme(legend.position = 'none')+
-  scale_color_manual(values = survfltPal) +
-  geom_point(size = 5) +
-  labs(y = 'Surveys (Relative Abundance)')
-ggsave(last_plot(),
-       file = here('input','input_data','input_figs','datplot_survey.png'),
-       width = 4, height = 6, unit = 'in', dpi = 420)
-
 fltnamesCol <- merge(fltnames, melt(fishfltPal), by.x = 'NAME', by.y = 'Var2' ) %>%
   rbind(.,
 merge(fltnames, melt(survfltPal), by.x = 'NAME', by.y = 'Var2' ) ) %>%
@@ -1133,18 +1119,24 @@ fltnamesCol$value[is.na(fltnamesCol$value)] <- c(rep("#015b58",3),
                                            rep("#2c6184",2),  "#ba7999")
 
 fltnames[fltnames==FALSE] <- NA
+
 fltsub <- fltnames %>%
   select(-SELTYPE) %>%
   reshape2::melt(., id = c('M','NAME')) 
-ggplot(fltsub,aes(x = variable, y = NAME, fill = NAME )) +
+
+
+ggplot(fltsub,aes(x = NAME, y = variable, fill = NAME )) +
   theme_sleek() +
   theme(legend.position = 'none',
         axis.text.x = element_text(angle = 90))+
   scale_fill_manual(values = paste(fltnamesCol$value)) +
   geom_tile(color = 'white') +
   geom_tile(data = subset(fltsub, is.na(value)),fill = 'white') +
-  labs(y = 'Fleet Name', x = '') +
-  facet_wrap(.~M)
+  geom_tile(data = subset(fltsub, variable == 'DISCARD' & !is.na(value)|
+                            variable == 'LCOMP' & !is.na(value)),
+             alpha = 0.8) +
+  labs(x = 'Fleet Name', y= '') +
+  facet_wrap(.~M, scales = 'free_x')
 
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_fleets.png'),

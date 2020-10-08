@@ -77,10 +77,14 @@ Type objective_function<Type>::operator() ()
   // // Catches
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   DATA_ARRAY(catch_yf_error); // right now just 0.1 for all fleets and all years
-  array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  // estimated catches at age by fleet
-  array<Type> catch_yf_pred(tEnd,nfleets_fish);
-  array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);
-  array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);
+  array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish);  catch_yaf_pred.setZero();  // estimated catches at age by fleet
+  array<Type> catch_yf_pred(tEnd,nfleets_fish);  catch_yf_pred.setZero();       
+  
+
+
+
+  array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);  catch_yfi_pred.setZero();
+  array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  catch_yaif_pred.setZero();
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
   array<Type> N_avail_yf(tEnd, nfleets_fish);
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
@@ -95,7 +99,7 @@ Type objective_function<Type>::operator() ()
   int niter = 3;
   vector<Type>Z_a_TEMP(nage);
   vector<Type>Z_a_TEMP2(nage);
-  array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);
+  array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();
   array<Type> F1_yf(tEnd,nfleets_fish, niter+1); // intermediate f guess storage
   array<Type> F2_yf(tEnd,nfleets_fish, niter+1); // intermediate f guess storage
   array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
@@ -557,11 +561,7 @@ Type objective_function<Type>::operator() ()
         if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
           // std::cout << fish_flt << " F TUNING" << "\n";
           // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
-          catch_yaf_pred.setZero();
-          catch_yf_pred.setZero();
-          catch_yfi_pred.setZero();
-          catch_yaif_pred.setZero();
-          catch_afk_TEMP.setZero();
+
           Type denom = 0;
           for(int s=0;s<nsex;s++){
             for(int i=0;i<(nspace);i++){
@@ -787,9 +787,10 @@ Type objective_function<Type>::operator() ()
             } // end space
             catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
           } // end age
-          std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
         } // end -1 NA trap
-    }// end nfleets_fish
+        std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
+        // std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
+    } // end nfleets_fish
       
     // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
            

@@ -96,7 +96,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>selGL(LBins);
 
   // F tuning
-  int niter = 4;
+  int niter = 7;
   vector<Type>Z_a_TEMP(nage);
   vector<Type>Z_a_TEMP2(nage);
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();
@@ -359,7 +359,7 @@ Type objective_function<Type>::operator() ()
   //  END DATA & PARS, BEGIN MODEL //
   // recdevs placeholder
   for(int k=0;k<(nstocks);k++){
-    for(int y=0;y<(10);y++){
+    for(int y=0;y<(tEnd-1);y++){
       tildeR_yk(y,k) =0;
     }
     tildeR_yk(25,k) =0;
@@ -418,7 +418,7 @@ Type objective_function<Type>::operator() ()
 
   // std::cout << " Here" << "\n";
   for(int y=0;y<(20);y++){ // Start y loop
-    // for(int y=0;y<(10);y++){ // Start y loop
+    // for(int y=0;y<(tEnd-1);y++){ // Start y loop
       
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -1024,7 +1024,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: survey biomass
   Type ans_survey=0.0;
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-    for(int y=0;y<(10);y++){ // Survey Surveyobs
+    for(int y=0;y<(tEnd-1);y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
         std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
         std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
@@ -1039,7 +1039,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: catches
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    for(int y=0;y<(10);y++){
+    for(int y=0;y<(tEnd-1);y++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
         std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
         std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
@@ -1059,11 +1059,12 @@ Type objective_function<Type>::operator() ()
   sum1.setZero();
   sum2.setZero();
   for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    for(int y=1;y<(10);y++){ // Loop over available years      
+    for(int y=1;y<(tEnd-1);y++){ // Loop over available years      
       for(int s=0;s<nsex;s++){
         for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) == Type(-1.0)){ // Flag if  there was a measurement that year
             sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
+            // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
             if(acomp_flt_type(acomp_flt) == 0){
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                 acomp_yafs_obs(y,a,acomp_flt,s) +
@@ -1081,6 +1082,7 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
+              // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
               
             } else{
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
@@ -1099,6 +1101,8 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
+              // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+              
             } // end switch for comm or surv type
           } // end acomp flag
         } // end age
@@ -1109,7 +1113,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: SD Recruitment (hyperprior)
   Type ans_SDR = 0.0;
   for(int k=0;k<(nstocks);k++){
-    for(int y=0;y<(10);y++){ // Start y loop
+    for(int y=0;y<(tEnd-1);y++){ // Start y loop
       ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
     }
   }
@@ -1150,7 +1154,7 @@ Type objective_function<Type>::operator() ()
   ans_tot(6) = ans_priors;
   // 
   // // Likelihood: TOTAL
-  Type ans =  
+  Type ans =
   // ans_SDR+
   // ans_psel+
   ans_catch+

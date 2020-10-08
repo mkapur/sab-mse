@@ -399,12 +399,12 @@ Type objective_function<Type>::operator() ()
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){
-          Ninit_ais(a,i,s) += 0.5* omega_ais(a,i,s) *
+          Ninit_ais(a,i,s) += 0.5* 
             tau_ki(phi_ik2(i),i) *
             R_0k(phi_ik2(i))* exp(-(mat_age(a)*age(a))) *
             exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i)));
         } // end ages
-        Ninit_ais(nage-1,i,s) += (omega_ais(nage-1,i,s) * Ninit_ais(nage-2,i,s) *
+        Ninit_ais(nage-1,i,s) += ( Ninit_ais(nage-2,i,s) *
           exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-sum(mat_age))*
           exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i))));
       } // end space

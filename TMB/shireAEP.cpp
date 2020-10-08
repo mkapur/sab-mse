@@ -885,7 +885,7 @@ Type objective_function<Type>::operator() ()
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-          if(surv_yf_obs(y,surv_flt) != -1){
+          if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
             switch(selType_surv(surv_flt)){
             case 0: // age sel
               for(int a=0;a<nage;a++){
@@ -1024,7 +1024,7 @@ Type objective_function<Type>::operator() ()
   Type ans_survey=0.0;
   for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
     for(int y=0;y<tEnd;y++){ // Survey Surveyobs
-      if(surv_yf_obs(surv_flt) != -1){
+      if(surv_yf_obs(surv_flt) != Type(-1.0)){
         ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)),
                             log(surv_yf_obs(y,surv_flt)),
                             surv_yf_err(y,surv_flt), TRUE); 
@@ -1036,7 +1036,7 @@ Type objective_function<Type>::operator() ()
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int y=0;y<tEnd;y++){
-      if(catch_yf_obs(fish_flt) != -1){
+      if(catch_yf_obs(fish_flt) != Type(-1.0)){
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt)),
                            log(catch_yf_obs(y,fish_flt)),
                            catch_yf_error(y,fish_flt), TRUE); 
@@ -1055,7 +1055,7 @@ Type objective_function<Type>::operator() ()
     for(int y=1;y<tEnd;y++){ // Loop over available years      
       for(int s=0;s<nsex;s++){
         for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
-          if(acomp_yafs_obs(y,a,acomp_flt,s) == -1){ // Flag if  there was a measurement that year
+          if(acomp_yafs_obs(y,a,acomp_flt,s) == Type(-1.0)){ // Flag if  there was a measurement that year
             sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
             if(acomp_flt_type(acomp_flt) == 0){
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*

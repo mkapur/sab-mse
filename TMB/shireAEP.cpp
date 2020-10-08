@@ -732,44 +732,37 @@ Type objective_function<Type>::operator() ()
           for(int m=1;m<(nmgmt_reg);m++){
             F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
           } // end mgmt regions
-        // generate predicted catches
-        std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
-        for(int i=0;i<(nspace);i++){
-          switch(selType_fish(fish_flt)){
-          case 0: // age sel
-            for(int a=0;a<(nage);a++){
-              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
-
+          // generate predicted catches
+          std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
+          for(int a=0;a<(nage);a++){
+            for(int i=0;i<(nspace);i++){
               for(int s=0;s<nsex;s++){
-                catch_yaf_pred(y,a,fish_flt) +=
-                  Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
-                  (1-exp(- Zreal_ya(y,a) ))*
-                  phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y,a,fish_flt,s)*
-                  N_yais_mid(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-
-                catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
-                  ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
-                    phi_if_fish(fish_flt, i)*
+                switch(selType_fish(fish_flt)){
+                case 0: // age sel
+                  Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+                  Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+                  catch_yaf_pred(y,a,fish_flt) +=
+                    Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
+                    (1-exp(- Zreal_ya(y,a) ))*
+                    phi_if_fish(fish_flt,i)*
                     fsh_slx_yafs(y,a,fish_flt,s)*
                     N_yais_mid(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-              } // end sex
-              // std::cout << y << "\t" << fish_flt <<"\t catch_yaf_pred \t" <<    catch_yaf_pred(y,a,fish_flt)<< "\n";
-            } // end age
-            break;
-          case 1: // length sel
-            for(int a=0;a<(nage);a++){
-              Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-              Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
-            } // end age for Z
-            // for(int l=0;l<(LBins);l++){
-              for(int a=0;a<(nage);a++){
-                for(int s=0;s<nsex;s++){
+                  
+                  catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
+                    ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+                      phi_if_fish(fish_flt, i)*
+                      fsh_slx_yafs(y,a,fish_flt,s)*
+                      N_yais_mid(y,a,i,s)*
+                      wtatlen_kab(phi_ik2(i),0)*
+                      pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  // std::cout << y << "\t" << fish_flt <<"\t catch_yaf_pred \t" <<    catch_yaf_pred(y,a,fish_flt)<< "\n";
+                  break;
+                case 1: // length sel
+                  Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+                  Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+                  
                   catch_yaf_pred(y,a,fish_flt) +=
                     Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
                     (1-exp(- Zreal_ya(y,a) ))*
@@ -787,19 +780,15 @@ Type objective_function<Type>::operator() ()
                       mla_yais(y,a,i,s)*
                       wtatlen_kab(phi_ik2(i),0)*
                       pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                } // end sex
-              } // end age
-             
-            
-            break;
-          } // end selType_fish
-          for(int a=0;a<(nage);a++){
-            catch_yfi_pred(y,fish_flt,i) += catch_yaif_pred(y,a,i,fish_flt);
-          } // end space
+                  break;
+                } // end selType_fish
+              } // end sex
+              catch_yfi_pred(y,fish_flt,i) += catch_yaif_pred(y,a,i,fish_flt);
+            } // end space
             catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
           } // end age
-        std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
-      } // end -1 NA trap
+          std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
+        } // end -1 NA trap
     }// end nfleets_fish
       
     // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";

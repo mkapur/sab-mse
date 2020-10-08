@@ -418,7 +418,7 @@ Type objective_function<Type>::operator() ()
 
   // std::cout << " Here" << "\n";
   // for(int y=0;y<(tEnd);y++){ // Start y loop
-    for(int y=0;y<3;y++){ // Start y loop
+    for(int y=0;y<5;y++){ // Start y loop
       
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only

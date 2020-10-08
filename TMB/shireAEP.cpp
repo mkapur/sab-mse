@@ -135,7 +135,7 @@ Type objective_function<Type>::operator() ()
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  // PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
   PARAMETER_VECTOR(logq_f); // Q by survey fleet
   PARAMETER_VECTOR(b); // bias adjustment factor
   PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
@@ -358,7 +358,7 @@ Type objective_function<Type>::operator() ()
     for(int y=0;y<(tEnd-1);y++){
       tildeR_yk(y,k) =0;
     }
-    tildeR_yk(25,k) =0;
+    tildeR_yk(y,k) =0;
   }
   for(int k=0;k<(nstocks);k++){
     tildeR_initk(k) =0;
@@ -550,10 +550,8 @@ Type objective_function<Type>::operator() ()
     // std::cout << y << " after LengthAge_alyis_mid" << "\n";
     // Catch at beginning of year
     // Hybrid F tuning inputs & temp storage
-    Type v1 = 0.99; Type v2 = 30; Type Fmax = 3;
-    // Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
-    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){}
-      // std::cout << y << 	" " << fish_flt << 	" " << catch_yf_obs(y,fish_flt+1) << std::endl;
+    // Type v1 = 0.99; Type v2 = 30; Type Fmax = 3;
+    Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
         if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
           // std::cout << fish_flt << " F TUNING" << "\n";
@@ -1207,12 +1205,9 @@ Type objective_function<Type>::operator() ()
   REPORT(surv_acomp_yafs_pred);
   REPORT(Nsamp_acomp_yf);
   
-  // other stuff
-
-  
   // REPORT PARS
   ADREPORT(logR_0k);
-  ADREPORT(omega_0ij);
+  // ADREPORT(omega_0ij);
   ADREPORT(logh_k);
   ADREPORT(logq_f);
   REPORT(tildeR_yk);

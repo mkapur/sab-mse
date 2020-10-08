@@ -11,7 +11,7 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-compile(here("TMB","shireAEP.cpp"))
+# compile(here("TMB","shireAEP.cpp"))
 dyn.load(dynlib(here("TMB","shireAEP")))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -20,25 +20,39 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 mappy <- list(
   logh_k = factor(rep(NA, 4)),
   logR_0k = factor(rep(NA, 4)), ## sum wc = 12
-  # omega_0ij = factor(matrix(NA, nrow = nrow(df$parms$omega_0ij), ncol = nrow(df$parms$omega_0ij))),
+  omega_0ij = factor(rep(NA,6)),
   logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60)),  
   logpi_acomp = factor(rep(NA,df$nfleets_acomp)),
-  logSDR = factor(NA)#,
+  logSDR = factor(NA),
   ## structure is fleet x alpha, beta x time block (1 for now)x sex 
-  # log_fsh_slx_pars = factor(array(NA, dim = c(df$nfleets_fish,2,1,2))),
+  log_fsh_slx_pars = factor(array(NA, dim = c(df$nfleets_fish,2,1,2)))
   # log_srv_slx_pars =  factor(array(NA, dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2)))
 )
-p = proc.time()
+
+p <- proc.time()
 obj <- MakeADFun(df,
                  parameters = df$parms,
-                 # map = mappy, ## fix everything
+                 # map = mappy, ## fix everything; for testing eigen fails
                  checkParameterOrder = TRUE,
                  DLL= "shireAEP") # Run the assessment, in TMB folder
 reps <- obj$report() ## return values with uncertainty
-# for (k in 1:3) 
-# opt <- TMBhelper::fit_tmb(obj) ## estimate
+for (k in 1:2) opt <- TMBhelper::fit_tmb(obj)$opt ## estimate
 proc.time()-p
+
+
+source(here("R","plotting","plotOM_outputs.R"))
+
+opt$opt$par
+opt$opt$objective
+opt$opt$time_for_MLE
+opt$opt$Convergence_check
+opt$opt$AIC
+
+steep <- exp(opt$opt$par[1:4])
+names(steep) <- paste0("h","_R",4:1)
+logR_0 <- opt$opt$par[5:8]
+names(logR_0) <- paste0("logR_0","_R",4:1)
 
 likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
@@ -54,9 +68,9 @@ reps$R_yk[1:25,]
 # # 
 # reps$catch_afk_TEMP[,8:9,]
 # reps$catch_yaf_pred[1:5,,8]
-reps$catch_yf_pred
+reps$catch_yf_pred[1:20,]
 # reps$Zreal_yai[1:3,c(0:4,71),] ## no fleets here!
-reps$Freal_yf
+reps$Freal_yf[1:20,]
 # reps$F1_yf[1:3,,]
 # reps$F2_yf[1:3,,]
 # 

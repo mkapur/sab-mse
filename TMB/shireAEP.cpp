@@ -358,11 +358,9 @@ Type objective_function<Type>::operator() ()
     for(int y=0;y<(tEnd-1);y++){
       tildeR_yk(y,k) =0;
     }
-    tildeR_yk(y,k) =0;
-  }
-  for(int k=0;k<(nstocks);k++){
     tildeR_initk(k) =0;
   }
+
 
   // Equilibrium Unfished numbers-at-age, subarea (outside of y loop)
   // identical to Ninit except no recdevs
@@ -413,7 +411,7 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
 
   // std::cout << " Here" << "\n";
-  for(int y=0;y<(20);y++){ // Start y loop
+  for(int y=0;y<(tEnd-1);y++){ // Start y loop
     // for(int y=0;y<(tEnd-1);y++){ // Start y loop
       
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
@@ -1149,7 +1147,7 @@ Type objective_function<Type>::operator() ()
   // 
   // // Likelihood: TOTAL
   Type ans =
-  // ans_SDR+
+  ans_SDR+
   // ans_psel+
   ans_catch+
   ans_survey;//-

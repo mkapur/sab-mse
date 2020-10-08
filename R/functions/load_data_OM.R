@@ -285,6 +285,23 @@ load_data_OM <- function(nspace = 6,
   #   # }
   # }  
   
+  log_fsh_slx_pars = array(NA, dim = c(nfleets_fish,2,1,2), 
+                           dimnames = list(c(fltnames_fish),
+                                           c("p1","p2"),
+                                           c(paste0('block',1)),
+                                           c('Fem','Mal')))
+  
+  # alpha_g1 <- 54.1045, 64.2127) ## trp, ll, twl, std, strs
+  # beta_g1 <- 4.55724, 12.9197)
+
+  log_fsh_slx_pars[1:4,1,1,1] <- 1.07528048238
+  log_fsh_slx_pars[1:4,1,1,2] <- 1.14893337353
+  log_fsh_slx_pars[1:4,2,1,1] <- 0.764917256584
+  log_fsh_slx_pars[1:4,2,1,2] <- 0.945517826919
+  log_fsh_slx_pars[c(6,5,7),1,1,1:2] <- c(62.8329, 63.6959, 33.8898)
+  log_fsh_slx_pars[c(6,5,7),2,1,1:2] <-  c(7.04483, 3.09715, 1.41494)
+  
+  
   
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED

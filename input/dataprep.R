@@ -57,6 +57,7 @@ names(bccatch)[1] <- names(wccatch)[1] <- names(akcatch)[1] <- 'Year'
 omcatch <- merge(omcatch0, akcatch,  by = "Year", all = TRUE) %>% 
   merge(., bccatch, by = "Year", all = TRUE) %>% 
   merge(., wccatch, by = "Year", all = TRUE) 
+omcatch[6:13,'BC_TRAP'] <- NA
 
 write.csv(omcatch %>% select(Year,fltnames_fish) , file = here("input","input_data","OM_catch.csv"), row.names = FALSE)
 

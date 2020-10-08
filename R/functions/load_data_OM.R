@@ -90,7 +90,7 @@ load_data_OM <- function(nspace = 6,
   
   
   # Catch ----
-  catch <- read.csv(here("input","input_data","OM_catch.csv"))
+  catch <- round(read.csv(here("input","input_data","OM_catch.csv")),1)
   catch[is.na(catch)] <- -1.0
   catch_yf_error = array(0.1, dim = dim(catch))
   

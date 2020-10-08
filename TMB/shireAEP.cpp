@@ -553,8 +553,8 @@ Type objective_function<Type>::operator() ()
     Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
     // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){}
       // std::cout << y << 	" " << fish_flt << 	" " << catch_yf_obs(y,fish_flt+1) << std::endl;
-      for(int fish_flt =1;fish_flt<(nfleets_fish+1);fish_flt++){
-        if(catch_yf_obs(y,fish_flt) != Type(-1.0)){
+      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+        if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
           // std::cout << fish_flt << " F TUNING" << "\n";
           // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt) << std::endl;
           catch_yaf_pred.setZero();
@@ -588,7 +588,7 @@ Type objective_function<Type>::operator() ()
               } // end age
             } // end space
           } // end sex
-          F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt)/denom;
+          F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt+1)/denom;
           Type latest_guess = F1_yf(y,fish_flt,0);
           // std::cout << y  <<"\t  catch_yf_obs = " <<  catch_yf_obs(y, fish_flt)  << "\n";
           // std::cout << y  <<"\t  pre-iter   denom  = " <<  denom  << "\n";
@@ -1036,14 +1036,14 @@ Type objective_function<Type>::operator() ()
   
   // Likelihood: catches
   Type ans_catch = 0.0;
-  for(int fish_flt =1;fish_flt<(nfleets_fish+1);fish_flt++){
+  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
     for(int y=0;y<5;y++){
-      if(catch_yf_obs(y,fish_flt) != Type(-1.0)){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt)),
                            log(catch_yf_obs(y,fish_flt)),
-                           catch_yf_error(y,fish_flt), TRUE); 
+                           catch_yf_error(y,fish_flt), TRUE);
         std::cout << y << "\t" << fish_flt << "\t" << "\t ans_survey = " <<  ans_catch  << "\n";
-        
+
       }
     } // end y
   } // end fish_flt

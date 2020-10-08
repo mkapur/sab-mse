@@ -36,28 +36,29 @@ obj <- MakeADFun(df,
                  checkParameterOrder = TRUE,
                  DLL= "shireAEP") # Run the assessment, in TMB folder
 reps <- obj$report() ## return values with uncertainty
+# for (k in 1:3) opt <- TMBhelper::fit_tmb(obj) ## estimate
 proc.time()-p
-
-reps$N_yais_beg[1:3,,,1]
-reps$N_yais_mid[1:3,,,1]
-reps$N_yais_end[1:3,,,1]
-reps$SSB_yi[1:3,]
-reps$SSB_yk[1:3,]
-reps$R_yk[1:3,]
-reps$R_yi[1:3,]
-
-reps$Zreal_yai[1:3,,]
+# # 
+reps$N_yais_beg[1:7,c(0:4,71),,1]
+reps$N_yais_mid[1:7,c(0:4,71),,1]
+reps$N_yais_end[1:7,c(0:4,71),,1]
+reps$SSB_yi[1:7,]
+reps$SSB_yk[1:7,]
+reps$R_yk[1:7,]
+reps$R_yi[1:7,]
+# 
+reps$Zreal_yai[1:3,c(0:4,71),]
 reps$Freal_yf[1:3,]
 reps$F1_yf[1:3,,]
 reps$F2_yf[1:3,,]
-
-reps$Length_yais_beg[1:3,,,1]
-
-likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
-names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
+# 
+# reps$Length_yais_beg[1:3,,,1]
+# 
+# likes <- reps$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+# names(likes) = c("SDR","PSEL","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 
 # reps$fsh_slx_yafs[4:6,,5,1]
-# opt <- TMBhelper::fit_tmb(obj) ## estimate
+
 # compile("C:/Users/public/shire.cpp")
 # dyn.load(dynlib("C:/Users/public/shire"))
 

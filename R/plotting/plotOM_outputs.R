@@ -9,8 +9,8 @@ tEnd <- length(years)
 age <- 0:70 
 nage <- length(age)
 
-
-reps$Ninit_ais[,,1] %>%
+## ninit ----
+dat$Ninit_ais[,,1] %>%
   data.frame() %>%
   mutate('Age' = age) %>%
   reshape2::melt(id = c('Age')) %>%
@@ -21,9 +21,10 @@ reps$Ninit_ais[,,1] %>%
   ggsidekick::theme_sleek()+
   facet_wrap(~variable,scales = 'free_y')
 
-reps$SSB_yk %>%
+## ssb ----
+dat$SSB_yk %>%
   data.frame() %>%
-  mutate('Yr' = years) %>%
+  mutate('Yr' = years[1:nrow(.)]) %>%
   reshape2::melt(id = c('Yr')) %>%
   ggplot(., aes(x = Yr, y = value, color = variable )) +
   scale_color_manual(values = demPal) +
@@ -39,18 +40,16 @@ spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
 
 assSB <- read.csv(here('input','downloads','AssessmentDat_thru2018.csv'),fileEncoding="UTF-8-BOM") %>%
   mutate(REG = substr(Index,1,2), assSSBMT = Value) %>% filter(Type == 'SpawnBiomass')
-
-names(reps$SSB_yi) <- spmat$subarea
-SSB_ym0 <-  reps$SSB_yi %>%
-  data.frame() %>%
-  mutate('Yr' =years) %>%
+SSB_yi <- data.frame(dat$SSB_yi)
+names(SSB_yi) <- spmat$subarea
+SSB_ym0 <-  SSB_yi %>%
+  mutate('Yr' = years[1:nrow(.)]) %>%
   reshape2::melt(id = c('Yr')) %>%
   merge(., spmat, by.x = "variable", by.y = "subarea") %>% 
   group_by(Yr, mgmt) %>%
   summarise(totSSBkg = sum(value), 
             totSSBmt = totSSBkg/1e6) %>% select(Yr, mgmt, totSSBmt)
-levels(SSB_ym0$mgmt) <- c('AI','AK','BC','CC','WC')
-
+levels(SSB_ym0$mgmt) <- c('AK','BC','CC','WC', 'AI')
 SSB_ym0$mgmt[SSB_ym0$mgmt == 'AI'] <- 'AK'  
 SSB_ym0$mgmt[SSB_ym0$mgmt == 'CC'] <- 'WC'  
 SSB_ym <- SSB_ym0 %>% group_by(Yr, mgmt) %>%
@@ -58,7 +57,7 @@ SSB_ym <- SSB_ym0 %>% group_by(Yr, mgmt) %>%
 
 merge(assSB, SSB_ym, by.x = c('Year','REG'), by.y = c('Yr','mgmt')) %>%
   select(Year, REG, CV,assSSBMT, omSSBMT) %>%
-  filter(Year > 1980) %>%
+  # filter(Year > 1980) %>%
   ggplot(., aes(x = Year, y = assSSBMT, color = REG)) +
   geom_line(aes(y = omSSBMT),lwd = 1.1) +
   geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG)) +
@@ -69,7 +68,7 @@ merge(assSB, SSB_ym, by.x = c('Year','REG'), by.y = c('Yr','mgmt')) %>%
 
 
 ## catch pred by fleet ----
-catch_yf_predt <- data.frame(reps$catch_yf_pred)
+catch_yf_predt <- data.frame(dat$catch_yf_pred)
 names(catch_yf_predt) <- df$fltnames_fish
 catch_yf_predt <- catch_yf_predt %>%
   mutate(Year = years) %>%
@@ -101,7 +100,7 @@ ggplot(data = catch_yf_obst,
        aes(x = Year, y = value, color = variable)) +
   geom_line(data = catch_yf_predt, lwd = 0.75) +
   scale_color_manual(values = fishfltPal) +
-  scale_x_continuous(limits = c(1980,2020)) +
+  # scale_x_continuous(limits = c(1980,2020)) +
   geom_point(pch = 1, fill = NA, col = 'black') +
   geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
   theme_sleek() + 

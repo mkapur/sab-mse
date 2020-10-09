@@ -350,9 +350,9 @@ catch_yf_predt <- catch_yf_predt %>%
   mutate(Year = year) %>%
   melt(id = 'Year') %>%
   mutate(Type = 'PRED') %>%
-  mutate(REG = substr(variable,0,2)) #%>%
+  mutate(REG = substr(variable,0,2)) 
   filter(REG == 'BC') #%>% View()
-
+  catch_yf_predt$value[catch_yf_predt$value < 0] = 0
 catch_yf_obst <- catch_yf_obs[1:length(year),] %>%  data.frame() %>%select(-Year) 
 
 catch_yf_obst <- catch_yf_obst %>%

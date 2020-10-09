@@ -642,11 +642,14 @@ Type objective_function<Type>::operator() ()
             vector<Type>Adj(niter+1);
             for(int a=0;a<(nage);a++){
               // buffer in case catch is straight up zero for any age, leading to NaN
-              if(catch_afk_TEMP(a,fish_flt,k) == 0){
-                Adj(k) += catch_yf_obs(y,fish_flt+1)/1e-9;
-              } else{
-                Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
-              }
+              Type denom2 += catch_yf_obs(y,fish_flt+1);
+            }
+            Adj(k) += catch_yf_obs(y,fish_flt+1)/denom2;
+              // if(catch_afk_TEMP(a,fish_flt,k) == 0){
+              //   Adj(k) += catch_yf_obs(y,fish_flt+1)/1e-9;
+              // } else{
+              //   Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
+              // }
             }
             std::cout << y << "\t" << k << "\t" << fish_flt << "\t  Adjk  = " <<   Adj(k)  << "\n";
             

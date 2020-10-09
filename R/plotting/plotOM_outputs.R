@@ -2,7 +2,7 @@ require(ggplot2)
 require(patchwork)
 library(gridExtra)
 require(dplyr)
-
+attach(dat)
 years <- 1960:2019
 nyear <- length(years)
 tEnd <- length(years)
@@ -10,7 +10,7 @@ age <- 0:70
 nage <- length(age)
 
 ## ninit ----
-dat$Ninit_ais[,,1] %>%
+Ninit_ais[,,1] %>%
   data.frame() %>%
   mutate('Age' = age) %>%
   reshape2::melt(id = c('Age')) %>%
@@ -21,8 +21,42 @@ dat$Ninit_ais[,,1] %>%
   ggsidekick::theme_sleek()+
   facet_wrap(~variable,scales = 'free_y')
 
+
+## N_yseason ----
+par(mfrow = c(2,3))
+for(i in 1:6){
+  ylt = 10*max(sum(N_yais_end[2,,i,][!is.na(N_yais_end[2,,i,])]),
+               sum(N_yais_end[10,,i,][!is.na(N_yais_end[10,,i,])]))
+  
+  plot(rowSums(N_yais_beg[,,i,]),
+       type = 'l',
+       lwd = 2, 
+       col = scales::alpha(subareaPal[i],0.2),
+       main = inames[i], 
+       col.main = subareaPal[i], 
+       ylim = c(0,ylt),
+       xlim = c(0,nyear),xaxt='n',
+       xlab = "Model Year", 
+       ylab = 'Numbers (M+F)')
+  lines(rowSums(N_yais_mid[,,i,]),
+        type = 'l',
+        lwd = 3,
+        col = scales::alpha(subareaPal[i],0.4))
+  lines(rowSums(N_yais_end[,,i,]),
+        type = 'l',
+        lwd = 3,
+        col = scales::alpha(subareaPal[i],0.8))
+  legend("topright",col = c(scales::alpha(subareaPal[i],0.2),
+                            scales::alpha(subareaPal[i],0.4),
+                            scales::alpha(subareaPal[i],0.8)), 
+         legend = c("beg",
+                    "mid (move)",
+                    "end (fished)"), cex = 0.7, lty =1, lwd = 5)
+  axis(1, at = seq(1,nyear,5), labels = years[seq(1,nyear,5)])
+}
+
 ## ssb ----
-dat$SSB_yk %>%
+SSB_yk %>%
   data.frame() %>%
   mutate('Yr' = years[1:nrow(.)]) %>%
   reshape2::melt(id = c('Yr')) %>%
@@ -40,7 +74,7 @@ spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
 
 assSB <- read.csv(here('input','downloads','AssessmentDat_thru2018.csv'),fileEncoding="UTF-8-BOM") %>%
   mutate(REG = substr(Index,1,2), assSSBMT = Value) %>% filter(Type == 'SpawnBiomass')
-SSB_yi <- data.frame(dat$SSB_yi)
+SSB_yi <- data.frame(SSB_yi)
 names(SSB_yi) <- spmat$subarea
 SSB_ym0 <-  SSB_yi %>%
   mutate('Yr' = years[1:nrow(.)]) %>%
@@ -48,16 +82,16 @@ SSB_ym0 <-  SSB_yi %>%
   merge(., spmat, by.x = "variable", by.y = "subarea") %>% 
   group_by(Yr, mgmt) %>%
   summarise(totSSBkg = sum(value), 
-            totSSBmt = totSSBkg/1e6) %>% select(Yr, mgmt, totSSBmt)
+            totSSBmt = totSSBkg) %>% select(Yr, mgmt, totSSBmt)
 levels(SSB_ym0$mgmt) <- c('AK','BC','CC','WC', 'AI')
 SSB_ym0$mgmt[SSB_ym0$mgmt == 'AI'] <- 'AK'  
 SSB_ym0$mgmt[SSB_ym0$mgmt == 'CC'] <- 'WC'  
 SSB_ym <- SSB_ym0 %>% group_by(Yr, mgmt) %>%
-  summarise(omSSBMT = sum(totSSBmt))
+  summarise(omSSBMT = sum(totSSBmt)/1e4)
 
 merge(assSB, SSB_ym, by.x = c('Year','REG'), by.y = c('Yr','mgmt')) %>%
   select(Year, REG, CV,assSSBMT, omSSBMT) %>%
-  # filter(Year > 1980) %>%
+  filter(Year < 1985 ) %>%
   ggplot(., aes(x = Year, y = assSSBMT, color = REG)) +
   geom_line(aes(y = omSSBMT),lwd = 1.1) +
   geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG)) +
@@ -68,7 +102,7 @@ merge(assSB, SSB_ym, by.x = c('Year','REG'), by.y = c('Yr','mgmt')) %>%
 
 
 ## catch pred by fleet ----
-catch_yf_predt <- data.frame(dat$catch_yf_pred)
+catch_yf_predt <- data.frame(catch_yf_pred)
 names(catch_yf_predt) <- df$fltnames_fish
 catch_yf_predt <- catch_yf_predt %>%
   mutate(Year = years) %>%
@@ -100,7 +134,7 @@ ggplot(data = catch_yf_obst,
        aes(x = Year, y = value, color = variable)) +
   geom_line(data = catch_yf_predt, lwd = 0.75) +
   scale_color_manual(values = fishfltPal) +
-  # scale_x_continuous(limits = c(1980,2020)) +
+  scale_x_continuous(limits = c(1960,1985)) +
   geom_point(pch = 1, fill = NA, col = 'black') +
   geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
   theme_sleek() + 

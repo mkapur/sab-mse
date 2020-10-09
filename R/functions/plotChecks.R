@@ -78,7 +78,7 @@ png(file = here('figs','N_season_iy.png'),
     width = 10, height = 8, unit = 'in', res = 420)
 par(mfrow = c(2,3))
 for(i in 1:6){
-  ylt = 3*max(sum(N_yais_end[2,,i,][!is.na(N_yais_end[2,,i,])]),
+  ylt = 10*max(sum(N_yais_end[2,,i,][!is.na(N_yais_end[2,,i,])]),
               sum(N_yais_end[10,,i,][!is.na(N_yais_end[10,,i,])]))
 
   plot(rowSums(N_yais_beg[,,i,]),
@@ -105,7 +105,7 @@ for(i in 1:6){
          legend = c("beg",
                     "mid (move)",
                     "end (fished)"), cex = 0.7, lty =1, lwd = 5)
-  axis(1, at = seq(1,nyear,5), labels = year[seq(1,nyear,5)])
+  axis(1, at = seq(1,nyear,5), labels = years[seq(1,nyear,5)])
 }
 dev.off()
 

@@ -92,7 +92,11 @@ Type objective_function<Type>::operator() ()
   vector<Type>selGL(LBins);
 
   // F tuning
-  int niter = 44;
+  // int niter = 22;
+  DATA_INTEGER(niter);
+  DATA_SCALAR(v1);
+  DATA_SCALAR(Fmax);
+  
   vector<Type>Z_a_TEMP(nage);
   vector<Type>Z_a_TEMP2(nage);
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();
@@ -548,9 +552,7 @@ Type objective_function<Type>::operator() ()
     // std::cout << y << " after LengthAge_alyis_mid" << "\n";
     // Catch at beginning of year
     // Hybrid F tuning inputs & temp storage
-    // Type v1 = 0.99; Type v2 = 30; Type Fmax = 3;
-    Type v1 = 0.7; Type v2 = 30; Type Fmax = 1.5;
-    // Type v1 = 0.65; Type v2 = 30; Type Fmax = 1.15;
+    Type v2 = 30;
       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
         if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
           // std::cout << fish_flt << " F TUNING" << "\n";
@@ -565,8 +567,8 @@ Type objective_function<Type>::operator() ()
                       fsh_slx_yafs(y,a,fish_flt,s)*
                       N_yais_mid(y,a,i,s)*
                       wtatlen_kab(phi_ik2(i),0)*
-                      pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
-                      catch_yf_obs(y,fish_flt+1);
+                      pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
+                      // catch_yf_obs(y,fish_flt+1);
                     break;
                   case 1: // length sel
                     denom += phi_if_fish(fish_flt,i)*
@@ -574,15 +576,15 @@ Type objective_function<Type>::operator() ()
                       N_yais_mid(y,a,i,s)*
                       mla_yais(y,a,i,s)*
                       wtatlen_kab(phi_ik2(i),0)*
-                      pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1))+
-                      catch_yf_obs(y,fish_flt+1);
+                      pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
+                      // catch_yf_obs(y,fish_flt+1);
                   break;
                 } // end selType_fish
               } // end age
               // std::cout << y  <<"\t"<< i << "\t area first loop denom \t" << denom  << "\n";
             } // end space
           } // end sex
-          F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt+1)/denom;
+          F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt+1)/(denom+ catch_yf_obs(y,fish_flt+1));
           Type latest_guess = F1_yf(y,fish_flt,0);
           // std::cout << y  <<"\t  catch_yf_obs = " <<  catch_yf_obs(y, fish_flt+1)  << "\n";
           // std::cout << y  <<"\t" <<fish_flt<<"\t  pre-iter denom  = " <<  denom  << "\n";
@@ -646,13 +648,7 @@ Type objective_function<Type>::operator() ()
               denom2 += catch_afk_TEMP(a,fish_flt,k);
             }
             Adj(k) += catch_yf_obs(y,fish_flt+1)/(denom2+1e-9);
-              // if(catch_afk_TEMP(a,fish_flt,k) == 0){
-              //   Adj(k) += catch_yf_obs(y,fish_flt+1)/1e-9;
-              // } else{
-              //   Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
-              // }
-            // }
-            std::cout << y << "\t" << k << "\t" << fish_flt << "\t  Adjk  = " <<   Adj(k)  << "\n";
+            // std::cout << y << "\t" << k << "\t" << fish_flt << "\t  Adjk  = " <<   Adj(k)  << "\n";
             
             // Get new Z given ADJ - need to add discard here and switch selex
             Z_a_TEMP2.setZero();
@@ -734,7 +730,7 @@ Type objective_function<Type>::operator() ()
             F_ym(y,m) += phi_fm(fish_flt,m)*Freal_yf(y, fish_flt);
           } // end mgmt regions
           // generate predicted catches
-          // std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
+          std::cout << y << "\t"<<fish_flt << "\t Freal + half mort (Zreal) \t" << Freal_yf(y, fish_flt)+0.2/2 << "\n";
           for(int a=0;a<(nage);a++){
             for(int i=0;i<(nspace);i++){
               for(int s=0;s<nsex;s++){

@@ -418,7 +418,7 @@ load_data_OM <- function(nspace = 6,
     L1_yk = growthPars$L1_yk,
     wtatlen_kab = wtatlen_kab,
     mat_ak = mat_ak, ## maturity
-    mat_age = rep(0.1,nage), ## mortality
+    mat_age = rep(0.2,nage), ## mortality
     unfished_ALK_F = unfished_ALK_F,
     mla_yais = mla_yais-1,
     

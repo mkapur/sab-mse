@@ -284,37 +284,62 @@ load_data_OM <- function(nspace = 6,
   #   # }
   # }  
   
-  log_fsh_slx_pars = array(NA, dim = c(nfleets_fish,2,1,2), 
+  log_fsh_slx_pars = array(0, dim = c(nfleets_fish,2,1,2), 
                            dimnames = list(c(fltnames_fish),
                                            c("p1","p2"),
                                            c(paste0('block',1)),
                                            c('Fem','Mal')))
   
-  # alpha_g1 <- 54.1045, 64.2127) ## trp, ll, twl, std, strs
-  # beta_g1 <- 4.55724, 12.9197)
+  # fleets 5+ are mean sd, ak fleets use delta stuff
 
   log_fsh_slx_pars[1:4,1,1,1] <- 1.07528048238
   log_fsh_slx_pars[1:4,1,1,2] <- 1.14893337353
   log_fsh_slx_pars[1:4,2,1,1] <- 0.764917256584
   log_fsh_slx_pars[1:4,2,1,2] <- 0.945517826919
-  log_fsh_slx_pars[c(6,5,7),1,1,1:2] <- c(62.8329, 63.6959, 33.8898)
-  log_fsh_slx_pars[c(6,5,7),2,1,1:2] <-  c(7.04483, 3.09715, 1.41494)
+  log_fsh_slx_pars[c(6,5,7),1,1,1:2] <- log(c(62.8329, 63.6959, 33.8898))
+  log_fsh_slx_pars[c(6,5,7),2,1,1:2] <-  log(c(7.04483, 3.09715, 1.41494))
+  ## share wc with bc
+  log_fsh_slx_pars[8:9,1,1,1:2] <-   log_fsh_slx_pars[5:6,1,1,1:2]
+  log_fsh_slx_pars[8:9,2,1,1:2] <-   log_fsh_slx_pars[5:6,2,1,1:2]
   
+
   
+  ## all of these are currently logistic with l/a50, and a delta
+  log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-5),2,1,2),   
+                            dimnames = list(c(paste(fltnames_surv),paste(fltnames_acomp[c(3,5,6)])),
+                                           c("p1","p2"),
+                                           c(paste0('block',1)),
+                                           c('Fem','Mal')))
+
+  log_srv_slx_pars['BC_StRS',1,1,1] <- 64.2127
+  log_srv_slx_pars['BC_StRS',1,1,2] <-64.2127
+  log_srv_slx_pars['BC_StRS',2,1,1] <- 12.9197
+  log_srv_slx_pars['BC_StRS',2,1,2] <- 12.9197
+  log_srv_slx_pars['BC_SS',1,1,1] <- 54.1045
+  log_srv_slx_pars['BC_SS',1,1,2] <- 54.1045
+  log_srv_slx_pars['BC_SS',2,1,1] <- 4.55724
+  log_srv_slx_pars['BC_SS',2,1,2] <- 4.55724
+  
+  for(i in 1:2){
+    log_srv_slx_pars[,1,,i][log_srv_slx_pars[,1,,i] ==0]<- 60
+    log_srv_slx_pars[,2,,i][log_srv_slx_pars[,2,,i] ==0]<- 8
+  }
+  log_srv_slx_pars = log(log_srv_slx_pars)
   
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
+  ## note that these go from AK to WC
   parms <- list(
     logh_k = log(c(0.7,0.88,0.7,0.7)),
     logR_0k = c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
-    omega_0ij = omega_0ij,
+    # omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
     b = rep(0,nyear),  
     logpi_acomp = rep(log(50),nfleets_acomp),
     logSDR = 1.4,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 
-    log_fsh_slx_pars = array(0.2, dim = c(nfleets_fish,2,1,2)),
-    log_srv_slx_pars =  array(0.4, dim = c( nfleets_surv+(nfleets_acomp-5),2,1,2))
+    log_fsh_slx_pars =log_fsh_slx_pars,
+    log_srv_slx_pars = log_srv_slx_pars
   )
   
   
@@ -393,9 +418,9 @@ load_data_OM <- function(nspace = 6,
     L1_yk = growthPars$L1_yk,
     wtatlen_kab = wtatlen_kab,
     mat_ak = mat_ak, ## maturity
-    mat_age = rep(0.2,nage), ## mortality
+    mat_age = rep(0.1,nage), ## mortality
     unfished_ALK_F = unfished_ALK_F,
-    mla_yais=mla_yais-1,
+    mla_yais = mla_yais-1,
     
     #* DATA ----
     acomp_yafs_obs = OM_agecomps_yafs,

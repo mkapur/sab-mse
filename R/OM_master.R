@@ -16,13 +16,13 @@ dyn.load(dynlib(here("TMB","shireAEP")))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
-# // Type v1 = 0.99; Type v2 = 30; Type Fmax = 3;
-# Type v1 = 0.7;  Type Fmax = 1.5;
-# // Type v1 = 0.65; Type v2 = 30; Type Fmax = 1.15;
 
-df$niter = 22
-df$v1 = 0.7
-df$Fmax = 1.5
+# df$v1 = 0.99; df$Fmax = 3;
+df$v1 = 0.7;  df$Fmax = 1.5;
+# df$v1 = 0.65; df$Fmax = 1.15;
+df$niter = 44
+df$yRun = 10;
+# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),

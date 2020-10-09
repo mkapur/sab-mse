@@ -355,7 +355,7 @@ Type objective_function<Type>::operator() ()
   //  END DATA & PARS, BEGIN MODEL //
   // recdevs placeholder
   for(int k=0;k<(nstocks);k++){
-    for(int y=0;y<(tEnd-1);y++){
+    for(int y=0;y<(22);y++){
       tildeR_yk(y,k) =0;
     }
     tildeR_initk(k) =0;
@@ -411,8 +411,8 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
 
   // std::cout << " Here" << "\n";
-  for(int y=0;y<(tEnd-1);y++){ // Start y loop
-    // for(int y=0;y<(tEnd-1);y++){ // Start y loop
+  for(int y=0;y<(22);y++){ // Start y loop
+    // for(int y=0;y<(22);y++){ // Start y loop
       
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
@@ -554,7 +554,6 @@ Type objective_function<Type>::operator() ()
         if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
           // std::cout << fish_flt << " F TUNING" << "\n";
           // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
-
           Type denom = 0;
           for(int s=0;s<nsex;s++){
             for(int i=0;i<(nspace);i++){
@@ -584,18 +583,18 @@ Type objective_function<Type>::operator() ()
           } // end sex
           F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt+1)/denom;
           Type latest_guess = F1_yf(y,fish_flt,0);
-          // std::cout << y  <<"\t  catch_yf_obs = " <<  catch_yf_obs(y, fish_flt+1)  << "\n";
-          // std::cout << y  <<"\t" <<fish_flt<<"\t  pre-iter denom  = " <<  denom  << "\n";
-          // std::cout << y  <<"\t  pre-iter F1_yf(y,fish_flt,k) aka latest guess  = " <<  latest_guess  << "\n";
+          std::cout << y  <<"\t  catch_yf_obs = " <<  catch_yf_obs(y, fish_flt+1)  << "\n";
+          std::cout << y  <<"\t" <<fish_flt<<"\t  pre-iter denom  = " <<  denom  << "\n";
+          std::cout << y  <<"\t  pre-iter F1_yf(y,fish_flt,k) aka latest guess  = " <<  latest_guess  << "\n";
           // k iterations
           for(int k=1;k<(niter+1);k++){
-            // std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
+            std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
             // modify the guess Eq 20
             Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
             Type term1 = latest_guess*term0;
             Type term2 = v1*(1-term0);
             F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
-            // std::cout << y << "\t" << k << "\t within iter F1_yf(y,fish_flt,k)  = " <<   F1_yf(y,fish_flt,k)  << "\n";
+            std::cout << y << "\t" << k << "\t within iter F1_yf(y,fish_flt,k)  = " <<   F1_yf(y,fish_flt,k)  << "\n";
             Z_a_TEMP.setZero();
             for(int i=0;i<(nspace);i++){
               for(int a=0;a<(nage);a++){
@@ -618,7 +617,6 @@ Type objective_function<Type>::operator() ()
                     for(int s=0;s<nsex;s++){
                       Z_a_TEMP[a] += fsh_slx_yafs(y, mla_yais(y,a,i,s), fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
                     } // end sex for z a temp
-                    // for(int l=0;l<(LBins);l++){
                     catch_afk_TEMP(a,fish_flt,k) +=
                       F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
                       (1-exp(-Z_a_TEMP[a]))*
@@ -634,15 +632,14 @@ Type objective_function<Type>::operator() ()
                 // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a]  = " << catch_afk_TEMP(a,fish_flt,k) << "\n";
               } // end age
             } // end space
-            // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
-            // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
-            // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
-            // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
-            // std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
             
             vector<Type>Adj(niter+1);
             for(int a=0;a<(nage);a++){
-
               // buffer in case catch is straight up zero for any age, leading to NaN
               if(catch_afk_TEMP(a,fish_flt,k) == 0){
                 Adj(k) += catch_yf_obs(y,fish_flt+1)/1e-9;
@@ -650,7 +647,7 @@ Type objective_function<Type>::operator() ()
                 Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
               }
             }
-            // std::cout << y << "\t" << k << "\t" << "\t  Adjk  = " <<   Adj(k)  << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  Adjk  = " <<   Adj(k)  << "\n";
             
             // Get new Z given ADJ - need to add discard here and switch selex
             Z_a_TEMP2.setZero();
@@ -661,7 +658,7 @@ Type objective_function<Type>::operator() ()
                   mat_age(a);
               } // end sex
             } // end age
-            // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP2[0]  = " <<   Z_a_TEMP2(0)  << "\n";
+            std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP2[0]  = " <<   Z_a_TEMP2(0)  << "\n";
             
             // Second Guess for F (EQ 24)
             Type denom = 0;
@@ -1016,7 +1013,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: survey biomass
   Type ans_survey=0.0;
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-    for(int y=0;y<(tEnd-1);y++){ // Survey Surveyobs
+    for(int y=0;y<(22);y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
         std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
         std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
@@ -1031,7 +1028,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: catches
   Type ans_catch = 0.0;
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    for(int y=0;y<(tEnd-1);y++){
+    for(int y=0;y<(22);y++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
         std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
         std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
@@ -1051,7 +1048,7 @@ Type objective_function<Type>::operator() ()
   sum1.setZero();
   sum2.setZero();
   for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    for(int y=1;y<(tEnd-1);y++){ // Loop over available years      
+    for(int y=1;y<(22);y++){ // Loop over available years      
       for(int s=0;s<nsex;s++){
         for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) == Type(-1.0)){ // Flag if  there was a measurement that year
@@ -1105,18 +1102,11 @@ Type objective_function<Type>::operator() ()
   // Likelihood: SD Recruitment (hyperprior)
   Type ans_SDR = 0.0;
   for(int k=0;k<(nstocks);k++){
-    for(int y=0;y<(tEnd-1);y++){ // Start y loop
+    for(int y=0;y<(22);y++){ // Start y loop
       ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
     }
   }
-  // Likelihood: Error for Selectivity
-  Type ans_psel = 0.0;
-  // for(int y=0;y<year_sel;y++){ // Start y loop
-  //   for(int i=0;i<psel_fish.size();i++){ // Start y loop
-  //     ans_psel += Type(0.5)*(PSEL(i,y)*PSEL(i,y))/(sigma_psel*sigma_psel);
-  //   }
-  // }
-  
+
   // // Likelihood: Priors on h and M
   Type ans_priors = 0.0;
   // for(int i=0;i<(nspace);i++){
@@ -1136,24 +1126,22 @@ Type objective_function<Type>::operator() ()
   // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
   // ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
   // 
-  vector<Type>ans_tot(7);
+  vector<Type>ans_tot(6);
   ans_tot(0) = ans_SDR;
-  ans_tot(1) = ans_psel;
-  ans_tot(2) = ans_catch;
-  ans_tot(3) = ans_survey;
-  ans_tot(4) = ans_survcomp;
-  ans_tot(5) = ans_catchcomp;
-  ans_tot(6) = ans_priors;
+  ans_tot(1) = ans_catch;
+  ans_tot(2) = ans_survey;
+  ans_tot(3) = ans_survcomp;
+  ans_tot(4) = ans_catchcomp;
+  ans_tot(5) = ans_priors;
   // 
   // // Likelihood: TOTAL
   Type ans =
   ans_SDR+
-  // ans_psel+
   ans_catch+
-  ans_survey;//-
+  ans_survey-
   // ans_survcomp-
   // ans_catchcomp+
-  // ans_priors;
+  ans_priors;//
   // Type ans = 0.0;
   // Report calculations
   

@@ -640,17 +640,18 @@ Type objective_function<Type>::operator() ()
             // std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
             
             vector<Type>Adj(niter+1);
+            Type denom2 = 0.0;
             for(int a=0;a<(nage);a++){
               // buffer in case catch is straight up zero for any age, leading to NaN
-              Type denom2 += catch_yf_obs(y,fish_flt+1);
+              denom2 += catch_afk_TEMP(a,fish_flt,k);
             }
-            Adj(k) += catch_yf_obs(y,fish_flt+1)/denom2;
+            Adj(k) += catch_yf_obs(y,fish_flt+1)/(denom2+1e-9);
               // if(catch_afk_TEMP(a,fish_flt,k) == 0){
               //   Adj(k) += catch_yf_obs(y,fish_flt+1)/1e-9;
               // } else{
               //   Adj(k) += catch_yf_obs(y,fish_flt+1)/catch_afk_TEMP(a,fish_flt,k);
               // }
-            }
+            // }
             std::cout << y << "\t" << k << "\t" << fish_flt << "\t  Adjk  = " <<   Adj(k)  << "\n";
             
             // Get new Z given ADJ - need to add discard here and switch selex

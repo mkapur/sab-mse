@@ -1054,7 +1054,7 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if  there was a measurement that year
             sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
-            // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
+            std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
             if(acomp_flt_type(acomp_flt) == 0){
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                 acomp_yafs_obs(y,a,acomp_flt,s) +
@@ -1072,7 +1072,7 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
-              // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+              std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
               
             } else{
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
@@ -1091,8 +1091,7 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
-              // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-              
+              std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
             } // end switch for comm or surv type
           } // end acomp flag
         } // end age

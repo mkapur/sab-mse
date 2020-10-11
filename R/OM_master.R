@@ -108,13 +108,13 @@ likes
 ## save everything and plot
 writeOM(dat,obj = obj, opt = opt2)
 
-opt$opt$par
-opt$objective
+opt2$par
+opt2$objective
 opt$time_for_MLE
-opt$Convergence_check
+opt2$Convergence_check
 opt$AIC
 
-steep <- exp(opt$par[1:4])
+steep <- exp(opt2$par[1:4])
 names(steep) <- paste0("h","_R",4:1)
 logR_0 <- opt$par[5:8]
 names(logR_0) <- paste0("logR_0","_R",4:1)

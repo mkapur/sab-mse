@@ -39,7 +39,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
       width = 10, height = 8, unit = 'in', res = 420)
   par(mfrow = c(2,3))
   for(i in 1:6){
-    ylt = 10*max(sum(N_yais_end[2,,i,][!is.na(N_yais_end[2,,i,])]),
+    ylt = 3*max(sum(N_yais_end[2,,i,][!is.na(N_yais_end[2,,i,])]),
                  sum(N_yais_end[10,,i,][!is.na(N_yais_end[10,,i,])]))
     
     plot(rowSums(N_yais_beg[,,i,]),
@@ -156,11 +156,11 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
     theme_sleek() + 
     theme(legend.position = 'none')+
     labs(y = 'catch', color = 'Fishing Fleet')+
-    facet_wrap(~variable, scales = "free_y")
+    facet_wrap(~variable, scales = "free_y", ncol = 2)
   ggsave(last_plot(),
          file = paste0(dumpfile,'/catch_fits_TMB_',
                             'v1=',df$v1,'niter=',df$niter,'Fmax=',df$Fmax,Sys.Date(),'.png'),
-         width = 10, height = 6, unit = 'in',
+         width = 8, height = 6, unit = 'in',
          dpi = 420)
   
   

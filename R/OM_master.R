@@ -20,9 +20,9 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.99; df$Fmax = 3;
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
-df$niter = 44
-df$yRun = 40;
-# df$yRun = df$tEnd-1
+df$niter = 7
+# df$yRun = 40;
+df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -49,8 +49,53 @@ likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 
+lower <- obj$par-Inf
+upper <- obj$par+Inf
+lower[names(lower) == 'logh_k'] <- log(0.0001)
+upper[names(upper) == 'logh_k'] <- log(0.99)
+lower[names(lower) == 'logR_0k'] <- log(0.0001)
+lower[names(lower) == 'logSDR'] <- log(0.0001)
+## lower bound for p1 (a50 or mean)
+lower[names(lower) == 'log_fsh_slx_pars'] <- log(0.0001)
+## upper bound for p1 (a50 or mean)
+upper[names(upper) == 'log_fsh_slx_pars'][c(1:9,19:28)] <- log(70)
+## lower bound p2 = a95 (first four fleets)
+lower[names(lower) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(30)
+## upper bound p2 = a95 (first four fleets)
+upper[names(upper) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(70)
+## upper bound p2 =sd (fleets 5:9)
+upper[names(upper) == 'log_fsh_slx_pars'][c(c(5:9,23:27)+df$nfleets_fish)] <- log(50)
+
+## currently srv slx all logistic with a95, a50
+nsurvsel = dim(df$parms$log_srv_slx_pars)[1]
+## lower for everything
+lower[names(lower) == 'log_srv_slx_pars'] <- log(0.0001)
+## lower bound for p2 (a95)
+lower[names(lower) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)] <- log(70)
+## upper bound for p1 (a50 or mean)
+upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel)))] <- log(70)
+## upper bound for p2 (a95)
+upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)]  <- log(70)
+
+## sanity check
+
+## last five flts p2 should be 10; p2 for first 4 fleets should be > p1
+array(exp(upper[names(upper) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
+##  p2 should be > p1
+array(exp(upper[names(upper) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
+## all zero and/or
+array(exp(lower[names(lower) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
+array(exp(lower[names(lower) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
+# upper[names(upper) == 'PSEL'] <- 9
+# upper[names(upper) == 'logh'] <- log(0.999)
+# upper[names(upper) == 'F0'] <- 2
+
 ## about 65s for 22 years
-system.time(opt <- TMBhelper::fit_tmb(obj)$opt) ## estimate; can repreat for stability)
+## 7 hours for 44 yrs
+## 3hrs for all years with bounds
+system.time(opt2 <- TMBhelper::fit_tmb(obj, lower = lower, upper = upper,
+                                      control = list(eval.max = 1e8,
+                                                     iter.max = 1e8))$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(model$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 ## 81 s
@@ -60,14 +105,14 @@ system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
-
-source(here("R","plotting","plotOM_outputs.R"))
+## save everything and plot
+writeOM(dat,obj = obj, opt = opt2)
 
 opt$opt$par
-opt$opt$objective
-opt$opt$time_for_MLE
-opt$opt$Convergence_check
-opt$opt$AIC
+opt$objective
+opt$time_for_MLE
+opt$Convergence_check
+opt$AIC
 
 steep <- exp(opt$par[1:4])
 names(steep) <- paste0("h","_R",4:1)
@@ -99,10 +144,4 @@ dat$Freal_yf[1:20,]
 
 # compile("C:/Users/public/shire.cpp")
 # dyn.load(dynlib("C:/Users/public/shire"))
-# lower <- obj$par-Inf
-# upper <- obj$par+Inf
-# lower[names(lower) == 'logh_k'] <- log(0.0001)
-# upper[names(upper) == 'psel_fish' ] <- 5
-# upper[names(upper) == 'PSEL'] <- 9
-# upper[names(upper) == 'logh'] <- log(0.999)
-# upper[names(upper) == 'F0'] <- 2
+

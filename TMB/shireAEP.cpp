@@ -721,7 +721,7 @@ Type objective_function<Type>::operator() ()
           for(int i=0;i<(nspace);i++){
             for(int a=0;a<(nage);a++){
               for(int s=0;s<nsex;s++){
-                N_weight_yfi(y,fish_flt, i) = (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
+                N_weight_yfi(y,fish_flt, i) += (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
               } // end sex
             } // end age
             F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);

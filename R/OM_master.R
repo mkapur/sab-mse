@@ -11,7 +11,7 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-compile(here("TMB","shireAEP.cpp"))
+# compile(here("TMB","shireAEP.cpp"))
 dyn.load(dynlib(here("TMB","shireAEP")))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -93,7 +93,7 @@ array(exp(lower[names(lower) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv
 ## about 65s for 22 years
 ## 7 hours for 44 yrs
 ## 3hrs for all years with bounds
-system.time(opt2 <- TMBhelper::fit_tmb(obj, lower = lower, upper = upper,
+system.time(opt <- TMBhelper::fit_tmb(obj, lower = lower, upper = upper,
                                       control = list(eval.max = 1e8,
                                                      iter.max = 1e8))$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(model$env$last.par.best, obj$fn, obj$gr) 
@@ -106,7 +106,7 @@ likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
-writeOM(dat,obj = obj, opt = opt2)
+writeOM(dat,obj = obj, opt = opt)
 
 opt2$par
 opt2$objective

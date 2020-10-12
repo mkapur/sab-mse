@@ -863,7 +863,14 @@ Type objective_function<Type>::operator() ()
     }  // end stocks
     // std::cout << y << "\t" << "end R_yk" << "\n";
     for(int i=0;i<(nspace);i++){
-      R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i);//*omega_0ij(i); /// downscale to subarea including age-0 movement
+      Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
+      for(int j=0;j<(nspace);j++){
+        if(i != j){
+          pLeave += R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*omega_0ij(i,j); // will do 1-this for proportion which stay
+          NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*omega_0ij(j,i);// actual numbers incoming
+        } // end i != j
+      } // end subareas j
+      R_yi(y,i) = ()1-pLeave)+NCome;//; /// downscale to subarea including age-0 movement
       N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
       N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
     } /// end space

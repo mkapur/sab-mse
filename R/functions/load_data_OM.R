@@ -58,7 +58,7 @@ load_data_OM <- function(nspace = 6,
       ## I forced this to be 166 vs 167 because it was causing too many individuals
     }
   }
-  omega_0ij = matrix(0, nrow = 1, ncol = nspace)
+  omega_0ij = matrix(0, nrow = nspace, ncol = nspace)
   
   # Weight at length ----
   load(here("input","input_data","OM_wtatlen_kab.rdata")) ## a and be are pars of al^b
@@ -332,7 +332,7 @@ load_data_OM <- function(nspace = 6,
   parms <- list(
     logh_k = log(c(0.7,0.88,0.7,0.7)),
     logR_0k = c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
-    # omega_0ij = omega_0ij,
+    omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
     b = rep(0,nyear),  
     logpi_acomp = rep(log(50),nfleets_acomp),

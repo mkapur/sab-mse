@@ -140,7 +140,7 @@ Type objective_function<Type>::operator() ()
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  // PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  PARAMETER_IMATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
   PARAMETER_VECTOR(logq_f); // Q by survey fleet
   PARAMETER_VECTOR(b); // bias adjustment factor
   PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling

@@ -140,7 +140,7 @@ Type objective_function<Type>::operator() ()
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  PARAMETER_IMATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  PARAMETER_ARRAY(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
   PARAMETER_VECTOR(logq_f); // Q by survey fleet
   PARAMETER_VECTOR(b); // bias adjustment factor
   PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
@@ -870,7 +870,7 @@ Type objective_function<Type>::operator() ()
           NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*omega_0ij(j,i);// actual numbers incoming
         } // end i != j
       } // end subareas j
-      R_yi(y,i) = ()1-pLeave)+NCome;//; /// downscale to subarea including age-0 movement
+      R_yi(y,i) = (1-pLeave)+NCome;//; /// downscale to subarea including age-0 movement
       N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
       N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
     } /// end space

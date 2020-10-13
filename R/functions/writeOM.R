@@ -3,8 +3,13 @@
 # library(gridExtra)
 # require(dplyr)
 writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/"))){
-  attach(dat)
+  # attach(dat)
   if(!exists(dumpfile)) dir.create(dumpfile)
+  
+  spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
+                      stock = c("R4","R3","R3","R2","R2","R1"),
+                      mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
+  inames = unique(spmat$subarea)
   
   ## save stuff into dumpfile
   save(dat, file = paste0(dumpfile,"/dat.rdata"))
@@ -21,7 +26,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   ## ninit ----
   png(file =paste0(dumpfile,"/",Sys.Date(),'-Ninit_ais.png'),
       width = 10, height = 8, unit = 'in', res = 420)
-  Ninit_ais[,,1] %>%
+  dat$Ninit_ais[,,1] %>%
     data.frame() %>%
     mutate('Age' = age) %>%
     reshape2::melt(id = c('Age')) %>%
@@ -35,14 +40,14 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   
   
   ## N_yseason ----
-  png(file =paste0(dumpfile,"/",Sys.Date(),'-N_season_iy.png'),
+  png(file =paste0(dumpfile,"/",Sys.Date(),'-dat$N_seasodat$N_iy.png'),
       width = 10, height = 8, unit = 'in', res = 420)
   par(mfrow = c(2,3))
   for(i in 1:6){
-    ylt = 3*max(sum(N_yais_end[2,,i,][!is.na(N_yais_end[2,,i,])]),
-                 sum(N_yais_end[10,,i,][!is.na(N_yais_end[10,,i,])]))
+    ylt = 3*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
+                 sum(dat$N_yais_end[10,,i,][!is.na(dat$N_yais_end[10,,i,])]))
     
-    plot(rowSums(N_yais_beg[,,i,]),
+    plot(rowSums(dat$N_yais_beg[,,i,]),
          type = 'l',
          lwd = 2, 
          col = scales::alpha(subareaPal[i],0.2),
@@ -52,11 +57,11 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
          xlim = c(0,nyear),xaxt='n',
          xlab = "Model Year", 
          ylab = 'Numbers (M+F)')
-    lines(rowSums(N_yais_mid[,,i,]),
+    lines(rowSums(dat$N_yais_mid[,,i,]),
           type = 'l',
           lwd = 3,
           col = scales::alpha(subareaPal[i],0.4))
-    lines(rowSums(N_yais_end[,,i,]),
+    lines(rowSums(dat$N_yais_end[,,i,]),
           type = 'l',
           lwd = 3,
           col = scales::alpha(subareaPal[i],0.8))
@@ -119,7 +124,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   dpi = 420)
   
   ## catch pred by fleet ----
-  catch_yf_predt <- data.frame(catch_yf_pred)
+  catch_yf_predt <- data.frame(dat$catch_yf_pred)
   names(catch_yf_predt) <- df$fltnames_fish
   catch_yf_predt <- catch_yf_predt %>%
     mutate(Year = years) %>%
@@ -129,7 +134,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
     select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
-    mutate(REG = substr(variable,0,2)) #%>%
+    mutate(REG = substr(variable,0,2)) %>% filter(value != 0)
 
   catch_yf_obst <- df$catch_yf_obs %>%  data.frame() %>%select(-Year) 
   
@@ -165,7 +170,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   
   
   ## catch pred by m ----
-  catch_yf_predm <- catch_yf_predt %>% 
+  catch_yf_predm <- dat$catch_yf_predt %>% 
     group_by(Year, REG) %>%
     summarise(totC = sum(value)) %>%  mutate(Type = 'PRED') 
   catch_yf_obsm <- catch_yf_obst %>% 
@@ -194,7 +199,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   
   ## survey preds ----
   
-  survey_yf_predt <- data.frame(surv_yf_pred)
+  survey_yf_predt <- data.frame(dat$surv_yf_pred)
   names(survey_yf_predt) <- df$fltnames_surv
   survey_yf_predt <- survey_yf_predt %>%
     mutate(Year = years) %>%

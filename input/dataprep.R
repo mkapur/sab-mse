@@ -1082,9 +1082,11 @@ save(ageerr_ExpAge, file = here("input","input_data","ageerr_ExpAge.rdata"))
 # age_catch.tmp <- read.csv(here("input","data",'age_catch_ss.csv'))
 # ac.data <- read.csv(here("input","data",'ac_data.csv'))
 
-## plotting some data avail ----
-reshape2::melt(catch, id = c('Year')) %>% 
-  filter(!is.na(value)) %>%
+## Data Avail Plots ----
+
+#* catch x year x fleet----
+reshape2::melt(  data.frame(catch), id = c('Year')) %>% 
+  filter(value != -1) %>%
   ggplot(.,aes(x = Year, y = variable, color = variable)) +
   theme_sleek() +
   theme(legend.position = 'none')+
@@ -1095,6 +1097,7 @@ ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_catches.png'),
        width = 4, height = 6, unit = 'in', dpi = 420)
 
+#* surv x year x fleet ----
 survey %>%
   mutate(Year = df$years) %>%
   reshape2::melt(., id = c('Year')) %>% 
@@ -1109,14 +1112,38 @@ ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_survey.png'),
        width = 4, height = 6, unit = 'in', dpi = 420)
 
+
+#* acomp x year x fleet ----
+levels(fltnames$M) <- c("AK", "BC", "WC","CC")
+fltnames$M[fltnames$M == 'WC'] <- 'CC'
 fltnamesCol <- merge(fltnames, melt(fishfltPal), by.x = 'NAME', by.y = 'Var2' ) %>%
   rbind(.,
-merge(fltnames, melt(survfltPal), by.x = 'NAME', by.y = 'Var2' ) ) %>%
+        merge(fltnames, melt(survfltPal), by.x = 'NAME', by.y = 'Var2' ) ) %>%
   merge(., fltnames, all.y = TRUE)
 levels(fltnamesCol$value) <- c(levels(fltnamesCol$value), "#015b58","#2c6184","#ba7999")
 
 fltnamesCol$value[is.na(fltnamesCol$value)] <- c(rep("#015b58",3),
-                                           rep("#2c6184",2),  "#ba7999")
+                                                 rep("#2c6184",2),  "#ba7999")
+
+dimnames(df$acomp_yafs_obs)[[3]] <- paste(df$fltnames_acomp)
+df$acomp_yafs_obs[,6,,1] %>%
+  data.frame(.) %>%
+  mutate(Year = df$years) %>%
+  reshape2::melt(., id = c('Year')) %>% 
+  filter(!is.na(value)) %>%
+  ggplot(.,aes(x = Year, y = variable, color = variable)) +
+  theme_sleek() +
+  theme(legend.position = 'none')+
+  scale_color_manual(values =  paste(fltnamesCol$value)) +
+  geom_point(size = 5) +
+  labs(y = 'Fishery or Survey Fleet with Age Comp Data')
+ggsave(last_plot(),
+       file = here('input','input_data','input_figs',
+                   'datplot_acomp.png'),
+       width = 4, height = 6, unit = 'in', dpi = 420)
+
+
+#* fleet x type tile ----
 
 fltnames[fltnames==FALSE] <- NA
 

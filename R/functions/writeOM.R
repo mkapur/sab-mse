@@ -2,9 +2,21 @@
 # require(patchwork)
 # library(gridExtra)
 # require(dplyr)
-writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/"))){
+writeOM <- function(dat, opt, obj, 
+                    dumpfile = 
+                      here('output',paste0(Sys.Date(),"/"))){
   # attach(dat)
+  
+
   if(!exists(dumpfile)) dir.create(dumpfile)
+  ## save the CPP used here
+  file.copy(list.files(here('TMB')
+                       ,pattern = '.cpp',full.names = TRUE),
+            to = paste(dumpfile,"/shireUSED.cpp"))
+  
+  ## write DF used here
+  write.txt(df,
+            file =  paste(dumpfile,"/dfUSED.txt"))
   
   spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
@@ -40,11 +52,12 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   
   
   ## N_yseason ----
-  png(file =paste0(dumpfile,"/",Sys.Date(),'-dat$N_seasodat$N_iy.png'),
+  png(file =paste0(dumpfile,"/",
+                   Sys.Date(),'-N_season_iy.png'),
       width = 10, height = 8, unit = 'in', res = 420)
   par(mfrow = c(2,3))
   for(i in 1:6){
-    ylt = 3*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
+    ylt = 10*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
                  sum(dat$N_yais_end[10,,i,][!is.na(dat$N_yais_end[10,,i,])]))
     
     plot(rowSums(dat$N_yais_beg[,,i,]),
@@ -75,15 +88,19 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   }
   dev.off()
   ## ssb ----
-  SSB_yk %>%
+  dat$SSB_yk %>%
     data.frame() %>%
     mutate('Yr' = years[1:nrow(.)]) %>%
     reshape2::melt(id = c('Yr')) %>%
     ggplot(., aes(x = Yr, y = value, color = variable )) +
     scale_color_manual(values = demPal) +
     geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
-    ggsidekick::theme_sleek() + theme( legend.position = c(0.8,0.8))
-  
+    ggsidekick::theme_sleek() + 
+    theme( legend.position = c(0.8,0.8))
+  ggsave(last_plot(),
+         file = paste0(dumpfile,'/SSB_yk-',Sys.Date(),'.png'),
+         width = 10, height = 6, unit = 'in',
+         dpi = 420)
   
   
   ## ssb_ym with compare ----
@@ -93,7 +110,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   
   assSB <- read.csv(here('input','downloads','AssessmentDat_thru2018.csv'),fileEncoding="UTF-8-BOM") %>%
     mutate(REG = substr(Index,1,2), assSSBMT = Value) %>% filter(Type == 'SpawnBiomass')
-  SSB_yi <- data.frame(SSB_yi)
+  SSB_yi <- data.frame(dat$SSB_yi)
   names(SSB_yi) <- spmat$subarea
   SSB_ym0 <-  SSB_yi %>%
     mutate('Yr' = years[1:nrow(.)]) %>%
@@ -170,7 +187,7 @@ writeOM <- function(dat, opt, obj, dumpfile = here('output',paste0(Sys.Date(),"/
   
   
   ## catch pred by m ----
-  catch_yf_predm <- dat$catch_yf_predt %>% 
+  catch_yf_predm <- catch_yf_predt %>% 
     group_by(Year, REG) %>%
     summarise(totC = sum(value)) %>%  mutate(Type = 'PRED') 
   catch_yf_obsm <- catch_yf_obst %>% 

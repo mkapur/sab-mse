@@ -520,7 +520,8 @@ ggplot(ypred,
   # kaplot::theme_black(base_size = 16)+
   # kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
    ggsidekick::theme_sleek() +
-  theme(legend.position = 'right',
+  theme(legend.position = c(0.9,0.2),
+        legend.text = element_text(size = 9),
         panel.grid = element_blank()) +
   scale_color_manual(values =demPal, 
                      labels = c('Stock R1 (South CC)',
@@ -533,7 +534,7 @@ ggplot(ypred,
                                                              'Stock R3 (West BC/AK Gulf)',
                                                              'Stock R4 (West Gulf/Aleutians)')) +
   
-  geom_ribbon(aes(ymin = LCI, ymax = UCI,  fill = gamREG, group = gamREG), alpha = 0.2) +                
+  # geom_ribbon(aes(ymin = LCI, ymax = UCI,  fill = gamREG, group = gamREG), alpha = 0.2) +                
   scale_alpha(guide = 'none') +
   scale_y_continuous(limits = c(0,110)) +
   scale_x_continuous(limits = c(0,65)) +
@@ -542,8 +543,9 @@ ggplot(ypred,
   facet_wrap(~Sex +Period, ncol = 4)
 
 ggsave(plot = last_plot(),
-       file = here("input","input_data","input_figs","OMGrowthCurves_sigma.png"),
-       height = 8, width = 10, unit = 'in', dpi = 420)
+       file = here("input","input_data","input_figs",
+                   "OMGrowthCurves.png"),
+       height = 6, width = 10, unit = 'in', dpi = 420)
 
 
  ## reshape survey datatable ----

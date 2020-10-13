@@ -11,7 +11,7 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-compile(here("TMB","shireAEP.cpp"))
+# compile(here("TMB","shireAEP.cpp"))
 dyn.load(dynlib(here("TMB","shireAEP")))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -21,7 +21,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 7
-df$yRun = 5;
+df$yRun = 20;
 # df$yRun = df$tEnd-1
 
 mappy <- list(
@@ -43,56 +43,14 @@ system.time(obj <- MakeADFun(df,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 ## up to 30s
-system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-
-likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
-names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
-likes
-
-lower <- obj$par-Inf
-upper <- obj$par+Inf
-lower[names(lower) == 'logh_k'] <- log(0.0001)
-upper[names(upper) == 'logh_k'] <- log(0.99)
-lower[names(lower) == 'logR_0k'] <- log(0.0001)
-lower[names(lower) == 'logSDR'] <- log(0.0001)
-## lower bound for p1 (a50 or mean)
-lower[names(lower) == 'log_fsh_slx_pars'] <- log(0.0001)
-## upper bound for p1 (a50 or mean)
-upper[names(upper) == 'log_fsh_slx_pars'][c(1:9,19:28)] <- log(70)
-## lower bound p2 = a95 (first four fleets)
-lower[names(lower) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(30)
-## upper bound p2 = a95 (first four fleets)
-upper[names(upper) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(70)
-## upper bound p2 =sd (fleets 5:9)
-upper[names(upper) == 'log_fsh_slx_pars'][c(c(5:9,23:27)+df$nfleets_fish)] <- log(50)
-
-## currently srv slx all logistic with a95, a50
-nsurvsel = dim(df$parms$log_srv_slx_pars)[1]
-## lower for everything
-lower[names(lower) == 'log_srv_slx_pars'] <- log(0.0001)
-## lower bound for p2 (a95)
-lower[names(lower) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)] <- log(70)
-## upper bound for p1 (a50 or mean)
-upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel)))] <- log(70)
-## upper bound for p2 (a95)
-upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)]  <- log(70)
-
-## sanity check
-
-## last five flts p2 should be 10; p2 for first 4 fleets should be > p1
-array(exp(upper[names(upper) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
-##  p2 should be > p1
-array(exp(upper[names(upper) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
-## all zero and/or
-array(exp(lower[names(lower) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
-array(exp(lower[names(lower) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
-# upper[names(upper) == 'PSEL'] <- 9
-# upper[names(upper) == 'logh'] <- log(0.999)
-# upper[names(upper) == 'F0'] <- 2
-
+# system.time(rep1 <- obj$report()) ## one off caclulation using start pars
+# likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+# names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
+# likes
+source(here('R','functions','boundPars.R')) ## bound selex etc
 ## about 65s for 22 years
 ## 7 hours for 44 yrs
-## 3hrs for all years with bounds
+## 3hrs for all years with bounds (just catch like)
 system.time(opt <- TMBhelper::fit_tmb(obj, lower = lower, upper = upper,
                                       control = list(eval.max = 1e8,
                                                      iter.max = 1e8))$opt) ## estimate; can repreat for stability)

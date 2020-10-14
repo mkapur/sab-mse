@@ -1206,7 +1206,7 @@ Type objective_function<Type>::operator() ()
   
   // REPORT PARS
   ADREPORT(logR_0k);
-  ADREPORT(omega_0ij);
+  // ADREPORT(omega_0ij);
   ADREPORT(logh_k);
   ADREPORT(logq_f);
   REPORT(tildeR_yk);

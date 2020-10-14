@@ -11,14 +11,9 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shireAEP1010",'shire_v2')[1]
-
-# compile(here("TMB","shireAEP.cpp"))
-# dyn.load(dynlib(here("TMB","shireAEP")))
-compile(here("TMB","test1010.cpp"))
+dllUSE = c("shireAEP1010",'shire_v2')[2]
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
-# compile(here("TMB","shire_v2.cpp"))
-# dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
@@ -27,12 +22,12 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 7
-df$yRun = 5;# df$yRun = df$tEnd-1
+df$yRun = 44;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
   # logR_0k = factor(rep(NA, 4)), ## sum wc = 12
-  # omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
+  omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
   # logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60))
   # logpi_acomp = factor(rep(NA,df$nfleets_acomp)),
@@ -67,7 +62,7 @@ system.time(opt <-
                 control = list(eval.max = 1e6,
                                iter.max = 1e6)
               )$opt) ## estimate; can repreat for stability)
-# for (k in 1:2)  opt <- nlminb(model$env$last.par.best, obj$fn, obj$gr) 
+# for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 ## 81 s
 dat <- obj$report(par = best)

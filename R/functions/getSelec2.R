@@ -1,6 +1,6 @@
 getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
 
-  
+  age = df$age
   if(selType ==0){
     if(selShape==0){
       selec = 1/ ( 1 + exp(-log(19) * (age -  selP[flt_idx,1,1,sex]) / ( selP[flt_idx,2,1,sex] -
@@ -45,7 +45,7 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
       selec <- selec0/ max(selec0)
     } ## end selshape for len sel
   } ## end leng or age sel
-  if(max(selec) > 1.2) cat('selec high')
+  # if(max(selec) > 1.2) cat('selec high')
   
   return(selec)
 }

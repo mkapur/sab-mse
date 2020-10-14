@@ -59,7 +59,7 @@ load_data_OM <- function(nspace = 6,
     }
   }
   # omega_0ij = matrix(0, nrow = nspace, ncol = nspace)
-  omega_0ij = X_ijas[,,5,1]
+  omega_0ij = X_ijas[,,6,1]
   
   # Weight at length ----
   load(here("input","input_data","OM_wtatlen_kab.rdata")) ## a and be are pars of al^b

@@ -12,10 +12,12 @@ writeOM <- function(dat, opt, obj,
 
   if(!exists(dumpfile)) dir.create(dumpfile)
   ## save the CPP used here
-  file.copy(list.files(here('TMB'),
-                       pattern = paste0("*",cppname,"*.cpp"),
-                       full.names = TRUE),
-            to = paste0(dumpfile,paste0(cppname,".cpp")))
+  
+  cppfile <- list.files(here('TMB'),
+                        pattern = paste0("*",cppname,"*.cpp"),
+                        full.names = TRUE)
+  file.copy(cppfile,
+            to = paste0(dumpfile,paste0(basename(cppfile),".cpp")))
   
   ## write DF used here
   save(df, file = paste0(dumpfile,"/dfUSED.rdata"))

@@ -11,7 +11,7 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shireAEP1010",'shire_v2')[1]
+dllUSE = c("shireAEP1010",'shire_v2')[2]
 
 # compile(here("TMB","shireAEP.cpp"))
 # dyn.load(dynlib(here("TMB","shireAEP")))
@@ -27,7 +27,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 7
-df$yRun = 6;# df$yRun = df$tEnd-1
+df$yRun = 5;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -49,8 +49,8 @@ system.time(obj <- MakeADFun(df,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 ## up to 30s
-system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-head(rep1$catch_yf_pred,10)
+# system.time(rep1 <- obj$report()) ## one off caclulation using start pars
+# head(rep1$catch_yf_pred,10)
 # likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 # names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 # likes
@@ -64,8 +64,8 @@ system.time(opt <-
                 lower = lower,
                 upper = upper,
                 dll = dllUSE,
-                control = list(eval.max = 1e8,
-                               iter.max = 1e8)
+                control = list(eval.max = 1e6,
+                               iter.max = 1e6)
               )$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(model$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters

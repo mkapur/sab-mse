@@ -25,7 +25,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 7
-df$yRun = 10;# df$yRun = df$tEnd-1
+df$yRun = 7;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),

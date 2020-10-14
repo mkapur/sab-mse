@@ -1038,8 +1038,8 @@ Type objective_function<Type>::operator() ()
   
   // Likelihood: catches
   Type ans_catch = 0.0;
-  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    for(int y=0;y<yRun;y++){
+  for(int y=0;y<yRun;y++){
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
         std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
         std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";

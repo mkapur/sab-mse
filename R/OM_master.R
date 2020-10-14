@@ -60,6 +60,7 @@ system.time(opt <-
                 obj,
                 # lower = lower,
                 # upper = upper,
+                dll = 'shire_v2',
                 control = list(eval.max = 1e8,
                                iter.max = 1e8)
               )$opt) ## estimate; can repreat for stability)
@@ -77,8 +78,8 @@ likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
-writeOM(dat=dat,obj = obj, opt = opt, cppname = '1010',
-        runname = "-tEnd1010mkapur")
+writeOM(dat=dat,obj = obj, opt = opt, cppname = 'v2',
+        runname = "-ltop3yv2")
 
 opt2$par
 opt2$objective

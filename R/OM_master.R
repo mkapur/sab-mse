@@ -14,8 +14,9 @@ library(ggsidekick)
 # compile(here("TMB","shireAEP.cpp"))
 # dyn.load(dynlib(here("TMB","shireAEP")))
 # compile(here("TMB","shireAEP1010.cpp"))
-dyn.load(dynlib(here("TMB","shireAEP1010")))
-
+# dyn.load(dynlib(here("TMB","shireAEP1010")))
+# compile(here("TMB","shire_v2.cpp"))
+dyn.load(dynlib(here("TMB","shire_v2")))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
@@ -42,7 +43,7 @@ mappy <- list(
 ## ~90s with full years
 system.time(obj <- MakeADFun(df,
                  parameters = df$parms,
-                 dll = 'shireAEP1010',
+                 dll = 'shire_v2',
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 ## up to 30s

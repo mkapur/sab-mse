@@ -30,7 +30,7 @@ df$yRun = 10;# df$yRun = df$tEnd-1
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
   # logR_0k = factor(rep(NA, 4)), ## sum wc = 12
-  # omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
+  omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
   # logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60))
   # logpi_acomp = factor(rep(NA,df$nfleets_acomp)),

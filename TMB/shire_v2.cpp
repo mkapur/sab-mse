@@ -859,7 +859,7 @@ Type objective_function<Type>::operator() ()
       // SSB_yk already has summation
       R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
         (SSB_0k(k)*(1-h_k(k))+
-          SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b[y]*SDR*SDR+tildeR_yk(y,k));
+          SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b(y)*SDR*SDR+tildeR_yk(y,k));
     }  // end stocks
     // std::cout << y << "\t" << "end R_yk" << "\n";
     for(int i=0;i<(nspace);i++){

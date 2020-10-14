@@ -12,7 +12,10 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 # compile(here("TMB","shireAEP.cpp"))
-dyn.load(dynlib(here("TMB","shireAEP")))
+# dyn.load(dynlib(here("TMB","shireAEP")))
+# compile(here("TMB","shireAEP1010.cpp"))
+dyn.load(dynlib(here("TMB","shireAEP1010")))
+
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
@@ -21,13 +24,12 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 7
-# df$yRun = 15;
-df$yRun = df$tEnd-1
+df$yRun = 10;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
   # logR_0k = factor(rep(NA, 4)), ## sum wc = 12
-  # omega_0ij = factor(rep(NA,6)),
+  # omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
   # logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60))
   # logpi_acomp = factor(rep(NA,df$nfleets_acomp)),
@@ -40,6 +42,7 @@ mappy <- list(
 ## ~90s with full years
 system.time(obj <- MakeADFun(df,
                  parameters = df$parms,
+                 dll = 'shireAEP1010',
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 ## up to 30s
@@ -51,13 +54,22 @@ source(here('R','functions','boundPars.R')) ## bound selex etc
 ## about 65s for 22 years
 ## 7 hours for 44 yrs
 ## 3hrs for all years with bounds (just catch like)
-system.time(opt <- TMBhelper::fit_tmb(obj, lower = lower, upper = upper,
-                                      control = list(eval.max = 1e8,
-                                                     iter.max = 1e8))$opt) ## estimate; can repreat for stability)
+system.time(opt <-
+              TMBhelper::fit_tmb(
+                obj,
+                # lower = lower,
+                # upper = upper,
+                control = list(eval.max = 1e8,
+                               iter.max = 1e8)
+              )$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(model$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 ## 81 s
 dat <- obj$report(par = best)
+
+head(dat$catch_yf_pred,10)
+head(df$catch_yf_obs,10)
+
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()

@@ -11,11 +11,11 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shireAEP1010",'shire_v2')[2]
+dllUSE = c("shireAEP1010",'shire_v2')[1]
 
 # compile(here("TMB","shireAEP.cpp"))
 # dyn.load(dynlib(here("TMB","shireAEP")))
-# compile(here("TMB","shireAEP1010.cpp"))
+compile(here("TMB","test1010.cpp"))
 dyn.load(dynlib(here("TMB",dllUSE)))
 # compile(here("TMB","shire_v2.cpp"))
 # dyn.load(dynlib(here("TMB",dllUSE)))

@@ -170,7 +170,7 @@ writeOM <- function(dat, opt, obj,
     mutate(Type = 'OBS', 
            lci = value - 1.96*(0.1*value),
            uci = value + 1.96*(0.1*value)) %>%
-    mutate(REG = substr(variable,0,2)) #%>% head()
+    mutate(REG = substr(variable,0,2)) %>% filter(value > -1)
   
   ggplot(data = catch_yf_obst, 
          aes(x = Year, y = value, color = variable)) +

@@ -81,7 +81,7 @@ names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
 writeOM(dat=dat,obj = obj, opt = opt, cppname = 'v2',
-        runname = "-ltop3yv2")
+        runname = "-ltop3y1010")
 
 opt2$par
 opt2$objective

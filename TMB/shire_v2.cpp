@@ -140,7 +140,7 @@ Type objective_function<Type>::operator() ()
   // // PARAMETERS //
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-  // PARAMETER_VECTOR(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  PARAMETER_MATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
   PARAMETER_VECTOR(logq_f); // Q by survey fleet
   PARAMETER_VECTOR(b); // bias adjustment factor
   PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
@@ -721,7 +721,7 @@ Type objective_function<Type>::operator() ()
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage);a++){
             for(int s=0;s<nsex;s++){
-              N_weight_yfi(y,fish_flt, i) = (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
+              N_weight_yfi(y,fish_flt, i) += (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
             } // end sex
           } // end age
           F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
@@ -863,7 +863,15 @@ Type objective_function<Type>::operator() ()
     }  // end stocks
     // std::cout << y << "\t" << "end R_yk" << "\n";
     for(int i=0;i<(nspace);i++){
-      R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i);//*omega_0ij(i); /// downscale to subarea including age-0 movement
+      Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
+      for(int j=0;j<(nspace);j++){
+        if(i != j){
+          pLeave += omega_0ij(i,j); // will do 1-this for proportion which stay
+          NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*omega_0ij(j,i);// actual numbers incoming
+        } // end i != j
+      } // end subareas j
+      R_yi(y,i) = (1-pLeave)*R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i) + NCome;//; /// downscale to subarea including age-0 movement
+      // R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i);//*omega_0ij(i); /// downscale to subarea including age-0 movement
       N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
       N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
     } /// end space
@@ -1197,7 +1205,7 @@ Type objective_function<Type>::operator() ()
   
   // REPORT PARS
   ADREPORT(logR_0k);
-  // ADREPORT(omega_0ij);
+  ADREPORT(omega_0ij);
   ADREPORT(logh_k);
   ADREPORT(logq_f);
   REPORT(tildeR_yk);

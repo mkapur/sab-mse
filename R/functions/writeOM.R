@@ -3,20 +3,22 @@
 # library(gridExtra)
 # require(dplyr)
 writeOM <- function(dat, opt, obj, 
+                    cppname = NA,
+                    runname = NA,
                     dumpfile = 
                       here('output',paste0(Sys.Date(),"/"))){
-  # attach(dat)
-  
+  ## allow for extra name
+  if(!is.na(runname)) dumpfile = paste0(dumpfile,runname,"/")
 
   if(!exists(dumpfile)) dir.create(dumpfile)
   ## save the CPP used here
-  file.copy(list.files(here('TMB')
-                       ,pattern = '.cpp',full.names = TRUE),
-            to = paste(dumpfile,"/shireUSED.cpp"))
+  file.copy(list.files(here('TMB'),
+                       pattern = paste0("*",cppname,"*.cpp"),
+                       full.names = TRUE),
+            to = paste0(dumpfile,paste0(cppname,".cpp")))
   
   ## write DF used here
-  write.txt(df,
-            file =  paste(dumpfile,"/dfUSED.txt"))
+  save(df, file = paste0(dumpfile,"/dfUSED.rdata"))
   
   spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),

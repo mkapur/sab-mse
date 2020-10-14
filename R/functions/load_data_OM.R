@@ -291,12 +291,12 @@ load_data_OM <- function(nspace = 6,
                                            c(paste0('block',1)),
                                            c('Fem','Mal')))
   
-  # fleets 5+ are mean sd, ak fleets use delta stuff
+  # fleets 5+ are mean sd, ak fleets are a50, a95
 
-  log_fsh_slx_pars[1:4,1,1,1] <- 1.07528048238
-  log_fsh_slx_pars[1:4,1,1,2] <- 1.14893337353
-  log_fsh_slx_pars[1:4,2,1,1] <- 0.764917256584
-  log_fsh_slx_pars[1:4,2,1,2] <- 0.945517826919
+  log_fsh_slx_pars[1:4,1,1,1] <- log(50) ## a50
+  log_fsh_slx_pars[1:4,1,1,2] <- log(50)
+  log_fsh_slx_pars[1:4,2,1,1] <- log(65) ## a95
+  log_fsh_slx_pars[1:4,2,1,2] <- log(65)
   log_fsh_slx_pars[c(6,5,7),1,1,1:2] <- log(c(62.8329, 63.6959, 33.8898))
   log_fsh_slx_pars[c(6,5,7),2,1,1:2] <-  log(c(7.04483, 3.09715, 1.41494))
   ## share wc with bc

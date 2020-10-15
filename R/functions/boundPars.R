@@ -8,18 +8,18 @@ lower[names(lower) == 'logSDR'] <- log(0.0001)
 ## lower bound for everything (a50 a95 mean or sd)
 lower[names(lower) == 'log_fsh_slx_pars'] <- log(0.0001)
 ## upper bound for p1 (a50 or mean)
-upper[names(upper) == 'log_fsh_slx_pars'][c(1:9,19:28)] <- log(70)
+upper[names(upper) == 'log_fsh_slx_pars'][c(1:9,19:28)] <- log(60)
 
 ## lower bound p2 = a95 (first four fleets)
-lower[names(lower) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(65)
+lower[names(lower) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(61)
 ## custom for fleet 2,3 cause misbehaving
 # lower[names(lower) == 'log_fsh_slx_pars'][c(c(2:3,21)+df$nfleets_fish)] <- log(65)
 
 
 ## upper bound p2 = a95 (first four fleets)
 upper[names(upper) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(70)
-## upper bound p2 =sd (fleets 5:9)
-upper[names(upper) == 'log_fsh_slx_pars'][c(c(5:9,23:27)+df$nfleets_fish)] <- log(50)
+## upper bound p2 = sd (fleets 5:9)
+upper[names(upper) == 'log_fsh_slx_pars'][c(c(5:9,23:27)+df$nfleets_fish)] <- log(25)
 
 ## currently srv slx all logistic with a95, a50
 nsurvsel = dim(df$parms$log_srv_slx_pars)[1]

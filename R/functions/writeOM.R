@@ -3,6 +3,7 @@
 # library(gridExtra)
 # require(dplyr)
 writeOM <- function(dat, opt, obj, 
+                    rep =NA,
                     cppname = NA,
                     runname = NA,
                     dumpfile = 
@@ -31,7 +32,7 @@ writeOM <- function(dat, opt, obj,
   save(dat, file = paste0(dumpfile,"/dat.rdata"))
   save(opt, file = paste0(dumpfile,"/opt.rdata"))
   save(obj, file = paste0(dumpfile,"/obj.rdata"))
-  
+  if(!is.na(rep))   save(rep, file = paste0(dumpfile,"/rep.rdata"))
   
   years <- 1960:2019
   nyear <- length(years)

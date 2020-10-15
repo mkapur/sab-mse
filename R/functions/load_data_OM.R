@@ -293,12 +293,12 @@ load_data_OM <- function(nspace = 6,
   
   # fleets 5+ are mean sd, ak fleets are a50, a95
 
-  log_fsh_slx_pars[1:4,1,1,1] <- log(0.01) #log(50) ## a50
-  log_fsh_slx_pars[1:4,1,1,2] <- log(0.01) #log(50)
-  log_fsh_slx_pars[1:4,2,1,1] <- log(0.011) #log(65) ## a95
-  log_fsh_slx_pars[1:4,2,1,2] <- log(0.011) #log(65)
-  log_fsh_slx_pars[c(6,5,7),1,1,1:2] <- log(0.01) #log(c(62.8329, 63.6959, 33.8898)) ## mean
-  log_fsh_slx_pars[c(6,5,7),2,1,1:2] <-  log(65) #log(c(7.04483, 3.09715, 1.41494)) ## sd
+  log_fsh_slx_pars[1:4,1,1,1] <- log(50) ## a50
+  log_fsh_slx_pars[1:4,1,1,2] <- log(50)
+  log_fsh_slx_pars[1:4,2,1,1] <- log(65) ## a95
+  log_fsh_slx_pars[1:4,2,1,2] <- log(65)
+  log_fsh_slx_pars[c(6,5,7),1,1,1:2] <- log(c(62.8329, 63.6959, 33.8898)) ## mean
+  log_fsh_slx_pars[c(6,5,7),2,1,1:2] <- log(c(7.04483, 3.09715, 1.41494)) ## sd
   ## share wc with bc
   log_fsh_slx_pars[8:9,1,1,1:2] <-   log_fsh_slx_pars[5:6,1,1,1:2]
   log_fsh_slx_pars[8:9,2,1,1:2] <-   log_fsh_slx_pars[5:6,2,1,1:2]

@@ -582,8 +582,9 @@ Type objective_function<Type>::operator() ()
                 //   "\t aL^b \t" <<  wtatlen_kab(phi_ik2(i),0)*pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1))  << "\n";
                 // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
                 //   "\t N_yais_mid(y,a,i,s) \t" <<  N_yais_mid(y,a,i,s)  << "\n";
-                std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
-                  "\t  fsh_slx_yafs(y,a,i,s) \t" <<   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)  << "\n";
+                // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
+                //   "\t  phi*fsh_slx_yafs(y,a,i,s) \t" <<    phi_if_fish(fish_flt,i)*
+                //   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)  << "\n";
                 
                 // catch_yf_obs(y,fish_flt+1);
                 break;

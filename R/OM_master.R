@@ -22,7 +22,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 22
-df$yRun = 6;# df$yRun = df$tEnd-1
+df$yRun = 10;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -45,7 +45,8 @@ system.time(obj <- MakeADFun(df,
                  checkParameterOrder = TRUE)) 
 ## up to 30s
 # system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-# head(rep1$catch_yf_pred,10)
+# head(rep1$catch_yf_pred,df$yRun)
+# head(df$catch_yf_obs,df$yRun)
 # likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 # names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 # likes
@@ -59,8 +60,10 @@ system.time(opt <-
                 lower = lower,
                 upper = upper,
                 dll = dllUSE,
+                getHessian = FALSE,
                 control = list(eval.max = 1e6,
-                               iter.max = 1e6)
+                               iter.max = 1e6,
+                               rel.tol = 1e-4)
               )$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
@@ -92,19 +95,19 @@ names(logR_0) <- paste0("logR_0","_R",4:1)
 # # 
 dat$N_yais_beg[1:7,c(0:4,71),,1]
 dat$N_yais_mid[1:7,c(0:4,71),,1]
-dat$N_yais_end[1:6,c(0:4,71),,1]
+dat$N_yais_end[1:7,c(0:4,71),,1]
 rowSums(dat$N_yais_end[1:25,,,1])
 # dat$SSB_yi[1:7,]
 dat$SSB_yk[1:25,]
 dat$R_yk[1:25,]
 # dat$R_yi[1:7,]
 # # 
-# dat$catch_afk_TEMP[,8:9,]
+dat$catch_afk_TEMP[,6,]
 # dat$catch_yaf_pred[1:5,,8]
 dat$catch_yf_pred[1:10,]
-# dat$Zreal_yai[1:3,c(0:4,71),] ## no fleets here!
+dat$Zreal_yai[5,c(0:4,71),] ## no fleets here!
 dat$Freal_yf[1:20,]
-# rep1$F1_yf[1:3,,]
+dat$F1_yf[1:10,,]
 # rep1$F2_yf[1:3,,]
 # 
 # rep1$Length_yais_beg[1:3,,,1]

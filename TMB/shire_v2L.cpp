@@ -427,7 +427,7 @@ Type objective_function<Type>::operator() ()
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
-          Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
+          // Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
           N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
           N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mat_age(0)/2);
           for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
@@ -438,10 +438,10 @@ Type objective_function<Type>::operator() ()
                 NCome += X_ijas(j,i,a,s)*Ninit_ais(a,j,s); // actual numbers incoming
               } // end i != j
             } // end subareas j
-            Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-              exp(-kappa_yk(0,phi_ik2(i),s)*a);
-            Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-              exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
+            // Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            //   exp(-kappa_yk(0,phi_ik2(i),s)*a);
+            // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
             N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mat_age[a]/2);
           } // end ages
           Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
@@ -453,32 +453,32 @@ Type objective_function<Type>::operator() ()
           } // end subareas j
           N_yais_beg(y,nage-1,i,s) =  ((1-pLeave)*(Ninit_ais(nage-1,i,s)+Ninit_ais(nage-2,i,s)) + NCome)*
             exp(-mat_age(nage-1)/2);
-          Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-            exp(-kappa_yk(0,phi_ik2(i),s)*(nage-1));
-          Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-            exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
+          // Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+          //   exp(-kappa_yk(0,phi_ik2(i),s)*(nage-1));
+          // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+          //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
         } // end sexes
       } // end subareas i
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
     
-    Type lenstep = 0.0; Type lenslope = 0.0;
+    // Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year 
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
         // linear growth below A4 as in synthesis
-        if(L1_yk(y,phi_ik2(i),s) < 3){
-          lenstep = L1_yk(y,phi_ik2(i),s);
-          lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
-        } else if(L1_yk(y,phi_ik2(i),s) >= 3){
-          lenstep = 3.0;
-          lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
-        }
-        for(int a=0;a<4;a++){
-          Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
-        } // end linear age
-        Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
+        // if(L1_yk(y,phi_ik2(i),s) < 3){
+        //   lenstep = L1_yk(y,phi_ik2(i),s);
+        //   lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        // } else if(L1_yk(y,phi_ik2(i),s) >= 3){
+        //   lenstep = 3.0;
+        //   lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        // }
+        // for(int a=0;a<4;a++){
+        //   Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
+        // } // end linear age
+        // Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
         // for(int a=0;a<4;a++){
         // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
         //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
@@ -493,16 +493,16 @@ Type objective_function<Type>::operator() ()
           } // end subareas j
           N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mat_age(a)/2);
         } // end ages for N
-        for(int a=5;a<(nage-1);a++){
-          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-            exp(-kappa_yk(y,phi_ik2(i),s)*a);
-          // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
-          //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
-          //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
-          Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
-            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-        } // end nonlinear growth ages
+        // for(int a=5;a<(nage-1);a++){
+        //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+        //     exp(-kappa_yk(y,phi_ik2(i),s)*a);
+        //   // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
+        //   //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
+        //   //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
+        //   Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
+        //     (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+        //     (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+        // } // end nonlinear growth ages
         // plus groups
         Type pLeave = 0.0; Type NCome = 0.0;
         for(int j=0;j<(nspace);j++){
@@ -513,23 +513,23 @@ Type objective_function<Type>::operator() ()
         } // end subareas j
         N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mat_age(nage-1)/2);
         // plus group weighted average (we already have the numbers at age)
-        Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
-          (Length_yais_beg(y,nage-2,i,s)+
-          (Linf_yk(y,phi_ik2(i),s))-
-          Length_yais_beg(y,nage-2,i,s)*
-          (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
-          N_yais_beg(y,nage-1,i,s)  *
-          (Length_yais_beg(y,nage-1,i,s) +
-          (Linf_yk(y,phi_ik2(i),s) -
-          Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
-        Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
-          (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-          Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
-          N_yais_mid(y,nage-1,i,s)*
-          (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-          Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
+        // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
+        //   (Length_yais_beg(y,nage-2,i,s)+
+        //   (Linf_yk(y,phi_ik2(i),s))-
+        //   Length_yais_beg(y,nage-2,i,s)*
+        //   (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
+        //   N_yais_beg(y,nage-1,i,s)  *
+        //   (Length_yais_beg(y,nage-1,i,s) +
+        //   (Linf_yk(y,phi_ik2(i),s) -
+        //   Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
+        //     (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
+        // Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
+        //   (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+        //   Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
+        //   N_yais_mid(y,nage-1,i,s)*
+        //   (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+        //   Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
+        //     (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
       } // end subareas i
     } // end sexes
     // std::cout << y << " before prob LAA" << "\n";
@@ -582,23 +582,23 @@ Type objective_function<Type>::operator() ()
                 break;
               } // end selType_fish
             } // end age
-            // std::cout << y  <<"\t"<< i << "\t area first loop denom \t" << denom  << "\n";
+            std::cout << y  <<"\t"<< i << "\t area first loop denom \t" << denom  << "\n";
           } // end space
         } // end sex
         F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt+1)/(denom+ catch_yf_obs(y,fish_flt+1));
         Type latest_guess = F1_yf(y,fish_flt,0);
         // std::cout << y  <<"\t  catch_yf_obs = " <<  catch_yf_obs(y, fish_flt+1)  << "\n";
-        // std::cout << y  <<"\t" <<fish_flt<<"\t  pre-iter denom  = " <<  denom  << "\n";
-        // std::cout << y  <<"\t  pre-iter F1_yf(y,fish_flt,k) aka latest guess  = " <<  latest_guess  << "\n";
+        std::cout << y  <<"\t" <<fish_flt<<"\t  pre-iter denom  = " <<  denom  << "\n";
+        std::cout << y  <<"\t  pre-iter F1_yf(y,fish_flt,k) aka latest guess  = " <<  latest_guess  << "\n";
         // k iterations
         for(int k=1;k<(niter+1);k++){
-          // std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
+          std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
           // modify the guess Eq 20
           Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
           Type term1 = latest_guess*term0;
           Type term2 = v1*(1-term0);
           F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
-          // std::cout << y << "\t" << k << "\t within iter F1_yf(y,fish_flt,k)  = " <<   F1_yf(y,fish_flt,k)  << "\n";
+          std::cout << y << "\t" << k << "\t within iter F1_yf(y,fish_flt,k)  = " <<   F1_yf(y,fish_flt,k)  << "\n";
           Z_a_TEMP.setZero();
           for(int i=0;i<(nspace);i++){
             for(int a=0;a<(nage);a++){
@@ -636,11 +636,11 @@ Type objective_function<Type>::operator() ()
               // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a]  = " << catch_afk_TEMP(a,fish_flt,k) << "\n";
             } // end age
           } // end space
-          // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
-          // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
-          // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
-          // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
-          // std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
+          std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
+          std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
+          std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
+          std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
+          std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
           
           vector<Type>Adj(niter+1);
           Adj.setZero();
@@ -721,10 +721,10 @@ Type objective_function<Type>::operator() ()
         for(int i=0;i<(nspace);i++){
           for(int a=0;a<(nage);a++){
             for(int s=0;s<nsex;s++){
-              N_weight_yfi(y,fish_flt, i) += (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s)) /N_avail_yf(y,fish_flt);
+              N_weight_yfi(y,fish_flt, i) += (phi_if_fish(fish_flt, i)* N_yais_mid(y,a,i,s))/N_avail_yf(y,fish_flt);
             } // end sex
           } // end age
-          std::cout << y << "\t" << fish_flt << "\t" << i << "\t" <<   N_weight_yfi(y,fish_flt, i) << "\n";
+          // std::cout << y << "\t" << fish_flt << "\t" << i << "\t" <<   N_weight_yfi(y,fish_flt, i) << "\n";
           F_area_yfi(y,fish_flt,i) = Freal_yf(y, fish_flt) * N_weight_yfi(y,fish_flt, i);
         } // end space
         // std::cout << y << "\t" << "end N_weight_yfi" << "\n";
@@ -788,7 +788,7 @@ Type objective_function<Type>::operator() ()
           catch_yf_pred(y,fish_flt) += catch_yaf_pred(y,a,fish_flt);
         } // end age
       } // end -1 NA trap
-      std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
+      // std::cout << y << "\t" << fish_flt <<"\t catch_yf_pred \t" << catch_yf_pred(y,fish_flt)<< "\n";
     } // end nfleets_fish
     
     // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";

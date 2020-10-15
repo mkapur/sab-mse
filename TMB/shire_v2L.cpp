@@ -1142,9 +1142,9 @@ Type objective_function<Type>::operator() ()
   vector<Type>ans_tot(6);
   ans_tot(0) = ans_SDR;
   ans_tot(1) = ans_catch;
-  ans_tot(2) = ans_survey;
-  ans_tot(3) = ans_survcomp;
-  ans_tot(4) = ans_catchcomp;
+  // ans_tot(2) = ans_survey;
+  // ans_tot(3) = ans_survcomp;
+  // ans_tot(4) = ans_catchcomp;
   ans_tot(5) = ans_priors;
   // 
   // // Likelihood: TOTAL

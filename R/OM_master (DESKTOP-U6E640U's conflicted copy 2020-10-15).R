@@ -11,8 +11,8 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shireAEP1010",'shire_v2','shire_v2L')[3]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+dllUSE = c("shireAEP1010",'shire_v2','shire_v2noW')[1]
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -22,7 +22,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 22
-df$yRun = 10;# df$yRun = df$tEnd-1
+df$yRun = 7;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),

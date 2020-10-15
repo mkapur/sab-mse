@@ -578,27 +578,35 @@ Type objective_function<Type>::operator() ()
                   mla_yais(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
+                // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
+                //   "\t aL^b \t" <<  wtatlen_kab(phi_ik2(i),0)*pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1))  << "\n";
+                // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
+                //   "\t N_yais_mid(y,a,i,s) \t" <<  N_yais_mid(y,a,i,s)  << "\n";
+                std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
+                  "\t  fsh_slx_yafs(y,a,i,s) \t" <<   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)  << "\n";
+                
                 // catch_yf_obs(y,fish_flt+1);
                 break;
               } // end selType_fish
             } // end age
-            std::cout << y  <<"\t"<< i << "\t area first loop denom \t" << denom  << "\n";
+            
+            std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
           } // end space
         } // end sex
         F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt+1)/(denom+ catch_yf_obs(y,fish_flt+1));
         Type latest_guess = F1_yf(y,fish_flt,0);
         // std::cout << y  <<"\t  catch_yf_obs = " <<  catch_yf_obs(y, fish_flt+1)  << "\n";
-        std::cout << y  <<"\t" <<fish_flt<<"\t  pre-iter denom  = " <<  denom  << "\n";
-        std::cout << y  <<"\t  pre-iter F1_yf(y,fish_flt,k) aka latest guess  = " <<  latest_guess  << "\n";
+        // std::cout << y  <<"\t" <<fish_flt<<"\t  pre-iter denom  = " <<  denom  << "\n";
+        // std::cout << y  <<"\t  pre-iter F1_yf(y,fish_flt,k) aka latest guess  = " <<  latest_guess  << "\n";
         // k iterations
         for(int k=1;k<(niter+1);k++){
-          std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
+          // std::cout << y << "\t" << k <<  "\t" << fish_flt <<  "\t" << "doing k iters" << "\n";
           // modify the guess Eq 20
           Type term0 = 1/(1+exp(v2*( latest_guess - v1)));
           Type term1 = latest_guess*term0;
           Type term2 = v1*(1-term0);
           F1_yf(y,fish_flt,k) = -log(1-(term1+term2));
-          std::cout << y << "\t" << k << "\t within iter F1_yf(y,fish_flt,k)  = " <<   F1_yf(y,fish_flt,k)  << "\n";
+          // std::cout << y << "\t" << k << "\t within iter F1_yf(y,fish_flt,k)  = " <<   F1_yf(y,fish_flt,k)  << "\n";
           Z_a_TEMP.setZero();
           for(int i=0;i<(nspace);i++){
             for(int a=0;a<(nage);a++){
@@ -636,11 +644,11 @@ Type objective_function<Type>::operator() ()
               // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a]  = " << catch_afk_TEMP(a,fish_flt,k) << "\n";
             } // end age
           } // end space
-          std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
-          std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
-          std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
-          std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
-          std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
+          // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[0]  = " << Z_a_TEMP(0) << "\n";
+          // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP[a+]  = " << Z_a_TEMP(nage-1) << "\n";
+          // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a+]  = " << catch_afk_TEMP(nage-1,fish_flt,k) << "\n";
+          // std::cout << y << "\t" << k << "\t" << "\t  catch_afk_TEMP[a0]  = " << catch_afk_TEMP(0,fish_flt,k) << "\n";
+          // std::cout << y << "\t" << k << "\t" << "\t  catch_yf_obs(y,fish_flt+1) = " << catch_yf_obs(y,fish_flt+1) << "\n";
           
           vector<Type>Adj(niter+1);
           Adj.setZero();

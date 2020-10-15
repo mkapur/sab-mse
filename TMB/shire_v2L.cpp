@@ -534,22 +534,22 @@ Type objective_function<Type>::operator() ()
     } // end sexes
     // std::cout << y << " before prob LAA" << "\n";
     // prob of length-at-age
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=0;a<(nage);a++){
-          LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          for(int l=1;l<(LBins-1);l++){
-            LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-              pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-            LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-              pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          } // end LBins
-          LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-          LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-        } // end ages
-      } // end nspace
-    } // end sex
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=0;a<(nage);a++){
+    //       LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       for(int l=1;l<(LBins-1);l++){
+    //         LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //         LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       } // end LBins
+    //       LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //     } // end ages
+    //   } // end nspace
+    // } // end sex
     // std::cout << y << " after LengthAge_alyis_mid" << "\n";
     // Catch at beginning of year
     // Hybrid F tuning inputs & temp storage
@@ -814,24 +814,24 @@ Type objective_function<Type>::operator() ()
     } // end sexes
     // std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=0;a<(nage);a++){
-          Type LCome = 0.0; Type NCome = 0.0;
-          for(int j=0;j<(nspace);j++){
-            if(i != j){
-              LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
-              NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
-            }
-          } // end subareas j
-          Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-            (N_yais_end(y,a,i,s)+NCome);
-          Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-            (N_yais_end(y,a,i,s)+NCome);
-          
-        } // end ages
-      } // end subareas i
-    } // end sexes
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=0;a<(nage);a++){
+    //       Type LCome = 0.0; Type NCome = 0.0;
+    //       for(int j=0;j<(nspace);j++){
+    //         if(i != j){
+    //           LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
+    //           NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
+    //         }
+    //       } // end subareas j
+    //       Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+    //         (N_yais_end(y,a,i,s)+NCome);
+    //       Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+    //         (N_yais_end(y,a,i,s)+NCome);
+    //       
+    //     } // end ages
+    //   } // end subareas i
+    // } // end sexes
     // std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){
@@ -1023,19 +1023,19 @@ Type objective_function<Type>::operator() ()
   
   // // LIKELIHOODS //
   // Likelihood: survey biomass
-  Type ans_survey=0.0;
-  for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-    for(int y=0;y<yRun;y++){ // Survey Surveyobs
-      if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
-        std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
-        std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
-        ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
-                            log(surv_yf_obs(y,surv_flt)),
-                            surv_yf_err(y,surv_flt), TRUE);
-        std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
-      } // end flag for neg 1
-    } // end y
-  } // end surv_flt
+  // Type ans_survey=0.0;
+  // for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
+  //   for(int y=0;y<yRun;y++){ // Survey Surveyobs
+  //     if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
+  //       std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
+  //       std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
+  //       ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
+  //                           log(surv_yf_obs(y,surv_flt)),
+  //                           surv_yf_err(y,surv_flt), TRUE);
+  //       std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
+  //     } // end flag for neg 1
+  //   } // end y
+  // } // end surv_flt
   
   // Likelihood: catches
   Type ans_catch = 0.0;
@@ -1053,64 +1053,64 @@ Type objective_function<Type>::operator() ()
   } // end fish_flt
   
   // Likelihood: age comps in surveys & catches
-  Type ans_survcomp = 0.0;
-  Type ans_catchcomp = 0.0;
-  vector<Type>sum1(tEnd); // survey comp likelihood
-  vector<Type>sum2(tEnd); // fishery comp likelihood
-  sum1.setZero();
-  sum2.setZero();
-  for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    for(int y=1;y<yRun;y++){ // Loop over available years      
-      for(int s=0;s<nsex;s++){
-        for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
-          if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if  there was a measurement that year
-            // sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
-            // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
-            if(acomp_flt_type(acomp_flt) == 0){
-              sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                acomp_yafs_obs(y,a,acomp_flt,s) +
-                pi_acomp(acomp_flt)*
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
-                - lgamma(pi_acomp(acomp_flt)*
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
-              
-              ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-                sum1(y)+
-                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-                pi_acomp(acomp_flt)*
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-                sum2(y);
-              // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
-              
-            } else{
-              sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                acomp_yafs_obs(y,a,acomp_flt,s) +
-                pi_acomp(acomp_flt)*
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
-                lgamma(pi_acomp(acomp_flt)*
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
-              
-              ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-                sum1(y)+
-                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-                pi_acomp(acomp_flt)*
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-                sum2(y);
-              // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-            } // end switch for comm or surv type
-          } // end acomp flag
-        } // end age
-      } // end sex
-      // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
-      // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-    } // end y
-  } // end acomp fleets
+  // Type ans_survcomp = 0.0;
+  // Type ans_catchcomp = 0.0;
+  // vector<Type>sum1(tEnd); // survey comp likelihood
+  // vector<Type>sum2(tEnd); // fishery comp likelihood
+  // sum1.setZero();
+  // sum2.setZero();
+  // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+  //   for(int y=1;y<yRun;y++){ // Loop over available years      
+  //     for(int s=0;s<nsex;s++){
+  //       for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
+  //         if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if  there was a measurement that year
+  //           // sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
+  //           // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
+  //           if(acomp_flt_type(acomp_flt) == 0){
+  //             sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               acomp_yafs_obs(y,a,acomp_flt,s) +
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
+  //               - lgamma(pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
+  //             
+  //             ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+  //               sum1(y)+
+  //               lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+  //               lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+  //               sum2(y);
+  //             // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+  //             
+  //           } else{
+  //             sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               acomp_yafs_obs(y,a,acomp_flt,s) +
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
+  //               lgamma(pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
+  //             
+  //             ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+  //               sum1(y)+
+  //               lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+  //               lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+  //               sum2(y);
+  //             // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+  //           } // end switch for comm or surv type
+  //         } // end acomp flag
+  //       } // end age
+  //     } // end sex
+  //     // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+  //     // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+  //   } // end y
+  // } // end acomp fleets
   
   // Likelihood: SD Recruitment (hyperprior)
   Type ans_SDR = 0.0;

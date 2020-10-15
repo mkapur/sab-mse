@@ -12,7 +12,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shireAEP1010",'shire_v2','shire_v2L')[3]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -22,12 +22,12 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 22
-df$yRun = 10;# df$yRun = df$tEnd-1
+df$yRun = 6;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
   # logR_0k = factor(rep(NA, 4)), ## sum wc = 12
-  # omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
+  omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
   # logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60))
   # logpi_acomp = factor(rep(NA,df$nfleets_acomp)),

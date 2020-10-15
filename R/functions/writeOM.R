@@ -26,7 +26,7 @@ writeOM <- function(dat, opt, obj,
   spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
-  inames = unique(spmat$subarea)
+  inames = rev(unique(spmat$subarea))
   
   ## save stuff into dumpfile
   save(dat, file = paste0(dumpfile,"/dat.rdata"))

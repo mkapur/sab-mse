@@ -11,7 +11,7 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shireAEP1010",'shire_v2')[2]
+dllUSE = c("shireAEP1010",'shire_v2','shire_v2noW')[2]
 # compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
@@ -76,7 +76,7 @@ names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
 writeOM(dat=dat,obj = obj, opt = opt, cppname = 'v2',
-        runname = "-ltop3y1010")
+        runname = "-ltop44yv2omega")
 
 opt2$par
 opt2$objective

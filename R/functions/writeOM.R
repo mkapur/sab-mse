@@ -17,7 +17,7 @@ writeOM <- function(dat, opt, obj,
                         pattern = paste0("*",cppname,"*.cpp"),
                         full.names = TRUE)
   file.copy(cppfile,
-            to = paste0(dumpfile,paste0(basename(cppfile),".cpp")))
+            to = paste0(dumpfile,paste0(basename(cppfile))))
   
   ## write DF used here
   save(df, file = paste0(dumpfile,"/dfUSED.rdata"))

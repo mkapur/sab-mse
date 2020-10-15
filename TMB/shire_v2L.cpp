@@ -583,14 +583,14 @@ Type objective_function<Type>::operator() ()
                 // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
                 //   "\t N_yais_mid(y,a,i,s) \t" <<  N_yais_mid(y,a,i,s)  << "\n";
                 // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t age" << a <<
-                //   "\t  phi*fsh_slx_yafs(y,a,i,s) \t" <<    phi_if_fish(fish_flt,i)*
-                //   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)  << "\n";
+                //   "\t  phi*fsh_slx_yafs(y,a,i,s) \t" <<   
+                //     phi_if_fish(fish_flt,i)*fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)  << "\n";
                 
                 // catch_yf_obs(y,fish_flt+1);
                 break;
               } // end selType_fish
             } // end age
-            // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
+            std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
           } // end space
         } // end sex
         F1_yf(y,fish_flt,0) = catch_yf_obs(y, fish_flt+1)/(denom+ catch_yf_obs(y,fish_flt+1));

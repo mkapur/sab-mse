@@ -46,9 +46,15 @@ system.time(obj <- MakeADFun(df,
 ## up to 30s
 system.time(rep1 <- obj$report()) ## one off caclulation using start pars
 head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),10)
-rep1$N_yais_beg[1:7,c(0:4,71),,1]
-rep1$N_yais_mid[1:7,c(0:4,71),,1]
-rep1$N_yais_end[1:7,c(0:4,71),,1]
+colSums(rep1$N_0ais) ## should not be super small anywhere
+rep1$SSB_0i ## should not be small or negative
+round(rep1$R_yi[1:df$yRun,])
+round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
+
+
+# rep1$N_yais_beg[1:7,c(0:4,71),,1]
+# rep1$N_yais_mid[1:7,c(0:4,71),,1]
+# rep1$N_yais_end[1:7,c(0:4,71),,1]
 # likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 # names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 # likes
@@ -69,20 +75,23 @@ system.time(opt <-
               )$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
-# fshslx <- array(exp(best[names(best)=='log_fsh_slx_pars']), dim = c(9,2,2))
+array(exp(best[names(best)=='log_fsh_slx_pars']), dim = c(9,2,2))
 ## 81 s
 dat <- obj$report(par = best)
-head(round(dat$catch_yf_pred/df$catch_yf_obs[,2:10],2),10)
-
-
+head(round(dat$catch_yf_pred/df$catch_yf_obs[,2:10],2),25)
+colSums(dat$N_0ais) ## should not be super small anywhere
+dat$SSB_0i ## should not be small or negative
+round(dat$R_yi[1:df$yRun,])
+round(dat$SSB_yi[1:df$yRun,]) ## should not be small or negative
+rowSums(dat$N_yais_end[1:df$yRun,,,1])
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
-writeOM(dat=dat,obj = obj, opt = opt, cppname = 'v2L',
-        runname = "-ltop6yv2L")
+writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname = 'v2L',
+        runname = "-ltop10yv2L_fixN_0B")
 
 opt2$par
 opt2$objective
@@ -97,8 +106,8 @@ names(logR_0) <- paste0("logR_0","_R",4:1)
 
 # # 
 dat$N_yais_beg[1:7,c(0:4,71),,1]
-dat$N_yais_mid[1:7,c(0:4,71),,1]
-dat$N_yais_end[1:7,c(0:4,71),,1]
+dat$N_yais_mid[1:15,c(0:4,71),,1]
+dat$N_yais_end[1:15,c(0:4,71),,1]
 rowSums(dat$N_yais_end[1:25,,,1])
 # dat$SSB_yi[1:7,]
 dat$SSB_yk[1:25,]

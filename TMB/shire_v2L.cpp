@@ -371,15 +371,15 @@ Type objective_function<Type>::operator() ()
   // identical to Ninit except no recdevs
   N_0ais.setZero();
   for(int s=0;s<nsex;s++){
-    for(int k=0;k<(nstocks);k++){
+    // for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){
-          N_0ais(a,i,s) = 0.5*R_0k(k)*tau_ki(k,i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
+          N_0ais(a,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
         }  // note the A+ group will be in slot A-1
         N_0ais(nage-1,i,s) =  N_0ais(nage-2,i,s)*exp(-sum(mat_age))
           /(Type(1.0)-exp(-mat_age(nage-1)));
       } // end subareas
-    } // end stocks
+    // } // end stocks
   } // end sex
   
   // Equilibrium Unfished SSB, stock (outside of y loop)

@@ -11,6 +11,8 @@ lower[names(lower) == 'log_fsh_slx_pars'] <- log(0.0001)
 upper[names(upper) == 'log_fsh_slx_pars'][c(1:9,19:28)] <- log(70)
 ## lower bound p2 = a95 (first four fleets)
 lower[names(lower) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(30)
+## custom for fleet 3 cause misbehaving
+lower[names(lower) == 'log_fsh_slx_pars'][c(c(3,21)+df$nfleets_fish)] <- log(65)
 ## upper bound p2 = a95 (first four fleets)
 upper[names(upper) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(70)
 ## upper bound p2 =sd (fleets 5:9)

@@ -210,7 +210,7 @@ Type objective_function<Type>::operator() ()
               break;
             case 2: // Dome Normal with alpha (mean) and beta (sd)
               for (int a= 0; a < nage; a++){
-                fsh_slx_yafs(i,a,fish_flt,s)  = exp(-(0.5 * (a -    fsh_slx_pars(fish_flt,0,0,s))/pow(   fsh_slx_pars(fish_flt,1,0,s),2)));
+                fsh_slx_yafs(i,a,fish_flt,s)  = exp(-pow(0.5 * (a -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
               } // end ages
               break;
             case 3: // Dome Gamma with alpha (mean) and beta (sd)
@@ -243,7 +243,7 @@ Type objective_function<Type>::operator() ()
               break;
             case 2: // Dome Normal with alpha (mean) and beta (sd)
               for (int l = 0; l < LBins; l++){
-                fsh_slx_yafs(i,l,fish_flt,s)  = exp(-(0.5 * (l -    fsh_slx_pars(fish_flt,0,0,s))/pow(   fsh_slx_pars(fish_flt,1,0,s),2)));
+                fsh_slx_yafs(i,l,fish_flt,s)  = exp(-pow(0.5 * (l -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
               } // end len
               break;
             case 3: // Dome Gamma with alpha (mean) and beta (sd)

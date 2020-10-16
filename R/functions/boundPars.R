@@ -30,7 +30,7 @@ lower[names(lower) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(1)
 ## gamma shape (k*theta equals mean)
 lower[names(lower) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(15)
 ## gamma rate
-lower[names(lower) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(1)
+lower[names(lower) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(2)
 #* fsh slx upper bounds ----
 ## logistic p1 (a50)
 upper[names(upper) == 'log_fsh_slx_pars'][p1_logistic_idx] <- log(60)
@@ -41,7 +41,7 @@ upper[names(upper) == 'log_fsh_slx_pars'][p1_norm_idx] <- log(65)
 ## normal p2 (sd)
 upper[names(upper) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(4)
 ## gamma shape (k*theta equals mean)
-upper[names(upper) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(40)
+upper[names(upper) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(35)
 ## gamma rate
 upper[names(upper) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(2)
 

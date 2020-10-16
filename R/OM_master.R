@@ -22,8 +22,8 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  25 #df$tEnd-1
-df$mat_age <- rep(0.1,df$nage)
+df$yRun =  44 #df$tEnd-1
+df$mat_age <- rep(0.05,df$nage)
 
 
 mappy <- list(
@@ -104,8 +104,9 @@ likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
-writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname = 'v2L',
-        runname = "-ltop20yv2L_postphi")
+cppname = substr(dllUSE,7,nchar(dllUSE))
+writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
+        runname = paste0(df$yRun,"y_",cppname,"_M=",df$mat_age[1]))
 
 opt2$par
 opt2$objective

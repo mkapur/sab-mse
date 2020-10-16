@@ -150,16 +150,15 @@ load_data_OM <- function(nspace = 6,
     ## phi_survy
     phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
     rownames(phi_if_surv) <- names(survey)
-    colnames(phi_if_surv) <- spmat$subarea
-    
-    phi_if_surv[1,1] <-  phi_if_surv[2,2] <-  
-      phi_if_surv[3:4,3:4]<-  phi_if_surv[5,5:6] <- 1
+    colnames(phi_if_surv) <- rev(spmat$subarea)
+    phi_if_surv[1,6] <-  phi_if_surv[2,5] <-  
+      phi_if_surv[3:4,3:4]<-  phi_if_surv[5,1:2] <- 1
     
     phi_if_acomp <- matrix(0, nrow = nfleets_acomp, ncol = nspace)
     rownames(phi_if_acomp) <- fltnames_acomp
-    colnames(phi_if_acomp) <- spmat$subarea
-    phi_if_acomp[1,1] <-  phi_if_acomp[2:3,2] <-  
-      phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,5:6] <- 1
+    colnames(phi_if_acomp) <- rev(spmat$subarea)
+    phi_if_acomp[1,6] <-  phi_if_acomp[2:3,5] <-  
+      phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,1:2] <- 1
     
     phi_ff_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 5) ## indicates the position of acomp fleet
     rownames(phi_ff_acomp) <- fltnames_acomp
@@ -169,66 +168,61 @@ load_data_OM <- function(nspace = 6,
     phi_ff_acomp[,3] <- c(5:12) ## ordering for nsamp
     phi_ff_acomp[,4] <- c(0,1,-1,2,-1,-1,3,4) ## ordering for comm comps
     phi_ff_acomp[,5] <- c(-1,-1,0,-1,1,2,-1,-1) ## ordering for surv comps (only 3)
-    
-    ## in the fish or selex surv, to be selected depending on the acomp flttype swtich
-    
-    
+
     ## phi_fish
     phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
     rownames(phi_if_fish) <- names(catch)[2:ncol(catch)]
-    colnames(phi_if_fish) <-  spmat$subarea
+    colnames(phi_if_fish) <-  rev(spmat$subarea)
     
-    phi_if_fish[c(1,3),1] <- phi_if_fish[c(2,4),2] <-   phi_if_fish[5:7,3:4] <-  
-      phi_if_fish[c(8,9),5:6] <-  1
+    phi_if_fish[c(1,3),6] <- phi_if_fish[c(2,4),5] <-   phi_if_fish[5:7,3:4] <-  
+      phi_if_fish[c(8,9),1:2] <-  1
     
     ## phi_im
     phi_im <- matrix(0, ncol = 3, nrow = nspace)
-    colnames(phi_im) <- unique(spmat$mgmt)
-    rownames(phi_im) <- spmat$subarea
+    colnames(phi_im) <- rev(unique(spmat$mgmt))
+    rownames(phi_im) <- rev(spmat$subarea)
     phi_im[1:2,1] <- phi_im[3:4,2] <- phi_im[5:6,3] <- 1
     
     ## phi_ik
     phi_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
-    rownames(phi_ki) <- unique(spmat$stock)
-    colnames(phi_ki) <- spmat$subarea
+    rownames(phi_ki) <- rev(unique(spmat$stock))
+    colnames(phi_ki) <- rev(spmat$subarea)
     
     phi_ki[1,1] <-  phi_ki[2,2:3] <-  phi_ki[3,4:5]<-  phi_ki[4,6]  <- 1
     phi_ik2 <- matrix(apply(phi_ki,2, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are subareas
     
     ## phi_ij [eq 6]
     phi_ij <-  matrix(1, ncol = nspace, nrow = nspace) ## 0 indicates  subareas comprise THE SAME stock
-    rownames(phi_ij) = colnames(phi_ij) = spmat$subarea
-    diag(phi_ij) <- phi_ij[4,5] <- phi_ij[5,4] <- 0
+    rownames(phi_ij) = colnames(phi_ij) = rev(spmat$subarea)
+    diag(phi_ij) <- phi_ij[2:3,2:3] <- phi_ij[4:5,4:5] <- 0
     
     
     ## phi_fm
     phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
     rownames(phi_fm) = names(catch)[2:ncol(catch)]
-    colnames(phi_fm) = c('AK','BC','WC')
-    phi_fm[1:4,1] <- phi_fm[5:7,2]  <- phi_fm[8:9,3]  <- 1
+    colnames(phi_fm) = rev(unique(spmat$mgmt))
+    phi_fm[1:4,3] <- phi_fm[5:7,2]  <- phi_fm[8:9,1]  <- 1
     
     ## same as above but for comps (mix of fisheries & surveys)
     phi_fm_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 3)
     rownames(phi_fm_acomp) = fltnames_acomp
-    colnames(phi_fm_acomp) = c('AK','BC','WC')
-    phi_fm_acomp[1:3,1] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,3]  <- 1
+    colnames(phi_fm_acomp) = rev(unique(spmat$mgmt))
+    phi_fm_acomp[1:3,3] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,1]  <- 1
     phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are survey fleets
     
     acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
     acomp_flt_type[c(3,5,6)] <- 1
     colnames(acomp_flt_type) <- fltnames_acomp
     
-    
     phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
     rownames(phi_lcomp_fm) = fltnames_lcomp
-    colnames(phi_lcomp_fm) = c('AK','BC','WC')
-    phi_lcomp_fm[1:6,1] <- phi_lcomp_fm[7:9,2]  <- phi_lcomp_fm[10,3]  <- 1
-    
+    colnames(phi_lcomp_fm) = rev(unique(spmat$mgmt))
+    phi_lcomp_fm[1:6,3] <- phi_lcomp_fm[7:9,2]  <- phi_lcomp_fm[10,1]  <- 1
     
     ## tau_ki
     tau_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
-    rownames(tau_ki) <- unique(spmat$stock)
-    colnames(tau_ki) <- spmat$subarea
+    rownames(tau_ki) <- rev(unique(spmat$stock))
+    colnames(tau_ki) <- rev(spmat$subarea)
     tau_ki[1,1] <-   tau_ki[4,6]  <- 1 ## 100% of recruitment in stock
     tau_ki[2,2:3] <-  tau_ki[3,5:4] <-  c(0.75,0.25) ## A2 and C1 are larger
   } else {

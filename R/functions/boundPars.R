@@ -1,29 +1,52 @@
 
 lower <- obj$par-Inf
 upper <- obj$par+Inf
+
+## bounds on repro pars ----
 lower[names(lower) == 'logh_k'] <- log(0.2) ## duh
 upper[names(upper) == 'logh_k'] <- log(0.99)
 lower[names(lower) == 'logR_0k'] <- log(0.0001)
 lower[names(lower) == 'logSDR'] <- log(0.0001)
-## lower bound for everything (a50 a95 mean or sd)
-lower[names(lower) == 'log_fsh_slx_pars'] <- log(0.0001)
-## upper bound for p1 (a50 or mean)
-upper[names(upper) == 'log_fsh_slx_pars'][c(1:9,19:28)] <- log(60)
 
-## lower bound p2 = a95 (first four fleets)
-lower[names(lower) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(61)
-## custom for fleet 2,3 cause misbehaving
-# lower[names(lower) == 'log_fsh_slx_pars'][c(c(2:3,21)+df$nfleets_fish)] <- log(65)
+## bounds on fsh slx ----
+## brute force par locations
+p1_logistic_idx <- c(1:4,19:22)
+p2_logistic_idx <- p1_logistic_idx+df$nfleets_fish
+p1_norm_idx <- c(5,6,8,9,23,24,26,27)
+p2_norm_idx <- p1_norm_idx+df$nfleets_fish
+p1_gamma_idx <- c(7,25)
+p2_gamma_idx <- p1_gamma_idx+df$nfleets_fish
 
 
-## upper bound p2 = a95 (first four fleets)
-upper[names(upper) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- log(70)
-## upper bound p2 = sd (fleets 5:9)
-upper[names(upper) == 'log_fsh_slx_pars'][c(c(5:9,23:27)+df$nfleets_fish)] <- log(25)
-## custom upper bound for our single gamma fleet bc_twl
-## k*theta equals mean
-upper[names(upper) == 'log_fsh_slx_pars'][c(7,25)] <- log(40) # shape, 
-upper[names(upper) == 'log_fsh_slx_pars'][c(16,34)] <- log(2) ## scale
+#* fsh slx lower bounds ----
+## logistic p1 (a50)
+lower[names(lower) == 'log_fsh_slx_pars'][p1_logistic_idx] <- log(35)
+## logistic p2 (a95)
+lower[names(lower) == 'log_fsh_slx_pars'][p2_logistic_idx] <- log(60)
+## normal p1 (mean)
+lower[names(lower) == 'log_fsh_slx_pars'][p1_norm_idx] <- log(35)
+## normal p2 (sd)
+lower[names(lower) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(0.05)
+## gamma shape (k*theta equals mean)
+lower[names(lower) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(35)
+## gamma rate
+lower[names(lower) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(0.05)
+#* fsh slx upper bounds ----
+## logistic p1 (a50)
+upper[names(upper) == 'log_fsh_slx_pars'][p1_logistic_idx] <- log(60)
+## logistic p2 (a95)
+upper[names(upper) == 'log_fsh_slx_pars'][p2_logistic_idx] <- log(70)
+## normal p1 (mean)
+upper[names(upper) == 'log_fsh_slx_pars'][p1_norm_idx] <- log(60)
+## normal p2 (sd)
+upper[names(upper) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(9)
+## gamma shape (k*theta equals mean)
+upper[names(upper) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(40)
+## gamma rate
+upper[names(upper) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(2)
+
+array(exp(upper[names(upper) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
+array(exp(lower[names(lower) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
 
 
 ## currently srv slx all logistic with a95, a50
@@ -42,11 +65,11 @@ upper[names(upper) == 'omega_0ij'] = 1
 ## sanity check
 
 ## last five flts p2 should be 10; p2 for first 4 fleets should be > p1
-array(exp(upper[names(upper) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
+
 ##  p2 should be > p1
 array(exp(upper[names(upper) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
 ## all zero and/or
-array(exp(lower[names(lower) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
+
 array(exp(lower[names(lower) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
 # upper[names(upper) == 'PSEL'] <- 9
 # upper[names(upper) == 'logh'] <- log(0.999)

@@ -22,7 +22,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun = 10;# df$yRun = df$tEnd-1
+df$yRun = 17;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -50,7 +50,7 @@ colSums(rep1$N_0ais) ## should not be super small anywhere
 rep1$SSB_0i ## should not be small or negative
 round(rep1$R_yi[1:df$yRun,])
 round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
-
+rowSums(rep1$N_yais_end[1:df$yRun,,,1])
 
 # rep1$N_yais_beg[1:7,c(0:4,71),,1]
 # rep1$N_yais_mid[1:7,c(0:4,71),,1]
@@ -75,10 +75,11 @@ system.time(opt <-
               )$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
-array(exp(best[names(best)=='log_fsh_slx_pars']), dim = c(9,2,2))
+array(exp(best[names(best)=='log_fsh_slx_pars']), dim = c(9,2,2),
+      dimnames = list(df$fltnames_fish))
 ## 81 s
 dat <- obj$report(par = best)
-head(round(dat$catch_yf_pred/df$catch_yf_obs[,2:10],2),25)
+head(round(dat$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
 colSums(dat$N_0ais) ## should not be super small anywhere
 dat$SSB_0i ## should not be small or negative
 round(dat$R_yi[1:df$yRun,])
@@ -91,7 +92,7 @@ names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname = 'v2L',
-        runname = "-ltop10yv2L_fixN_0B")
+        runname = "-ltop17yv2L")
 
 opt2$par
 opt2$objective
@@ -99,10 +100,10 @@ opt$time_for_MLE
 opt2$Convergence_check
 opt$AIC
 
-steep <- exp(opt2$par[1:4])
-names(steep) <- paste0("h","_R",4:1)
+steep <- exp(opt$par[1:4])
+names(steep) <- paste0("h","_R",1:4)
 logR_0 <- opt$par[5:8]
-names(logR_0) <- paste0("logR_0","_R",4:1)
+names(logR_0) <- paste0("logR_0","_R",1:4)
 
 # # 
 dat$N_yais_beg[1:7,c(0:4,71),,1]

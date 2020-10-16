@@ -534,12 +534,12 @@ Linf_yk <- L1_yk <- kappa_yk <- sigmaG_yk <- t0_yk <- array(NA,
                                                    dim = c(length(1960:2019),
                                                            length(unique(growPar$Region)),2),
                                                    dimnames = list(c(year),
-                                                                   c(paste0("R",4:1)),
+                                                                   c(paste0("R",1:4)),
                                                                    c('Fem','Mal')))
 
 for(s in 1:2){
   for(r in 1:4){
-    temp <- subset(growPar, Sex == c("F","M")[s] & Region == paste0("R",c(5,4,2,1)[r]))
+    temp <- subset(growPar, Sex == c("F","M")[s] & Region == paste0("R",c(1,2,4,5)[r]))
     if("pool" %in% temp$Period){
       Linf_yk[,r,s] <- temp$Linf
       L1_yk[,r,s] <- temp$L1
@@ -567,10 +567,10 @@ for(s in 1:2){
 
 
 
-## sanity check: the first subarea (i == 1) should return the first stock (k =1)
-## and thus the highest Linfs
-Linf_yk[1,phi_ik2[1],1]
-Linf_yk[1,phi_ik2[6],1]
+## sanity check: the first subarea (i == 1) should return the first stock (k =1  or C1)
+## and thus the LOWEST Linfs
+Linf_yk[1,phi_ik2[1],1] ## 60 ish
+Linf_yk[1,phi_ik2[6],1] ## 80 ish
 
 growthPars <- list("Linf_yk"=Linf_yk, "L1_yk"=L1_yk,
              "kappa_yk"=kappa_yk, "sigmaG_yk"=sigmaG_yk)
@@ -614,24 +614,24 @@ for(y in 1:dim(mla_yais)[1]){
 mla_yais[mla_yais<0] <- 1 ## coerce to 1 so tmb makes it
 save(mla_yais, file = here('input','input_data','mla_yais.rdata')) ## integers so can subset
 ## weight at length, kg
-wtatlen_kab <- matrix(NA, nrow = 4, ncol = 2) ## stock x a,b for aL^b
-rownames(wtatlen_kab) <- paste0("R",4:1)
+wtatlen_kab <- matrix(NA, nrow = 4, ncol = 2)## stock x a,b for aL^b
+rownames(wtatlen_kab) <- paste0("R",1:4)
 
-wtatlen_kab[4,1] <- wc$Growth_Parameters$WtLen1
-wtatlen_kab[4,2] <- wc$Growth_Parameters$WtLen2
+wtatlen_kab[1,1] <- wc$Growth_Parameters$WtLen1
+wtatlen_kab[1,2] <- wc$Growth_Parameters$WtLen2
 
 ## Hybrid of WC and BC, from Cox 2011
-wtatlen_kab[3,1] <- sum(8.58e-6,wc$Growth_Parameters$WtLen1)/2
-wtatlen_kab[3,2] <- sum(3.05,wc$Growth_Parameters$WtLen2)/2
+wtatlen_kab[2,1] <- sum(8.58e-6,wc$Growth_Parameters$WtLen1)/2
+wtatlen_kab[2,2] <- sum(3.05,wc$Growth_Parameters$WtLen2)/2
 
 ## mean BC and inflated BC used for AK-BC
-wtatlen_kab[2,1] <- sum(8.58e-6,8.58e-6 *1.15)/2
-wtatlen_kab[2,2] <-  sum(3.05,3.05*1.15)/2
+wtatlen_kab[3,1] <- sum(8.58e-6,8.58e-6 *1.15)/2
+wtatlen_kab[3,2] <-  sum(3.05,3.05*1.15)/2
 # wtatlen_kab[2,2] <-  4
 
 ## AK uses wt at age. Let's just increase the BC values a bit
-wtatlen_kab[1,1] <- 8.58e-6
-wtatlen_kab[1,2] <- 3.05*1.15
+wtatlen_kab[4,1] <- 8.58e-6
+wtatlen_kab[4,2] <- 3.05*1.15
 
 save(wtatlen_kab, 
      file = here('input','input_data',"OM_wtatlen_kab.rdata"))
@@ -654,6 +654,7 @@ matPar <- data.frame('region' = paste0('R',1:4),
                      'a75' = c(8.7,5.1,4.97,7.7))
 
 mat_ak <- matrix(NA, nrow = length(0:70), ncol = 4)
+colnames(mat_ak) =  paste0('R',1:4)
 
 for(a in 1:nrow(mat_ak)){
   for(k in 1:nrow(matPar)){

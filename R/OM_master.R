@@ -22,7 +22,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun = 20;# df$yRun = df$tEnd-1
+df$yRun =  df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -101,7 +101,7 @@ names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname = 'v2L',
-        runname = "-ltop10yv2L_postphi")
+        runname = "-ltop20yv2L_postphi")
 
 opt2$par
 opt2$objective

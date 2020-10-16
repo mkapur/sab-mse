@@ -42,8 +42,10 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
       # // Dome Normal with alpha (mean) and beta (sd)
       selec  = exp(-(0.5 * (len -    selP[flt_idx,1,1,sex])/  selP[flt_idx,2,1,sex])^2);
     } else if(selShape==3){
-      selec0 =    len ^( selP[flt_idx,1,1,sex] - 1) * exp(-len/selP[flt_idx,2,1,sex])
-      selec <- selec0/ max(selec0)
+      ## k is first parm, theta is second (shape, scale)
+      ## the mean is given by k*theta
+      selec0 =    len^(selP[flt_idx,1,1,sex] - 1) * exp(-len/selP[flt_idx,2,1,sex])
+      selec <- selec0/max(selec0)
     } ## end selshape for len sel
   } ## end leng or age sel
   # if(max(selec) > 1.2) cat('selec high')

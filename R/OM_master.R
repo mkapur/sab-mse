@@ -12,7 +12,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shireAEP1010",'shire_v2','shire_v2L')[3]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -22,7 +22,9 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  df$tEnd-1
+df$yRun =  25 #df$tEnd-1
+df$mat_age <- rep(0.1,df$nage)
+
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -50,8 +52,8 @@ system.time(rep1 <- obj$report()) ## one off caclulation using start pars
 head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
 colSums(rep1$N_0ais) ## should not be super small anywhere
 rep1$SSB_0i ## should not be small or negative
-round(rep1$R_yi[1:df$yRun,])
 round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
+round(rep1$R_yi[1:df$yRun,])
 rowSums(rep1$N_yais_end[1:df$yRun,,,1])
 
 # rep1$N_yais_beg[1:7,c(0:4,71),,1]
@@ -61,6 +63,8 @@ rowSums(rep1$N_yais_end[1:df$yRun,,,1])
 # names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 # likes
 source(here('R','functions','boundPars.R')) ## bound selex etc
+array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(9,2,2),
+      dimnames = list(df$fltnames_fish))
 ## about 65s for 22 years
 ## 7 hours for 44 yrs
 ## 3hrs for all years with bounds (just catch like)
@@ -77,7 +81,7 @@ system.time(opt <-
               )$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
-array(exp(best[names(best)=='log_fsh_slx_pars']), dim = c(9,2,2),
+array(round(exp(best[names(best)=='log_fsh_slx_pars'])), dim = c(9,2,2),
       dimnames = list(df$fltnames_fish))
 ## 81 s
 dat <- obj$report(par = best)

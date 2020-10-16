@@ -22,8 +22,8 @@ upper[names(upper) == 'log_fsh_slx_pars'][c(c(1:4,19:22)+df$nfleets_fish)] <- lo
 upper[names(upper) == 'log_fsh_slx_pars'][c(c(5:9,23:27)+df$nfleets_fish)] <- log(25)
 ## custom upper bound for our single gamma fleet bc_twl
 ## k*theta equals mean
-upper[names(upper) == 'log_fsh_slx_pars'][c(7,25)] <- log(48) # shape, 
-upper[names(upper) == 'log_fsh_slx_pars'][c(16,34)] <- log(1) ## scale
+upper[names(upper) == 'log_fsh_slx_pars'][c(7,25)] <- log(40) # shape, 
+upper[names(upper) == 'log_fsh_slx_pars'][c(16,34)] <- log(2) ## scale
 
 
 ## currently srv slx all logistic with a95, a50

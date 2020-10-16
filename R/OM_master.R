@@ -12,7 +12,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shireAEP1010",'shire_v2','shire_v2L')[3]
-# compile(here("TMB",paste0(dllUSE,".cpp")))
+compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -22,7 +22,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun = 2;# df$yRun = df$tEnd-1
+df$yRun = 20;# df$yRun = df$tEnd-1
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -43,9 +43,11 @@ system.time(obj <- MakeADFun(df,
                  dll =dllUSE,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
+array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), dim = c(9,2,2),
+      dimnames = list(df$fltnames_fish))
 ## up to 30s
 system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),10)
+head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
 colSums(rep1$N_0ais) ## should not be super small anywhere
 rep1$SSB_0i ## should not be small or negative
 round(rep1$R_yi[1:df$yRun,])
@@ -84,7 +86,14 @@ colSums(dat$N_0ais) ## should not be super small anywhere
 dat$SSB_0i ## should not be small or negative
 round(dat$R_yi[1:df$yRun,])
 round(dat$SSB_yi[1:df$yRun,]) ## should not be small or negative
+rowSums(dat$N_yais_beg[1:df$yRun,,,1])
 rowSums(dat$N_yais_end[1:df$yRun,,,1])
+
+steep <- exp(opt$par[1:4])
+names(steep) <- paste0("h","_R",1:4)
+logR_0 <- opt$par[5:8]
+names(logR_0) <- paste0("logR_0","_R",1:4)
+
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
@@ -92,7 +101,7 @@ names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 ## save everything and plot
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname = 'v2L',
-        runname = "-ltop17yv2L")
+        runname = "-ltop10yv2L_postphi")
 
 opt2$par
 opt2$objective
@@ -100,10 +109,7 @@ opt$time_for_MLE
 opt2$Convergence_check
 opt$AIC
 
-steep <- exp(opt$par[1:4])
-names(steep) <- paste0("h","_R",1:4)
-logR_0 <- opt$par[5:8]
-names(logR_0) <- paste0("logR_0","_R",1:4)
+
 
 # # 
 dat$N_yais_beg[1:7,c(0:4,71),,1]

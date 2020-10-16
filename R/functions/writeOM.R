@@ -48,7 +48,7 @@ writeOM <- function(dat, opt, obj,
     mutate('Age' = age) %>%
     reshape2::melt(id = c('Age')) %>%
     ggplot(., aes(x = Age, y = value, color = variable )) +
-    scale_color_manual(values = subareaPal) +
+    scale_color_manual(values = rev(subareaPal)) +
     geom_line(lwd = 2) + 
     labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
     ggsidekick::theme_sleek()+
@@ -68,9 +68,9 @@ writeOM <- function(dat, opt, obj,
     plot(rowSums(dat$N_yais_beg[,,i,]),
          type = 'l',
          lwd = 2, 
-         col = scales::alpha(subareaPal[i],0.2),
+         col = scales::alpha(rev(rev(subareaPal)[i]),0.2),
          main = inames[i], 
-         col.main = subareaPal[i], 
+         col.main = rev(rev(subareaPal)[i]), 
          ylim = c(0,ylt),
          xlim = c(0,nyear),xaxt='n',
          xlab = "Model Year", 
@@ -78,14 +78,14 @@ writeOM <- function(dat, opt, obj,
     lines(rowSums(dat$N_yais_mid[,,i,]),
           type = 'l',
           lwd = 3,
-          col = scales::alpha(subareaPal[i],0.4))
+          col = scales::alpha(rev(rev(subareaPal)[i]),0.4))
     lines(rowSums(dat$N_yais_end[,,i,]),
           type = 'l',
           lwd = 3,
-          col = scales::alpha(subareaPal[i],0.8))
-    legend("topright",col = c(scales::alpha(subareaPal[i],0.2),
-                              scales::alpha(subareaPal[i],0.4),
-                              scales::alpha(subareaPal[i],0.8)), 
+          col = scales::alpha(rev(rev(subareaPal)[i]),0.8))
+    legend("topright",col = c(scales::alpha(rev(rev(subareaPal)[i]),0.2),
+                              scales::alpha(rev(rev(subareaPal)[i]),0.4),
+                              scales::alpha(rev(rev(subareaPal)[i]),0.8)), 
            legend = c("beg",
                       "mid (move)",
                       "end (fished)"), cex = 0.7, lty =1, lwd = 5)

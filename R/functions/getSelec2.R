@@ -1,6 +1,7 @@
 getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
 
   age = df$age
+
   if(selType ==0){
     if(selShape==0){
       selec = 1/ ( 1 + exp(-log(19) * (age -  selP[flt_idx,1,1,sex]) / ( selP[flt_idx,2,1,sex] -
@@ -16,7 +17,7 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
       # break;
     } else if(selShape==2){
       # // Dome Normal with alpha (mean) and beta (sd)
-      selec  = exp(-(0.5 * (age -    selP[flt_idx,1,1,sex])/  selP[flt_idx,2,1,sex]^2));
+      selec  = exp(-(0.5 * (age -    selP[flt_idx,1,1,sex])/  selP[flt_idx,2,1,sex])^2);
     } else if(selShape==3){
       selec0 =    age ^( selP[flt_idx,1,1,sex] - 1) * exp(-age/selP[flt_idx,2,1,sex])
       selec <- selec0/ max(selec0)
@@ -39,7 +40,7 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
       # break;
     } else if(selShape==2){
       # // Dome Normal with alpha (mean) and beta (sd)
-      selec  = exp(-(0.5 * (len -    selP[flt_idx,1,1,sex])/  selP[flt_idx,2,1,sex]^2));
+      selec  = exp(-(0.5 * (len -    selP[flt_idx,1,1,sex])/  selP[flt_idx,2,1,sex])^2);
     } else if(selShape==3){
       selec0 =    len ^( selP[flt_idx,1,1,sex] - 1) * exp(-len/selP[flt_idx,2,1,sex])
       selec <- selec0/ max(selec0)

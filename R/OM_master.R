@@ -12,7 +12,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shireAEP1010",'shire_v2','shire_v2L')[3]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -21,10 +21,10 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.99; df$Fmax = 3;
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
-df$niter = 20
-df$yRun =  df$tEnd-1
+df$niter = 44
+df$yRun =  10 #df$tEnd-1
 df$mat_age <- rep(0.1,df$nage)
-df$selShape_fish <- rep(-1,df$nfleets_fish) ## turn OFF all slx
+df$selShape_fish[5:7] <-  -1 ## turn OFF all slx for BC
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -106,7 +106,7 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
-        runname = paste0(df$yRun,"y_",cppname,"_M=",df$mat_age[1]))
+        runname = paste0(df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_bcseloff"))
 
 opt2$par
 opt2$objective

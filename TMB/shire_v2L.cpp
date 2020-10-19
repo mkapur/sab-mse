@@ -190,8 +190,9 @@ Type objective_function<Type>::operator() ()
     for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
         switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
-        for (int s = 0; s < nsex; s++) { // loop sexes
+
         case 0: // enter age based sel
+          for (int s = 0; s < nsex; s++) { // loop sexes
           // Selectivity switch (case 0 or 1 references the value of slx_type)
           switch (selShape_fish(fish_flt)) { // age sel
           case -1:

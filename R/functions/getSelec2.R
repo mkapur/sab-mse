@@ -3,7 +3,9 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
   age = df$age
 
   if(selType ==0){
-    if(selShape==0){
+    if(selShape == -1){
+      selec = 1
+    } else if(selShape==0){
       selec = 1/ ( 1 + exp(-log(19) * (age -  selP[flt_idx,1,1,sex]) / ( selP[flt_idx,2,1,sex] -
                                                                           selP[flt_idx,1,1,sex])))
     } else if(selShape==1){
@@ -26,7 +28,9 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
     ## get mla_yais for fleet x area
     i = which(df$phi_if_fish[flt_idx,]==1)[1]
     len = df$mla_yais[df$yRun,,i,sex]
-    if(selShape==0){
+    if(selShape == -1){
+      selec = 1
+    } else if(selShape==0){
       selec = 1/ ( 1 + exp(-log(19) * (len -  selP[flt_idx,1,1,sex]) / ( selP[flt_idx,2,1,sex] -
                                                                            selP[flt_idx,1,1,sex])))
     } else if(selShape==1){

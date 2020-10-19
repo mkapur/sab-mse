@@ -190,49 +190,57 @@ Type objective_function<Type>::operator() ()
     for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
         switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
+        for (int s = 0; s < nsex; s++) { // loop sexes
         case 0: // enter age based sel
-          for (int s = 0; s < nsex; s++) { // loop sexes
-            // Selectivity switch (case 0 or 1 references the value of slx_type)
-            switch (selShape_fish(fish_flt)) { // age sel
-            case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
-              for (int a= 0; a < nage; a++){
-                fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-                  (a -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -
-                  fsh_slx_pars(fish_flt,0,0,s))));
-              } // end ages
-              break;
-            case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
-              //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-              for (int a= 0; a < nage; a++){
-                fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-                  fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
-              } // end ages
-              break;
-            case 2: // Dome Normal with alpha (mean) and beta (sd)
-              for (int a= 0; a < nage; a++){
-                fsh_slx_yafs(i,a,fish_flt,s)  = exp(-pow(0.5 * (a -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
-              } // end ages
-              break;
-            case 3: // Dome Gamma with alpha (mean) and beta (sd)
-              selG.setZero();
-              for (int a= 0; a < nage; a++) {
-                selG(a)= pow(a, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-a/   fsh_slx_pars(fish_flt,1,0,s));
-              } // end ages
-              for (int a= 0;a < nage; a++) {
-                fsh_slx_yafs(i,a,fish_flt,s) = selG(a) / max(selG);
-              } // end ages
-              break;
-            } // end switch selShape
-          } // end sex
-          break; // break age sel
+          // Selectivity switch (case 0 or 1 references the value of slx_type)
+          switch (selShape_fish(fish_flt)) { // age sel
+          case -1:
+            for (int a= 0; a < nage; a++){
+              fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0);
+            } // end ages
+          case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
+            for (int a= 0; a < nage; a++){
+              fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
+                (a -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -
+                fsh_slx_pars(fish_flt,0,0,s))));
+            } // end ages
+            break;
+          case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
+            //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+            for (int a= 0; a < nage; a++){
+              fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
+            } // end ages
+            break;
+          case 2: // Dome Normal with alpha (mean) and beta (sd)
+            for (int a= 0; a < nage; a++){
+              fsh_slx_yafs(i,a,fish_flt,s)  = exp(-pow(0.5 * (a -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
+            } // end ages
+            break;
+          case 3: // Dome Gamma with alpha (mean) and beta (sd)
+            selG.setZero();
+            for (int a= 0; a < nage; a++) {
+              selG(a)= pow(a, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-a/   fsh_slx_pars(fish_flt,1,0,s));
+            } // end ages
+            for (int a= 0;a < nage; a++) {
+              fsh_slx_yafs(i,a,fish_flt,s) = selG(a) / max(selG);
+            } // end ages
+            break;
+          } // end switch selShape
+        } // end sex
+        break; // break age sel
         case 1: // enter length based sel
           for (int s = 0; s < nsex; s++) {
             switch (selShape_fish(fish_flt)) {
+            case -1:
+              for (int l = 0; l < LBins; l++){
+                fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0); 
+              } // end lengths
             case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
               for (int l = 0; l < LBins; l++){
                 fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
                   (l -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -  fsh_slx_pars(fish_flt,0,0,s))));
-              } // end ages
+              } // end lengths
               break;
             case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
               //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*

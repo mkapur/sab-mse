@@ -818,8 +818,8 @@ Type objective_function<Type>::operator() ()
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
-          // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(0.2));
-          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
+          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a))/2);
+          // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
         }
         for(int a=1;a<(nage-1);a++){
           N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);

@@ -21,15 +21,18 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.99; df$Fmax = 3;
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
-df$niter = 44
-df$yRun =  10 #df$tEnd-1
-df$mat_age <- rep(0.1,df$nage)
+df$niter = 20
+df$yRun =  df$tEnd-1
+df$mat_age <- rep(1e-3,df$nage)
 df$selShape_fish[5:7] <-  -1 ## turn OFF all slx for BC
+
+omega_0ij_map <- matrix(NA, nrow = 6, ncol = 6) ## turn everything off
+# omega_0ij_map[1,] <- df$parms$omega_0ij[1,] ## estimate to/from C1 only
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
   # logR_0k = factor(rep(NA, 4)), ## sum wc = 12
-  omega_0ij = factor(matrix(NA, nrow = 6, ncol = 6)),
+  omega_0ij = factor(omega_0ij_map),
   # logq_f = factor(rep(NA, 5)),
   b =  factor(rep(NA, 60))
   # logpi_acomp = factor(rep(NA,df$nfleets_acomp)),
@@ -106,7 +109,7 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
-        runname = paste0(df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_bcseloff"))
+        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_bcseloff"))
 
 opt2$par
 opt2$objective

@@ -407,7 +407,7 @@ Type objective_function<Type>::operator() ()
   //
   // // The first year of the simulation is initialized with the following age distribution
   Ninit_ais.setZero();
-  for(int y=0;y<(10*nage);y++){
+  for(int y=0;y<(1000*nage);y++){
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){

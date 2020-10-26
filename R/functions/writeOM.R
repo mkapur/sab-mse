@@ -6,8 +6,7 @@ writeOM <- function(dat, opt, obj,
                     rep =NA,
                     cppname = NA,
                     runname = NA,
-                    dumpfile = 
-                      here('output',paste0(Sys.Date(),"/"))){
+                    dumpfile =  here('output',paste0(Sys.Date(),"/"))){
   ## allow for extra name
   if(!is.na(runname)) dumpfile = paste0(dumpfile,runname,"/")
 
@@ -23,7 +22,7 @@ writeOM <- function(dat, opt, obj,
   ## write DF used here
   save(df, file = paste0(dumpfile,"/dfUSED.rdata"))
   
-  spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
+  spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
   inames = rev(unique(spmat$subarea))
@@ -41,13 +40,15 @@ writeOM <- function(dat, opt, obj,
   nage <- length(age)
   
   ## ninit ----
-  png(file =paste0(dumpfile,"/",Sys.Date(),'-Ninit_ais.png'),
+  png(file = paste0(dumpfile,'Ninit_ais.png'),
       width = 10, height = 8, unit = 'in', res = 420)
-  dat$Ninit_ais[,,1] %>%
-    data.frame() %>%
+  ninit0 <-  dat$Ninit_ais[,,1] %>%
+    data.frame() 
+  names(ninit0) <- inames
+  ninit0 %>%
     mutate('Age' = age) %>%
     reshape2::melt(id = c('Age')) %>%
-    ggplot(., aes(x = Age, y = value, color = variable )) +
+  ggplot(., aes(x = Age, y = value, color = variable )) +
     scale_color_manual(values = rev(subareaPal)) +
     geom_line(lwd = 2) + 
     labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
@@ -62,10 +63,10 @@ writeOM <- function(dat, opt, obj,
       width = 10, height = 8, unit = 'in', res = 420)
   par(mfrow = c(2,3))
   for(i in 1:6){
-    ylt = 10*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
-                 sum(dat$N_yais_end[10,,i,][!is.na(dat$N_yais_end[10,,i,])]))
+    ylt = 2*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
+                 sum(dat$N_yais_end[df$yRun,,i,][!is.na(dat$N_yais_end[df$yRun,,i,])]))
     
-    plot(rowSums(dat$N_yais_beg[,,i,]),
+    plot(rowSums(dat$N_yais_beg[1:(df$yRun-1),,i,]),
          type = 'l',
          lwd = 2, 
          col = scales::alpha(rev(rev(subareaPal)[i]),0.2),

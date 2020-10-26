@@ -946,7 +946,7 @@ for(flt in 1:nfleets_surv){
 dev.off()
 ## survey ----
 ## spatial matrix -- for matching on region, stock, sub_area, etc
-spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
+spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                     stock = c("R4","R3","R3","R2","R2","R1"),
                     mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
 bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%

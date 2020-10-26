@@ -2,7 +2,6 @@
 ## M S Kapur 
 ## Inspiration  from J Sullivan N Jacobsen Summer 2020
 ## kapurm@uw.edu
-# file.copy("C:/Users/public/shire.cpp",here("TMB","shire.cpp"),overwrite = TRUE)
 
 library(TMB)
 library(dplyr)
@@ -22,8 +21,8 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.7;  df$Fmax = 1.5;
 # df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  df$tEnd-1
-df$mat_age <- rep(1e-3,df$nage)
+df$yRun =  30 #df$tEnd-1
+# df$mat_age <- rep(1e-3,df$nage)
 df$selShape_fish[5:7] <-  -1 ## turn OFF all slx for BC
 
 omega_0ij_map <- matrix(NA, nrow = 6, ncol = 6) ## turn everything off
@@ -55,6 +54,7 @@ system.time(rep1 <- obj$report()) ## one off caclulation using start pars
 head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
 colSums(rep1$N_0ais) ## should not be super small anywhere
 rep1$SSB_0i ## should not be small or negative
+rep1$SSB_yi[3,] ## should match SSB0 without fishing
 round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
 round(rep1$R_yi[1:df$yRun,])
 rowSums(rep1$N_yais_end[1:df$yRun,,,1])
@@ -109,7 +109,7 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
-        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_bcseloff"))
+        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_noF"))
 
 opt2$par
 opt2$objective

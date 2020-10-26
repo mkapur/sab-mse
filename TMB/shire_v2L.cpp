@@ -380,10 +380,17 @@ Type objective_function<Type>::operator() ()
   // identical to Ninit except no recdevs
   N_0ais.setZero();
   for(int s=0;s<nsex;s++){
-    // for(int k=0;k<(nstocks);k++){
       for(int i=0;i<(nspace);i++){
-        for(int a=0;a<(nage-1);a++){
-          N_0ais(a,i,s) += 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(-(mat_age(a)*age(a))); // compound multiply duh
+        N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+          for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
+            Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
+            for(int j=0;j<(nspace);j++){
+              if(i != j){
+                pLeave += X_ijas(i,j,a,s); // will do 1-this for proportion which stay
+                NCome += X_ijas(j,i,a,s)*Ninit_ais(a,j,s); // actual numbers incoming
+              } // end i != j
+            } // end subareas j
+            N_0ais(a,i,s) = ((1-pLeave)*N_0ais(a,i,s) + NCome)*exp(-mat_age[a]/2);
         }  // note the A+ group will be in slot A-1
         N_0ais(nage-1,i,s) +=  N_0ais(nage-2,i,s)*exp(-sum(mat_age))
           /(Type(1.0)-exp(-mat_age(nage-1)));
@@ -407,7 +414,7 @@ Type objective_function<Type>::operator() ()
   //
   // // The first year of the simulation is initialized with the following age distribution
   Ninit_ais.setZero();
-  for(int y=0;y<(1000*nage);y++){
+  for(int y=0;y<(10*nage);y++){
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage-1);a++){

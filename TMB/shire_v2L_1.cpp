@@ -386,7 +386,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> Mat3Inv = Mat3.inverse().col(0); // vector of dim nage*nspace
   
   // matrix<Type> Mat3Inv(Mat3.rows,Mat3.cols);
-  for(int a=1;a<(nage-1);a++){
+  for(int a=0;a<(nage-1);a++){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
       // Eigen::LLT< Matrix<Type, Eigen::Dynamic, Eigen::Dynamic> > Mat3Inv(Mat3);
@@ -394,7 +394,7 @@ Type objective_function<Type>::operator() ()
       // matrix<Type> Mat3Inv = Mat3.matrixL(); // matrixL is a function returning lower tri, lltcovmat is an object
 
       // matrix<Type> Mat3Inv = Mat3.inverse();
-        N_0ais(a,i,s) = Mat3Inv((a)+(i*nage)-1);//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+        N_0ais(a,i,s) = Mat3Inv(a+(i*nage)-1);//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
         }
       }
   }

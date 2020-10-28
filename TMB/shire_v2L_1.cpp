@@ -384,19 +384,12 @@ Type objective_function<Type>::operator() ()
   
   N_0ais.setZero();
   vector<Type> Mat3Inv = Mat3.inverse().col(0); // vector of dim nage*nspace
-  
-  // matrix<Type> Mat3Inv(Mat3.rows,Mat3.cols);
-  for(int a=0;a<(nage-1);a++){
-      for(int i=0;i<(nspace);i++){
-        for(int s=0;s<nsex;s++){
-      // Eigen::LLT< Matrix<Type, Eigen::Dynamic, Eigen::Dynamic> > Mat3Inv(Mat3);
-      // Mat3Inv = Mat3;
-      // matrix<Type> Mat3Inv = Mat3.matrixL(); // matrixL is a function returning lower tri, lltcovmat is an object
-
-      // matrix<Type> Mat3Inv = Mat3.inverse();
-        N_0ais(a,i,s) = Mat3Inv(a+(i*nage)-1);//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
-        }
+  for(int a=0;a<(nage);a++){
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        N_0ais(a,i,s) = Mat3Inv(a+(i*nage)-1)*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
       }
+    }
   }
   //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //         for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
@@ -431,21 +424,13 @@ Type objective_function<Type>::operator() ()
   //
   // // The first year of the simulation is initialized with the following age distribution
   Ninit_ais.setZero();
-  for(int y=0;y<(10*nage);y++){
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
-        for(int a=0;a<(nage-1);a++){
-          Ninit_ais(a,i,s) += 0.5* 
-            tau_ki(phi_ik2(i),i) *
-            R_0k(phi_ik2(i))* exp(-(mat_age(a)*age(a))) *
-            exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i)));
+        for(int a=0;a<(nage);a++){
+          Ninit_ais(a,i,s) =   N_0ais(a,i,s)*exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i)));
         } // end ages
-        Ninit_ais(nage-1,i,s) += ( Ninit_ais(nage-2,i,s) *
-          exp(-mat_age(nage-1)*age(nage-1)))/(Type(1.0)-exp(-sum(mat_age))*
-          exp(-0.5*SDR*SDR+tildeR_initk(phi_ik2(i))));
       } // end space
-    } // end sex
-  } // end yinit
+    }
   // std::cout << "Done" << std::endl;
   
   // std::cout << " Here" << "\n";

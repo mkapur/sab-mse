@@ -384,13 +384,13 @@ Type objective_function<Type>::operator() ()
   
   N_0ais.setZero();
   vector<Type> Mat3Inv = Mat3.inverse().col(0); // vector of dim nage*nspace
-  // for(int a=0;a<(nage);a++){
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int s=0;s<nsex;s++){
-  //       N_0ais(a,i,s) = Mat3Inv(a+(i*nage)-1)*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
-  //     }
-  //   }
-  // }
+  for(int a=0;a<(nage);a++){
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        N_0ais(a,i,s) = Mat3Inv(a+(i*nage))*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+      }
+    }
+  }
   //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //         for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
   //           Type pLeave = 0.0; Type NCome = 0.0; // reset for new age

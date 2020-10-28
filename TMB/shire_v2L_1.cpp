@@ -378,10 +378,20 @@ Type objective_function<Type>::operator() ()
   
   // Equilibrium Unfished numbers-at-age, subarea (outside of y loop)
   // identical to Ninit except no recdevs
+ 
+  // matrix<Type> LN = lltCovMAT.matrixL(); // matrixL is a function, lltcovmat is an object
+  // matrix<Type> LinvN = LN.inverse(); // now LN is an object and we do inverse on it
+  
   N_0ais.setZero();
-  for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        N_0ais(0,i,s) = Mat3.inverse()*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+  // matrix<Type> Mat3Inv(Mat3.rows,Mat3.cols);
+  // for(int s=0;s<nsex;s++){
+      // for(int i=0;i<(nspace);i++){
+      Eigen::LLT< Matrix<Type, Eigen::Dynamic, Eigen::Dynamic> > Mat3Inv;
+      // matrix<Type> LN = lltCovMAT.matrixL(); // matrixL is a function, lltcovmat is an object
+      // matrix<Type> LinvN = LN.inverse(); // now LN is an object and we do inverse on it
+      
+      // matrix<Type> Mat3Inv = Mat3.inverse();
+        // N_0ais(0,i,s) = Mat3.inverse()*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //         for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
   //           Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
@@ -395,9 +405,9 @@ Type objective_function<Type>::operator() ()
   //       }  // note the A+ group will be in slot A-1
   //       N_0ais(nage-1,i,s) +=  N_0ais(nage-2,i,s)*exp(-sum(mat_age))
   //         /(Type(1.0)-exp(-mat_age(nage-1)));
-      } // end subareas
+      // } // end subareas
   //   // } // end stocks
-  } // end sex
+  // } // end sex
   
   // Equilibrium Unfished SSB, stock (outside of y loop)
   for(int i=0;i<(nspace);i++){

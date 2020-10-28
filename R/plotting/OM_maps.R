@@ -104,19 +104,20 @@ fill = NA, lwd = 1.1,  color = 'white', linetype = 'dotted') +
   ## OM strata labels
   # geom_label(data = data.frame(), aes( x = c(238, 233, 232, 225, 220, 200),
   #   y = c(33, 40, 49, 52, 57, 53)),
+  #   size = 5,
   #   label = list(c(1:6),
-  #                c(paste0('Subarea ',c("C1", "C2", "B1","B2","A2", "A1"))),
-  #              c("C1", "C2", "B1","B2","A2", "A1"))[[1]] ,
-  #   fill = rev(subareaPal),
-  #   color = 'black') +
+  #                c(paste0('Subarea ',c("C1", "C2", "B2","B3","A3", "A4"))),
+  #              c("C1", "C2", "B2","B3","A3", "A4"))[[3]] ,
+  #   fill = 'white',
+  #   color = rev(subareaPal)) +
   
   ## OM Stock labels
-  geom_label(data = data.frame(), aes( x = c(238, 233, 225,  200),
+  geom_label(data = data.frame(), aes( x = c(238, 233, 224,  200),
                                        y = c(33, 48,  54, 53)),
              size = 6,
              label = list(c(1:4),
-                          c(paste0('Stock ',c("R1", "R2", "R3","R4"))),
-                        c("R1", "R2", "R3","R4"))[[3]] ,
+                          c(paste0('Stock ',c(1:4))),
+                        c("R1", "R2", "R3","R4"))[[2]] ,
              fill = 'white',
              color = rev(demPal)) +
   coord_sf(xlim = c(165, 245), ylim = c(26, 65)) +
@@ -531,18 +532,18 @@ ggplot(ypred,
   theme(legend.position = c(0.9,0.2),
         legend.text = element_text(size = 9),
         panel.grid = element_blank()) +
-  scale_color_manual(values =demPal, 
-                     labels = c('Stock R1 (South CC)',
-                                'Stock R2 (North CC/South BC)',
-                                'Stock R3 (West BC/AK Gulf)',
-                                'Stock R4 (West Gulf/Aleutians)')) +
-   scale_fill_manual(values = demPal,guide = 'none',
-                     labels = c('Stock R1 (South CC)',
-                                                             'Stock R2 (North CC/South BC)',
-                                                             'Stock R3 (West BC/AK Gulf)',
-                                                             'Stock R4 (West Gulf/Aleutians)')) +
+  scale_color_manual(values =rev(demPal), 
+                     labels = c('Stock 1 (South CC)',
+                                'Stock 2 (North CC/South BC)',
+                                'Stock 3 (West BC/AK Gulf)',
+                                'Stock 4 (West Gulf/Aleutians)')) +
+   scale_fill_manual(values = rev(demPal),guide = 'none',
+                     labels = c('Stock 1 (South CC)',
+                                                             'Stock 2 (North CC/South BC)',
+                                                             'Stock 3 (West BC/AK Gulf)',
+                                                             'Stock 4 (West Gulf/Aleutians)')) +
   
-  # geom_ribbon(aes(ymin = LCI, ymax = UCI,  fill = gamREG, group = gamREG), alpha = 0.2) +                
+  geom_ribbon(aes(ymin = LCI, ymax = UCI,  fill = gamREG, group = gamREG), alpha = 0.2) +
   scale_alpha(guide = 'none') +
   scale_y_continuous(limits = c(0,110)) +
   scale_x_continuous(limits = c(0,65)) +
@@ -552,7 +553,7 @@ ggplot(ypred,
 
 ggsave(plot = last_plot(),
        file = here("input","input_data","input_figs",
-                   "OMGrowthCurves.png"),
+                   "OMGrowthCurves_sigma.png"),
        height = 6, width = 10, unit = 'in', dpi = 420)
 
 

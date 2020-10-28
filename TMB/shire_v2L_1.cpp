@@ -394,7 +394,7 @@ Type objective_function<Type>::operator() ()
       // matrix<Type> Mat3Inv = Mat3.matrixL(); // matrixL is a function returning lower tri, lltcovmat is an object
 
       // matrix<Type> Mat3Inv = Mat3.inverse();
-        N_0ais(0,i,s) = Mat3Inv((a)+(i*nage)-1);//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+        N_0ais(a,i,s) = Mat3Inv((a)+(i*nage)-1);//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
         }
       }
   }

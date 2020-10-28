@@ -10,8 +10,8 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shireAEP1010",'shire_v2','shire_v2L')[3]
-# compile(here("TMB",paste0(dllUSE,".cpp")))
+dllUSE = c("shire_v2L",'shire_v2L_1')[2]
+compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))

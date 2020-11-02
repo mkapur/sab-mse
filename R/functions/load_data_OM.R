@@ -142,7 +142,7 @@ load_data_OM <- function(nspace = 6,
   ## Phi objects ----
   ## setup phi (spatial matching matrix) depending on spatial setup
   ## MAKE A NSPACE == 3 AND 1 OPTION FOR COMBINING
-  spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
+  spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
   if(nspace == 6){ ## OM
@@ -337,6 +337,8 @@ load_data_OM <- function(nspace = 6,
     log_srv_slx_pars = log_srv_slx_pars,
     epsilon_tau = rep(log(5),nspace)
   )
+  
+  ## initial matrix ----
   load(here('input','input_data',"Mat3Inv.rdata"))
   
   # alpha_g1 <- c(62.8329, 63.6959, 33.8898, 54.1045, 64.2127) ## trap ll twl std strs

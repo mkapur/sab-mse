@@ -529,8 +529,12 @@ ggplot(ypred,
   # kaplot::theme_black(base_size = 16)+
   # kaplot::theme_solarized_mk(base_size = 16, light = FALSE) +
    ggsidekick::theme_sleek() +
-  theme(legend.position = c(0.9,0.2),
-        legend.text = element_text(size = 9),
+  theme(legend.position = c(0.5,0.15),
+        legend.background = element_rect(fill = 'white'),
+        strip.text = element_text(size = 15),
+        legend.text = element_text(size = 13),
+        axis.text = element_text(size = 15),
+        axis.title = element_text(size = 15),
         panel.grid = element_blank()) +
   scale_color_manual(values =rev(demPal), 
                      labels = c('Stock 1 (South CC)',
@@ -543,17 +547,17 @@ ggplot(ypred,
                                                              'Stock 3 (West BC/AK Gulf)',
                                                              'Stock 4 (West Gulf/Aleutians)')) +
   
-  geom_ribbon(aes(ymin = LCI, ymax = UCI,  fill = gamREG, group = gamREG), alpha = 0.2) +
+  # geom_ribbon(aes(ymin = LCI, ymax = UCI,  fill = gamREG, group = gamREG), alpha = 0.2) +
   scale_alpha(guide = 'none') +
   scale_y_continuous(limits = c(0,110)) +
-  scale_x_continuous(limits = c(0,65)) +
+  scale_x_continuous(limits = c(0,70)) +
   geom_line(aes(y = meanPred, col = gamREG), lwd = 1.1)+
   labs(y = 'Length (cm)', x= 'Age (years)', col = "") +
   facet_wrap(~Sex +Period, ncol = 4)
 
 ggsave(plot = last_plot(),
        file = here("input","input_data","input_figs",
-                   "OMGrowthCurves_sigma.png"),
+                   "OMGrowthCurves.png"),
        height = 6, width = 10, unit = 'in', dpi = 420)
 
 

@@ -232,8 +232,10 @@ writeOM <- function(dat, opt, obj,
 
   
   survey_yf_obst <- data.frame( df$surv_yf_obs)  %>%
+
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
+    filter(value > -1) %>%
     ## convert CV to SD via CV = mean/sd
     mutate(Type = 'OBS', 
            lci = value - 1.96*(0.1*value),
@@ -247,6 +249,7 @@ writeOM <- function(dat, opt, obj,
     scale_color_manual(values = fishfltPal) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
+    scale_x_continuous(limits = c(1960,1960+df$yRun)) +
     theme_sleek() + 
     theme(legend.position = 'none')+
     labs(y = 'survey', color = 'Fishing Fleet')+

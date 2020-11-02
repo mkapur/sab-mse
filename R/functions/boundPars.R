@@ -5,7 +5,7 @@ upper <- obj$par+Inf
 ## bounds on repro pars ----
 lower[names(lower) == 'logh_k'] <- log(0.2) ## duh
 upper[names(upper) == 'logh_k'] <- log(0.99)
-
+lower[names(lower) == 'epsilon_tau'] <- 0
 lower[names(lower) == 'logR_0k'] <- 1
 
 lower[names(lower) == 'logSDR'] <- log(0.0001)

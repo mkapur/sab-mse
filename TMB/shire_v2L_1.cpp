@@ -138,7 +138,7 @@ Type objective_function<Type>::operator() ()
   array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-5, nsex); // predicted acomps from surveys (without biomass)
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
-  PARAMETER_VECTOR(epsilon_tau) // logn error around rec dist
+  PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER_MATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
@@ -390,7 +390,7 @@ Type objective_function<Type>::operator() ()
       for(int s=0;s<nsex;s++){
         N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
         for(int a=1;a<(nage);a++){
-        N_0ais(a,i,s) = Mat3Inv(a+(i*nage))//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+        N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
       }
     }
   }
@@ -893,7 +893,7 @@ Type objective_function<Type>::operator() ()
           SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b(y)*SDR*SDR+tildeR_yk(y,k));
     }  // end stocks
     // std::cout << y << "\t" << "end R_yk" << "\n";
-    // for(int i=0;i<(nspace);i++){
+    for(int i=0;i<(nspace);i++){
     //   Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
     //   for(int j=0;j<(nspace);j++){
     //     if(i != j){

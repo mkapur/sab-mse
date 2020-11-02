@@ -138,6 +138,7 @@ Type objective_function<Type>::operator() ()
   array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-5, nsex); // predicted acomps from surveys (without biomass)
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
+  PARAMETER_VECTOR(epsilon_tau) // logn error around rec dist
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER_MATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
@@ -387,9 +388,9 @@ Type objective_function<Type>::operator() ()
 
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
-        N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+        N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
         for(int a=1;a<(nage);a++){
-        N_0ais(a,i,s) = Mat3Inv(a+(i*nage))*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+        N_0ais(a,i,s) = Mat3Inv(a+(i*nage))//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
       }
     }
   }
@@ -892,16 +893,18 @@ Type objective_function<Type>::operator() ()
           SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b(y)*SDR*SDR+tildeR_yk(y,k));
     }  // end stocks
     // std::cout << y << "\t" << "end R_yk" << "\n";
-    for(int i=0;i<(nspace);i++){
-      Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
-      for(int j=0;j<(nspace);j++){
-        if(i != j){
-          pLeave += omega_0ij(i,j); // will do 1-this for proportion which stay
-          NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*omega_0ij(j,i);// actual numbers incoming
-        } // end i != j
-      } // end subareas j
-      R_yi(y,i) = (1-pLeave)*R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i) + NCome;//; /// downscale to subarea including age-0 movement
-      // R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i);//*omega_0ij(i); /// downscale to subarea including age-0 movement
+    // for(int i=0;i<(nspace);i++){
+    //   Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
+    //   for(int j=0;j<(nspace);j++){
+    //     if(i != j){
+    //       pLeave += omega_0ij(i,j); // will do 1-this for proportion which stay
+    //       // NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*omega_0ij(j,i);// actual numbers incoming
+    //       NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*exp(epsilon_tau);// actual numbers incoming
+    //       
+    //     } // end i != j
+    //   } // end subareas j
+      // R_yi(y,i) = (1-pLeave)*R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i) + NCome;//; /// downscale to subarea including age-0 movement
+      R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i)); /// downscale to subarea including age-0 movement
       N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
       N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
     } /// end space
@@ -1234,6 +1237,7 @@ Type objective_function<Type>::operator() ()
   REPORT(Nsamp_acomp_yf);
   
   // REPORT PARS
+  ADREPORT(epsilon_tau);
   ADREPORT(logR_0k);
   ADREPORT(omega_0ij);
   ADREPORT(logh_k);

@@ -36,7 +36,7 @@ Type objective_function<Type>::operator() ()
   
   // // DEMOGRAPHY //
   DATA_VECTOR(mat_age); // natural mortality at age
-  DATA_MATRIX(Mat3Inv); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))[,1]
+  DATA_VECTOR(Mat3Inv); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))[,1]
   // // movement //
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
@@ -830,8 +830,8 @@ Type objective_function<Type>::operator() ()
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
-          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a))/2);
-          // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
+          // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a))/2);
+          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
         }
         for(int a=1;a<(nage-1);a++){
           N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
@@ -913,45 +913,45 @@ Type objective_function<Type>::operator() ()
     } //end mgmt
     // std::cout << y << "\t" << "end R_ym" << "\n";
     // Estimate survey biomass at midyear
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //     for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-    //       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
-    //         switch(selType_surv(surv_flt)){
-    //         case 0: // age sel
-    //           for(int a=0;a<nage;a++){
-    //             surv_yf_pred(y,surv_flt) += q_f(surv_flt)*
-    //               srv_slx_yafs(y,a,surv_flt,s)*
-    //               phi_if_surv(surv_flt,i)*
-    //               N_yais_mid(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             
-    //             Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
-    //               phi_if_surv(surv_flt,i)*
-    //               N_yais_mid(y,a,i,s);
-    //           } // end ages
-    //           break;
-    //         case 1:
-    //           for(int a=0;a<(nage);a++){
-    //             surv_yf_pred(y,surv_flt) +=  q_f(surv_flt)*
-    //               srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
-    //               phi_if_surv(surv_flt,i)*
-    //               N_yais_mid(y,a,i,s)*
-    //               mla_yais(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             
-    //             Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
-    //               phi_if_surv(surv_flt,i)*
-    //               N_yais_mid(y,a,i,s);
-    //           }
-    //           break;
-    //         } // end selType_fish
-    //       } // end check that it's not an NA year
-    //     } // end survey fleets
-    //   } // end sexes
-    // } // end nspace
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
+          if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
+            switch(selType_surv(surv_flt)){
+            case 0: // age sel
+              for(int a=0;a<nage;a++){
+                surv_yf_pred(y,surv_flt) += q_f(surv_flt)*
+                  srv_slx_yafs(y,a,surv_flt,s)*
+                  phi_if_surv(surv_flt,i)*
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+
+                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
+                  phi_if_surv(surv_flt,i)*
+                  N_yais_mid(y,a,i,s);
+              } // end ages
+              break;
+            case 1:
+              for(int a=0;a<(nage);a++){
+                surv_yf_pred(y,surv_flt) +=  q_f(surv_flt)*
+                  srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
+                  phi_if_surv(surv_flt,i)*
+                  N_yais_mid(y,a,i,s)*
+                  mla_yais(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+
+                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
+                  phi_if_surv(surv_flt,i)*
+                  N_yais_mid(y,a,i,s);
+              }
+              break;
+            } // end selType_fish
+          } // end check that it's not an NA year
+        } // end survey fleets
+      } // end sexes
+    } // end nspace
     // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
     // predicted age comps, given error
     // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
@@ -1052,19 +1052,19 @@ Type objective_function<Type>::operator() ()
   
   // // LIKELIHOODS //
   // Likelihood: survey biomass
-  // Type ans_survey=0.0;
-  // for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-  //   for(int y=0;y<yRun;y++){ // Survey Surveyobs
-  //     if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
-  //       std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
-  //       std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
-  //       ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
-  //                           log(surv_yf_obs(y,surv_flt)),
-  //                           surv_yf_err(y,surv_flt), TRUE);
-  //       std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
-  //     } // end flag for neg 1
-  //   } // end y
-  // } // end surv_flt
+  Type ans_survey=0.0;
+  for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
+    for(int y=0;y<yRun;y++){ // Survey Surveyobs
+      if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
+        std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
+        std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
+        ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
+                            log(surv_yf_obs(y,surv_flt)),
+                            surv_yf_err(y,surv_flt), TRUE);
+        std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
+      } // end flag for neg 1
+    } // end y
+  } // end surv_flt
   
   // Likelihood: catches
   Type ans_catch = 0.0;
@@ -1171,7 +1171,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>ans_tot(6);
   ans_tot(0) = ans_SDR;
   ans_tot(1) = ans_catch;
-  // ans_tot(2) = ans_survey;
+  ans_tot(2) = ans_survey;
   // ans_tot(3) = ans_survcomp;
   // ans_tot(4) = ans_catchcomp;
   ans_tot(5) = ans_priors;
@@ -1179,11 +1179,11 @@ Type objective_function<Type>::operator() ()
   // // Likelihood: TOTAL
   Type ans =
     // ans_SDR+
-    ans_catch+
-    // ans_survey-
-    // ans_survcomp-
-    // ans_catchcomp+
-    ans_priors;//
+    ans_catch
+    +ans_survey
+    // -ans_survcomp
+    // -ans_catchcomp
+    +ans_priors;//
   // Type ans = 0.0;
   // Report calculations
   

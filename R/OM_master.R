@@ -1,6 +1,6 @@
 ## OM_Master.R
 ## M S Kapur 
-## Inspiration  from J Sullivan N Jacobsen Summer 2020
+## Inspiration from J Sullivan, N Jacobsen Summer 2020
 ## kapurm@uw.edu
 
 library(TMB)
@@ -21,12 +21,12 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.7;  df$Fmax = 1.5;
 df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  25 #df$tEnd-1
+df$yRun =  df$tEnd-1
 df$mat_age <- rep(5e-2,df$nage)
 # df$selShape_fish[5:7] <-  -1 ## slx = 1 for all BC fisheries
 
 omega_0ij_map <- matrix(NA, nrow = 6, ncol = 6) ## turn off age-zero movement estimation
-omega_0ij_map[1,] <- df$parms$omega_0ij[1,] ## estimate to/from C1 only
+# omega_0ij_map[1,] <- df$parms$omega_0ij[1,] ## estimate to/from C1 only
 
 ## mirror selex in AK E/W 
 ## if you want to MIRROR selex, fill a value in the specific location which is identical for each fleet
@@ -35,14 +35,14 @@ fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars),
                      dimnames = dimnames(df$parms$log_fsh_slx_pars))
 dimnames(fsh_slx_map)[[1]] <- df$fltnames_fish
 
-fsh_slx_map[c(1,3)] <- -1 ## mirror p1 for females, W
-fsh_slx_map[c(19,21)] <- -2 ## mirror p1 for males, W
-fsh_slx_map[c(2,4)] <- -3 ## mirror p1 for females, E
-fsh_slx_map[c(20,22)] <- -4 ## mirror p1 for males, E
-fsh_slx_map[c(10,12)] <- -5## mirror p2 for females, W
-fsh_slx_map[c(28,30)] <- -6## mirror p2 for males, W
-fsh_slx_map[c(11,13)] <- -7## mirror p2 for females, E
-fsh_slx_map[c(29,31)] <- -8## mirror p2 for males, E
+fsh_slx_map[c(1,2)] <- -1 ## mirror p1 for females, W
+fsh_slx_map[c(19,20)] <- -2 ## mirror p1 for males, W
+fsh_slx_map[c(3,4)] <- -3 ## mirror p1 for females, E
+fsh_slx_map[c(21,22)] <- -4 ## mirror p1 for males, E
+fsh_slx_map[c(10,11)] <- -5## mirror p2 for females, W
+fsh_slx_map[c(28,29)] <- -6## mirror p2 for males, W
+fsh_slx_map[c(12,13)] <- -7## mirror p2 for females, E
+fsh_slx_map[c(30,31)] <- -8## mirror p2 for males, E
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
@@ -64,8 +64,8 @@ system.time(obj <- MakeADFun(df,
                  dll =dllUSE,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
-array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), dim = c(9,2,2),
-      dimnames = list(df$fltnames_fish))
+array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), 
+      dim = c(7,2,2))
 # ## up to 30s
 # system.time(rep1 <- obj$report()) ## one off caclulation using start pars
 # head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
@@ -84,8 +84,7 @@ source(here('R','functions','boundPars.R')) ## bound selex etc
 # array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(9,2,2),
       # dimnames = list(df$fltnames_fish))
 ## about 65s for 22 years
-## 7 hours for 44 yrs
-## 3hrs for all years with bounds (just catch like)
+## 7 hours for 44 yrs ## 3hrs for all years with bounds (just catch like)
 system.time(opt <-
               TMBhelper::fit_tmb(
                 obj,
@@ -99,8 +98,9 @@ system.time(opt <-
               )$opt) ## estimate; can repreat for stability)
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
-# array(round(exp(best[names(best)=='log_fsh_slx_pars'])), dim = c(9,2,2),
-#       dimnames = list(df$fltnames_fish))
+array(round(exp(best[names(best)=='log_fsh_slx_pars'])), 
+      dim = c(7,2,2))
+     # dimnames = list(df$fltnames_fish))
 ## 81 s
 dat <- obj$report(par = best)
 head(round(dat$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
@@ -111,12 +111,12 @@ round(dat$SSB_yi[1:df$yRun,]) ## should not be small or negative
 rowSums(dat$N_yais_beg[1:df$yRun,,,1])
 rowSums(dat$N_yais_end[1:df$yRun,,,1])
 
-steep <- exp(opt$par[1:4])
+steep <- exp(opt$par[names(opt$par) == 'logh_k'])
 names(steep) <- paste0("h","_R",1:4)
-logR_0 <- opt$par[5:8]
+logR_0 <- opt$par[names(opt$par) == 'logR_0k']
 names(logR_0) <- paste0("logR_0","_R",1:4)
-
-
+epstau <- opt$par[names(opt$par) == 'epsilon_tau']
+names(epstau) <- paste0("epstau_",inames)
 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")

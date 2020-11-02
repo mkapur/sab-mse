@@ -1087,16 +1087,18 @@ save(ageerr_ExpAge, file = here("input","input_data","ageerr_ExpAge.rdata"))
 
 #* catch x year x fleet----
 reshape2::melt(  data.frame(catch), id = c('Year')) %>% 
-  filter(value != -1) %>%
+  filter(value >-1) %>%
   ggplot(.,aes(x = Year, y = variable, color = variable)) +
   theme_sleek() +
-  theme(legend.position = 'none')+
-  scale_color_manual(values = fishfltPal) +
+  theme(legend.position = 'none', 
+        axis.text = element_text(size = 15),
+        axis.title  = element_text(size = 20))+
+  scale_x_continuous(limits = c(1959,2021)) +  scale_color_manual(values = fishfltPal) +
   geom_point(size = 5) +
   labs(y = 'Comm Fleet')
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_catches.png'),
-       width = 4, height = 6, unit = 'in', dpi = 420)
+       width = 4.5, height = 6, unit = 'in', dpi = 420)
 
 #* surv x year x fleet ----
 survey %>%
@@ -1105,13 +1107,17 @@ survey %>%
   filter(!is.na(value) & value >0 ) %>%
   ggplot(.,aes(x = Year, y = variable, color = variable)) +
   theme_sleek() +
-  theme(legend.position = 'none')+
+  theme(legend.position = 'none', 
+        axis.text = element_text(size = 15),
+        axis.title  = element_text(size = 20))+
+  scale_x_continuous(limits = c(1979,2021)) +
   scale_color_manual(values = survfltPal) +
+
   geom_point(size = 5) +
   labs(y = 'Indices')
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_survey.png'),
-       width = 4, height = 6, unit = 'in', dpi = 420)
+       width = 4.5, height = 6, unit = 'in', dpi = 420)
 
 
 #* acomp x year x fleet ----
@@ -1134,14 +1140,17 @@ df$acomp_yafs_obs[,6,,1] %>%
   filter(!is.na(value)) %>%
   ggplot(.,aes(x = Year, y = variable, color = variable)) +
   theme_sleek() +
-  theme(legend.position = 'none')+
+  theme(legend.position = 'none', 
+        axis.text = element_text(size = 15),
+        axis.title  = element_text(size = 18))+
+  scale_x_continuous(limits = c(1979,2021)) +  
   scale_color_manual(values =  paste(fltnamesCol$value)) +
   geom_point(size = 5) +
   labs(y = 'Fishery or Survey Fleet with Age Comp Data')
 ggsave(last_plot(),
        file = here('input','input_data','input_figs',
                    'datplot_acomp.png'),
-       width = 4, height = 6, unit = 'in', dpi = 420)
+       width = 4.5, height = 6, unit = 'in', dpi = 420)
 
 
 #* fleet x type tile ----
@@ -1156,7 +1165,10 @@ fltsub <- fltnames %>%
 ggplot(fltsub,aes(x = NAME, y = variable, fill = NAME )) +
   theme_sleek() +
   theme(legend.position = 'none',
-        axis.text.x = element_text(angle = 90))+
+        strip.text.x = element_text(size = 15),
+        axis.text.x = element_text(angle = 90, size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title  = element_text(size = 20))+
   scale_fill_manual(values = paste(fltnamesCol$value)) +
   geom_tile(color = 'white') +
   geom_tile(data = subset(fltsub, is.na(value)),fill = 'white') +
@@ -1168,4 +1180,4 @@ ggplot(fltsub,aes(x = NAME, y = variable, fill = NAME )) +
 
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_fleets.png'),
-       width = 8, height = 6, unit = 'in', dpi = 420)
+       width = 9, height = 6, unit = 'in', dpi = 420)

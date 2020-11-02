@@ -1102,13 +1102,13 @@ ggsave(last_plot(),
 survey %>%
   mutate(Year = df$years) %>%
   reshape2::melt(., id = c('Year')) %>% 
-  filter(!is.na(value)) %>%
+  filter(!is.na(value) & value >0 ) %>%
   ggplot(.,aes(x = Year, y = variable, color = variable)) +
   theme_sleek() +
   theme(legend.position = 'none')+
   scale_color_manual(values = survfltPal) +
   geom_point(size = 5) +
-  labs(y = 'Surveys (Relative Abundance)')
+  labs(y = 'Indices')
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_survey.png'),
        width = 4, height = 6, unit = 'in', dpi = 420)

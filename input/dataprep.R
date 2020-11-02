@@ -1143,7 +1143,7 @@ df$acomp_yafs_obs[,6,,1] %>%
   theme(legend.position = 'none', 
         axis.text = element_text(size = 15),
         axis.title  = element_text(size = 18))+
-  scale_x_continuous(limits = c(1979,2021)) +  
+  scale_x_continuous(limits = c(1959,2021)) +
   scale_color_manual(values =  paste(fltnamesCol$value)) +
   geom_point(size = 5) +
   labs(y = 'Fishery or Survey Fleet with Age Comp Data')

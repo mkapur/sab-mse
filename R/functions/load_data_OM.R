@@ -335,7 +335,7 @@ load_data_OM <- function(nspace = 6,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 
     log_fsh_slx_pars =log_fsh_slx_pars,
     log_srv_slx_pars = log_srv_slx_pars,
-    epsilon_tau = log(5)
+    epsilon_tau = rep(log(5),nspace)
   )
   load(here('input','input_data',"Mat3Inv.rdata"))
   

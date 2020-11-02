@@ -264,14 +264,17 @@ writeOM <- function(dat, opt, obj,
                     dim = dim(df$parms$log_fsh_slx_pars),
                     dimnames = dimnames(df$parms$log_fsh_slx_pars))
   
-  selP <- array(exp(opt$par[grep('fsh_slx',names(opt$par))]),
-                dim = dim(df$parms$log_fsh_slx_pars),
-                dimnames = dimnames(df$parms$log_fsh_slx_pars))
-  dimnames(selP)[[1]] <- paste(df$fltnames_fish)
+  mapped_fsh_selnames <- c('AK_FIX','AK_TWL',paste(df$fltnames_fish[5:df$nfleets_fish]))
   
-  fsh_sel_afs <- array(NA, dim = c(df$nage,df$nfleets_fish,2),
+  selP <- array(exp(opt$par[grep('fsh_slx',names(opt$par))]),
+                dim = c(7,2,1,2))
+  dimnames(selP)[[1]] <- mapped_fsh_selnames
+  
+  fsh_sel_afs <- array(NA, dim = c(df$nage,
+                                   length(mapped_fsh_selnames),#df$nfleets_fish
+                                   2),
                        dimnames = list(c(df$age),
-                                       c(paste(df$fltnames_fish)),
+                                       mapped_fsh_selnames,# c(paste(df$fltnames_fish)),
                                        c('Fem','Mal')))
   ## function to take the estimated parameters
   ## and info about selType, selShape
@@ -279,12 +282,12 @@ writeOM <- function(dat, opt, obj,
   
   for(a in 1:df$nage){
     for(s in 1:2){
-      for(fish_flt in 1:df$nfleets_fish){
+      for(fish_flt in 1:length(mapped_fsh_selnames)){
         fsh_sel_afs[,fish_flt,s] <- getSelec2(sex = s,
                                                selP = selP,
                                                flt_idx = fish_flt,
-                                               selType = df$selType_fish[fish_flt], 
-                                               selShape = df$selShape_fish[fish_flt])
+                                               selType = df$selType_fish[3:df$nfleets_fish][fish_flt], 
+                                               selShape = df$selShape_fish[3:df$nfleets_fish][fish_flt])
           
         }
       }
@@ -294,20 +297,20 @@ writeOM <- function(dat, opt, obj,
   
   png(paste0(dumpfile,'/fishery_selex.png'),
       height = 8, width = 6, unit = 'in', res = 420)
-  par(mfrow = c(3,3) )
-  for(flt in 1:df$nfleets_fish){
+  par(mfrow = c(4,2) )
+  for(flt in 1:length(mapped_fsh_selnames)){
     for(s in 1:2){
       tmp <- fsh_sel_afs[,flt,s]
       if(s == 1) plot(tmp, 
                       col = sexPal[1], 
                       type = 'l', 
                       lwd = 2, 
-                      xlab = ifelse(df$selType_fish[flt] == 0,
+                      xlab = ifelse(df$selType_fish[3:df$nfleets_fish][flt] == 0,
                                     'Age','Length'), 
                       ylab = 'Selectivity',
                       lty = 1,
                       ylim = c(0,1), 
-                      main = df$fltnames_fish[flt], xlim = c(0,75),
+                      main = mapped_fsh_selnames[flt], xlim = c(0,75),
                       col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
       box(which = 'plot', lty = 'solid', 
           col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
@@ -321,6 +324,8 @@ writeOM <- function(dat, opt, obj,
   # plot SURV selex ----
   ## bring estimates out and rearrange
   nsurvmod = df$nfleets_surv+(df$nfleets_acomp-5) ## bc we got selex for acomp flts too
+
+  
   inputSel <- array(exp(obj$par[grep('srv_slx',names(obj$par))]),
                     dim = dim(df$parms$log_srv_slx_pars),
                     dimnames = dimnames(df$parms$log_srv_slx_pars))

@@ -258,7 +258,7 @@ writeOM <- function(dat, opt, obj,
          width = 10, height = 6, unit = 'in',
          dpi = 420)
   
-  # plot  selex ----
+  # plot FISH selex ----
   ## bring estimates out and rearrange
   inputSel <- array(exp(obj$par[grep('fsh_slx',names(obj$par))]),
                     dim = dim(df$parms$log_fsh_slx_pars),
@@ -318,5 +318,66 @@ writeOM <- function(dat, opt, obj,
   dev.off()
   
   
+  # plot SURV selex ----
+  ## bring estimates out and rearrange
+  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-5) ## bc we got selex for acomp flts too
+  inputSel <- array(exp(obj$par[grep('srv_slx',names(obj$par))]),
+                    dim = dim(df$parms$log_srv_slx_pars),
+                    dimnames = dimnames(df$parms$log_srv_slx_pars))
   
-}
+  selP <- array(exp(opt$par[grep('srv_slx',names(opt$par))]),
+                dim = dim(df$parms$log_srv_slx_pars),
+                dimnames = dimnames(df$parms$log_srv_slx_pars))
+  dimnames(selP)[[1]] <- dimnames(df$parms$log_srv_slx_pars)[[1]]
+  
+  srv_sel_afs <- array(NA, dim =  c(df$nage,nsurvmod,2),
+                       dimnames = list(c(df$age),
+                                                  c( dimnames(df$parms$log_srv_slx_pars)[[1]]),
+                                                  c('Fem','Mal')))
+  ## function to take the estimated parameters
+  ## and info about selType, selShape
+  ## and spit out vector of selx@a or selx@L
+  
+  for(a in 1:df$nage){
+    for(s in 1:2){
+      for(surv_flt in 1:nsurvmod){
+        srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
+                                              selP = selP,
+                                              flt_idx = surv_flt,
+                                              selType = df$selType_surv[surv_flt], 
+                                              selShape = df$selShape_surv[surv_flt])
+        
+      }
+    }
+  }
+  
+  
+  
+  png(paste0(dumpfile,'/survey_selex.png'),
+      height = 8, width = 6, unit = 'in', res = 420)
+  par(mfrow = c(4,2) )
+  for(flt in 1:nsurvmod){
+    for(s in 1:2){
+      tmp <- srv_sel_afs[,flt,s]
+      if(s == 1) plot(tmp, 
+                      col = sexPal[1], 
+                      type = 'l', 
+                      lwd = 2, 
+                      xlab = ifelse(df$selType_surv[flt] == 0,
+                                    'Age','Length'), 
+                      ylab = 'Selectivity',
+                      lty = 1,
+                      ylim = c(0,1), 
+                      main = dimnames(df$parms$log_srv_slx_pars)[[1]][flt], xlim = c(0,75),
+                      col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+      box(which = 'plot', lty = 'solid', 
+          col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
+          lwd = 2)
+      if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
+    }
+  }
+  dev.off()
+  
+  
+  
+} ## end func

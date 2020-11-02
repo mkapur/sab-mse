@@ -6,7 +6,7 @@ upper <- obj$par+Inf
 lower[names(lower) == 'logh_k'] <- log(0.2) ## duh
 upper[names(upper) == 'logh_k'] <- log(0.99)
 
-lower[names(lower) == 'logR_0k'] <- log(1) #44
+lower[names(lower) == 'logR_0k'] <- 1
 
 lower[names(lower) == 'logSDR'] <- log(0.0001)
 lower[names(lower) == 'omega_0ij'] <- log(0.0001)

@@ -18,25 +18,42 @@ source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 
 # df$v1 = 0.99; df$Fmax = 3;
-df$v1 = 0.7;  df$Fmax = 1.5;
-# df$v1 = 0.65; df$Fmax = 1.15;
+# df$v1 = 0.7;  df$Fmax = 1.5;
+df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
 df$yRun =  25 #df$tEnd-1
 df$mat_age <- rep(5e-2,df$nage)
-df$selShape_fish[5:7] <-  -1 ## turn OFF all slx for BC
+# df$selShape_fish[5:7] <-  -1 ## slx = 1 for all BC fisheries
 
 omega_0ij_map <- matrix(NA, nrow = 6, ncol = 6) ## turn off age-zero movement estimation
 omega_0ij_map[1,] <- df$parms$omega_0ij[1,] ## estimate to/from C1 only
+
+## mirror selex in AK E/W 
+## if you want to MIRROR selex, fill a value in the specific location which is identical for each fleet
+fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars),
+                     dim = dim(df$parms$log_fsh_slx_pars),
+                     dimnames = dimnames(df$parms$log_fsh_slx_pars))
+dimnames(fsh_slx_map)[[1]] <- df$fltnames_fish
+
+fsh_slx_map[c(1,3)] <- -1 ## mirror p1 for females, W
+fsh_slx_map[c(19,21)] <- -2 ## mirror p1 for males, W
+fsh_slx_map[c(2,4)] <- -3 ## mirror p1 for females, E
+fsh_slx_map[c(20,22)] <- -4 ## mirror p1 for males, E
+fsh_slx_map[c(10,12)] <- -5## mirror p2 for females, W
+fsh_slx_map[c(28,30)] <- -6## mirror p2 for males, W
+fsh_slx_map[c(11,13)] <- -7## mirror p2 for females, E
+fsh_slx_map[c(29,31)] <- -8## mirror p2 for males, E
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
   # logR_0k = factor(rep(NA, 4)), ## sum wc = 12
   omega_0ij = factor(omega_0ij_map),
   # logq_f = factor(rep(NA, 5)),
-  b =  factor(rep(NA, 60))
+  b =  factor(rep(NA, 60)),
   # logpi_acomp = factor(rep(NA,df$nfleets_acomp)),
   # logSDR = factor(NA),
-  ## structure is fleet x alpha, beta x time block (1 for now)x sex
+  ## structure is fleet x alpha, beta x time block (1 for now) x sex
+  log_fsh_slx_pars = factor(fsh_slx_map)
   # log_fsh_slx_pars = factor(array(NA, dim = c(df$nfleets_fish,2,1,2)))
   # log_srv_slx_pars =  factor(array(NA, dim = c( df$nfleets_surv+(df$nfleets_acomp-5),2,1,2)))
 )
@@ -47,8 +64,8 @@ system.time(obj <- MakeADFun(df,
                  dll =dllUSE,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
-# array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), dim = c(9,2,2),
-#       dimnames = list(df$fltnames_fish))
+array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), dim = c(9,2,2),
+      dimnames = list(df$fltnames_fish))
 # ## up to 30s
 # system.time(rep1 <- obj$report()) ## one off caclulation using start pars
 # head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
@@ -99,7 +116,7 @@ names(steep) <- paste0("h","_R",1:4)
 logR_0 <- opt$par[5:8]
 names(logR_0) <- paste0("logR_0","_R",1:4)
 
-system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
+
 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
@@ -107,8 +124,10 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
-        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_Fon_SurvOn"))
+        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_Fon_SurvOn_BCSelexOn"))
 
+
+system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
 opt2$par
 opt2$objective
 opt$time_for_MLE

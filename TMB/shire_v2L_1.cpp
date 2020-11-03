@@ -1,5 +1,6 @@
 #include <TMB.hpp>
 template<class Type>
+
 Type objective_function<Type>::operator() ()
 {
   
@@ -386,7 +387,15 @@ Type objective_function<Type>::operator() ()
   N_0ais.setZero();
   // calc true Neqn given recruitment (matrix multiplication)
   // new dims are subarea x age, note indexing [use block to subset?]
-  matrix<Type> NeqnR = (Neqn*R_0k);
+  // first fill in R0K values to be compatible with Neqn structure
+  vector<Type>R_0k_vect(Neqn.cols()); // 0 is rows 1 is cols
+  // Eigen::SparseVector< Type > asSparseVector (vector< Type > R_0k_vect);
+  for(int i=0;i<(nspace);i++){
+    R_0k_vect((i-1)*nage) = R_0k(phi_ik2(i)); // this returns seq(0,Ndim,nage)
+  }
+  REPORT(R_0k_vect);
+  
+  // matrix<Type> NeqnR = (Neqn*R_0k);
   
   //   for(int i=0;i<(nspace);i++){
   //     for(int s=0;s<nsex;s++){
@@ -1193,6 +1202,7 @@ Type objective_function<Type>::operator() ()
   // Report calculations
   
   // numbers @ age
+
   REPORT(Ninit_ais);
   REPORT(N_0ais);
   REPORT(N_yais_beg);

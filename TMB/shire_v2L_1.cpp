@@ -391,17 +391,24 @@ Type objective_function<Type>::operator() ()
   vector<Type>R_0k_vect(Neqn.cols()); // 0 is rows 1 is cols
   // Eigen::SparseVector< Type > asSparseVector (vector< Type > R_0k_vect);
   for(int i=0;i<(nspace);i++){
+    // for(int x=0;x<(Neqn.cols());x++){
+    // //   if(x != i*nage){
+    //     R_0k_vect(x) =0; // overwrite off values
+    //   }
+    // // }
     R_0k_vect(i*nage) = R_0k(phi_ik2(i)); // this returns seq(0,Ndim,nage)
+    std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
   }
-  REPORT(R_0k_vect);
-  
-  // matrix<Type> NeqnR = (Neqn*R_0k);
-  
+
+  vector<Type> NeqnR = (Neqn*R_0k_vect);
+  // REPORT(R_0k_vect);
+  // REPORT(NeqnR);
   //   for(int i=0;i<(nspace);i++){
   //     for(int s=0;s<nsex;s++){
-  //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
+  // //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
   //       for(int a=1;a<(nage);a++){
-  //       N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+  //         NeqnR.block(i*nage,i*nage,(i+1)*nage,(i+1)*nage)
+  //       // N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //     }
   //   }
   // }

@@ -391,7 +391,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>R_0k_vect(Neqn.cols()); // 0 is rows 1 is cols
   // Eigen::SparseVector< Type > asSparseVector (vector< Type > R_0k_vect);
   for(int i=0;i<(nspace);i++){
-    R_0k_vect((i-1)*nage) = R_0k(phi_ik2(i)); // this returns seq(0,Ndim,nage)
+    R_0k_vect(i*nage) = R_0k(phi_ik2(i)); // this returns seq(0,Ndim,nage)
   }
   REPORT(R_0k_vect);
   

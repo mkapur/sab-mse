@@ -339,7 +339,7 @@ load_data_OM <- function(nspace = 6,
   )
   
   ## initial matrix ----
-  load(here('input','input_data',"Mat3Inv.rdata"))
+  load(here('input','input_data',"Neqn.rdata"))
   
   # alpha_g1 <- c(62.8329, 63.6959, 33.8898, 54.1045, 64.2127) ## trap ll twl std strs
   # beta_g1 <- c(7.04483, 3.09715, 1.41494, 4.55724, 12.9197)
@@ -435,7 +435,7 @@ load_data_OM <- function(nspace = 6,
     surv_selex_yafs = OM_surv_selex_yafs,
     fsh_blks = fsh_blks, ## currently not ready to be fleet-specific
     srv_blks = srv_blks,
-    Mat3Inv = Mat3Inv, ## solve(I-Mat2)[,1]
+    Neqn = Neqn, ## solve(I-Mat2)
     # fsh_blks = t(fsh_blks), ## currently not ready to be fleet-specific
     # srv_blks = t(srv_blks),
     #* ADDL PARS ----

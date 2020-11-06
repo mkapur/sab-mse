@@ -110,7 +110,7 @@ load_data_OM <- function(nspace = 6,
   selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
   ## note that the first two acomp fleets are already inside seltype fish
   selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(3,5,6)]))-1
-  selShape_fish <- c(rep(0,4),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_fish <- c(rep(0,2),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-5))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   
   
@@ -173,9 +173,18 @@ load_data_OM <- function(nspace = 6,
     phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
     rownames(phi_if_fish) <- names(catch)[2:ncol(catch)]
     colnames(phi_if_fish) <-  rev(spmat$subarea)
-    
-    phi_if_fish[c(1,3),6] <- phi_if_fish[c(2,4),5] <-   phi_if_fish[5:7,3:4] <-  
-      phi_if_fish[c(8,9),1:2] <-  1
+    ## works whether you have 7 or 9 fleets
+    for(i in 1:nrow(phi_if_fish)){
+      reg = substr(rownames(phi_if_fish)[i],1,2)
+      if(reg == 'AK') {
+        phi_if_fish[i,5:6] <- 1
+      } else  if(reg == 'BC'){
+        phi_if_fish[i,3:4] <- 1
+      }else{
+        phi_if_fish[i,1:2] <- 1
+    }
+    # phi_if_fish[c(1,3),6] <- phi_if_fish[c(2,4),5] <-   phi_if_fish[5:7,3:4] <-  
+    #   phi_if_fish[c(8,9),1:2] <-  1
     
     ## phi_im
     phi_im <- matrix(0, ncol = 3, nrow = nspace)

@@ -40,9 +40,17 @@ nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
 omcatch0 <- data.frame(Year = 1960:2019)
 
 ## read files
-akcatch <- read.csv(here("input","raw_data","catch","AK_comm_catch.csv")) ## this is separated at 145W, corresponding to A1 and A2
-names(akcatch)[2:ncol(akcatch)] = rev(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$COMM]))
-names(akcatch)[1] <- 'Year'
+## ak_comm_catch has sptlly aggregated data back to 1977
+## back to 1960 is not aggregated in bygear_and_byarea
+# akcatch <- read.csv(here("input","raw_data","catch","AK_comm_catch.csv")) ## this is separated at 145W, corresponding to A1 and A2
+# names(akcatch)[2:ncol(akcatch)] = rev(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$COMM]))
+# names(akcatch)[1] <- 'Year'
+
+akcatch <- read.csv(here("input","raw_data","catch","AK_catch_byGear_and_byarea.csv"))[c(1,11,12)] ## this is separated at 145W, corresponding to A1 and A2
+names(akcatch) <- c('Year',rev(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$COMM])))
+
+
+
 bccatch <- read.csv(here("input","raw_data","catch","BC_om_landingCatch.csv"))[,c(1,4,3,5)] ## year, trap trawl and LL
 names(bccatch)[2:4] = paste(fltnames$NAME[fltnames$M == 'BC' & fltnames$COMM]  )
 
@@ -65,19 +73,38 @@ omcatch <- read.csv(here("input","input_data","OM_catch.csv") )
 ## plot values, GROUPING AK FOR CONFIDENTIALITY
 omcatch %>%
   group_by(Year) %>%
-  mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
-         "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
-  select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
+  # mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
+  #        "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
+  # select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
   melt(id = "Year") %>%
-  ggplot(., aes(x = Year, y = value, color = variable)) +
+  ggplot(., aes(x = Year, y = value/1000, fill = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
-  scale_color_manual(values = fishfltPal) +
-  scale_x_continuous(breaks = seq(1960,2020,10)) +
-  geom_line(lwd = 1) +
-  labs(x = 'Year', y = 'Obs Catch (mt)', color = 'Comm. Fleet')
+  scale_fill_manual(values = fishfltPal )+
+  # scale_x_continuous(breaks = seq(1960,2020,10)) +
+  # geom_line(lwd = 1) +
+  geom_bar(position = 'stack',stat = 'identity') +
+  labs(x = 'Year', y = 'Obs Catch (kt)', fill = 'Comm. Fleet')
 
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','om_catches.png'),
+       height = 6, width = 6, unit = 'in', dpi = 420)
+
+omcatch %>%
+  # group_by(Year) %>%
+  # mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
+  #        "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
+  # select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
+  melt(id = "Year") %>%
+  mutate(REG = substr(variable,1,2)) %>%
+  ggplot(., aes(x = Year, y = value/1000, fill = REG)) +
+  theme_sleek() + 
+  theme(legend.position = c(0.8,0.8)) +
+  scale_fill_manual(values = mgmtPal )+
+  geom_bar(position = 'stack',stat = 'identity') +
+  labs(x = 'Year', y = 'Obs Catch (kt)', fill = 'Mgmt. Area')
+
+ggsave(last_plot(),
+       file = here('input','input_data','input_figs','om_catches_m.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
 #* discards ----

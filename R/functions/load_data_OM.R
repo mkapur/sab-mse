@@ -258,9 +258,13 @@ load_data_OM <- function(nspace = 6,
     # phi_fm_acomp[1:3,3] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,1]  <- 1
     phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are survey fleets
     
-    acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
-    acomp_flt_type[c(3,5,6)] <- 1
+    acomp_flt_type <- matrix(1, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
     colnames(acomp_flt_type) <- fltnames_acomp
+    ## match colnames to fltnames which are commercial, assign those as 1
+    acomp_flt_type[which(fltnames$COMM[which(grepl(paste(colnames(acomp_flt_type), collapse = "|"),fltnames$NAME))])] <- 0
+    
+    # acomp_flt_type[fltnames$NAME == rownames(acomp_flt_type) ] <- 1
+
     
     phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
     rownames(phi_lcomp_fm) = fltnames_lcomp

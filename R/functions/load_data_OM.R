@@ -20,9 +20,7 @@ load_data_OM <- function(nspace = 6,
   ## ERROR TRAPS 
   if(nspace  <4 & nstocks >3) stop("mismatch between nspace and nstocks")
   if(nspace == 1 & move) stop("can't have movement with fully pooled model")
-  
-  
-  
+
   years <- 1960:(myear+yr_future)
   nyear <- length(years)
   tEnd <- length(years)
@@ -111,9 +109,6 @@ load_data_OM <- function(nspace = 6,
   selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]))-1
   selShape_fish <- c(rep(0,2),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-4))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  
-  
-  
   if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
   survey <- read.csv(here("input","input_data",'OM_indices.csv'))
@@ -236,8 +231,16 @@ load_data_OM <- function(nspace = 6,
     phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
     rownames(phi_fm) = names(catch)[2:ncol(catch)]
     colnames(phi_fm) = rev(unique(spmat$mgmt))
-    phi_fm[1:4,3] <- phi_fm[5:7,2]  <- phi_fm[8:9,1]  <- 1
-    
+    for(i in 1:nrow(phi_fm)){
+      reg = substr(rownames(phi_fm)[i],1,2)
+      if(reg == 'AK') {
+        phi_fm[i,3] <- 1
+      } else  if(reg == 'BC'){
+        phi_fm[i,2] <- 1
+      }else{
+        phi_fm[i,1] <- 1
+      }
+    }
     ## same as above but for comps (mix of fisheries & surveys)
     phi_fm_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 3)
     rownames(phi_fm_acomp) = fltnames_acomp
@@ -261,23 +264,23 @@ load_data_OM <- function(nspace = 6,
     tau_ki[1,1] <-   tau_ki[4,6]  <- 1 ## 100% of recruitment in stock
     tau_ki[2,2:3] <-  tau_ki[3,5:4] <-  c(0.75,0.25) ## A2 and C1 are larger
   } else {
-    phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
-    phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
-    phi_ki <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
-    phi_ik2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
-    
-    # phi_fm <- matrix(0, nrow = nspace, ncol = 2)
-    # phi_fm[1,1] <- phi_fm[2,2] <- 1
-    phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
-    phi_fm[1:2,1] <- phi_fm[3,3]  <- 1
-    ## autogenerate stock-distinction matrix
-    phi_ij <-  matrix(NA, byrow = TRUE, ncol = nspace, nrow = nspace)
-    for(i in 1:nspace){
-      for(j in 1:nspace){
-        phi_ij[i,j] = ifelse(phi_ik2[i] == phi_ik2[j],0,1)
-      }
-    }
-    tau_ki <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
+    # phi_if_surv <- matrix(rbinom(nfleets_surv*nspace,1,0.5), byrow = TRUE, nrow = nfleets_surv, ncol = nspace) ## placeholder for alternative spatial stratifications
+    # phi_if_fish <- matrix(c(0,1,1,1,1,0), nrow = nfleets_fish, ncol = nspace)  ## placeholder for fishing fleets
+    # phi_ki <- matrix(c(1,0,0,1), byrow = TRUE, nrow = nstocks, ncol = nspace) ## placeholder for alternative spatial stratifications
+    # phi_ik2 <- apply(phi_ki,2, function(x)which(x == 1))-1 ## a vector for par subsetting, the columns are subareas
+    # 
+    # # phi_fm <- matrix(0, nrow = nspace, ncol = 2)
+    # # phi_fm[1,1] <- phi_fm[2,2] <- 1
+    # phi_fm <- matrix(0, nrow = nfleets_fish, ncol = 3)
+    # phi_fm[1:2,1] <- phi_fm[3,3]  <- 1
+    # ## autogenerate stock-distinction matrix
+    # phi_ij <-  matrix(NA, byrow = TRUE, ncol = nspace, nrow = nspace)
+    # for(i in 1:nspace){
+    #   for(j in 1:nspace){
+    #     phi_ij[i,j] = ifelse(phi_ik2[i] == phi_ik2[j],0,1)
+    #   }
+    # }
+    # tau_ki <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
   }
   
   # b <- matrix(NA, nyear)

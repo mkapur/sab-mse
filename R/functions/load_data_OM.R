@@ -339,22 +339,22 @@ load_data_OM <- function(nspace = 6,
   # }  
   
   log_fsh_slx_pars = array(0, dim = c(nfleets_fish,2,1,2), 
-                           dimnames = list(c(fltnames_fish),
+                           dimnames = list(c(paste(fltnames_fish)),
                                            c("p1","p2"),
                                            c(paste0('block',1)),
                                            c('Fem','Mal')))
   
   # fleets 5+ are mean sd, ak fleets are a50, a95
 
-  log_fsh_slx_pars[1:4,1,1,1] <- log(50) ## a50
-  log_fsh_slx_pars[1:4,1,1,2] <- log(50)
-  log_fsh_slx_pars[1:4,2,1,1] <- log(67) ## a95
-  log_fsh_slx_pars[1:4,2,1,2] <- log(67)
-  log_fsh_slx_pars[c(6,5,7),1,1,1:2] <- log(c(62.8329, 63.6959, 33.8898)) ## mean
-  log_fsh_slx_pars[c(6,5,7),2,1,1:2] <- log(c(7.04483, 3.09715, 1.41494)) ## sd
+  log_fsh_slx_pars[1:2,1,1,1] <- log(50) ## a50
+  log_fsh_slx_pars[1:2,1,1,2] <- log(50)
+  log_fsh_slx_pars[1:2,2,1,1] <- log(67) ## a95
+  log_fsh_slx_pars[1:2,2,1,2] <- log(67)
+  log_fsh_slx_pars[c(4,2,5),1,1,1:2] <- log(c(62.8329, 63.6959, 33.8898)) ## mean
+  log_fsh_slx_pars[c(4,2,5),2,1,1:2] <- log(c(7.04483, 3.09715, 1.41494)) ## sd
   ## share wc with bc
-  log_fsh_slx_pars[8:9,1,1,1:2] <-   log_fsh_slx_pars[5:6,1,1,1:2]
-  log_fsh_slx_pars[8:9,2,1,1:2] <-   log_fsh_slx_pars[5:6,2,1,1:2]
+  log_fsh_slx_pars[6:7,1,1,1:2] <-   log_fsh_slx_pars[4:5,1,1,1:2]
+  log_fsh_slx_pars[6:7,2,1,1:2] <-   log_fsh_slx_pars[4:5,2,1,1:2]
   
 
   

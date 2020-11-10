@@ -108,7 +108,7 @@ load_data_OM <- function(nspace = 6,
   selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
   ## note that the first two acomp fleets are already inside seltype fish
   ## only first ONE if AK fix not aggregated
-  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(3,5,6)]))-1
+  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]))-1
   selShape_fish <- c(rep(0,2),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-4))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   
@@ -185,12 +185,12 @@ load_data_OM <- function(nspace = 6,
     rownames(phi_ff_acomp) <- fltnames_acomp
     colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos',"nsamp_pos","commacomp_pos","survacomp_pos")
     ## MANUAL UPDATE WITH COLNAMES [seltypes are in same order as fltnames]
-    
-    phi_ff_acomp[which(paste(fltnames_fish) == rownames(phi_ff_acomp)),1] <- which(paste(fltnames_fish) == rownames(phi_ff_acomp))-1
+    phi_ff_acomp[which(rownames(phi_ff_acomp) %in% paste(fltnames_fish)),1] <- 
+      which(grepl(paste(rownames(phi_ff_acomp), collapse = "|"), paste(fltnames_fish)))-1
     # phi_ff_acomp[,1] <- c(0,1,-1,5,-1,-1,7,8) ## position in fishery selex (-1 means not applicable)
     phi_ff_acomp[,2] <- c(-1,5,-1,6,7,-1,-1) ## Pos in survey
     phi_ff_acomp[,3] <- c(5:11) ## ordering for nsamp
-    phi_ff_acomp[which(paste(fltnames_fish) == rownames(phi_ff_acomp)),4] <- 0:2
+    phi_ff_acomp[which(rownames(phi_ff_acomp) %in% paste(fltnames_fish)),4] <- 0:3
     # phi_ff_acomp[,4] <- c(0,1,-1,2,-1,-1,3,4) ## ordering for comm comps
     phi_ff_acomp[,5] <- c(-1,0,-1,1,2,-1,-1) ## ordering for surv comps (only 3)
 
@@ -336,7 +336,7 @@ load_data_OM <- function(nspace = 6,
   
   ## all of these are currently logistic with l/a50, and a delta
   log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-4),2,1,2),   
-                            dimnames = list(c(paste(fltnames_surv),paste(fltnames_acomp[c(3,5,6)])),
+                            dimnames = list(c(paste(fltnames_surv),paste(fltnames_acomp[c(2,4,5)])),
                                            c("p1","p2"),
                                            c(paste0('block',1)),
                                            c('Fem','Mal')))

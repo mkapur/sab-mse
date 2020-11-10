@@ -89,7 +89,7 @@ Type objective_function<Type>::operator() ()
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish, nsex);           // Fishery selectivity-at-age by sex (on natural scale)
-  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-5),nsex);  // five of the acomp fleets are surveys; the other two are fsh
+  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-4),nsex);  // four acomp fleets are comm
   vector<Type>selG(nage);
   vector<Type>selGL(LBins);
   
@@ -135,8 +135,8 @@ Type objective_function<Type>::operator() ()
   array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
   // age comps
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // placeholder multiplier for all acomp fleets
-  array<Type> comm_acomp_yafs_pred(tEnd, nage, 5, nsex); // predicted acomps from commercial fisheries
-  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-5, nsex); // predicted acomps from surveys (without biomass)
+  array<Type> comm_acomp_yafs_pred(tEnd, nage, 4, nsex); // predicted acomps from commercial fisheries
+  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-4, nsex); // predicted acomps from surveys (without biomass)
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
   PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
@@ -288,7 +288,7 @@ Type objective_function<Type>::operator() ()
     } // end alpha, beta
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
-  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-5));srv_flt++){ // loop fleets
+  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0
     for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
@@ -389,6 +389,7 @@ Type objective_function<Type>::operator() ()
   // new dims are subarea x age, note indexing [use block to subset?]
   // first fill in R0K values to be compatible with Neqn structure
   vector<Type>R_0k_vect(Neqn.cols()); // 0 is rows 1 is cols
+  R_0k_vect.setZero();
   // Eigen::SparseVector< Type > asSparseVector (vector< Type > R_0k_vect);
   for(int i=0;i<(nspace);i++){
     // for(int x=0;x<(Neqn.cols());x++){
@@ -400,9 +401,9 @@ Type objective_function<Type>::operator() ()
     std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
   }
 
-  vector<Type> NeqnR = (Neqn*R_0k_vect);
-  // REPORT(R_0k_vect);
-  // REPORT(NeqnR);
+  vector<Type> NeqnR = Neqn*R_0k_vect;
+  REPORT(R_0k_vect);
+  REPORT(NeqnR);
   //   for(int i=0;i<(nspace);i++){
   //     for(int s=0;s<nsex;s++){
   // //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));

@@ -80,8 +80,6 @@ load_data_OM <- function(nspace = 6,
   fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
   fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
   
-  
-  
   nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
   nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
   nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
@@ -102,16 +100,17 @@ load_data_OM <- function(nspace = 6,
   load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
   
   ## time blocks by fleet
-  srv_blks <- matrix(0, nrow = tEnd, ncol = nfleets_surv+(nfleets_acomp-5))
+  srv_blks <- matrix(0, nrow = tEnd, ncol = nfleets_surv+(nfleets_acomp-4))
   fsh_blks <- matrix(0, nrow = tEnd, ncol = nfleets_fish)
-  # srv_blks <- matrix(tEnd-1, ncol = 1, nrow = nfleets_surv+(nfleets_acomp-5))
+  # srv_blks <- matrix(tEnd-1, ncol = 1, nrow = nfleets_surv+(nfleets_acomp-4))
   # fsh_blks <-  matrix(tEnd-1, ncol = 1, nrow = nfleets_fish)
   
   selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
   ## note that the first two acomp fleets are already inside seltype fish
+  ## only first ONE if AK fix not aggregated
   selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(3,5,6)]))-1
   selShape_fish <- c(rep(0,2),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-5))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-4))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   
   
   
@@ -151,23 +150,49 @@ load_data_OM <- function(nspace = 6,
     phi_if_surv <- matrix(0, nrow = nfleets_surv, ncol = nspace)
     rownames(phi_if_surv) <- names(survey)
     colnames(phi_if_surv) <- rev(spmat$subarea)
-    phi_if_surv[1,6] <-  phi_if_surv[2,5] <-  
-      phi_if_surv[3:4,3:4]<-  phi_if_surv[5,1:2] <- 1
+    # phi_if_surv[1,6] <-  phi_if_surv[2,5] <-  
+    #   phi_if_surv[3:4,3:4]<-  phi_if_surv[5,1:2] <- 1
+    for(i in 1:nrow(phi_if_surv)){
+      reg = substr(rownames(phi_if_surv)[i],1,2)
+      if(reg == 'AK') {
+        phi_if_surv[i,5:6] <- 1
+      } else  if(reg == 'BC'){
+        phi_if_surv[i,3:4] <- 1
+      }else{
+        phi_if_surv[i,1:2] <- 1
+      }
+    }
     
     phi_if_acomp <- matrix(0, nrow = nfleets_acomp, ncol = nspace)
     rownames(phi_if_acomp) <- fltnames_acomp
     colnames(phi_if_acomp) <- rev(spmat$subarea)
-    phi_if_acomp[1,6] <-  phi_if_acomp[2:3,5] <-  
-      phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,1:2] <- 1
+    for(i in 1:nrow(phi_if_acomp)){
+      reg = substr(rownames(phi_if_acomp)[i],1,2)
+      if(reg == 'AK') {
+        phi_if_acomp[i,5:6] <- 1
+      } else  if(reg == 'BC'){
+        phi_if_acomp[i,3:4] <- 1
+      }else{
+        phi_if_acomp[i,1:2] <- 1
+      }
+    }
     
-    phi_ff_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 5) ## indicates the position of acomp fleet
+    # phi_if_acomp[1,6] <-  phi_if_acomp[2:3,5] <-  
+      # phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,1:2] <- 1
+    
+    ## indicates the position of acomp fleet
+    phi_ff_acomp <- matrix(-1, nrow = nfleets_acomp, ncol = 5) 
     rownames(phi_ff_acomp) <- fltnames_acomp
     colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos',"nsamp_pos","commacomp_pos","survacomp_pos")
-    phi_ff_acomp[,1] <- c(0,1,-1,5,-1,-1,7,8) ## position in fishery selex (-1 means not applicable)
-    phi_ff_acomp[,2] <- c(-1,-1,5,-1,6,7,-1,-1) ## Pos in survey
-    phi_ff_acomp[,3] <- c(5:12) ## ordering for nsamp
-    phi_ff_acomp[,4] <- c(0,1,-1,2,-1,-1,3,4) ## ordering for comm comps
-    phi_ff_acomp[,5] <- c(-1,-1,0,-1,1,2,-1,-1) ## ordering for surv comps (only 3)
+    ## MANUAL UPDATE WITH COLNAMES [seltypes are in same order as fltnames]
+    
+    phi_ff_acomp[which(paste(fltnames_fish) == rownames(phi_ff_acomp)),1] <- which(paste(fltnames_fish) == rownames(phi_ff_acomp))-1
+    # phi_ff_acomp[,1] <- c(0,1,-1,5,-1,-1,7,8) ## position in fishery selex (-1 means not applicable)
+    phi_ff_acomp[,2] <- c(-1,5,-1,6,7,-1,-1) ## Pos in survey
+    phi_ff_acomp[,3] <- c(5:11) ## ordering for nsamp
+    phi_ff_acomp[which(paste(fltnames_fish) == rownames(phi_ff_acomp)),4] <- 0:2
+    # phi_ff_acomp[,4] <- c(0,1,-1,2,-1,-1,3,4) ## ordering for comm comps
+    phi_ff_acomp[,5] <- c(-1,0,-1,1,2,-1,-1) ## ordering for surv comps (only 3)
 
     ## phi_fish
     phi_if_fish <- matrix(0, nrow = nfleets_fish, ncol = nspace) ## placeholder for fishing fleets
@@ -182,6 +207,7 @@ load_data_OM <- function(nspace = 6,
         phi_if_fish[i,3:4] <- 1
       }else{
         phi_if_fish[i,1:2] <- 1
+      }
     }
     # phi_if_fish[c(1,3),6] <- phi_if_fish[c(2,4),5] <-   phi_if_fish[5:7,3:4] <-  
     #   phi_if_fish[c(8,9),1:2] <-  1
@@ -309,7 +335,7 @@ load_data_OM <- function(nspace = 6,
 
   
   ## all of these are currently logistic with l/a50, and a delta
-  log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-5),2,1,2),   
+  log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-4),2,1,2),   
                             dimnames = list(c(paste(fltnames_surv),paste(fltnames_acomp[c(3,5,6)])),
                                            c("p1","p2"),
                                            c(paste0('block',1)),

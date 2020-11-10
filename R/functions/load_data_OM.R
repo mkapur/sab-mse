@@ -262,15 +262,22 @@ load_data_OM <- function(nspace = 6,
     colnames(acomp_flt_type) <- fltnames_acomp
     ## match colnames to fltnames which are commercial, assign those as 1
     acomp_flt_type[which(fltnames$COMM[which(grepl(paste(colnames(acomp_flt_type), collapse = "|"),fltnames$NAME))])] <- 0
-    
     # acomp_flt_type[fltnames$NAME == rownames(acomp_flt_type) ] <- 1
 
-    
     phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
     rownames(phi_lcomp_fm) = fltnames_lcomp
     colnames(phi_lcomp_fm) = rev(unique(spmat$mgmt))
-    phi_lcomp_fm[1:6,3] <- phi_lcomp_fm[7:9,2]  <- phi_lcomp_fm[10,1]  <- 1
-    
+    # phi_lcomp_fm[1:6,3] <- phi_lcomp_fm[7:9,2]  <- phi_lcomp_fm[10,1]  <- 1
+    for(i in 1:nrow(phi_lcomp_fm)){
+      reg = substr(rownames(phi_lcomp_fm)[i],1,2)
+      if(reg == 'AK') {
+        phi_lcomp_fm[i,3] <- 1
+      } else  if(reg == 'BC'){
+        phi_lcomp_fm[i,2] <- 1
+      }else{
+        phi_lcomp_fm[i,1] <- 1
+      }
+    }
     ## tau_ki
     tau_ki <-  matrix(0, ncol = nspace, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     rownames(tau_ki) <- rev(unique(spmat$stock))

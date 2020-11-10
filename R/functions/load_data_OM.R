@@ -245,7 +245,17 @@ load_data_OM <- function(nspace = 6,
     phi_fm_acomp <- matrix(0, nrow = nfleets_acomp, ncol = 3)
     rownames(phi_fm_acomp) = fltnames_acomp
     colnames(phi_fm_acomp) = rev(unique(spmat$mgmt))
-    phi_fm_acomp[1:3,3] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,1]  <- 1
+    for(i in 1:nrow(phi_fm_acomp)){
+      reg = substr(rownames(phi_fm_acomp)[i],1,2)
+      if(reg == 'AK') {
+        phi_fm_acomp[i,3] <- 1
+      } else  if(reg == 'BC'){
+        phi_fm_acomp[i,2] <- 1
+      }else{
+        phi_fm_acomp[i,1] <- 1
+      }
+    }
+    # phi_fm_acomp[1:3,3] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,1]  <- 1
     phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are survey fleets
     
     acomp_flt_type <- matrix(0, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey

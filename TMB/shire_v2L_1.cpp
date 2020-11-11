@@ -395,17 +395,21 @@ Type objective_function<Type>::operator() ()
     std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
   }
   vector<Type> NeqnR = Neqn*R_0k_vect;
-  
-  //   for(int i=0;i<(nspace);i++){
-  //     for(int s=0;s<nsex;s++){
-  // //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
-  //       for(int a=1;a<(nage);a++){
-  //         NeqnR.block(i*nage,i*nage,(i+1)*nage,(i+1)*nage) = NeqnR(i*na)
-  //       // N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
-  //     }
+  for(int a=0;a<(nage);a++){
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        // //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
+        N_0ais(a,i,s) = NeqnR(i*nage+a);
+        //         NeqnR.block(i*nage,i*nage,(i+1)*nage,(i+1)*nage) = NeqnR(i*na)
+        //       // N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+      }
+    }
+  }
+  // for(i in 1:2){
+  //   for(a in 1:70){
+  //     cat(i,"\t",a,"\t",(i-1)*70+a,"\n")
   //   }
   // }
-
   //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //         for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
   //           Type pLeave = 0.0; Type NCome = 0.0; // reset for new age

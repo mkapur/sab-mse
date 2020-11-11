@@ -390,25 +390,17 @@ Type objective_function<Type>::operator() ()
   // first fill in R0K values to be compatible with Neqn structure
   vector<Type>R_0k_vect(Neqn.cols()); // 0 is rows 1 is cols
   R_0k_vect.setZero();
-  // Eigen::SparseVector< Type > asSparseVector (vector< Type > R_0k_vect);
   for(int i=0;i<(nspace);i++){
-    // for(int x=0;x<(Neqn.cols());x++){
-    // //   if(x != i*nage){
-    //     R_0k_vect(x) =0; // overwrite off values
-    //   }
-    // // }
-    R_0k_vect(i*nage) = R_0k(phi_ik2(i)); // this returns seq(0,Ndim,nage)
+    R_0k_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i); // this returns seq(0,Ndim,nage)
     std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
   }
-
   vector<Type> NeqnR = Neqn*R_0k_vect;
-  REPORT(R_0k_vect);
-  REPORT(NeqnR);
+  
   //   for(int i=0;i<(nspace);i++){
   //     for(int s=0;s<nsex;s++){
   // //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
   //       for(int a=1;a<(nage);a++){
-  //         NeqnR.block(i*nage,i*nage,(i+1)*nage,(i+1)*nage)
+  //         NeqnR.block(i*nage,i*nage,(i+1)*nage,(i+1)*nage) = NeqnR(i*na)
   //       // N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //     }
   //   }
@@ -1257,6 +1249,8 @@ Type objective_function<Type>::operator() ()
   REPORT(Nsamp_acomp_yf);
   
   // REPORT PARS
+  REPORT(R_0k_vect);
+  REPORT(NeqnR);
   ADREPORT(epsilon_tau);
   ADREPORT(logR_0k);
   ADREPORT(omega_0ij);

@@ -388,28 +388,20 @@ Type objective_function<Type>::operator() ()
   // calc true Neqn given recruitment (matrix multiplication)
   // new dims are subarea x age, note indexing [use block to subset?]
   // first fill in R0K values to be compatible with Neqn structure
-  vector<Type>R_0k_vect(Neqn.cols()); // 0 is rows 1 is cols
-  R_0k_vect.setZero();
+  vector<Type>R_0i_vect(Neqn.cols()); // 0 is rows 1 is cols
+  R_0i_vect.setZero();
   for(int i=0;i<(nspace);i++){
-    R_0k_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i); // this returns seq(0,Ndim,nage)
+    R_0i_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i); // consider tau epsilon here
     std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
   }
-  vector<Type> NeqnR = Neqn*R_0k_vect;
+  vector<Type> NeqnR = Neqn*R_0i_vect;
   for(int a=0;a<(nage);a++){
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
-        // //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
         N_0ais(a,i,s) = NeqnR(i*nage+a);
-        //         NeqnR.block(i*nage,i*nage,(i+1)*nage,(i+1)*nage) = NeqnR(i*na)
-        //       // N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
       }
     }
   }
-  // for(i in 1:2){
-  //   for(a in 1:70){
-  //     cat(i,"\t",a,"\t",(i-1)*70+a,"\n")
-  //   }
-  // }
   //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //         for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
   //           Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
@@ -1253,7 +1245,7 @@ Type objective_function<Type>::operator() ()
   REPORT(Nsamp_acomp_yf);
   
   // REPORT PARS
-  REPORT(R_0k_vect);
+  REPORT(R_0i_vect);
   REPORT(NeqnR);
   ADREPORT(epsilon_tau);
   ADREPORT(logR_0k);

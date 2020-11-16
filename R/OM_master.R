@@ -21,18 +21,17 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.7;  df$Fmax = 1.5;
 df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  5 #df$tEnd-1
-df$mat_age <- rep(5e-2,df$nage)
-# df$selShape_fish[5:7] <-  -1 ## slx = 1 for all BC fisheries
+df$yRun =  7#df$tEnd-1
+# df$mat_age <- rep(1e-5,df$nage)
 
 omega_0ij_map <- matrix(NA, nrow = 6, ncol = 6) ## turn off age-zero movement estimation
 # omega_0ij_map[1,] <- df$parms$omega_0ij[1,] ## estimate to/from C1 only
 # 
 # ## mirror selex in AK E/W 
 # ## if you want to MIRROR selex, fill a value in the specific location which is identical for each fleet
-# fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars)*2,
-#                      dim = dim(df$parms$log_fsh_slx_pars),
-#                      dimnames = dimnames(df$parms$log_fsh_slx_pars))
+fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars)*2,
+                     dim = dim(df$parms$log_fsh_slx_pars),
+                     dimnames = dimnames(df$parms$log_fsh_slx_pars))
 # dimnames(fsh_slx_map)[[1]] <- df$fltnames_fish
 # 
 # fsh_slx_map[c(1,2)] <- 1 ## mirror p1 for females, W
@@ -43,13 +42,17 @@ omega_0ij_map <- matrix(NA, nrow = 6, ncol = 6) ## turn off age-zero movement es
 # fsh_slx_map[c(28,29)] <- 6## mirror p2 for males, W
 # fsh_slx_map[c(12,13)] <- 7## mirror p2 for females, E
 # fsh_slx_map[c(30,31)] <- 8## mirror p2 for males, E
+## fix BC selex (for use with -1 slx)
+# df$selShape_fish[3:5] <-  -1 ## slx = 1.0 for all BC fisheries
+# fsh_slx_map[3:5,1,1,1:2] <- factor(NA)
+# fsh_slx_map[3:5,2,1,1:2] <- factor(NA)
 
 mappy <- list(
   # logh_k = factor(rep(NA, 4)),
   # logR_0k = factor(rep(NA, 4)), ## sum wc = 12
   omega_0ij = factor(omega_0ij_map),
   # logq_f = factor(rep(NA, 5)),
-  b =  factor(rep(NA, 60))
+  b =  factor(rep(NA, 60))#,
   # logpi_acomp = factor(rep(NA,df$nfleets_acomp)),
   # logSDR = factor(NA),
   ## structure is fleet x alpha, beta x time block (1 for now) x sex
@@ -68,23 +71,39 @@ array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']),
       dim = c(7,2,2))
 # ## up to 30s
 system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-rep1$R_0k_vect
+rep1$fsh_slx_yafs[1,,3,1]; rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
+rep1$R_0i_vect
 rep1$NeqnR
-# head(round(rep1$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
-# colSums(rep1$N_0ais) ## should not be super small anywhere
-# rep1$SSB_0i ## should not be small or negative
-# rep1$SSB_yi[3,] ## should match SSB0 without fishing
-# round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
-# round(rep1$R_yi[1:df$yRun,])
-# rowSums(rep1$N_yais_end[1:df$yRun,,,1])
+
+matrix(rep1$NeqnR, ncol = nspace, nrow = nage) %>%
+  data.frame(.) %>%
+  mutate(age = 1:nage) %>%
+  reshape2::melt(id = 'age') %>%
+  ggplot(., aes(x = age, y = value, color = variable)) +
+  ggsidekick::theme_sleek() +
+  geom_line(lwd = 1.1) +
+  scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]]) +
+  facet_wrap(~variable, scales = 'free_y', labeller = labeller(variable =conservation_status))
+
+
+head(round(rep1$catch_yf_pred,2)/round(df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
+colSums(rep1$N_0ais) ## should not be super small anywhere
+rep1$SSB_0i ## should not be small or negative
+rep1$SSB_yi[1,] ## should match SSB0 without fishing
+round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
+round(rep1$R_yi[1:df$yRun,])
+rowSums(rep1$N_yais_mid[1:df$yRun,,,1])
+rowSums(rep1$N_yais_end[1:df$yRun,,,1])
 
 # rep1$N_yais_beg[1:7,c(0:4,71),,1]
 # rep1$N_yais_mid[1:7,c(0:4,71),,1]
 # rep1$N_yais_end[1:7,c(0:4,71),,1]
 
 source(here('R','functions','boundPars.R')) ## bound selex etc
-# array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(9,2,2),
-      # dimnames = list(df$fltnames_fish))
+array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(7,2,2),
+      dimnames = list(df$fltnames_fish))
+array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,2),
+      dimnames = list(df$fltnames_fish))
 ## about 65s for 22 years
 ## 7 hours for 44 yrs ## 3hrs for all years with bounds (just catch like)
 system.time(opt <-
@@ -105,7 +124,7 @@ array(round(exp(best[names(best)=='log_fsh_slx_pars'])),
      # dimnames = list(df$fltnames_fish))
 ## 81 s
 dat <- obj$report(par = best)
-head(round(dat$catch_yf_pred/df$catch_yf_obs[,2:10],2),df$yRun)
+head(round(dat$catch_yf_pred/df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
 colSums(dat$N_0ais) ## should not be super small anywhere
 dat$SSB_0i ## should not be small or negative
 round(dat$R_yi[1:df$yRun,])

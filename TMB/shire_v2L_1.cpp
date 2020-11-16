@@ -1,6 +1,5 @@
 #include <TMB.hpp>
 template<class Type>
-
 Type objective_function<Type>::operator() ()
 {
   
@@ -37,7 +36,7 @@ Type objective_function<Type>::operator() ()
   
   // // DEMOGRAPHY //
   DATA_VECTOR(mat_age); // natural mortality at age
-  DATA_MATRIX(Neqn); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))
+  DATA_VECTOR(Mat3Inv); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))[,1]
   // // movement //
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
@@ -89,7 +88,7 @@ Type objective_function<Type>::operator() ()
   // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
   // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish, nsex);           // Fishery selectivity-at-age by sex (on natural scale)
-  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-4),nsex);  // four acomp fleets are comm
+  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-5),nsex);  // five of the acomp fleets are surveys; the other two are fsh
   vector<Type>selG(nage);
   vector<Type>selGL(LBins);
   
@@ -135,8 +134,8 @@ Type objective_function<Type>::operator() ()
   array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
   // age comps
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // placeholder multiplier for all acomp fleets
-  array<Type> comm_acomp_yafs_pred(tEnd, nage, 4, nsex); // predicted acomps from commercial fisheries
-  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-4, nsex); // predicted acomps from surveys (without biomass)
+  array<Type> comm_acomp_yafs_pred(tEnd, nage, 5, nsex); // predicted acomps from commercial fisheries
+  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-5, nsex); // predicted acomps from surveys (without biomass)
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
   PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
@@ -288,7 +287,7 @@ Type objective_function<Type>::operator() ()
     } // end alpha, beta
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
-  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
+  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-5));srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0
     for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
       do{
@@ -385,23 +384,17 @@ Type objective_function<Type>::operator() ()
   // matrix<Type> LinvN = LN.inverse(); // now LN is an object and we do inverse on it
   
   N_0ais.setZero();
-  // calc true Neqn given recruitment (matrix multiplication)
-  // new dims are subarea x age, note indexing [use block to subset?]
-  // first fill in R0K values to be compatible with Neqn structure
-  vector<Type>R_0i_vect(Neqn.cols()); // 0 is rows 1 is cols
-  R_0i_vect.setZero();
-  for(int i=0;i<(nspace);i++){
-    R_0i_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i); // consider tau epsilon here
-    std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
-  }
-  vector<Type> NeqnR = Neqn*R_0i_vect;
-  for(int a=0;a<(nage);a++){
+  // vector<Type> Mat3Inv = Mat3.inverse().col(0); // vector of dim nage*nspace
+
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
-        N_0ais(a,i,s) = NeqnR(i*nage+a);
+        N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
+        for(int a=1;a<(nage);a++){
+        N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
       }
     }
   }
+
   //       N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
   //         for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
   //           Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
@@ -1198,7 +1191,6 @@ Type objective_function<Type>::operator() ()
   // Report calculations
   
   // numbers @ age
-
   REPORT(Ninit_ais);
   REPORT(N_0ais);
   REPORT(N_yais_beg);
@@ -1245,8 +1237,6 @@ Type objective_function<Type>::operator() ()
   REPORT(Nsamp_acomp_yf);
   
   // REPORT PARS
-  REPORT(R_0i_vect);
-  REPORT(NeqnR);
   ADREPORT(epsilon_tau);
   ADREPORT(logR_0k);
   ADREPORT(omega_0ij);

@@ -55,9 +55,9 @@ writeOM <- function(dat, opt, obj,
   #   ggsidekick::theme_sleek()+
   #   facet_wrap(~variable,scales = 'free_y')
   # dev.off()
-  neqnm <- matrix(dat$NeqnR, ncol = nspace, nrow = nage) %>%
+  neqnm <- matrix(dat$NeqnR, ncol = 6, nrow = 71) %>%
     data.frame(.) %>%
-    mutate(age = 1:nage) %>%
+    mutate(age = 0:70) %>%
     reshape2::melt(id = 'age')
   
   conservation_status <- c(
@@ -174,9 +174,9 @@ writeOM <- function(dat, opt, obj,
   catch_yf_predt <- catch_yf_predt %>%
     mutate(Year = years) %>%
     group_by(Year) %>%
-    mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
-           "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
-    select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
+    # mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
+    #        "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
+    # select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
     mutate(REG = substr(variable,0,2)) %>% filter(value != 0)
@@ -186,9 +186,9 @@ writeOM <- function(dat, opt, obj,
   catch_yf_obst <- catch_yf_obst %>%
     mutate(Year = years) %>%
     group_by(Year) %>%
-    mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
-           "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
-    select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
+    # mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
+    #        "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
+    # select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
     melt(id = 'Year') %>%
     ## convert CV to SD via CV = mean/sd
     mutate(Type = 'OBS', 
@@ -289,7 +289,7 @@ writeOM <- function(dat, opt, obj,
                     dim = dim(df$parms$log_fsh_slx_pars),
                     dimnames = dimnames(df$parms$log_fsh_slx_pars))
   
-  mapped_fsh_selnames <- c('AK_FIX','AK_TWL',paste(df$fltnames_fish[5:df$nfleets_fish]))
+  mapped_fsh_selnames <- c('AK_FIX','AK_TWL',paste(df$fltnames_fish[3:df$nfleets_fish]))
   
   selP <- array(exp(opt$par[grep('fsh_slx',names(opt$par))]),
                 dim = c(7,2,1,2))
@@ -311,8 +311,8 @@ writeOM <- function(dat, opt, obj,
         fsh_sel_afs[,fish_flt,s] <- getSelec2(sex = s,
                                                selP = selP,
                                                flt_idx = fish_flt,
-                                               selType = df$selType_fish[3:df$nfleets_fish][fish_flt], 
-                                               selShape = df$selShape_fish[3:df$nfleets_fish][fish_flt])
+                                               selType = df$selType_fish[fish_flt], 
+                                               selShape = df$selShape_fish[fish_flt])
           
         }
       }
@@ -348,7 +348,7 @@ writeOM <- function(dat, opt, obj,
   
   # plot SURV selex ----
   ## bring estimates out and rearrange
-  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-5) ## bc we got selex for acomp flts too
+  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-4) ## bc we got selex for acomp flts too
 
   
   inputSel <- array(exp(obj$par[grep('srv_slx',names(obj$par))]),
@@ -375,7 +375,8 @@ writeOM <- function(dat, opt, obj,
                                               selP = selP,
                                               flt_idx = surv_flt,
                                               selType = df$selType_surv[surv_flt], 
-                                              selShape = df$selShape_surv[surv_flt])
+                                              selShape = df$selShape_surv[surv_flt],
+                                              fltType = 'surv')
         
       }
     }

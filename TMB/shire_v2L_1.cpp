@@ -36,7 +36,7 @@ Type objective_function<Type>::operator() ()
   
   // // DEMOGRAPHY //
   DATA_VECTOR(mat_age); // natural mortality at age
-  DATA_VECTOR(Mat3Inv); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))[,1]
+  DATA_VECTOR(Neqn); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))[,1]
   // // movement //
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
@@ -390,7 +390,7 @@ Type objective_function<Type>::operator() ()
       for(int s=0;s<nsex;s++){
         N_0ais(0,i,s) = 0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i));
         for(int a=1;a<(nage);a++){
-        N_0ais(a,i,s) = Mat3Inv(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
+        N_0ais(a,i,s) = Neqn(a+(i*nage));//*0.5*R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i);
       }
     }
   }

@@ -1,4 +1,4 @@
-getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
+getSelec2 <- function(sex, flt_idx, selP, selShape, selType, fltType = 'fish'){
 
   age = df$age
 
@@ -26,7 +26,8 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType){
     } ## end selshape for age sel
   } else if(selType ==1){
     ## get mla_yais for fleet x area
-    i = which(df$phi_if_fish[flt_idx,]==1)[1]
+   if(fltType == 'fish') i = which(df$phi_if_fish[flt_idx,]==1)[1]
+   if(fltType == 'surv') i = which(df$phi_if_surv[flt_idx,]==1)[1]
     len = df$mla_yais[df$yRun,,i,sex]
     if(selShape == -1){
       selec = 1

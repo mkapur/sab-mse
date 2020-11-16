@@ -10,7 +10,7 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shire_v2L",'shire_v2L_1')[2]
+dllUSE = c("shire_v2L_1",'shire_v2L_1_16Nov')[2]
 compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
@@ -21,8 +21,8 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.7;  df$Fmax = 1.5;
 df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  7#df$tEnd-1
-# df$mat_age <- rep(1e-5,df$nage)
+df$yRun =  df$tEnd-1
+df$mat_age <- rep(1e-5,df$nage)
 
 omega_0ij_map <- matrix(NA, nrow = 6, ncol = 6) ## turn off age-zero movement estimation
 # omega_0ij_map[1,] <- df$parms$omega_0ij[1,] ## estimate to/from C1 only
@@ -75,16 +75,14 @@ rep1$fsh_slx_yafs[1,,3,1]; rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 rep1$R_0i_vect
 rep1$NeqnR
 
-matrix(rep1$NeqnR, ncol = nspace, nrow = nage) %>%
+matrix(rep1$NeqnR, ncol = 6, nrow = 71) %>%
   data.frame(.) %>%
-  mutate(age = 1:nage) %>%
+  mutate(age = 0:70) %>%
   reshape2::melt(id = 'age') %>%
   ggplot(., aes(x = age, y = value, color = variable)) +
   ggsidekick::theme_sleek() +
   geom_line(lwd = 1.1) +
-  scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]]) +
-  facet_wrap(~variable, scales = 'free_y', labeller = labeller(variable =conservation_status))
-
+  scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]])
 
 head(round(rep1$catch_yf_pred,2)/round(df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
 colSums(rep1$N_0ais) ## should not be super small anywhere
@@ -145,7 +143,7 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
-        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_Fon_SurvOn_BCSelexOn"))
+        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_Fon_BCSelexOn"))
 
 
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

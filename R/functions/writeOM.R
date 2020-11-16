@@ -40,22 +40,44 @@ writeOM <- function(dat, opt, obj,
   nage <- length(age)
   
   ## ninit ----
-  png(file = paste0(dumpfile,'Ninit_ais.png'),
-      width = 10, height = 8, unit = 'in', res = 420)
-  ninit0 <-  dat$Ninit_ais[,,1] %>%
-    data.frame() 
-  names(ninit0) <- inames
-  ninit0 %>%
-    mutate('Age' = age) %>%
-    reshape2::melt(id = c('Age')) %>%
-  ggplot(., aes(x = Age, y = value, color = variable )) +
-    scale_color_manual(values = rev(subareaPal)) +
-    geom_line(lwd = 2) + 
-    labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
-    ggsidekick::theme_sleek()+
-    facet_wrap(~variable,scales = 'free_y')
-  dev.off()
+  # png(file = paste0(dumpfile,'Ninit_ais.png'),
+  #     width = 10, height = 8, unit = 'in', res = 420)
+  # ninit0 <-  dat$Ninit_ais[,,1] %>%
+  #   data.frame() 
+  # names(ninit0) <- inames
+  # ninit0 %>%
+  #   mutate('Age' = age) %>%
+  #   reshape2::melt(id = c('Age')) %>%
+  # ggplot(., aes(x = Age, y = value, color = variable )) +
+  #   scale_color_manual(values = rev(subareaPal)) +
+  #   geom_line(lwd = 2) + 
+  #   labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
+  #   ggsidekick::theme_sleek()+
+  #   facet_wrap(~variable,scales = 'free_y')
+  # dev.off()
+  neqnm <- matrix(dat$NeqnR, ncol = nspace, nrow = nage) %>%
+    data.frame(.) %>%
+    mutate(age = 1:nage) %>%
+    reshape2::melt(id = 'age')
   
+  conservation_status <- c(
+    X1 =  dimnames(df$X_ijas)[[1]][1],
+    X2 = dimnames(df$X_ijas)[[1]][2],
+    X3 = dimnames(df$X_ijas)[[1]][3],
+    X4 =dimnames(df$X_ijas)[[1]][4],
+    X5 = dimnames(df$X_ijas)[[1]][5],
+    X6 = dimnames(df$X_ijas)[[1]][6]
+  )
+  
+  ggplot(neqnm, aes(x = age, y = value, color = variable)) +
+    ggsidekick::theme_sleek() +
+    geom_line(lwd = 1.1) +
+    scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]]) +
+    facet_wrap(~variable, scales = 'free_y', labeller = labeller(variable =conservation_status))
+  
+  ggsave(last_plot(),
+         file = here('input','input_data','input_figs','Neqn.png'),
+         width = 8, height = 6, units = 'in', dpi = 520)
   
   ## N_yseason ----
   png(file =paste0(dumpfile,"/",

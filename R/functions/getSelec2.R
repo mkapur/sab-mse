@@ -27,7 +27,12 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType, fltType = 'fish'){
   } else if(selType ==1){
     ## get mla_yais for fleet x area
    if(fltType == 'fish') i = which(df$phi_if_fish[flt_idx,]==1)[1]
-   if(fltType == 'surv') i = which(df$phi_if_surv[flt_idx,]==1)[1]
+   
+   if(fltType == 'surv') {
+     temp_phi_if_surv <- rbind(df$phi_if_surv,df$phi_if_acomp)
+     rown <- which(rownames(temp_phi_if_surv) ==  dimnames(df$parms$log_srv_slx_pars)[[1]][flt_idx])
+     i = which(temp_phi_if_surv[rown,]==1)[1]
+   }
     len = df$mla_yais[df$yRun,,i,sex]
     if(selShape == -1){
       selec = 1

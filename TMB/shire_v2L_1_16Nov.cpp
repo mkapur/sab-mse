@@ -196,11 +196,11 @@ Type objective_function<Type>::operator() ()
           for (int s = 0; s < nsex; s++) { // loop sexes
           // Selectivity switch (case 0 or 1 references the value of slx_type)
           switch (selShape_fish(fish_flt)) { // age sel
-          case 10:
+          case -1:
             for (int a= 0; a < nage; a++){
               fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0);
-              
             } // end ages
+            break;
           case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
             for (int a= 0; a < nage; a++){
               fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
@@ -235,10 +235,11 @@ Type objective_function<Type>::operator() ()
         case 1: // enter length based sel
           for (int s = 0; s < nsex; s++) {
             switch (selShape_fish(fish_flt)) {
-            case 10:
+            case -1:
               for (int l = 0; l < LBins; l++){
                 fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0); 
               } // end lengths
+              break;
               // std::cout << fish_flt <<"\t" << fsh_slx_yafs(i,44,fish_flt,s) << std::endl;
             case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
               for (int l = 0; l < LBins; l++){

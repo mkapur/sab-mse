@@ -130,7 +130,26 @@ writeOM <- function(dat, opt, obj,
          width = 10, height = 6, unit = 'in',
          dpi = 420)
   
+  ## ssb_yk gganimate ----
+  library(gganimate)
+  library(gifski)
+  myPlot <-dat$SSB_yk %>%
+    data.frame() %>%
+    mutate('Yr' = years[1:nrow(.)]) %>%
+    reshape2::melt(id = c('Yr')) %>%
+    ggplot(., aes(x = Yr, y = value, color = variable )) +
+    scale_color_manual(values = demPal) +
+    geom_line(lwd = 2) + 
+    labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
+    ggsidekick::theme_sleek() + 
+    theme( legend.position = c(0.8,0.8))+ 
+    transition_reveal(Yr)
   
+  animate(myPlot, duration = 10, fps = 20, width = 6,
+          height = 6, unit = 'in', res = 420, renderer = gifski_renderer())
+  anim_save(paste0(dumpfile,'/SSB_yk-animate-',Sys.Date(),'.png'))
+  
+  # anim_save(paste0(dumpfile,"SSB_yk_animate.gif",animation = last_animation())) 
   ## ssb_ym with compare ----
   spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),

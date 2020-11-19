@@ -11,7 +11,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nage); // Plus group
   DATA_VECTOR(age); // ages
   DATA_INTEGER(tEnd); // number of years modeled
-  DATA_VECTOR(years); // number of years modeled
+  DATA_VECTOR(years); // number of years modeled; max tEnd-1
   int nyear = years.size();
   int nsex = 2;
   DATA_INTEGER(yRun); //how many years to run; max tEnd-1
@@ -196,7 +196,7 @@ Type objective_function<Type>::operator() ()
           for (int s = 0; s < nsex; s++) { // loop sexes
           // Selectivity switch (case 0 or 1 references the value of slx_type)
           switch (selShape_fish(fish_flt)) { // age sel
-          case -1:
+          case 10:
             for (int a= 0; a < nage; a++){
               fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0);
               
@@ -235,7 +235,7 @@ Type objective_function<Type>::operator() ()
         case 1: // enter length based sel
           for (int s = 0; s < nsex; s++) {
             switch (selShape_fish(fish_flt)) {
-            case -1:
+            case 10:
               for (int l = 0; l < LBins; l++){
                 fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0); 
               } // end lengths

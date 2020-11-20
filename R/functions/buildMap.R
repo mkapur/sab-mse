@@ -1,1 +1,52 @@
-buildMap <- function(){}
+buildMap <- function(toFix = c(3,5,8,10),
+                     fixFlt = c("BC_LL","BC_TRAP","BC_TWL")){
+  
+  mappy <- list(); idx = 1
+  for(i in 1:length(df$parms)){
+    if(i %in% toFix){
+      if(i != 8 & i != 9){
+        # cat(df$parms[i])
+        mappy[[idx]] <- factor(rep(NA, length(df$parms[i])))
+        names(mappy[[idx]]) <- names(df$parms[i])
+        idx = idx+1
+        ## end non slx pars
+      } else{
+        if(i == 8){
+          fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars),
+                               dim = dim(df$parms$log_fsh_slx_pars),
+                               dimnames = dimnames(df$parms$log_fsh_slx_pars))
+          
+          for(flt in fixFlt){
+            fsh_slx_map[row.names(fsh_slx_map) == flt,1:2,1,1:2] <- factor(NA)
+          }
+          mappy[[idx]] <- factor(fsh_slx_map)
+          names(mappy[[idx]]) <- names(df$parms[i])
+          idx = idx+1
+        } else if(i == 9){
+          stop("fx not ready to automate fixing survey slx")
+        }
+      } ## end  slx pars
+    } ## end i in to fix
+  } ## end loop parms
+  return(mappy)
+}
+
+# df$parms$logR_0k = rep(25,4)
+
+
+# omega_0ij_map[1,] <- df$parms$omega_0ij[1,] ## estimate to/from C1 only
+# 
+# ## mirror selex in AK E/W 
+# ## if you want to MIRROR selex, fill a value in the specific location which is identical for each fleet
+
+# dimnames(fsh_slx_map)[[1]] <- df$fltnames_fish
+# 
+# fsh_slx_map[c(1,2)] <- 1 ## mirror p1 for females, W
+# fsh_slx_map[c(19,20)] <- 2 ## mirror p1 for males, W
+# fsh_slx_map[c(3,4)] <- 3 ## mirror p1 for females, E
+# fsh_slx_map[c(21,22)] <- 4 ## mirror p1 for males, E
+# fsh_slx_map[c(10,11)] <- 5## mirror p2 for females, W
+# fsh_slx_map[c(28,29)] <- 6## mirror p2 for males, W
+# fsh_slx_map[c(12,13)] <- 7## mirror p2 for females, E
+# fsh_slx_map[c(30,31)] <- 8## mirror p2 for males, E
+## fix BC selex (for use with -1 slx)

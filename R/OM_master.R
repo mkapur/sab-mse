@@ -22,9 +22,9 @@ df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
 df$yRun =  df$tEnd-1
 df$mat_age <- rep(1e-5,df$nage)
-df$selShape_fish[4:5] <-  -1 ## slx = 1.0 for all BC fisheries
-mappy <- buildMap(toFix = c(3,5,8,10),
-                  fixFlt = c("BC_LL","BC_TRAP","BC_TWL")) ## the numbers are in order of df$parms
+# df$selShape_fish[4:5] <-  -1 ## slx = 1.0 for all BC fisheries
+mappy <- buildMap(toFix = c(3,5)) #,
+                  # fixFlt = c("BC_LL","BC_TRAP","BC_TWL")) ## the numbers are in order of df$parms
 
 ## ~90s with full years
 system.time(obj <- MakeADFun(df,
@@ -36,9 +36,9 @@ system.time(obj <- MakeADFun(df,
 array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), 
       dim = c(7,2,2))
 # ## up to 30s
-# system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-# rep1$fsh_slx_yafs[1,,2,1]; rep1$fsh_slx_yafs[1,,3,1]; 
-# rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
+system.time(rep1 <- obj$report()) ## one off caclulation using start pars
+rep1$fsh_slx_yafs[1,,2,1]; rep1$fsh_slx_yafs[1,,3,1];
+rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 # rep1$R_0i_vect
 # rep1$NeqnR
 

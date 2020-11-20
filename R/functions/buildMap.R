@@ -5,7 +5,7 @@ buildMap <- function(toFix = c(3,5,8,10),
   for(i in 1:length(df$parms)){
     if(i %in% toFix){
       if(i != 8 & i != 9){
-        # cat(df$parms[i])
+ 
         mappy[[idx]] <- factor(rep(NA, length(df$parms[i])))
         names(mappy[[idx]]) <- names(df$parms[i])
         idx = idx+1
@@ -15,12 +15,12 @@ buildMap <- function(toFix = c(3,5,8,10),
           fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars),
                                dim = dim(df$parms$log_fsh_slx_pars),
                                dimnames = dimnames(df$parms$log_fsh_slx_pars))
-          
           for(flt in fixFlt){
             fsh_slx_map[row.names(fsh_slx_map) == flt,1:2,1,1:2] <- factor(NA)
           }
           mappy[[idx]] <- factor(fsh_slx_map)
           names(mappy[[idx]]) <- names(df$parms[i])
+          
           idx = idx+1
         } else if(i == 9){
           stop("fx not ready to automate fixing survey slx")

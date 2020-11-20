@@ -2,7 +2,10 @@
 # require(patchwork)
 # library(gridExtra)
 # require(dplyr)
-writeOM <- function(dat, opt, obj, 
+writeOM <- function(dat, 
+                    opt,
+                    obj,
+                    mappy,
                     rep =NA,
                     cppname = NA,
                     runname = NA,
@@ -11,6 +14,10 @@ writeOM <- function(dat, opt, obj,
   if(!is.na(runname)) dumpfile = paste0(dumpfile,runname,"/")
 
   if(!exists(dumpfile)) dir.create(dumpfile)
+
+  
+  
+  
   ## save the CPP used here
   
   cppfile <- list.files(here('TMB'),
@@ -20,7 +27,8 @@ writeOM <- function(dat, opt, obj,
             to = paste0(dumpfile,paste0(basename(cppfile))))
   
   ## write DF used here
-  save(df, file = paste0(dumpfile,"/dfUSED.rdata"))
+  save(df, file = paste0(dumpfile,"/df_used.rdata"))
+  save(mappy, file = paste0(dumpfile,"/mappy.rdata"))
   
   spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
@@ -39,6 +47,13 @@ writeOM <- function(dat, opt, obj,
   age <- 0:70 
   nage <- length(age)
   
+  ## create and save metadata ----
+  ## still in dev.
+  # sink(paste0(dumpfile,"metadata.txt"))
+  # cat('years \t',nyear,'\n')
+  # cat('age \t',nage,'\n')
+  # cat( as.data.frame(do.call(rbind, mappy)),"\n")
+  # sink()
   ## ninit ----
   neqnm <- matrix(dat$NeqnR, ncol = 6, nrow = 71) %>%
     data.frame(.) %>%

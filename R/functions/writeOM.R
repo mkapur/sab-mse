@@ -40,21 +40,6 @@ writeOM <- function(dat, opt, obj,
   nage <- length(age)
   
   ## ninit ----
-  # png(file = paste0(dumpfile,'Ninit_ais.png'),
-  #     width = 10, height = 8, unit = 'in', res = 420)
-  # ninit0 <-  dat$Ninit_ais[,,1] %>%
-  #   data.frame() 
-  # names(ninit0) <- inames
-  # ninit0 %>%
-  #   mutate('Age' = age) %>%
-  #   reshape2::melt(id = c('Age')) %>%
-  # ggplot(., aes(x = Age, y = value, color = variable )) +
-  #   scale_color_manual(values = rev(subareaPal)) +
-  #   geom_line(lwd = 2) + 
-  #   labs(x = 'Age in Initial Years',y = 'Initial Numbers', color = 'subarea') +
-  #   ggsidekick::theme_sleek()+
-  #   facet_wrap(~variable,scales = 'free_y')
-  # dev.off()
   neqnm <- matrix(dat$NeqnR, ncol = 6, nrow = 71) %>%
     data.frame(.) %>%
     mutate(age = 0:70) %>%
@@ -76,7 +61,8 @@ writeOM <- function(dat, opt, obj,
     facet_wrap(~variable, scales = 'free_y', labeller = labeller(variable =conservation_status))
   
   ggsave(last_plot(),
-         file = here('input','input_data','input_figs','Neqn.png'),
+         file =paste0(dumpfile,"/",
+                      Sys.Date(),'input_figs','Neqn.png'),
          width = 8, height = 6, units = 'in', dpi = 520)
   
   ## N_yseason ----
@@ -131,23 +117,23 @@ writeOM <- function(dat, opt, obj,
          dpi = 420)
   
   ## ssb_yk gganimate ----
-  library(gganimate)
-  library(gifski)
-  myPlot <-dat$SSB_yk %>%
-    data.frame() %>%
-    mutate('Yr' = years[1:nrow(.)]) %>%
-    reshape2::melt(id = c('Yr')) %>%
-    ggplot(., aes(x = Yr, y = value, color = variable )) +
-    scale_color_manual(values = demPal) +
-    geom_line(lwd = 2) + 
-    labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
-    ggsidekick::theme_sleek() + 
-    theme( legend.position = c(0.8,0.8))+ 
-    transition_reveal(Yr)
-  
-  animate(myPlot, duration = 10, fps = 20, width = 6,
-          height = 6, unit = 'in', res = 420, renderer = gifski_renderer())
-  anim_save(paste0(dumpfile,'/SSB_yk-animate-',Sys.Date(),'.png'))
+  # library(gganimate)
+  # library(gifski)
+  # myPlot <-dat$SSB_yk %>%
+  #   data.frame() %>%
+  #   mutate('Yr' = years[1:nrow(.)]) %>%
+  #   reshape2::melt(id = c('Yr')) %>%
+  #   ggplot(., aes(x = Yr, y = value, color = variable )) +
+  #   scale_color_manual(values = demPal) +
+  #   geom_line(lwd = 2) + 
+  #   labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
+  #   ggsidekick::theme_sleek() + 
+  #   theme( legend.position = c(0.8,0.8))+ 
+  #   transition_reveal(Yr)
+  # 
+  # animate(myPlot, duration = 10, fps = 20, width = 6,
+  #         height = 6, unit = 'in', res = 420, renderer = gifski_renderer())
+  # anim_save(paste0(dumpfile,'/SSB_yk-animate-',Sys.Date(),'.png'))
   
   # anim_save(paste0(dumpfile,"SSB_yk_animate.gif",animation = last_animation())) 
   ## ssb_ym with compare ----

@@ -21,7 +21,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
 df$yRun =  30# df$tEnd-1
-# df$mat_age <- rep(1e-5,df$nage)
+df$mat_age <- rep(0.05,df$nage)
 df$selShape_fish[3:5] <-  -1 ## slx = 1.0 for all BC fisheries
 ## the numbers are in order of df$parms
 ## if you are fixing fish fleets, be sure that selShape is correct!

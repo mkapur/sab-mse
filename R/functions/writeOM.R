@@ -12,9 +12,9 @@ writeOM <- function(dat,
                     dumpfile =  here('output',paste0(Sys.Date(),"/"))){
   ## allow for extra name
   if(!is.na(runname)) dumpfile = paste0(dumpfile,runname,"/")
-
+  
   if(!exists(dumpfile)) dir.create(dumpfile)
-
+  
   
   
   
@@ -73,11 +73,13 @@ writeOM <- function(dat,
     ggsidekick::theme_sleek() +
     geom_line(lwd = 1.1) +
     scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]]) +
-    facet_wrap(~variable, scales = 'free_y', labeller = labeller(variable =conservation_status))
+    facet_wrap(~variable, scales = 'free_y', 
+               labeller = labeller(variable =conservation_status)) +
+    labs(x = 'Age',y = 'Numbers (M+F)', color = 'Subarea')
   
   ggsave(last_plot(),
          file =paste0(dumpfile,"/",
-                      Sys.Date(),'input_figs','Neqn.png'),
+                      Sys.Date(),'-Neqn.png'),
          width = 8, height = 6, units = 'in', dpi = 520)
   
   ## N_yseason ----
@@ -87,7 +89,7 @@ writeOM <- function(dat,
   par(mfrow = c(2,3))
   for(i in 1:6){
     ylt = 2*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
-                 sum(dat$N_yais_end[df$yRun,,i,][!is.na(dat$N_yais_end[df$yRun,,i,])]))
+                sum(dat$N_yais_end[df$yRun,,i,][!is.na(dat$N_yais_end[df$yRun,,i,])]))
     
     plot(rowSums(dat$N_yais_beg[1:(df$yRun-1),,i,]),
          type = 'l',
@@ -127,7 +129,7 @@ writeOM <- function(dat,
     ggsidekick::theme_sleek() + 
     theme( legend.position = c(0.8,0.8))
   ggsave(last_plot(),
-         file = paste0(dumpfile,'/SSB_yk-',Sys.Date(),'.png'),
+         file = paste0(dumpfile,"/", Sys.Date(),'-SSB_yk.png'),
          width = 10, height = 6, unit = 'in',
          dpi = 420)
   
@@ -184,9 +186,9 @@ writeOM <- function(dat,
     labs(x = 'Modeled Year',y = 'SSB', color = 'Mgmt Region') +
     facet_wrap(~REG,scales = 'free_y')
   ggsave(last_plot(),
-         file = paste0(dumpfile,'/SSB_ym-',Sys.Date(),'.png'),
-  width = 10, height = 6, unit = 'in',
-  dpi = 420)
+         file = paste0(dumpfile,"/", Sys.Date(),'-SSB_ym.png'),
+         width = 10, height = 6, unit = 'in',
+         dpi = 420)
   
   ## catch pred by fleet ----
   catch_yf_predt <- data.frame(dat$catch_yf_pred)
@@ -200,7 +202,7 @@ writeOM <- function(dat,
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
     mutate(REG = substr(variable,0,2)) %>% filter(value != 0)
-
+  
   catch_yf_obst <- df$catch_yf_obs %>%  data.frame() %>%select(-Year) 
   
   catch_yf_obst <- catch_yf_obst %>%
@@ -228,8 +230,7 @@ writeOM <- function(dat,
     labs(y = 'catch', color = 'Fishing Fleet')+
     facet_wrap(~variable, scales = "free_y", ncol = 2)
   ggsave(last_plot(),
-         file = paste0(dumpfile,'/catch_fits_TMB_',
-                            'v1=',df$v1,'niter=',df$niter,'Fmax=',df$Fmax,Sys.Date(),'.png'),
+         file = paste0(dumpfile,"/", Sys.Date(),'-catch_fits.png'),
          width = 8, height = 6, unit = 'in',
          dpi = 420)
   
@@ -258,8 +259,7 @@ writeOM <- function(dat,
     facet_wrap(~REG, scales = "free_y")
   
   ggsave(last_plot(),
-         file = paste0(dumpfile,'/catchm_fits_TMB_',
-                            'v1=',df$v1,'niter=',df$niter,'Fmax=',df$Fmax,Sys.Date(),'.png'),
+         file = paste0(dumpfile,"/", Sys.Date(),'-catchM_fits.png'),
          width = 10, height = 6, unit = 'in', dpi = 420)
   
   ## survey preds ----
@@ -271,10 +271,10 @@ writeOM <- function(dat,
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
     mutate(REG = substr(variable,0,2)) #%>%
-
+  
   
   survey_yf_obst <- data.frame( df$surv_yf_obs)  %>%
-
+    
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
     filter(value > -1) %>%
@@ -298,8 +298,7 @@ writeOM <- function(dat,
     facet_wrap(~variable, scales = "free_y")
   
   ggsave(last_plot(),
-         file =paste0(dumpfile,'/survey_fits_selMult_',
-                      'v1=',df$v1,'Fmax=',df$Fmax,Sys.Date(),'.png'),
+         file =paste0(dumpfile,"/", Sys.Date(),'-survey_fits.png'),
          width = 10, height = 6, unit = 'in',
          dpi = 420)
   
@@ -329,15 +328,15 @@ writeOM <- function(dat,
     for(s in 1:2){
       for(fish_flt in 1:length(mapped_fsh_selnames)){
         fsh_sel_afs[,fish_flt,s] <- getSelec2(sex = s,
-                                               selP = selP,
-                                               flt_idx = fish_flt,
-                                               selType = df$selType_fish[fish_flt], 
-                                               selShape = df$selShape_fish[fish_flt])
-          
-        }
+                                              selP = selP,
+                                              flt_idx = fish_flt,
+                                              selType = df$selType_fish[fish_flt], 
+                                              selShape = df$selShape_fish[fish_flt])
+        
       }
     }
-
+  }
+  
   
   
   png(paste0(dumpfile,'/fishery_selex.png'),
@@ -358,7 +357,7 @@ writeOM <- function(dat,
                       main = mapped_fsh_selnames[flt], xlim = c(0,75),
                       col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
       box(which = 'plot', lty = 'solid', 
-          col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
+          col = c(rep(mgmtPal[1],2), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
           lwd = 2)
       if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
     }
@@ -369,7 +368,7 @@ writeOM <- function(dat,
   # plot SURV selex ----
   ## bring estimates out and rearrange
   nsurvmod = df$nfleets_surv+(df$nfleets_acomp-4) ## bc we got selex for acomp flts too
-
+  
   
   inputSel <- array(exp(obj$par[grep('srv_slx',names(obj$par))]),
                     dim = dim(df$parms$log_srv_slx_pars),
@@ -382,8 +381,8 @@ writeOM <- function(dat,
   
   srv_sel_afs <- array(NA, dim =  c(df$nage,nsurvmod,2),
                        dimnames = list(c(df$age),
-                                                  c( dimnames(df$parms$log_srv_slx_pars)[[1]]),
-                                                  c('Fem','Mal')))
+                                       c( dimnames(df$parms$log_srv_slx_pars)[[1]]),
+                                       c('Fem','Mal')))
   ## function to take the estimated parameters
   ## and info about selType, selShape
   ## and spit out vector of selx@a or selx@L

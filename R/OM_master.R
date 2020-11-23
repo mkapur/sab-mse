@@ -20,11 +20,13 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.7;  df$Fmax = 1.5;
 df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  df$tEnd-1
-df$mat_age <- rep(1e-5,df$nage)
-# df$selShape_fish[4:5] <-  -1 ## slx = 1.0 for all BC fisheries
-mappy <- buildMap(toFix = c(3,5)) #,
-                  # fixFlt = c("BC_LL","BC_TRAP","BC_TWL")) ## the numbers are in order of df$parms
+df$yRun =  30# df$tEnd-1
+# df$mat_age <- rep(1e-5,df$nage)
+df$selShape_fish[3:5] <-  -1 ## slx = 1.0 for all BC fisheries
+## the numbers are in order of df$parms
+## if you are fixing fish fleets, be sure that selShape is correct!
+mappy <- buildMap(toFix = c(3,5,8),
+                  fixFlt = c("BC_LL","BC_TRAP","BC_TWL")) 
 
 ## ~90s with full years
 system.time(obj <- MakeADFun(df,
@@ -66,11 +68,13 @@ rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 # rep1$N_yais_mid[1:7,c(0:4,71),,1]
 # rep1$N_yais_end[1:7,c(0:4,71),,1]
 
-bounds <- boundPars(obj, r0_lower = 10)
-with(bounds, array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(7,2,2),
-                   dimnames = list(df$fltnames_fish)))
+bounds <- boundPars(obj, r0_lower = 0, boundSlx = FALSE)
+
 with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,2),
                    dimnames = list(df$fltnames_fish)))
+with(bounds, array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(7,2,2),
+                   dimnames = list(df$fltnames_fish)))
+
 system.time(opt <-
               TMBhelper::fit_tmb(
                 obj,
@@ -110,7 +114,7 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
-        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_Fon_SurvOff_BCSelexOff"))
+        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_NoSlxBnds_SurvOff_BCSelexOff"))
 
 
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

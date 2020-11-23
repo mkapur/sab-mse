@@ -1,4 +1,4 @@
-boundPars <- function(obj, r0_lower = 10){
+boundPars <- function(obj, r0_lower = 10, boundSlx = FALSE){
 
 ## bounds on repro pars ----
 
@@ -28,21 +28,19 @@ upper[names(upper) == 'omega_0ij'] <- log(0.999)
 # array(1:length(obj$par[names(obj$par) == "log_fsh_slx_pars"]), dim = c(4,2,2))
 
 
-# if(is.na(fixSlx)){
+if(boundSlx == TRUE){
   ## if no fleets to fix, go with the normal slx bounds
   p1_logistic_idx <- c(1:2,15:16) #c(1:4,19:22)
   p2_logistic_idx <- p1_logistic_idx+df$nfleets_fish
   p1_norm_idx <- c(3,4,6,7,17,18,20,21)  #c(5,6,8,9,23,24,26,27)
   p1_norm_idx <- c(3,4,6,7,17,18,20,21)  #c(5,6,8,9,23,24,26,27)
-  
   p2_norm_idx <- p1_norm_idx+df$nfleets_fish
   p1_gamma_idx <- c(5,19)#c(7,25)
   p2_gamma_idx <- p1_gamma_idx+df$nfleets_fish
-  
   # #* fsh slx lower bounds ----
   # ## logistic p1 (a50)
   # array(1:length(lower[names(lower) == 'log_fsh_slx_pars']), dim = c(7,2,2))
-  
+
   lower[names(lower) == 'log_fsh_slx_pars'][p1_logistic_idx] <- log(35)
   ## logistic p2 (a95)
   lower[names(lower) == 'log_fsh_slx_pars'][p2_logistic_idx] <- log(60)
@@ -54,8 +52,6 @@ upper[names(upper) == 'omega_0ij'] <- log(0.999)
   lower[names(lower) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(15)
   ## gamma rate
   lower[names(lower) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(2)
-  # 
-  # 
   # #* fsh slx upper bounds ----
   # ## logistic p1 (a50)
   upper[names(upper) == 'log_fsh_slx_pars'][p1_logistic_idx] <- log(60)
@@ -69,8 +65,8 @@ upper[names(upper) == 'omega_0ij'] <- log(0.999)
   upper[names(upper) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(35)
   ## gamma rate
   upper[names(upper) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(2)
-  # 
-# }
+
+}
 # array(exp(upper[names(upper) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
 # array(exp(lower[names(lower) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
 # # array(lower[names(lower) == 'log_fsh_slx_pars'], dim = dim = c(7,2,2))

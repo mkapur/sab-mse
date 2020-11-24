@@ -11,7 +11,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shire_v2L_1_16Nov",'shire_v3L')[2]
-# compile(here("TMB",paste0(dllUSE,".cpp")))
+compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -20,7 +20,7 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.7;  df$Fmax = 1.5;
 df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =  30# df$tEnd-1
+df$yRun =   df$tEnd-1
 df$mat_age <- rep(0.05,df$nage)
 df$selShape_fish[3:5] <-  -1 ## slx = 1.0 for all BC fisheries
 ## the numbers are in order of df$parms
@@ -55,14 +55,16 @@ rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 #   facet_wrap(~variable, scales = 'free_y' )
 
 
-# head(round(rep1$catch_yf_pred,2)/round(df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
-# colSums(rep1$N_0ais) ## should not be super small anywhere
-# rep1$SSB_0i ## should not be small or negative
-# rep1$SSB_yi[1,] ## should match SSB0 without fishing
-# round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
-# round(rep1$R_yi[1:df$yRun,])
-# rowSums(rep1$N_yais_mid[1:df$yRun,,,1])
-# rowSums(rep1$N_yais_end[1:df$yRun,,,1])
+head(round(rep1$catch_yf_pred,2)/round(df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
+colSums(rep1$N_0ais) ## should not be super small anywhere
+colSums(rep1$Ninit_ais) ## should not be super small anywhere
+
+rep1$SSB_0i ## should not be small or negative
+rep1$SSB_yi[1,] ## should match SSB0 without fishing
+round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
+round(rep1$R_yi[1:df$yRun,])
+rowSums(rep1$N_yais_mid[1:df$yRun,,,1])
+rowSums(rep1$N_yais_end[1:df$yRun,,,1])
 
 # rep1$N_yais_beg[1:7,c(0:4,71),,1]
 # rep1$N_yais_mid[1:7,c(0:4,71),,1]
@@ -70,9 +72,9 @@ rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 
 bounds <- boundPars(obj, r0_lower = 0, boundSlx = FALSE)
 
-with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,2),
+with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
                    dimnames = list(df$fltnames_fish)))
-with(bounds, array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(7,2,2),
+with(bounds, array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
                    dimnames = list(df$fltnames_fish)))
 
 system.time(opt <-

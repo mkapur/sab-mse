@@ -399,7 +399,7 @@ Type objective_function<Type>::operator() ()
   for(int a=0;a<(nage);a++){
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
-        N_0ais(a,i,s) = NeqnR(i*nage+a);
+        N_0ais(a,i,s) = 0.5*NeqnR(i*nage+a);
       }
     }
   }

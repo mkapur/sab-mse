@@ -33,7 +33,6 @@ if(boundSlx == TRUE){
   p1_logistic_idx <- c(1:2,15:16) #c(1:4,19:22)
   p2_logistic_idx <- p1_logistic_idx+df$nfleets_fish
   p1_norm_idx <- c(3,4,6,7,17,18,20,21)  #c(5,6,8,9,23,24,26,27)
-  p1_norm_idx <- c(3,4,6,7,17,18,20,21)  #c(5,6,8,9,23,24,26,27)
   p2_norm_idx <- p1_norm_idx+df$nfleets_fish
   p1_gamma_idx <- c(5,19)#c(7,25)
   p2_gamma_idx <- p1_gamma_idx+df$nfleets_fish
@@ -60,7 +59,7 @@ if(boundSlx == TRUE){
   ## normal p1 (mean)
   upper[names(upper) == 'log_fsh_slx_pars'][p1_norm_idx] <- log(65)
   ## normal p2 (sd)
-  upper[names(upper) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(4)
+  upper[names(upper) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(15)
   ## gamma shape (k*theta equals mean)
   upper[names(upper) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(35)
   ## gamma rate

@@ -412,10 +412,10 @@ Type objective_function<Type>::operator() ()
         wtatlen_kab(phi_ik2(i),0)*
         pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),1))*
         mat_ak(a,phi_ik2(i));
-      for(int k=0;k<(nstocks);k++){
-        SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
-      } // end stocks
     } // end ages
+    for(int k=0;k<(nstocks);k++){
+      SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
+    } // end stocks
   } // end space
 
   // // The first year of the simulation is initialized with the following age distribution

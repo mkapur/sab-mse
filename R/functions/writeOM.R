@@ -190,6 +190,30 @@ writeOM <- function(dat,
          width = 10, height = 6, unit = 'in',
          dpi = 420)
   
+  
+  ## plot SRR----
+  dat$R_yk %>% 
+    data.frame() %>%
+    mutate('Yr' = 1:nrow(.))  %>%
+    reshape2::melt(.,id = c('Yr')) %>%
+    mutate(RYK = value) %>%
+    select(-value) %>%
+    bind_cols(.,
+              dat$SSB_yk %>% 
+                data.frame() %>%
+                mutate('Yr' = 1:nrow(.))  %>%
+                reshape2::melt(.,id = c('Yr')) %>%
+                mutate(SSByk = value) %>%
+                select(-value,-variable)) %>%
+    ggplot(., aes(x = SSByk, y = RYK, color = variable, group = Yr...1)) +
+    scale_color_manual(values = demPal) +
+    geom_point() +
+    labs(x = 'SSB',y = 'Recruits #', color = 'stock') +
+    # scale_y_continuous(limits = c(0,25000)) +
+    # scale_x_continuous(limits = c(0,400000)) +
+    ggsidekick::theme_sleek() +
+    facet_wrap(~ variable, scales = 'free')
+  
   ## catch pred by fleet ----
   catch_yf_predt <- data.frame(dat$catch_yf_pred)
   names(catch_yf_predt) <- df$fltnames_fish

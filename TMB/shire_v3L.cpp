@@ -407,7 +407,7 @@ Type objective_function<Type>::operator() ()
   // Equilibrium Unfished SSB, stock (outside of y loop)
   for(int i=0;i<(nspace);i++){
     for(int a=0;a<nage;a++){ // Loop over ages
-      SSB_0i(i) += mat_age(a)*
+      SSB_0i(i) += 
         N_0ais(a,i,0)*
         wtatlen_kab(phi_ik2(i),0)*
         pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),1))*

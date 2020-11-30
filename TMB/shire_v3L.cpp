@@ -779,13 +779,15 @@ Type objective_function<Type>::operator() ()
                 //   N_yais_mid(y,a,i,s)*
                 //   wtatlen_kab(phi_ik2(i),0)*
                 //   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                // instF_yafs(y,a,fish_flt,s) = fsh_slx_yafs(y,a,fish_flt,s)* Freal_yf(y, fish_flt);
-                // catch_yaf_pred(y,a,fish_flt) +=
-                //   phi_if_fish(fish_flt,i)*
-                //   instF_yafs(y,a,fish_flt,s) *
-                //   N_yais_mid(y,a,i,s)*
-                //   wtatlen_kab(phi_ik2(i),0)*
-                //   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                
+                // instantaneous (midyear) version
+                instF_yafs(y,a,fish_flt,s) = fsh_slx_yafs(y,a,fish_flt,s)* Freal_yf(y, fish_flt);
+                catch_yaf_pred(y,a,fish_flt) +=
+                  phi_if_fish(fish_flt,i)*
+                  instF_yafs(y,a,fish_flt,s) *
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
                 // catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
                 //   ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
@@ -795,13 +797,14 @@ Type objective_function<Type>::operator() ()
                 //     wtatlen_kab(phi_ik2(i),0)*
                 //     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
-                // catch_yaif_pred(y,a,i,fish_flt) += 
-                //     phi_if_fish(fish_flt, i)*
-                //     fsh_slx_yafs(y,a,fish_flt,s)*
-                //     F_area_yfi(y,fish_flt,i)*
-                //     N_yais_mid(y,a,i,s)*
-                //     wtatlen_kab(phi_ik2(i),0)*
-                //     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                // instantaneous (midyear) version
+                catch_yaif_pred(y,a,i,fish_flt) +=
+                    phi_if_fish(fish_flt, i)*
+                    fsh_slx_yafs(y,a,fish_flt,s)*
+                    F_area_yfi(y,fish_flt,i)*
+                    N_yais_mid(y,a,i,s)*
+                    wtatlen_kab(phi_ik2(i),0)*
+                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 // std::cout << y << "\t" << fish_flt <<"\t catch_yaf_pred \t" <<    catch_yaf_pred(y,a,fish_flt)<< "\n";
                 break;
               case 1: // length sel
@@ -817,16 +820,16 @@ Type objective_function<Type>::operator() ()
                 //   mla_yais(y,a,i,s)*
                 //   wtatlen_kab(phi_ik2(i),0)*
                 //   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-
-                // instF_yafs(y,a,fish_flt,s) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)* Freal_yf(y, fish_flt);
                 
-                // catch_yaf_pred(y,a,fish_flt) +=
-                //   phi_if_fish(fish_flt,i)*
-                //   instF_yafs(y,a,fish_flt,s)*
-                //   N_yais_mid(y,a,i,s)*
-                //   mla_yais(y,a,i,s)*
-                //   wtatlen_kab(phi_ik2(i),0)*
-                //   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                // instantaneous (midyear) version
+                instF_yafs(y,a,fish_flt,s) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)* Freal_yf(y, fish_flt);
+                catch_yaf_pred(y,a,fish_flt) +=
+                  phi_if_fish(fish_flt,i)*
+                  instF_yafs(y,a,fish_flt,s)*
+                  N_yais_mid(y,a,i,s)*
+                  mla_yais(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
                 // catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
                 //   ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
@@ -837,14 +840,15 @@ Type objective_function<Type>::operator() ()
                 //     wtatlen_kab(phi_ik2(i),0)*
                 //     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
-                // catch_yaif_pred(y,a,i,fish_flt) += 
-                //     phi_if_fish(fish_flt,i)*
-                //     F_area_yfi(y,fish_flt,i)*
-                //     fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
-                //     N_yais_mid(y,a,i,s)*
-                //     mla_yais(y,a,i,s)*
-                //     wtatlen_kab(phi_ik2(i),0)*
-                //     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                // instantaneous (midyear) version
+                catch_yaif_pred(y,a,i,fish_flt) +=
+                    phi_if_fish(fish_flt,i)*
+                    F_area_yfi(y,fish_flt,i)*
+                    fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+                    N_yais_mid(y,a,i,s)*
+                    mla_yais(y,a,i,s)*
+                    wtatlen_kab(phi_ik2(i),0)*
+                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
 
                 break;

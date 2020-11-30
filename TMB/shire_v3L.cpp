@@ -1274,8 +1274,8 @@ Type objective_function<Type>::operator() ()
   REPORT(catch_yaif_pred);  
   REPORT(catch_afk_TEMP);
   REPORT(Freal_yf);
-  REPORT(F1_yf)
-    REPORT(F2_yf);
+  REPORT(F1_yf);
+  REPORT(F2_yf);
   REPORT(Zreal_yai);
   REPORT(F_area_yfi);
   

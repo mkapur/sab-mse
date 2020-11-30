@@ -877,9 +877,9 @@ Type objective_function<Type>::operator() ()
       for(int s=0;s<nsex;s++){
         for(int a=0;a<(nage);a++){
           // sum over fleets targeting this area
-          // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-          //   instF_yafs_sum += phi_if_fish(i,fish_flt)*instF_yafs(y,a,fish_flt,s); // note instF is Sa
-          // }
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            instF_yafs_sum += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s); // note instF is Sa
+          }
           N_yais_end(y,a,i,s) = (1-instF_yafs_sum)*N_yais_mid(y,a,i,s)*exp(-(mat_age(a))/2);
           // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
         } // end ages

@@ -41,7 +41,7 @@ Type objective_function<Type>::operator() ()
   // // movement //
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
-  //
+
   // // growth //
   DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs
   DATA_ARRAY(wtatlen_kab); // aL^b values by stock
@@ -53,7 +53,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(LBins); // maximum length bin in CM
   DATA_IARRAY(mla_yais); // most likely length bin in age bin
   DATA_ARRAY(mat_ak); // maturity at age for stock
-  //
+
   // // Selectivity
   DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
   DATA_IVECTOR(selShape_fish);
@@ -102,6 +102,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>Z_a_TEMP(nage);
   vector<Type>Z_a_TEMP2(nage);
   array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();
+  array<Type> instF_yafs(tEnd,nage,nfleets_fish,nsex); // finalized instantaenous F
   array<Type> F1_yf(tEnd,nfleets_fish, niter+1); // intermediate f guess storage
   array<Type> F2_yf(tEnd,nfleets_fish, niter+1); // intermediate f guess storage
   array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
@@ -406,6 +407,7 @@ Type objective_function<Type>::operator() ()
 
   // Equilibrium Unfished SSB, stock (outside of y loop)
   for(int i=0;i<(nspace);i++){
+    SSB_0i(i) = 0;
     for(int a=0;a<nage;a++){ // Loop over ages
       SSB_0i(i) += 
         N_0ais(a,i,0)*
@@ -413,9 +415,10 @@ Type objective_function<Type>::operator() ()
         pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),1))*
         mat_ak(a,phi_ik2(i));
     } // end ages
-  } // end space    
-  for(int i=0;i<(nspace);i++){
-    for(int k=0;k<(nstocks);k++){
+  } // end space 
+  for(int k=0;k<(nstocks);k++){
+    SSB_0k(k) = 0;
+    for(int i=0;i<(nspace);i++){
       SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
     } // end stocks
   } // end space
@@ -765,47 +768,85 @@ Type objective_function<Type>::operator() ()
             for(int s=0;s<nsex;s++){
               switch(selType_fish(fish_flt)){
               case 0: // age sel
-                Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-                Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+              
+                // Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+                // Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+                // catch_yaf_pred(y,a,fish_flt) +=
+                //   Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
+                //   (1-exp(- Zreal_ya(y,a) ))*
+                //   phi_if_fish(fish_flt,i)*
+                //   fsh_slx_yafs(y,a,fish_flt,s)*
+                //   N_yais_mid(y,a,i,s)*
+                //   wtatlen_kab(phi_ik2(i),0)*
+                //   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                instF_yafs(y,a,fish_flt,s) = fsh_slx_yafs(y,a,fish_flt,s)* Freal_yf(y, fish_flt);
                 catch_yaf_pred(y,a,fish_flt) +=
-                  Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
-                  (1-exp(- Zreal_ya(y,a) ))*
                   phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  instF_yafs(y,a,fish_flt,s) *
                   N_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
-                catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
-                  ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+                // catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
+                //   ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+                //     phi_if_fish(fish_flt, i)*
+                //     fsh_slx_yafs(y,a,fish_flt,s)*
+                //     N_yais_mid(y,a,i,s)*
+                //     wtatlen_kab(phi_ik2(i),0)*
+                //     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                
+                catch_yaif_pred(y,a,i,fish_flt) += 
                     phi_if_fish(fish_flt, i)*
                     fsh_slx_yafs(y,a,fish_flt,s)*
+                    F_area_yfi(y,fish_flt,i)*
                     N_yais_mid(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 // std::cout << y << "\t" << fish_flt <<"\t catch_yaf_pred \t" <<    catch_yaf_pred(y,a,fish_flt)<< "\n";
                 break;
               case 1: // length sel
-                Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-                Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+                // Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
+                // Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+                
+                // catch_yaf_pred(y,a,fish_flt) +=
+                //   Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
+                //   (1-exp(- Zreal_ya(y,a) ))*
+                //   phi_if_fish(fish_flt,i)*
+                //   fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                //   N_yais_mid(y,a,i,s)*
+                //   mla_yais(y,a,i,s)*
+                //   wtatlen_kab(phi_ik2(i),0)*
+                //   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+
+                instF_yafs(y,a,fish_flt,s) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)* Freal_yf(y, fish_flt);
                 
                 catch_yaf_pred(y,a,fish_flt) +=
-                  Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
-                  (1-exp(- Zreal_ya(y,a) ))*
                   phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                  instF_yafs(y,a,fish_flt,s)*
                   N_yais_mid(y,a,i,s)*
                   mla_yais(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
-                  ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+                
+                // catch_yaif_pred(y,a,i,fish_flt) += (F_area_yfi(y,fish_flt,i)/
+                //   ( Zreal_yai(y,a,i)))*(1-exp(- Zreal_yai(y,a,i)  ))*
+                //     phi_if_fish(fish_flt,i)*
+                //     fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+                //     N_yais_mid(y,a,i,s)*
+                //     mla_yais(y,a,i,s)*
+                //     wtatlen_kab(phi_ik2(i),0)*
+                //     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                
+                catch_yaif_pred(y,a,i,fish_flt) += 
                     phi_if_fish(fish_flt,i)*
+                    F_area_yfi(y,fish_flt,i)*
                     fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
                     N_yais_mid(y,a,i,s)*
                     mla_yais(y,a,i,s)*
                     wtatlen_kab(phi_ik2(i),0)*
                     pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                
+
                 break;
               } // end selType_fish
             } // end sex
@@ -826,10 +867,15 @@ Type objective_function<Type>::operator() ()
     
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
+        instF_yafs_sum = Type(0);
         for(int a=0;a<(nage);a++){
-          N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(mat_age(a))/2);
+          // sum over fleets targeting this area
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            instF_yafs_sum += phi_if_fish(i,fish_flt)*instF_yafs(y,a,fish_flt,s)
+          }
+          N_yais_end(y,a,i,s) = (1-instF_yafs_sum)*N_yais_mid(y,a,i,s)*exp(-(mat_age(a))/2);
           // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
-        }
+        } // end ages
         for(int a=1;a<(nage-1);a++){
           N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
           //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";

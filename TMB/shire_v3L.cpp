@@ -529,7 +529,9 @@ Type objective_function<Type>::operator() ()
         for(int j=0;j<(nspace);j++){
           if(i != j){
             pLeave += X_ijas(i,j,nage-1,s);
-            NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s) + N_yais_beg(y,nage-2,j,s));
+            // NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s) + N_yais_beg(y,nage-2,j,s));
+            NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s));
+            
           } // end i != j
         } // end subareas j
         N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mat_age(nage-1)/2);

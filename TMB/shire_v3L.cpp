@@ -141,7 +141,7 @@ Type objective_function<Type>::operator() ()
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
   PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
-  PARAMETER_MATRIX(mort_k); // mortality at age in stock
+  PARAMETER_VECTOR(mort_k); // mortality in stock
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER_MATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)

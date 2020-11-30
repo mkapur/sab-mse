@@ -874,7 +874,6 @@ Type objective_function<Type>::operator() ()
     
     Type instF_yafs_sum;
     for(int i=0;i<(nspace);i++){
-      // instF_yafs_sum.setZero();
       instF_yafs_sum = 0;
       for(int s=0;s<nsex;s++){
         for(int a=0;a<(nage);a++){

@@ -11,7 +11,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shire_v2L_1_16Nov",'shire_v3L')[2]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -20,13 +20,15 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 # df$v1 = 0.7;  df$Fmax = 1.5;
 df$v1 = 0.65; df$Fmax = 1.15;
 df$niter = 20
-df$yRun =   df$tEnd-1
-df$mat_age <- rep(0.05,df$nage)
-df$selShape_fish[3:5] <-  -1 ## slx = 1.0 for all BC fisheries
+df$yRun =  df$tEnd-1
+# df$mat_age <- rep(1e-5,df$nage)
+# df$selShape_fish[3:5] <-  -1 ## slx = 1.0 for all BC fisheries
+# mappy <- buildMap(toFix = c(3,5,8),
+                  # fixFlt = c("BC_LL","BC_TRAP","BC_TWL")) 
 ## the numbers are in order of df$parms
 ## if you are fixing fish fleets, be sure that selShape is correct!
-mappy <- buildMap(toFix = c(3,5,8),
-                  fixFlt = c("BC_LL","BC_TRAP","BC_TWL")) 
+
+mappy <- buildMap(toFix = c(3,5)) 
 
 ## ~90s with full years
 system.time(obj <- MakeADFun(df,
@@ -34,6 +36,9 @@ system.time(obj <- MakeADFun(df,
                  dll =dllUSE,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
+
+
+
 
 array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), 
       dim = c(7,2,2))
@@ -43,10 +48,14 @@ rep1$fsh_slx_yafs[1,,2,1]; rep1$fsh_slx_yafs[1,,3,1];
 rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 # rep1$R_0i_vect
 # rep1$NeqnR
+likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
+likes
+neqnm <- matrix(rep1$NeqnR, ncol = 6, nrow = length(0:70)) %>%
+  data.frame(.) 
 
-# matrix(rep1$NeqnR, ncol = 6, nrow = length(0:70)) %>%
-#   data.frame(.) %>%
-#   mutate(age = 0:70) %>%
+
+# neqnm %>%  mutate(age = 0:70) %>%
 #   reshape2::melt(id = 'age') %>%
 #   ggplot(., aes(x = age, y = value, color = variable)) +
 #   ggsidekick::theme_sleek() +
@@ -56,13 +65,39 @@ rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 
 
 head(round(rep1$catch_yf_pred,2)/round(df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
-colSums(rep1$N_0ais) ## should not be super small anywhere
-colSums(rep1$Ninit_ais) ## should not be super small anywhere
+data.frame('NEQN_m' =colSums(neqnm) , 
+           "N_0_Fem" = colSums(rep1$N_0ais)[,1],
+           "N_0_Mal" = colSums(rep1$N_0ais)[,2],
+           "N_init_Fem" = colSums(rep1$Ninit_ais)[,1],
+           "N_init_Mal" = colSums(rep1$Ninit_ais)[,2],
+           "N_beg_y1_Fem" = colSums(rep1$N_yais_beg[1,,,1]),
+           "N_mid_y1_Fem" = colSums(rep1$N_yais_mid[1,,,1]),
+           "N_end_y1_Fem" = colSums(rep1$N_yais_end[1,,,1]))
 
-rep1$SSB_0i ## should not be small or negative
-rep1$SSB_yi[1,] ## should match SSB0 without fishing
+
+rep1$SSB_0i ## should not be small or negative nor disproportionate
+ans = rep(0,6)
+for(i in 1:6){
+  for(a in 1:71){
+    ans[i] = ans[i] + rep1$N_0ais[a,i,1]*
+      df$wtatlen_kab[df$phi_ik2[i]+1,1]*
+      df$unfished_ALK_F[a,1]^df$wtatlen_kab[df$phi_ik2[i]+1,2]*
+      df$mat_ak[a,df$phi_ik2[i]+1]
+  }
+}
+ans = rep(0,4)
+for(k in 1:4){
+  for(i in 1:6){
+    ans[k] = ans[k]+  df$phi_ki[k,i]*rep1$SSB_0i[i];
+  } 
+} 
+
+rep1$SSB_0k ## should not be small or negative
+
+ ## should match SSB0 without fishing
 round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
 round(rep1$R_yi[1:df$yRun,])
+rowSums(rep1$N_yais_beg[1:df$yRun,,,1])
 rowSums(rep1$N_yais_mid[1:df$yRun,,,1])
 rowSums(rep1$N_yais_end[1:df$yRun,,,1])
 
@@ -70,7 +105,7 @@ rowSums(rep1$N_yais_end[1:df$yRun,,,1])
 # rep1$N_yais_mid[1:7,c(0:4,71),,1]
 # rep1$N_yais_end[1:7,c(0:4,71),,1]
 
-bounds <- boundPars(obj, r0_lower = 0, boundSlx = FALSE)
+bounds <- boundPars(obj, r0_lower = 0, boundSlx = TRUE)
 
 with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
                    dimnames = list(df$fltnames_fish)))
@@ -80,15 +115,15 @@ with(bounds, array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(7,2,1,2
 system.time(opt <-
               TMBhelper::fit_tmb(
                 obj,
-                lower = bounds$lower,
-                upper = bounds$upper,
+                # lower = bounds$lower,
+                # upper = bounds$upper,
                 dll = dllUSE,
                 getHessian = FALSE,
                 control = list(eval.max = 1e6,
                                iter.max = 1e6,
                                rel.tol = 1e-4)
               )$opt) ## estimate; can repreat for stability)
-# for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
+  # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 array(round(exp(best[names(best)=='log_fsh_slx_pars'])), 
       dim = c(7,2,2))
@@ -103,12 +138,9 @@ round(dat$SSB_yi[1:df$yRun,]) ## should not be small or negative
 rowSums(dat$N_yais_beg[1:df$yRun,,,1])
 rowSums(dat$N_yais_end[1:df$yRun,,,1])
 
-steep <- exp(opt$par[names(opt$par) == 'logh_k'])
-names(steep) <- paste0("h","_R",1:4)
-logR_0 <- opt$par[names(opt$par) == 'logR_0k']
-names(logR_0) <- paste0("logR_0","_R",1:4)
-epstau <- opt$par[names(opt$par) == 'epsilon_tau']
-names(epstau) <- paste0("epstau_",inames)
+steep <- exp(opt$par[names(opt$par) == 'logh_k']); names(steep) <- paste0("h","_R",1:4)
+logR_0 <- opt$par[names(opt$par) == 'logR_0k'];names(logR_0) <- paste0("logR_0","_R",1:4)
+epstau <- opt$par[names(opt$par) == 'epsilon_tau']; names(epstau) <- paste0("epstau_",inames)
 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
@@ -116,7 +148,7 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
-        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_NoSlxBnds_SurvOff_BCSelexOff"))
+        runname = paste0("-",df$yRun,"y_",cppname,"_M=",df$mat_age[1],"_NoBnds_SurvOff"))
 
 
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

@@ -379,11 +379,8 @@ load_data_OM <- function(nspace = 6,
   }
   log_srv_slx_pars = log(log_srv_slx_pars)
   
-  mort_ak <- matrix(NA, nrow = nage, ncol = nstocks)
-  mort_ak[,1] <- rep(0.2, nrow(mort_ak))
-  mort_ak[,2] <- rep(0.15, nrow(mort_ak))
-  mort_ak[,3] <- rep(0.05, nrow(mort_ak))
-  mort_ak[,4] <- rep(0.1, nrow(mort_ak))
+  mort_k <- c(0.2,0.15,0.05,0.1)
+
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   ## note that these go from AK to WC
@@ -400,7 +397,7 @@ load_data_OM <- function(nspace = 6,
     log_fsh_slx_pars =log_fsh_slx_pars,
     log_srv_slx_pars = log_srv_slx_pars,
     epsilon_tau = rep(log(5),nspace),
-    mort_ak = mort_ak ## mortality
+    mort_k = mort_k ## mortality
   )
   
   ## initial matrix ----
@@ -481,7 +478,7 @@ load_data_OM <- function(nspace = 6,
     L1_yk = growthPars$L1_yk,
     wtatlen_kab = wtatlen_kab,
     mat_ak = mat_ak, ## maturity
-    # mort_ak = mort_ak, ## mortality
+    # mort_k = mort_k, ## mortality
     unfished_ALK_F = unfished_ALK_F,
     mla_yais = mla_yais-1,
     

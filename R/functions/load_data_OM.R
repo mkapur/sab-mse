@@ -379,11 +379,17 @@ load_data_OM <- function(nspace = 6,
   }
   log_srv_slx_pars = log(log_srv_slx_pars)
   
+  mort_ak <- matrix(NA, nrow = nage, ncol = nstocks)
+  mort_ak[,1] <- rep(0.2, nrow(mort_ak))
+  mort_ak[,2] <- rep(0.15, nrow(mort_ak))
+  mort_ak[,3] <- rep(0.05, nrow(mort_ak))
+  mort_ak[,4] <- rep(0.1, nrow(mort_ak))
   ## Parms List ----
   ## things that will get estimated later on, everthing else is FIXED
   ## note that these go from AK to WC
   parms <- list(
     logh_k = log(c(0.7,0.88,0.7,0.7)),
+
     logR_0k = rep(log(8*10e6),4), #c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
@@ -393,7 +399,8 @@ load_data_OM <- function(nspace = 6,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 
     log_fsh_slx_pars =log_fsh_slx_pars,
     log_srv_slx_pars = log_srv_slx_pars,
-    epsilon_tau = rep(log(5),nspace)
+    epsilon_tau = rep(log(5),nspace),
+    mort_ak = mort_ak ## mortality
   )
   
   ## initial matrix ----
@@ -474,7 +481,7 @@ load_data_OM <- function(nspace = 6,
     L1_yk = growthPars$L1_yk,
     wtatlen_kab = wtatlen_kab,
     mat_ak = mat_ak, ## maturity
-    mat_age = rep(0.2,nage), ## mortality
+    # mort_ak = mort_ak, ## mortality
     unfished_ALK_F = unfished_ALK_F,
     mla_yais = mla_yais-1,
     

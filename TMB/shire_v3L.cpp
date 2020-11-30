@@ -689,7 +689,7 @@ Type objective_function<Type>::operator() ()
             for(int s=0;s<nsex;s++){
               Z_a_TEMP2(a) += Adj(k)  *
                 fsh_slx_yafs(y, a, fish_flt, s) * F1_yf(y, fish_flt, k) +
-                mort_ak(a, phi_ik2(i));
+                0.125; // standin mean M
             } // end sex
           } // end age
           // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP2[0]  = " <<   Z_a_TEMP2(0)  << "\n";

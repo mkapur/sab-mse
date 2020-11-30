@@ -36,7 +36,7 @@ Type objective_function<Type>::operator() ()
   // DATA_MATRIX(phi_lcomp_fm); //  fleets to mgmt areas
   
   // // DEMOGRAPHY //
-  DATA_VECTOR(mort_ak); // natural mortality at age
+  // DATA_VECTOR(mort_ak); // natural mortality at age
   DATA_MATRIX(Neqn); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))
   // // movement //
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
@@ -141,6 +141,7 @@ Type objective_function<Type>::operator() ()
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   // // PARAMETERS //
   PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
+  PARAMETER_MATRIX(mort_ak); // mortality at age in stock
   PARAMETER_VECTOR(logh_k); // Steepness by stock
   PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
   PARAMETER_MATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)

@@ -36,7 +36,7 @@ Type objective_function<Type>::operator() ()
   // DATA_MATRIX(phi_lcomp_fm); //  fleets to mgmt areas
   
   // // DEMOGRAPHY //
-  DATA_VECTOR(mat_age); // natural mortality at age
+  DATA_VECTOR(mort_ak); // natural mortality at age
   DATA_MATRIX(Neqn); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))
   // // movement //
   DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
@@ -450,7 +450,7 @@ Type objective_function<Type>::operator() ()
         for(int s=0;s<nsex;s++){
           // Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
           N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
-          N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mat_age(0)/2);
+          N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mort_ak(0)/2);
           for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
             Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
             for(int j=0;j<(nspace);j++){
@@ -463,7 +463,7 @@ Type objective_function<Type>::operator() ()
             //   exp(-kappa_yk(0,phi_ik2(i),s)*a); ## raw von b
             // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
             //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
-            N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mat_age(a)/2);
+            N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mort_ak(a, phi_ik2(i))/2);
           } // end ages
           Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
           for(int j=0;j<(nspace);j++){
@@ -473,7 +473,7 @@ Type objective_function<Type>::operator() ()
             } // end i != j
           } // end subareas j
           N_yais_beg(y,nage-1,i,s) =  ((1-pLeave)*(Ninit_ais(nage-1,i,s)+Ninit_ais(nage-2,i,s)) + NCome)*
-            exp(-mat_age(nage-1)/2);
+            exp(-mort_ak(nage-1, phi_ik2(i))/2);
           // Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
           //   exp(-kappa_yk(0,phi_ik2(i),s)*(nage-1));
           // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
@@ -487,7 +487,7 @@ Type objective_function<Type>::operator() ()
     // N- and Nominal Length - at-age for the middle of this year 
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
-        N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mat_age(0)/2);
+        N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_ak(0)/2);
         // linear growth below A4 as in synthesis
         // if(L1_yk(y,phi_ik2(i),s) < 3){
         //   lenstep = L1_yk(y,phi_ik2(i),s);
@@ -512,7 +512,7 @@ Type objective_function<Type>::operator() ()
               NCome += X_ijas(j,i,a,s)*N_yais_beg(y,a,j,s);
             } // end i != j
           } // end subareas j
-          N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mat_age(a)/2);
+          N_yais_mid(y,a,i,s) = ((1-pLeave)*N_yais_beg(y,a,i,s) + NCome)*exp(-mort_ak(a, phi_ik2(i))/2);
         } // end ages for N
         // for(int a=5;a<(nage-1);a++){
         //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
@@ -534,7 +534,7 @@ Type objective_function<Type>::operator() ()
             
           } // end i != j
         } // end subareas j
-        N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mat_age(nage-1)/2);
+        N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mort_ak(nage-1, phi_ik2(i))/2);
         // plus group weighted average (we already have the numbers at age)
         // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
         //   (Length_yais_beg(y,nage-2,i,s)+
@@ -637,7 +637,7 @@ Type objective_function<Type>::operator() ()
                 switch(selType_fish(fish_flt)){
                 case 0: // age sel
                   for(int s=0;s<nsex;s++){
-                    Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+                    Z_a_TEMP[a] += fsh_slx_yafs(y, a, fish_flt, s)*F1_yf(y,fish_flt,k) + mort_ak(a, phi_ik2(i));
                   } // end sex for z a temp
                   catch_afk_TEMP(a,fish_flt,k) +=
                     F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
@@ -650,7 +650,7 @@ Type objective_function<Type>::operator() ()
                   break;
                 case 1: // length sel
                   for(int s=0;s<nsex;s++){
-                    Z_a_TEMP[a] += fsh_slx_yafs(y, mla_yais(y,a,i,s), fish_flt, s)*F1_yf(y,fish_flt,k) + mat_age(a);
+                    Z_a_TEMP[a] += fsh_slx_yafs(y, mla_yais(y,a,i,s), fish_flt, s)*F1_yf(y,fish_flt,k) + mort_ak(a, phi_ik2(i));
                   } // end sex for z a temp
                   catch_afk_TEMP(a,fish_flt,k) +=
                     F1_yf(y,fish_flt,k)/Z_a_TEMP[a]*
@@ -689,7 +689,7 @@ Type objective_function<Type>::operator() ()
             for(int s=0;s<nsex;s++){
               Z_a_TEMP2(a) += Adj(k)  *
                 fsh_slx_yafs(y, a, fish_flt, s) * F1_yf(y, fish_flt, k) +
-                mat_age(a);
+                mort_ak(a, phi_ik2(i));
             } // end sex
           } // end age
           // std::cout << y << "\t" << k << "\t" << "\t  Z_a_TEMP2[0]  = " <<   Z_a_TEMP2(0)  << "\n";
@@ -771,8 +771,8 @@ Type objective_function<Type>::operator() ()
               switch(selType_fish(fish_flt)){
               case 0: // age sel
               
-                // Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-                // Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+                // Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mort_ak(a, phi_ik2(i))/2;
+                // Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mort_ak(a, phi_ik2(i))/2;
                 // catch_yaf_pred(y,a,fish_flt) +=
                 //   Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
                 //   (1-exp(- Zreal_ya(y,a) ))*
@@ -810,8 +810,8 @@ Type objective_function<Type>::operator() ()
                 // std::cout << y << "\t" << fish_flt <<"\t catch_yaf_pred \t" <<    catch_yaf_pred(y,a,fish_flt)<< "\n";
                 break;
               case 1: // length sel
-                // Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mat_age(a)/2;
-                // Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mat_age(a)/2;
+                // Zreal_ya(y,a) += Freal_yf(y, fish_flt) + mort_ak(a, phi_ik2(i))/2;
+                // Zreal_yai(y,a,i) += F_area_yfi(y, fish_flt,i) + mort_ak(a, phi_ik2(i))/2;
                 
                 // catch_yaf_pred(y,a,fish_flt) +=
                 //   Freal_yf(y, fish_flt)/ Zreal_ya(y,a) *
@@ -881,7 +881,7 @@ Type objective_function<Type>::operator() ()
           for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
             instF_yafs_sum += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s); // note instF is Sa
           }
-          N_yais_end(y,a,i,s) = (1-instF_yafs_sum)*N_yais_mid(y,a,i,s)*exp(-(mat_age(a))/2);
+          N_yais_end(y,a,i,s) = (1-instF_yafs_sum)*N_yais_mid(y,a,i,s)*exp(-(mort_ak(a, phi_ik2(i)))/2);
           // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
         } // end ages
         for(int a=1;a<(nage-1);a++){

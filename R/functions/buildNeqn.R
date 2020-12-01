@@ -8,7 +8,7 @@ buildNeqn <- function(df){
     srt = ifelse(i == 1,1, 1+71*(i-1))
     #1+71*(i-1)
     stp = 71*(i)
-    cat(srt," ",stp,"\n")
+    # cat(srt," ",stp,"\n")
     diag(S[srt:stp,srt:stp]) <- exp(-df$parms$mort_k[df$phi_ik2[i]+1]/2)
     #   diag(S[,srt:stp]) <- exp(-df$parms$mort_k[df$phi_ik2[i]+1]/2)
    

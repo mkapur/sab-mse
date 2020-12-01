@@ -5,6 +5,7 @@
 #source('R/functions/getParms_noAge.R')
 source('R/functions/load_data_OM.R')
 source('R/functions/buildMap.R')
+source('R/functions/buildNeqn.R')
 source('R/functions/boundPars.R')
 # source('R/functions/run_agebased_model_true_Catch.R')
 source('R/functions/writeOM.R')

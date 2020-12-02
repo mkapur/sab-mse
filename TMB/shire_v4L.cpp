@@ -36,10 +36,8 @@ Type objective_function<Type>::operator() ()
   // DATA_MATRIX(phi_lcomp_fm); //  fleets to mgmt areas
   
   // // DEMOGRAPHY //
-  // DATA_VECTOR(mort_k); // natural mortality at age
   DATA_MATRIX(Neqn); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))
   // // movement //
-  DATA_ARRAY(omega_ais); // eigenvect of movement between subareas for ages > 0
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
   
   // // growth //
@@ -74,8 +72,9 @@ Type objective_function<Type>::operator() ()
   DATA_MATRIX(age_error_SD); // nmgmt_reg x 100 ages
   DATA_IMATRIX(acomp_flt_type); // 0 for commercial, 1 for survey
   DATA_ARRAY(acomp_yafs_obs);
+  
   // // STORAGE ///
-  // // Catches
+  // Catches
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   DATA_ARRAY(catch_yf_error); // right now just 0.1 for all fleets and all years
   array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish,2);  catch_yaf_pred.setZero();  // estimated catches at age by fleet
@@ -166,417 +165,417 @@ Type objective_function<Type>::operator() ()
   vector<Type> tildeR_initk(nstocks); // recdevs for init
   
   
-    
-    // Fishery selectivity
-    // Number of parameters in the chosen selectivity type:
-    int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
-    // Preliminary calcs to bring parameters out of log space
-    vector<int> a1_dim =log_fsh_slx_pars.dim;
-    array<Type> fsh_slx_pars(a1_dim);
-    fsh_slx_pars.setZero();
-    for (int fish_flt = 0; fish_flt < nfleets_fish; fish_flt++) {
-      for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
-        // for (int h = 0; h < fsh_blks.size(); h++) { // loop time blocks
-        for (int s = 0; s < nsex; s++) { // loop sexes
-          fsh_slx_pars(fish_flt,n,0,s) = exp(log_fsh_slx_pars(fish_flt,n,0,s));
-        } // end sex
-        // } // end blocks
-      } // end alpha, beta
-    } // end fish fleets
-    // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
-    // "does" the looping over year and age "while" within the y block, then
-    // iterates to the next block. Year is not in a for loop because it is
-    // iterated by the do statement.
-    
-    // The switch for slx_shape allows you to change parameterization SHAPE. This could
-    // easily be expanded to accomodate any selectivity type (the fsh_slx_pars
-    // allows for a flexible number of parameters and y blocks)
-    // slx pars setup is fleet x alpha, beta x time block (1 for now) x sex
-    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ // loop fleets
-      int i = 0;
-      for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
-        do{
-          switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
-          case 0: // enter age based sel
-            for (int s = 0; s < nsex; s++) { // loop sexes
-              // Selectivity switch (case 0 or 1 references the value of slx_type)
-              switch (selShape_fish(fish_flt)) { // age sel
-              case -1:
-                for (int a= 0; a < nage; a++){
-                  fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0);
-                } // end ages
-                break;
-              case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
-                for (int a= 0; a < nage; a++){
-                  fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-                    (a -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -
-                    fsh_slx_pars(fish_flt,0,0,s))));
-                } // end ages
-                break;
-              case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
-                //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-                for (int a= 0; a < nage; a++){
-                  fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-                    fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
-                } // end ages
-                break;
-              case 2: // Dome Normal with alpha (mean) and beta (sd)
-                for (int a= 0; a < nage; a++){
-                  fsh_slx_yafs(i,a,fish_flt,s)  = exp(-pow(0.5 * (a -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
-                } // end ages
-                break;
-              case 3: // Dome Gamma with alpha (mean) and beta (sd)
-                selG.setZero();
-                for (int a= 0; a < nage; a++) {
-                  selG(a)= pow(a, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-a/   fsh_slx_pars(fish_flt,1,0,s));
-                } // end ages
-                for (int a= 0;a < nage; a++) {
-                  fsh_slx_yafs(i,a,fish_flt,s) = selG(a) / max(selG);
-                } // end ages
-                break;
-              } // end switch selShape
-            } // end sex
-            break; // break age sel
-          case 1: // enter length based sel
-            for (int s = 0; s < nsex; s++) {
-              switch (selShape_fish(fish_flt)) {
-              case -1:
-                for (int l = 0; l < LBins; l++){
-                  fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0); 
-                } // end lengths
-                break;
-                // std::cout << fish_flt <<"\t" << fsh_slx_yafs(i,44,fish_flt,s) << std::endl;
-              case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
-                for (int l = 0; l < LBins; l++){
-                  fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-                    (l -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -  fsh_slx_pars(fish_flt,0,0,s))));
-                } // end lengths
-                break;
-              case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
-                //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-                for (int l = 0; l < LBins; l++){
-                  fsh_slx_yafs(i,l,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-                    fsh_slx_pars(fish_flt,1,0,s) * (l -  fsh_slx_pars(fish_flt,0,0,s)) ) );
-                } // end len
-                break;
-              case 2: // Dome Normal with alpha (mean) and beta (sd)
-                for (int l = 0; l < LBins; l++){
-                  fsh_slx_yafs(i,l,fish_flt,s)  = exp(-pow(0.5 * (l -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
-                } // end len
-                break;
-              case 3: // Dome Gamma with alpha (mean) and beta (sd)
-                selGL.setZero();
-                for (int l = 0; l < LBins; l++){
-                  selGL(l)= pow(l, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-l/   fsh_slx_pars(fish_flt,1,0,s));
-                } // end len
-                for (int l = 0; l < LBins; l++){
-                  fsh_slx_yafs(i,l,fish_flt,s) = selGL(l) / max(selGL);
-                } // end len
-                break;
-              } // end switch selShape
-            } // end sex for case 1
-            break;
-          } // end switch selType
-          i++;
-        } while (i <= fsh_blks(y,fish_flt)); // bracket i estimation for years designated by this block
-      } // end y blocks
-    } // end fish_flt
-    
-    vector<int> a2_dim = log_srv_slx_pars.dim;
-    array<Type> srv_slx_pars(a2_dim);
-    srv_slx_pars.setZero();
-    for (int srv_flt = 0; srv_flt < a2_dim(0); srv_flt++) {
-      for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
-        // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
-        for (int s = 0; s < nsex; s++) { // loop sexes
-          srv_slx_pars(srv_flt,n,0,s) = exp(log_srv_slx_pars(srv_flt,n,0,s));
-        } // end sex
-        // } // end blocks
-      } // end alpha, beta
-    } // end srv fleets
-    // doing five of these to account for five surveys w acomp
-    for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
-      int i = 0; // re-set i to 0
-      for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
-        do{
-          switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
-          case 0: // enter age based sel
-            for (int s = 0; s < nsex; s++) { // loop sexes
-              // Selectivity switch (case 0 or 1 references the value of slx_type)
-              switch (selShape_surv(srv_flt)) { // age sel
-              case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
-                for (int a= 0; a < nage; a++){
-                  srv_slx_yafs(i,a,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-                    (a -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -
-                    srv_slx_pars(srv_flt,0,0,s))));
-                } // end ages
-                break;
-              case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
-                //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-                for (int a= 0; a < nage; a++){
-                  srv_slx_yafs(i,a,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-                    srv_slx_pars(srv_flt,1,0,s) * (a -  srv_slx_pars(srv_flt,0,0,s)) ) );
-                } // end ages
-                break;
-              case 2: // Dome Normal with alpha (mean) and beta (sd)
-                for (int a= 0; a < nage; a++){
-                  srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,0,s))/pow(   srv_slx_pars(srv_flt,1,0,s),2)));
-                } // end ages
-                break;
-              case 3: // Dome Gamma with alpha (mean) and beta (sd)
-                selG.setZero();
-                for (int a= 0; a < nage; a++) {
-                  selG(a)= pow(a, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-a/   srv_slx_pars(srv_flt,1,0,s));
-                } // end ages
-                for (int a= 0;a < nage; a++) {
-                  srv_slx_yafs(i,a,srv_flt,s) = selG(a) / max(selG);
-                } // end ages
-                break;
-              } // end switch selShape
-            } // end sex
-            break; // break age sel
-          case 1: // enter length based sel
-            for (int s = 0; s < nsex; s++) {
-              switch (selShape_surv(srv_flt)) {
-              case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
-                for (int l = 0; l < LBins; l++){
-                  srv_slx_yafs(i,l,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-                    (l -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -  srv_slx_pars(srv_flt,0,0,s))));
-                } // end ages
-                break;
-              case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
-                //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-                for (int l = 0; l < LBins; l++){
-                  srv_slx_yafs(i,l,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-                    srv_slx_pars(srv_flt,1,0,s) * (l -  srv_slx_pars(srv_flt,0,0,s)) ) );
-                } // end len
-                break;
-              case 2: // Dome Normal with alpha (mean) and beta (sd)
-                for (int l = 0; l < LBins; l++){
-                  srv_slx_yafs(i,l,srv_flt,s)  = exp(-(0.5 * (l -    srv_slx_pars(srv_flt,0,0,s))/pow(   srv_slx_pars(srv_flt,1,0,s),2)));
-                } // end len
-                break;
-              case 3: // Dome Gamma with alpha (mean) and beta (sd)
-                selGL.setZero();
-                for (int l = 0; l < LBins; l++){
-                  selG(l)= pow(l, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-l/   srv_slx_pars(srv_flt,1,0,s));
-                } // end len
-                for (int l = 0; l < LBins; l++){
-                  srv_slx_yafs(i,l,srv_flt,s) = selG(l) / max(selG);
-                } // end len
-                break;
-              } // end switch selShape
-            } // end sex for case 1
-            break;
-          } // end switch selType
-          i++;
-        } while (i <= srv_blks(y,srv_flt)); // bracket i estimation for years designated by this block
-      } // end y blocks
-    } // end srv
-    
-    //  END DATA & PARS, BEGIN MODEL //
-    // recdevs placeholder
-    for(int k=0;k<(nstocks);k++){
-      for(int y=0;y<yRun;y++){
-        tildeR_yk(y,k) =0;
-      }
-      tildeR_initk(k) =0;
+  
+  // Fishery selectivity
+  // Number of parameters in the chosen selectivity type:
+  int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
+  // Preliminary calcs to bring parameters out of log space
+  vector<int> a1_dim =log_fsh_slx_pars.dim;
+  array<Type> fsh_slx_pars(a1_dim);
+  fsh_slx_pars.setZero();
+  for (int fish_flt = 0; fish_flt < nfleets_fish; fish_flt++) {
+    for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
+      // for (int h = 0; h < fsh_blks.size(); h++) { // loop time blocks
+      for (int s = 0; s < nsex; s++) { // loop sexes
+        fsh_slx_pars(fish_flt,n,0,s) = exp(log_fsh_slx_pars(fish_flt,n,0,s));
+      } // end sex
+      // } // end blocks
+    } // end alpha, beta
+  } // end fish fleets
+  // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
+  // "does" the looping over year and age "while" within the y block, then
+  // iterates to the next block. Year is not in a for loop because it is
+  // iterated by the do statement.
+  
+  // The switch for slx_shape allows you to change parameterization SHAPE. This could
+  // easily be expanded to accomodate any selectivity type (the fsh_slx_pars
+  // allows for a flexible number of parameters and y blocks)
+  // slx pars setup is fleet x alpha, beta x time block (1 for now) x sex
+  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ // loop fleets
+    int i = 0;
+    for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
+      do{
+        switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
+        case 0: // enter age based sel
+          for (int s = 0; s < nsex; s++) { // loop sexes
+            // Selectivity switch (case 0 or 1 references the value of slx_type)
+            switch (selShape_fish(fish_flt)) { // age sel
+            case -1:
+              for (int a= 0; a < nage; a++){
+                fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0);
+              } // end ages
+              break;
+            case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
+              for (int a= 0; a < nage; a++){
+                fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
+                  (a -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -
+                  fsh_slx_pars(fish_flt,0,0,s))));
+              } // end ages
+              break;
+            case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
+              //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+              for (int a= 0; a < nage; a++){
+                fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                  fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
+              } // end ages
+              break;
+            case 2: // Dome Normal with alpha (mean) and beta (sd)
+              for (int a= 0; a < nage; a++){
+                fsh_slx_yafs(i,a,fish_flt,s)  = exp(-pow(0.5 * (a -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
+              } // end ages
+              break;
+            case 3: // Dome Gamma with alpha (mean) and beta (sd)
+              selG.setZero();
+              for (int a= 0; a < nage; a++) {
+                selG(a)= pow(a, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-a/   fsh_slx_pars(fish_flt,1,0,s));
+              } // end ages
+              for (int a= 0;a < nage; a++) {
+                fsh_slx_yafs(i,a,fish_flt,s) = selG(a) / max(selG);
+              } // end ages
+              break;
+            } // end switch selShape
+          } // end sex
+          break; // break age sel
+        case 1: // enter length based sel
+          for (int s = 0; s < nsex; s++) {
+            switch (selShape_fish(fish_flt)) {
+            case -1:
+              for (int l = 0; l < LBins; l++){
+                fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0); 
+              } // end lengths
+              break;
+              // std::cout << fish_flt <<"\t" << fsh_slx_yafs(i,44,fish_flt,s) << std::endl;
+            case 0: // Logistic with a50 and a95, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = a95
+              for (int l = 0; l < LBins; l++){
+                fsh_slx_yafs(i,l,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
+                  (l -  fsh_slx_pars(fish_flt,0,0,s)) / ( fsh_slx_pars(fish_flt,1,0,s) -  fsh_slx_pars(fish_flt,0,0,s))));
+              } // end lengths
+              break;
+            case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
+              //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+              for (int l = 0; l < LBins; l++){
+                fsh_slx_yafs(i,l,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                  fsh_slx_pars(fish_flt,1,0,s) * (l -  fsh_slx_pars(fish_flt,0,0,s)) ) );
+              } // end len
+              break;
+            case 2: // Dome Normal with alpha (mean) and beta (sd)
+              for (int l = 0; l < LBins; l++){
+                fsh_slx_yafs(i,l,fish_flt,s)  = exp(-pow(0.5 * (l -    fsh_slx_pars(fish_flt,0,0,s))/ fsh_slx_pars(fish_flt,1,0,s),2));
+              } // end len
+              break;
+            case 3: // Dome Gamma with alpha (mean) and beta (sd)
+              selGL.setZero();
+              for (int l = 0; l < LBins; l++){
+                selGL(l)= pow(l, (   fsh_slx_pars(fish_flt,0,0,s) - 1)) * exp(-l/   fsh_slx_pars(fish_flt,1,0,s));
+              } // end len
+              for (int l = 0; l < LBins; l++){
+                fsh_slx_yafs(i,l,fish_flt,s) = selGL(l) / max(selGL);
+              } // end len
+              break;
+            } // end switch selShape
+          } // end sex for case 1
+          break;
+        } // end switch selType
+        i++;
+      } while (i <= fsh_blks(y,fish_flt)); // bracket i estimation for years designated by this block
+    } // end y blocks
+  } // end fish_flt
+  
+  vector<int> a2_dim = log_srv_slx_pars.dim;
+  array<Type> srv_slx_pars(a2_dim);
+  srv_slx_pars.setZero();
+  for (int srv_flt = 0; srv_flt < a2_dim(0); srv_flt++) {
+    for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
+      // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
+      for (int s = 0; s < nsex; s++) { // loop sexes
+        srv_slx_pars(srv_flt,n,0,s) = exp(log_srv_slx_pars(srv_flt,n,0,s));
+      } // end sex
+      // } // end blocks
+    } // end alpha, beta
+  } // end srv fleets
+  // doing five of these to account for five surveys w acomp
+  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
+    int i = 0; // re-set i to 0
+    for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
+      do{
+        switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
+        case 0: // enter age based sel
+          for (int s = 0; s < nsex; s++) { // loop sexes
+            // Selectivity switch (case 0 or 1 references the value of slx_type)
+            switch (selShape_surv(srv_flt)) { // age sel
+            case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
+              for (int a= 0; a < nage; a++){
+                srv_slx_yafs(i,a,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
+                  (a -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -
+                  srv_slx_pars(srv_flt,0,0,s))));
+              } // end ages
+              break;
+            case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
+              //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+              for (int a= 0; a < nage; a++){
+                srv_slx_yafs(i,a,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                  srv_slx_pars(srv_flt,1,0,s) * (a -  srv_slx_pars(srv_flt,0,0,s)) ) );
+              } // end ages
+              break;
+            case 2: // Dome Normal with alpha (mean) and beta (sd)
+              for (int a= 0; a < nage; a++){
+                srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,0,s))/pow(   srv_slx_pars(srv_flt,1,0,s),2)));
+              } // end ages
+              break;
+            case 3: // Dome Gamma with alpha (mean) and beta (sd)
+              selG.setZero();
+              for (int a= 0; a < nage; a++) {
+                selG(a)= pow(a, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-a/   srv_slx_pars(srv_flt,1,0,s));
+              } // end ages
+              for (int a= 0;a < nage; a++) {
+                srv_slx_yafs(i,a,srv_flt,s) = selG(a) / max(selG);
+              } // end ages
+              break;
+            } // end switch selShape
+          } // end sex
+          break; // break age sel
+        case 1: // enter length based sel
+          for (int s = 0; s < nsex; s++) {
+            switch (selShape_surv(srv_flt)) {
+            case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
+              for (int l = 0; l < LBins; l++){
+                srv_slx_yafs(i,l,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
+                  (l -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -  srv_slx_pars(srv_flt,0,0,s))));
+              } // end ages
+              break;
+            case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
+              //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+              for (int l = 0; l < LBins; l++){
+                srv_slx_yafs(i,l,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                  srv_slx_pars(srv_flt,1,0,s) * (l -  srv_slx_pars(srv_flt,0,0,s)) ) );
+              } // end len
+              break;
+            case 2: // Dome Normal with alpha (mean) and beta (sd)
+              for (int l = 0; l < LBins; l++){
+                srv_slx_yafs(i,l,srv_flt,s)  = exp(-(0.5 * (l -    srv_slx_pars(srv_flt,0,0,s))/pow(   srv_slx_pars(srv_flt,1,0,s),2)));
+              } // end len
+              break;
+            case 3: // Dome Gamma with alpha (mean) and beta (sd)
+              selGL.setZero();
+              for (int l = 0; l < LBins; l++){
+                selG(l)= pow(l, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-l/   srv_slx_pars(srv_flt,1,0,s));
+              } // end len
+              for (int l = 0; l < LBins; l++){
+                srv_slx_yafs(i,l,srv_flt,s) = selG(l) / max(selG);
+              } // end len
+              break;
+            } // end switch selShape
+          } // end sex for case 1
+          break;
+        } // end switch selType
+        i++;
+      } while (i <= srv_blks(y,srv_flt)); // bracket i estimation for years designated by this block
+    } // end y blocks
+  } // end srv
+  
+  //  END DATA & PARS, BEGIN MODEL //
+  // recdevs placeholder
+  for(int k=0;k<(nstocks);k++){
+    for(int y=0;y<yRun;y++){
+      tildeR_yk(y,k) =0;
     }
-    
-    
-    // Equilibrium Unfished numbers-at-age, subarea (outside of y loop)
-    // identical to Ninit except no recdevs
-    // https://groups.google.com/u/2/g/tmb-users/c/y2hVhNQKVqo/m/WHw4NTSzBAAJ
-    // matrix<Type> LN = lltCovMAT.matrixL(); // matrixL is a function, lltcovmat is an object
-    // matrix<Type> LinvN = LN.inverse(); // now LN is an object and we do inverse on it
-    
-    N_0ais.setZero();
-    // calc true Neqn given recruitment (matrix multiplication)
-    // new dims are subarea x age, note indexing [use block to subset?]
-    // first fill in R0K values to be compatible with Neqn structure
-    vector<Type>R_0i_vect(Neqn.cols()); // 0 is rows 1 is cols
-    R_0i_vect.setZero();
+    tildeR_initk(k) =0;
+  }
+  
+  
+  // Equilibrium Unfished numbers-at-age, subarea (outside of y loop)
+  // identical to Ninit except no recdevs
+  // https://groups.google.com/u/2/g/tmb-users/c/y2hVhNQKVqo/m/WHw4NTSzBAAJ
+  // matrix<Type> LN = lltCovMAT.matrixL(); // matrixL is a function, lltcovmat is an object
+  // matrix<Type> LinvN = LN.inverse(); // now LN is an object and we do inverse on it
+  
+  N_0ais.setZero();
+  // calc true Neqn given recruitment (matrix multiplication)
+  // new dims are subarea x age, note indexing [use block to subset?]
+  // first fill in R0K values to be compatible with Neqn structure
+  vector<Type>R_0i_vect(Neqn.cols()); // 0 is rows 1 is cols
+  R_0i_vect.setZero();
+  for(int i=0;i<(nspace);i++){
+    R_0i_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i); // consider tau epsilon here
+    // std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
+  }
+  vector<Type> NeqnR = Neqn*R_0i_vect;
+  for(int a=0;a<(nage);a++){
     for(int i=0;i<(nspace);i++){
-      R_0i_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i); // consider tau epsilon here
-      // std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
+      for(int s=0;s<nsex;s++){
+        N_0ais(a,i,s) = 0.5*NeqnR(i*nage+a);
+      }
     }
-    vector<Type> NeqnR = Neqn*R_0i_vect;
-    for(int a=0;a<(nage);a++){
+  }
+  
+  // Equilibrium Unfished SSB, stock (outside of y loop)
+  for(int i=0;i<(nspace);i++){
+    SSB_0i(i) = 0;
+    for(int a=0;a<nage;a++){ // Loop over ages
+      SSB_0i(i) += 
+        N_0ais(a,i,0)*
+        wtatlen_kab(phi_ik2(i),0)*
+        pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),1))*
+        mort_k(phi_ik2(i));
+    } // end ages
+  } // end space 
+  for(int k=0;k<(nstocks);k++){
+    SSB_0k(k) = 0;
+    for(int i=0;i<(nspace);i++){
+      SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
+    } // end stocks
+  } // end space
+  
+  // // The first year of the simulation is initialized with the following age distribution
+  Ninit_ais.setZero();
+  for(int s=0;s<nsex;s++){
+    for(int i=0;i<(nspace);i++){
+      for(int a=0;a<(nage);a++){
+        Ninit_ais(a,i,s) =   N_0ais(a,i,s)*exp(-0.5*logSDR*logSDR+tildeR_initk(phi_ik2(i)));
+      } // end ages
+    } // end space
+  } // end sex
+  // std::cout << "Done" << std::endl;
+  
+  // std::cout << " Here" << "\n";
+  for(int y=0;y<yRun;y++){ // Start y loop
+    // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
+    // note we are assuming unfished here as the exponent is M only
+    // note that in tmb, plus group is in slot nage-1
+    // so the incoming plus-groupers will be in slots nage-1 or nage-2 in prior year
+    // std::cout << y << " start year loop" << "\n";
+    if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
-          N_0ais(a,i,s) = 0.5*NeqnR(i*nage+a);
-        }
-      }
-    }
-    
-    // Equilibrium Unfished SSB, stock (outside of y loop)
-    for(int i=0;i<(nspace);i++){
-      SSB_0i(i) = 0;
-      for(int a=0;a<nage;a++){ // Loop over ages
-        SSB_0i(i) += 
-          N_0ais(a,i,0)*
-          wtatlen_kab(phi_ik2(i),0)*
-          pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),1))*
-          mort_k(phi_ik2(i));
-      } // end ages
-    } // end space 
-    for(int k=0;k<(nstocks);k++){
-      SSB_0k(k) = 0;
-      for(int i=0;i<(nspace);i++){
-        SSB_0k(k) += phi_ki(k,i)*SSB_0i(i);
-      } // end stocks
-    } // end space
-    
-    // // The first year of the simulation is initialized with the following age distribution
-    Ninit_ais.setZero();
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=0;a<(nage);a++){
-          Ninit_ais(a,i,s) =   N_0ais(a,i,s)*exp(-0.5*logSDR*logSDR+tildeR_initk(phi_ik2(i)));
-        } // end ages
-      } // end space
-    } // end sex
-    // std::cout << "Done" << std::endl;
-    
-    // std::cout << " Here" << "\n";
-    for(int y=0;y<yRun;y++){ // Start y loop
-      // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
-      // note we are assuming unfished here as the exponent is M only
-      // note that in tmb, plus group is in slot nage-1
-      // so the incoming plus-groupers will be in slots nage-1 or nage-2 in prior year
-      // std::cout << y << " start year loop" << "\n";
-      if (y == 0){
-        for(int i=0;i<(nspace);i++){
-          for(int s=0;s<nsex;s++){
-            // Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
-            N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
-            N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
-            for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
-              Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
-              for(int j=0;j<(nspace);j++){
-                if(i != j){
-                  pLeave += X_ijas(i,j,a,s); // will do 1-this for proportion which stay
-                  NCome += X_ijas(j,i,a,s)*Ninit_ais(a,j,s); // actual numbers incoming
-                } // end i != j
-              } // end subareas j
-              // Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-              //   exp(-kappa_yk(0,phi_ik2(i),s)*a); ## raw von b
-              // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-              //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
-              N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mort_k(phi_ik2(i))/2);
-            } // end ages
-            Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
+          // Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
+          N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
+          N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
+          for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later
+            Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
             for(int j=0;j<(nspace);j++){
               if(i != j){
-                pLeave += X_ijas(i,j,nage-1,s);
-                NCome += X_ijas(j,i,nage-1,s)*(Ninit_ais(nage-1,j,s) + Ninit_ais(nage-2,j,s)) ;
+                pLeave += X_ijas(i,j,a,s); // will do 1-this for proportion which stay
+                NCome += X_ijas(j,i,a,s)*Ninit_ais(a,j,s); // actual numbers incoming
               } // end i != j
             } // end subareas j
-            N_yais_beg(y,nage-1,i,s) =  ((1-pLeave)*(Ninit_ais(nage-1,i,s)+Ninit_ais(nage-2,i,s)) + NCome)*
-              exp(-mort_k(phi_ik2(i))/2);
-            // Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-            //   exp(-kappa_yk(0,phi_ik2(i),s)*(nage-1));
-            // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-            //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
-          } // end sexes
-        } // end subareas i
-      } // end y == 0
-      // std::cout << y << " did year zero" << "\n";
-      
-      // F denom at first half of year
-      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-        if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-          // std::cout << fish_flt << " F TUNING" << "\n";
-          // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
-          Type denom = 0; // exploitable biomass
-          for(int s=0;s<nsex;s++){
-            for(int i=0;i<(nspace);i++){
-              for(int a=0;a<(nage);a++){
-                switch(selType_fish(fish_flt)){
-                case 0: // age sel
-                  denom += phi_if_fish(fish_flt,i)*
-                    fsh_slx_yafs(y,a,fish_flt,s)*
-                    N_yais_beg(y,a,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
-                  // catch_yf_obs(y,fish_flt+1);
-                  break;
-                case 1: // length sel
-                  denom += phi_if_fish(fish_flt,i)*
-                    fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
-                    N_yais_beg(y,a,i,s)*
-                    mla_yais(y,a,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                  break;
-                } // end selType_fish
-              } // end age
-              // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
-            } // end space
-          } // end sex
-          instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
-        } // end -1 NA trap
-      } // end nfleets_fish
-      
-      // predicted catches first half of year
-      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-        if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-          for(int a=0;a<(nage);a++){
-            for(int i=0;i<(nspace);i++){
-              for(int s=0;s<nsex;s++){
-                switch(selType_fish(fish_flt)){
-                case 0: // age sel
-                  // instantaneous F x Slx for each fleet
-                  instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
-                    instF_yf(y, fish_flt,0);
-                  
-                  catch_yaf_pred(y,a,fish_flt,0) +=
-                    phi_if_fish(fish_flt,i)*
-                    instF_yafs(y,a,fish_flt,s,0) *
-                    N_yais_mid(y,a,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                  break;
-                case 1: // length sel
-                  // instantaneous version
-                  instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-                    instF_yf(y, fish_flt,0);
-                  
-                  catch_yaf_pred(y,a,fish_flt,1) +=
-                    phi_if_fish(fish_flt,i)*
-                    instF_yafs(y,a,fish_flt,s,0)*
-                    N_yais_mid(y,a,i,s)*
-                    mla_yais(y,a,i,s)*
-                    wtatlen_kab(phi_ik2(i),0)*
-                    pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                  break;
-                } // end selType_fish
-              } // end sex
-            } // end space
-            catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,1);
-          } // end age
-        } // end -1 NA trap
-      } // end nfleets_fish
-      
-      // sum instF_yafs over fleets to get F in i and build N_yais_mid
-      for(int i=0;i<(nspace);i++){
+            // Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            //   exp(-kappa_yk(0,phi_ik2(i),s)*a); ## raw von b
+            // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
+            N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mort_k(phi_ik2(i))/2);
+          } // end ages
+          Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              pLeave += X_ijas(i,j,nage-1,s);
+              NCome += X_ijas(j,i,nage-1,s)*(Ninit_ais(nage-1,j,s) + Ninit_ais(nage-2,j,s)) ;
+            } // end i != j
+          } // end subareas j
+          N_yais_beg(y,nage-1,i,s) =  ((1-pLeave)*(Ninit_ais(nage-1,i,s)+Ninit_ais(nage-2,i,s)) + NCome)*
+            exp(-mort_k(phi_ik2(i))/2);
+          // Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+          //   exp(-kappa_yk(0,phi_ik2(i),s)*(nage-1));
+          // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+          //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
+        } // end sexes
+      } // end subareas i
+    } // end y == 0
+    // std::cout << y << " did year zero" << "\n";
+    
+    // F denom at first half of year
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+        // std::cout << fish_flt << " F TUNING" << "\n";
+        // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
+        Type denom = 0; // exploitable biomass
         for(int s=0;s<nsex;s++){
-          for(int a=1;a<(nage);a++){
-            for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-              instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0); 
-            } // end fish fleets
-          } // end sex
-        } // end ages
-      } // end subarea i
-      
-      
-      // Type lenstep = 0.0; Type lenslope = 0.0;
-      // N- and Nominal Length - at-age for the middle of this year 
-      
-      
-      for(int i=0;i<(nspace);i++){
-        for(int s=0;s<nsex;s++){
-          N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
+          for(int i=0;i<(nspace);i++){
+            for(int a=0;a<(nage);a++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_beg(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
+                // catch_yf_obs(y,fish_flt+1);
+                break;
+              case 1: // length sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+                  N_yais_beg(y,a,i,s)*
+                  mla_yais(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              } // end selType_fish
+            } // end age
+            // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
+          } // end space
+        } // end sex
+        instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
+      } // end -1 NA trap
+    } // end nfleets_fish
+    
+    // predicted catches first half of year
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+        for(int a=0;a<(nage);a++){
+          for(int i=0;i<(nspace);i++){
+            for(int s=0;s<nsex;s++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                // instantaneous F x Slx for each fleet
+                instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
+                  instF_yf(y, fish_flt,0);
+                
+                catch_yaf_pred(y,a,fish_flt,0) +=
+                  phi_if_fish(fish_flt,i)*
+                  instF_yafs(y,a,fish_flt,s,0) *
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              case 1: // length sel
+                // instantaneous version
+                instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                  instF_yf(y, fish_flt,0);
+                
+                catch_yaf_pred(y,a,fish_flt,1) +=
+                  phi_if_fish(fish_flt,i)*
+                  instF_yafs(y,a,fish_flt,s,0)*
+                  N_yais_mid(y,a,i,s)*
+                  mla_yais(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              } // end selType_fish
+            } // end sex
+          } // end space
+          catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,1);
+        } // end age
+      } // end -1 NA trap
+    } // end nfleets_fish
+    
+    // sum instF_yafs over fleets to get F in i and build N_yais_mid
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        for(int a=1;a<(nage);a++){
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0); 
+          } // end fish fleets
+        } // end sex
+      } // end ages
+    } // end subarea i
+    
+    
+    // Type lenstep = 0.0; Type lenslope = 0.0;
+    // N- and Nominal Length - at-age for the middle of this year 
+    
+    
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
         // linear growth below A4 as in synthesis
         // if(L1_yk(y,phi_ik2(i),s) < 3){
         //   lenstep = L1_yk(y,phi_ik2(i),s);
@@ -604,7 +603,11 @@ Type objective_function<Type>::operator() ()
                 exp(-mort_k(phi_ik2(j))/2);
             } // end i != j
           } // end subareas j
-          N_yais_mid(y,a,i,s) = ((1-pLeave)*(1-instF_yais(y,a,i,s,0))*N_yais_beg(y,a,i,s) + NCome);
+          N_yais_mid(y,a,i,s) = ((1-pLeave)*
+            (1-instF_yais(y,a,i,s,0))*
+            N_yais_beg(y,a,i,s)* 
+            exp(-mort_k(phi_ik2(i))/2) +
+            NCome);
         } // end ages for N
         // for(int a=5;a<(nage-1);a++){
         //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
@@ -616,7 +619,7 @@ Type objective_function<Type>::operator() ()
         //     (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
         //     (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
         // } // end nonlinear growth ages
-  
+        
         // plus group weighted average (we already have the numbers at age)
         // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
         //   (Length_yais_beg(y,nage-2,i,s)+
@@ -659,79 +662,79 @@ Type objective_function<Type>::operator() ()
     
     
     // F denom at second half of year
-    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        // std::cout << fish_flt << " F TUNING" << "\n";
-        // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
-        Type denom = 0; // exploitable biomass
-        for(int s=0;s<nsex;s++){
-          for(int i=0;i<(nspace);i++){
-            for(int a=0;a<(nage);a++){
-              switch(selType_fish(fish_flt)){
-              case 0: // age sel
-                denom += phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y,a,fish_flt,s)*
-                  N_yais_mid(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
-                // catch_yf_obs(y,fish_flt+1);
-                break;
-              case 1: // length sel
-                denom += phi_if_fish(fish_flt,i)*
-                  fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
-                  N_yais_mid(y,a,i,s)*
-                  mla_yais(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                break;
-              } // end selType_fish
-            } // end age
-            // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
-          } // end space
-        } // end sex
-        instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
-      } // end -1 NA trap
-    } // end nfleets_fish
+    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    //   if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+    //     // std::cout << fish_flt << " F TUNING" << "\n";
+    //     // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
+    //     Type denom = 0; // exploitable biomass
+    //     for(int s=0;s<nsex;s++){
+    //       for(int i=0;i<(nspace);i++){
+    //         for(int a=0;a<(nage);a++){
+    //           switch(selType_fish(fish_flt)){
+    //           case 0: // age sel
+    //             denom += phi_if_fish(fish_flt,i)*
+    //               fsh_slx_yafs(y,a,fish_flt,s)*
+    //               N_yais_mid(y,a,i,s)*
+    //               wtatlen_kab(phi_ik2(i),0)*
+    //               pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
+    //             // catch_yf_obs(y,fish_flt+1);
+    //             break;
+    //           case 1: // length sel
+    //             denom += phi_if_fish(fish_flt,i)*
+    //               fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+    //               N_yais_mid(y,a,i,s)*
+    //               mla_yais(y,a,i,s)*
+    //               wtatlen_kab(phi_ik2(i),0)*
+    //               pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    //             break;
+    //           } // end selType_fish
+    //         } // end age
+    //         // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
+    //       } // end space
+    //     } // end sex
+    //     instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
+    //   } // end -1 NA trap
+    // } // end nfleets_fish
     
     // predicted catches second half of year
-    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        for(int a=0;a<(nage);a++){
-          for(int i=0;i<(nspace);i++){
-            for(int s=0;s<nsex;s++){
-              switch(selType_fish(fish_flt)){
-              case 0: // age sel
-                // instantaneous (midyear) version
-                instF_yafs(y,a,fish_flt,s,1) = fsh_slx_yafs(y,a,fish_flt,s)*
-                  instF_yf(y, fish_flt,1);
-                
-                catch_yaf_pred(y,a,fish_flt,1) +=
-                  phi_if_fish(fish_flt,i)*
-                  instF_yafs(y,a,fish_flt,s,1) *
-                  N_yais_mid(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                break;
-              case 1: // length sel
-                // instantaneous (midyear) version
-                instF_yafs(y,a,fish_flt,s,1) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-                  instF_yf(y, fish_flt,1);
-                
-                catch_yaf_pred(y,a,fish_flt,1) +=
-                  phi_if_fish(fish_flt,i)*
-                  instF_yafs(y,a,fish_flt,s,1)*
-                  N_yais_mid(y,a,i,s)*
-                  mla_yais(y,a,i,s)*
-                  wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                break;
-              } // end selType_fish
-            } // end sex
-          } // end space
-          catch_yf_pred(y,fish_flt,1) += catch_yaf_pred(y,a,fish_flt,1);
-        } // end age
-      } // end -1 NA trap
-    } // end nfleets_fish
+    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    //   if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+    //     for(int a=0;a<(nage);a++){
+    //       for(int i=0;i<(nspace);i++){
+    //         for(int s=0;s<nsex;s++){
+    //           switch(selType_fish(fish_flt)){
+    //           case 0: // age sel
+    //             // instantaneous (midyear) version
+    //             instF_yafs(y,a,fish_flt,s,1) = fsh_slx_yafs(y,a,fish_flt,s)*
+    //               instF_yf(y, fish_flt,1);
+    //             
+    //             catch_yaf_pred(y,a,fish_flt,1) +=
+    //               phi_if_fish(fish_flt,i)*
+    //               instF_yafs(y,a,fish_flt,s,1) *
+    //               N_yais_mid(y,a,i,s)*
+    //               wtatlen_kab(phi_ik2(i),0)*
+    //               pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    //             break;
+    //           case 1: // length sel
+    //             // instantaneous (midyear) version
+    //             instF_yafs(y,a,fish_flt,s,1) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+    //               instF_yf(y, fish_flt,1);
+    //             
+    //             catch_yaf_pred(y,a,fish_flt,1) +=
+    //               phi_if_fish(fish_flt,i)*
+    //               instF_yafs(y,a,fish_flt,s,1)*
+    //               N_yais_mid(y,a,i,s)*
+    //               mla_yais(y,a,i,s)*
+    //               wtatlen_kab(phi_ik2(i),0)*
+    //               pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+    //             break;
+    //           } // end selType_fish
+    //         } // end sex
+    //       } // end space
+    //       catch_yf_pred(y,fish_flt,1) += catch_yaf_pred(y,a,fish_flt,1);
+    //     } // end age
+    //   } // end -1 NA trap
+    // } // end nfleets_fish
     // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
     
     // N_yais_end ----
@@ -740,24 +743,24 @@ Type objective_function<Type>::operator() ()
     //of the mortality and the tuned F extraction.
     
     // apply second half of F rates to get NAA_end
-    // no need to do summation separately because no more movement
-    for(int i=0;i<(nspace);i++){
-      for(int s=0;s<nsex;s++){
-        for(int a=0;a<(nage);a++){
-          // sum over fleets targeting this area
-          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-            instF_yais(y,a,i,s,1) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s); // note instF is Sa
-          }
-          N_yais_end(y,a,i,s) = (1- instF_yais(y,a,i,s,1))*N_yais_mid(y,a,i,s)*exp(-(mort_k(phi_ik2(i)))/2);
-        } // end ages
-        for(int a=1;a<(nage-1);a++){
-          N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
-          //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
-        }
-        N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
-        // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
-      } // end subareas i
-    } // end sexes
+    // // no need to do summation separately because no more movement
+    // for(int i=0;i<(nspace);i++){
+    //   for(int s=0;s<nsex;s++){
+    //     for(int a=0;a<(nage);a++){
+    //       // sum over fleets targeting this area
+    //       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+    //         instF_yais(y,a,i,s,1) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s); // note instF is Sa
+    //       }
+    //       N_yais_end(y,a,i,s) = (1- instF_yais(y,a,i,s,1))*N_yais_mid(y,a,i,s)*exp(-(mort_k(phi_ik2(i)))/2);
+    //     } // end ages
+    //     for(int a=1;a<(nage-1);a++){
+    //       N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+    //       //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
+    //     }
+    //     N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+    //     // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
+    //   } // end subareas i
+    // } // end sexes
     
     
     
@@ -971,205 +974,205 @@ Type objective_function<Type>::operator() ()
     //     } // end space
     //   } // end age
     // } // end acomp fleets
-} // END YEARS; END MODEL RUN
-
-
-// // LIKELIHOODS //
-// Likelihood: survey biomass
-Type ans_survey=0.0;
-for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-  for(int y=0;y<yRun;y++){ // Survey Surveyobs
-    if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
-      std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
-      std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
-      ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
-                          log(surv_yf_obs(y,surv_flt)),
-                          surv_yf_err(y,surv_flt), TRUE);
-      std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
-    } // end flag for neg 1
-  } // end y
-} // end surv_flt
-
-// Likelihood: catches
-Type ans_catch = 0.0;
-for(int y=0;y<yRun;y++){
-  for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-      // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
-      // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
-      ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)=1e-9),
-                         log(catch_yf_obs(y,fish_flt+1)+1e-9),
-                         catch_yf_error(y,fish_flt), TRUE);
-      std::cout << y << "\t" << fish_flt << "\t ans_catch = " <<  ans_catch  << "\n";
-    } // end flag for neg 1
-  } // end y
-} // end fish_flt
-
-// Likelihood: age comps in surveys & catches
-// Type ans_survcomp = 0.0;
-// Type ans_catchcomp = 0.0;
-// vector<Type>sum1(tEnd); // survey comp likelihood
-// vector<Type>sum2(tEnd); // fishery comp likelihood
-// sum1.setZero();
-// sum2.setZero();
-// for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-//   for(int y=1;y<yRun;y++){ // Loop over available years      
-//     for(int s=0;s<nsex;s++){
-//       for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
-//         if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if  there was a measurement that year
-//           // sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
-//           // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
-//           if(acomp_flt_type(acomp_flt) == 0){
-//             sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-//               acomp_yafs_obs(y,a,acomp_flt,s) +
-//               pi_acomp(acomp_flt)*
-//               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-//               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
-//               - lgamma(pi_acomp(acomp_flt)*
-//               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-//               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
-//             
-//             ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-//               sum1(y)+
-//               lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-//               lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-//               pi_acomp(acomp_flt)*
-//               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-//               sum2(y);
-//             // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
-//             
-//           } else{
-//             sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-//               acomp_yafs_obs(y,a,acomp_flt,s) +
-//               pi_acomp(acomp_flt)*
-//               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-//               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
-//               lgamma(pi_acomp(acomp_flt)*
-//               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-//               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
-//             
-//             ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-//               sum1(y)+
-//               lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-//               lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-//               pi_acomp(acomp_flt)*
-//               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-//               sum2(y);
-//             // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-//           } // end switch for comm or surv type
-//         } // end acomp flag
-//       } // end age
-//     } // end sex
-//     // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
-//     // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-//   } // end y
-// } // end acomp fleets
-
-// Likelihood: SD Recruitment (hyperprior)
-Type ans_SDR = 0.0;
-for(int k=0;k<(nstocks);k++){
-  for(int y=0;y<yRun;y++){ // Start y loop
-    ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
+  } // END YEARS; END MODEL RUN
+  
+  
+  // // LIKELIHOODS //
+  // Likelihood: survey biomass
+  Type ans_survey=0.0;
+  for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
+    for(int y=0;y<yRun;y++){ // Survey Surveyobs
+      if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
+        std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
+        std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
+        ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
+                            log(surv_yf_obs(y,surv_flt)),
+                            surv_yf_err(y,surv_flt), TRUE);
+        std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
+      } // end flag for neg 1
+    } // end y
+  } // end surv_flt
+  
+  // Likelihood: catches
+  Type ans_catch = 0.0;
+  for(int y=0;y<yRun;y++){
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+        // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
+        // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
+        ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)+1e-9),
+                           log(catch_yf_obs(y,fish_flt+1)+1e-9),
+                           catch_yf_error(y,fish_flt), TRUE);
+        std::cout << y << "\t" << fish_flt << "\t ans_catch = " <<  ans_catch  << "\n";
+      } // end flag for neg 1
+    } // end y
+  } // end fish_flt
+  
+  // Likelihood: age comps in surveys & catches
+  // Type ans_survcomp = 0.0;
+  // Type ans_catchcomp = 0.0;
+  // vector<Type>sum1(tEnd); // survey comp likelihood
+  // vector<Type>sum2(tEnd); // fishery comp likelihood
+  // sum1.setZero();
+  // sum2.setZero();
+  // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+  //   for(int y=1;y<yRun;y++){ // Loop over available years      
+  //     for(int s=0;s<nsex;s++){
+  //       for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
+  //         if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if  there was a measurement that year
+  //           // sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
+  //           // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
+  //           if(acomp_flt_type(acomp_flt) == 0){
+  //             sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               acomp_yafs_obs(y,a,acomp_flt,s) +
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
+  //               - lgamma(pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
+  //             
+  //             ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+  //               sum1(y)+
+  //               lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+  //               lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+  //               sum2(y);
+  //             // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+  //             
+  //           } else{
+  //             sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               acomp_yafs_obs(y,a,acomp_flt,s) +
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
+  //               lgamma(pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+  //               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
+  //             
+  //             ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+  //               sum1(y)+
+  //               lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+  //               lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+  //               pi_acomp(acomp_flt)*
+  //               Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+  //               sum2(y);
+  //             // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+  //           } // end switch for comm or surv type
+  //         } // end acomp flag
+  //       } // end age
+  //     } // end sex
+  //     // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+  //     // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+  //   } // end y
+  // } // end acomp fleets
+  
+  // Likelihood: SD Recruitment (hyperprior)
+  Type ans_SDR = 0.0;
+  for(int k=0;k<(nstocks);k++){
+    for(int y=0;y<yRun;y++){ // Start y loop
+      ans_SDR += Type(0.5)*(tildeR_yk(y,k)*tildeR_yk(y,k))/(SDR*SDR)+b(y)*log(SDR*SDR);
+    }
   }
-}
-
-// // Likelihood: Priors on h and M
-Type ans_priors = 0.0;
-// for(int i=0;i<(nspace);i++){
-//   for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
-//     for(int s=0;s<nsex;s++){
-//       ans_priors += Type(0.5)*(Ninit_ais(a,i,s)*Ninit_ai(a,i,s))/(SDR*SDR);
-//     } // end sex
-//   } // end ages
-// } // end space
-
-// Likelihood: Prior on h
-// ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
-// ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
-// if(sum_zero == 1){
-//   ans_priors += ((Type(0.0)-sum(tildeR_yk))*(Type(0.0)-sum(tildeR_yk)))/Type(0.01);
-// }
-// ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
-// ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
-// 
-vector<Type>ans_tot(6);
-ans_tot(0) = ans_SDR;
-ans_tot(1) = ans_catch;
-ans_tot(2) = ans_survey;
-// ans_tot(3) = ans_survcomp;
-// ans_tot(4) = ans_catchcomp;
-ans_tot(5) = ans_priors;
-// 
-// // Likelihood: TOTAL
-Type ans =
-  // ans_SDR+
-  ans_catch
-  // +ans_survey
-  // -ans_survcomp
-  // -ans_catchcomp
-  +ans_priors;//
-// Type ans = 0.0;
-// Report calculations
-
-// numbers @ age
-
-REPORT(Ninit_ais);
-REPORT(N_0ais);
-REPORT(N_yais_beg);
-REPORT(N_yais_mid);
-REPORT(N_yais_end);
-
-// len at age
-REPORT(Length_yais_beg);
-REPORT(Length_yais_mid);
-REPORT(Length_yais_end);
-REPORT(LengthAge_alyis_beg);
-REPORT(LengthAge_alyis_mid);
-REPORT(LengthAge_alyis_end);
-
-// SSB and recruits
-REPORT(SSB_yi);
-REPORT(SSB_ym);
-REPORT(SSB_yk);
-REPORT(SSB_0i);
-REPORT(SSB_0k);
-REPORT(R_yi);
-REPORT(R_ym);
-REPORT(R_yk);
-REPORT(R_0k);
-
-// catches and tuning
-REPORT(catch_yaf_pred);  
-REPORT(catch_yf_pred);  
-// REPORT(catch_yfi_pred);  
-// REPORT(catch_yaif_pred);  
-// REPORT(catch_afk_TEMP);
-// REPORT(Freal_yf);
-// REPORT(F1_yf);
-// REPORT(F2_yf);
-// REPORT(Zreal_yai);
-// REPORT(F_area_yfi);
-
-// survey biomass
-REPORT(surv_yf_pred);
-
-// age comps
-REPORT(comm_acomp_yafs_pred);
-REPORT(surv_acomp_yafs_pred);
-REPORT(Nsamp_acomp_yf);
-
-// REPORT PARS
-REPORT(fsh_slx_yafs);
-REPORT(srv_slx_yafs);
-REPORT(R_0i_vect);
-REPORT(NeqnR);
-ADREPORT(epsilon_tau);
-ADREPORT(logR_0k);
-ADREPORT(omega_0ij);
-ADREPORT(logh_k);
-ADREPORT(logq_f);
-REPORT(tildeR_yk);
-REPORT(tildeR_initk);
-REPORT(ans_tot);
-return ans;
+  
+  // // Likelihood: Priors on h and M
+  Type ans_priors = 0.0;
+  // for(int i=0;i<(nspace);i++){
+  //   for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
+  //     for(int s=0;s<nsex;s++){
+  //       ans_priors += Type(0.5)*(Ninit_ais(a,i,s)*Ninit_ai(a,i,s))/(SDR*SDR);
+  //     } // end sex
+  //   } // end ages
+  // } // end space
+  
+  // Likelihood: Prior on h
+  // ans_priors += -dnorm(logh,log(Type(0.777)),Type(0.113),TRUE);
+  // ans_priors += -dbeta(h,Bprior,Aprior,TRUE);
+  // if(sum_zero == 1){
+  //   ans_priors += ((Type(0.0)-sum(tildeR_yk))*(Type(0.0)-sum(tildeR_yk)))/Type(0.01);
+  // }
+  // ans_priors += -dnorm(logMinit, log(Type(0.2)), Type(0.1), TRUE);
+  // ans_priors += 0.5*pow(logMinit-log(Type(0.2)),2)/Type(0.01);
+  // 
+  vector<Type>ans_tot(6);
+  ans_tot(0) = ans_SDR;
+  ans_tot(1) = ans_catch;
+  ans_tot(2) = ans_survey;
+  // ans_tot(3) = ans_survcomp;
+  // ans_tot(4) = ans_catchcomp;
+  ans_tot(5) = ans_priors;
+  // 
+  // // Likelihood: TOTAL
+  Type ans =
+    // ans_SDR+
+    ans_catch
+    // +ans_survey
+    // -ans_survcomp
+    // -ans_catchcomp
+    +ans_priors;//
+  // Type ans = 0.0;
+  // Report calculations
+  
+  // numbers @ age
+  
+  REPORT(Ninit_ais);
+  REPORT(N_0ais);
+  REPORT(N_yais_beg);
+  REPORT(N_yais_mid);
+  REPORT(N_yais_end);
+  
+  // len at age
+  REPORT(Length_yais_beg);
+  REPORT(Length_yais_mid);
+  REPORT(Length_yais_end);
+  REPORT(LengthAge_alyis_beg);
+  REPORT(LengthAge_alyis_mid);
+  REPORT(LengthAge_alyis_end);
+  
+  // SSB and recruits
+  REPORT(SSB_yi);
+  REPORT(SSB_ym);
+  REPORT(SSB_yk);
+  REPORT(SSB_0i);
+  REPORT(SSB_0k);
+  REPORT(R_yi);
+  REPORT(R_ym);
+  REPORT(R_yk);
+  REPORT(R_0k);
+  
+  // catches and tuning
+  REPORT(catch_yaf_pred);  
+  REPORT(catch_yf_pred);  
+  // REPORT(catch_yfi_pred);  
+  // REPORT(catch_yaif_pred);  
+  // REPORT(catch_afk_TEMP);
+  // REPORT(Freal_yf);
+  // REPORT(F1_yf);
+  // REPORT(F2_yf);
+  // REPORT(Zreal_yai);
+  // REPORT(F_area_yfi);
+  
+  // survey biomass
+  REPORT(surv_yf_pred);
+  
+  // age comps
+  REPORT(comm_acomp_yafs_pred);
+  REPORT(surv_acomp_yafs_pred);
+  REPORT(Nsamp_acomp_yf);
+  
+  // REPORT PARS
+  REPORT(fsh_slx_yafs);
+  REPORT(srv_slx_yafs);
+  REPORT(R_0i_vect);
+  REPORT(NeqnR);
+  ADREPORT(epsilon_tau);
+  ADREPORT(logR_0k);
+  ADREPORT(omega_0ij);
+  ADREPORT(logh_k);
+  ADREPORT(logq_f);
+  REPORT(tildeR_yk);
+  REPORT(tildeR_initk);
+  REPORT(ans_tot);
+  return ans;
 }

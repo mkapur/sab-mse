@@ -568,11 +568,9 @@ Type objective_function<Type>::operator() ()
     
     // Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year 
-    
-    
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //     N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
         // linear growth below A4 as in synthesis
         // if(L1_yk(y,phi_ik2(i),s) < 3){
         //   lenstep = L1_yk(y,phi_ik2(i),s);
@@ -591,23 +589,23 @@ Type objective_function<Type>::operator() ()
         // } // end linear age
         
         
-        // for(int a=1;a<(nage);a++){
-        //   Type pLeave = 0.0; Type NCome = 0.0;
-        //   for(int j=0;j<(nspace);j++){
-        //     if(i != j){
-        //       pLeave += X_ijas(i,j,a,s);
-        //       NCome += X_ijas(j,i,a,s)*
-        //         N_yais_beg(y,a,j,s)*
-        //         (1-instF_yais(y,a,j,s,0))*
-        //         exp(-mort_k(phi_ik2(j))/2);
-        //     } // end i != j
-        //   } // end subareas j
-        //   N_yais_mid(y,a,i,s) = ((1-pLeave)*
-        //     (1-instF_yais(y,a,i,s,0))*
-        //     N_yais_beg(y,a,i,s)* 
-        //     exp(-mort_k(phi_ik2(i))/2) +
-        //     NCome);
-        // } // end ages for N
+        for(int a=1;a<(nage);a++){
+          Type pLeave = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              pLeave += X_ijas(i,j,a,s);
+              NCome += X_ijas(j,i,a,s)*
+                N_yais_beg(y,a,j,s)*
+                (1-instF_yais(y,a,j,s,0))*
+                exp(-mort_k(phi_ik2(j))/2);
+            } // end i != j
+          } // end subareas j
+          N_yais_mid(y,a,i,s) = ((1-pLeave)*
+            (1-instF_yais(y,a,i,s,0))*
+            N_yais_beg(y,a,i,s)*
+            exp(-mort_k(phi_ik2(i))/2) +
+            NCome);
+        } // end ages for N
         
         
         // for(int a=5;a<(nage-1);a++){
@@ -639,8 +637,8 @@ Type objective_function<Type>::operator() ()
         //   (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
         //   Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
         //     (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
-    //   } // end subareas i
-    // } // end sexes
+      } // end subareas i
+    } // end sexes
     
     
     // std::cout << y << " before prob LAA" << "\n";
@@ -998,7 +996,7 @@ Type objective_function<Type>::operator() ()
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
         std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
-        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt) << "\n";
+        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1) << "\n";
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)+1e-9),
                            log(catch_yf_obs(y,fish_flt+1)+1e-9),
                            catch_yf_error(y,fish_flt), TRUE);

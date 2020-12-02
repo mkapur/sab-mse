@@ -529,7 +529,7 @@ Type objective_function<Type>::operator() ()
                 catch_yaf_pred(y,a,fish_flt,0) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,0) *
-                  N_yais_mid(y,a,i,s)*
+                  N_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
@@ -541,7 +541,7 @@ Type objective_function<Type>::operator() ()
                 catch_yaf_pred(y,a,fish_flt,1) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,0)*
-                  N_yais_mid(y,a,i,s)*
+                  N_yais_beg(y,a,i,s)*
                   mla_yais(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
@@ -555,15 +555,15 @@ Type objective_function<Type>::operator() ()
     } // end nfleets_fish
     
     // sum instF_yafs over fleets to get F in i and build N_yais_mid
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //     for(int a=1;a<(nage);a++){
-    //       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //         instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0); 
-    //       } // end fish fleets
-    //     } // end sex
-    //   } // end ages
-    // } // end subarea i
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        for(int a=1;a<(nage);a++){
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0);
+          } // end fish fleets
+        } // end sex
+      } // end ages
+    } // end subarea i
     
     
     // Type lenstep = 0.0; Type lenslope = 0.0;

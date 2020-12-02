@@ -436,10 +436,6 @@ Type objective_function<Type>::operator() ()
   
   // std::cout << " Here" << "\n";
   for(int y=0;y<yRun;y++){ // Start y loop
-    // std::cout <<"\t Age/Bin 2 selex flt 3 \t" << fsh_slx_yafs(y,2,2,1) << std::endl;
-    // std::cout <<"\t Age/Bin 2 selex flt 4 \t" << fsh_slx_yafs(y,2,3,1) << std::endl;
-    // for(int y=0;y<yRun;y++){ // Start y loop
-    
     // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
     // note we are assuming unfished here as the exponent is M only
     // note that in tmb, plus group is in slot nage-1
@@ -483,6 +479,9 @@ Type objective_function<Type>::operator() ()
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
     
+// now calc f for first half of year using n_yais beg, and apply that f during movement to get mid naa
+    
+    
     // Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year 
     for(int s=0;s<nsex;s++){
@@ -504,7 +503,7 @@ Type objective_function<Type>::operator() ()
         // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
         //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
         // } // end linear age
-        for(int a=1;a<(nage-1);a++){
+        for(int a=1;a<(nage);a++){
           Type pLeave = 0.0; Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){
             if(i != j){
@@ -525,16 +524,16 @@ Type objective_function<Type>::operator() ()
         //     (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
         // } // end nonlinear growth ages
         // plus groups
-        Type pLeave = 0.0; Type NCome = 0.0;
-        for(int j=0;j<(nspace);j++){
-          if(i != j){
-            pLeave += X_ijas(i,j,nage-1,s);
-            // NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s) + N_yais_beg(y,nage-2,j,s));
-            NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s));
-            
-          } // end i != j
-        } // end subareas j
-        N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mort_k(phi_ik2(i))/2);
+        // Type pLeave = 0.0; Type NCome = 0.0;
+        // for(int j=0;j<(nspace);j++){
+        //   if(i != j){
+        //     pLeave += X_ijas(i,j,nage-1,s);
+        //     // NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s) + N_yais_beg(y,nage-2,j,s));
+        //     NCome += X_ijas(j,i,nage-1,s)*(N_yais_beg(y,nage-1,j,s));
+        //     
+        //   } // end i != j
+        // } // end subareas j
+        // N_yais_mid(y,nage-1,i,s) =((1-pLeave)*N_yais_beg(y,nage-1,i,s) + NCome)*exp(-mort_k(phi_ik2(i))/2);
         // plus group weighted average (we already have the numbers at age)
         // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
         //   (Length_yais_beg(y,nage-2,i,s)+
@@ -577,7 +576,6 @@ Type objective_function<Type>::operator() ()
     
     
     // Catch at second half of year
-    // Midyear F to generate N_yais_end
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
         // std::cout << fish_flt << " F TUNING" << "\n";
@@ -793,6 +791,8 @@ Type objective_function<Type>::operator() ()
       } // end sexes
     } // end nspace
     // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
+    
+    
     // predicted age comps, given error
     // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
     //   // age 0

@@ -1,4 +1,4 @@
-boundPars <- function(obj, r0_lower = 10, boundSlx = FALSE){
+boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   
   ## bounds on repro pars ----
   
@@ -18,22 +18,25 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = FALSE){
   # 
   lower[names(lower) == 'b'] <- 0
   upper[names(upper) == 'b'] <- 1
+  
+  lower[names(lower) == 'logq_f'] <- 0
+  upper[names(upper) == 'logq_f'] <- 1
   ## bounds on fsh slx ----
-  ## first check if slx was fixed at all
-  # if(length(grep("log_fsh_slx_pars", mappy)) != 0){
-  #   ## make a master array with everything
-  #   array(1:length(obj$par[names(obj$par) == "log_fsh_slx_pars"]), dim = c(7,2,2))
-  #   ## identify which fleets were NA
-  #   which(is.na(mappy[[grep("log_fsh_slx_pars", mappy)]]))
-  #   
-  # }
   
   ## brute force par locations; if mappy mirrors first ak fleets,
   ## assume that fleets 1 and 2 are now AK FIX mirror and AK TWL mirror
   # array(1:length(obj$par[names(obj$par) == "log_fsh_slx_pars"]), dim = c(4,2,2))
   
   
-  if(boundSlx == TRUE){
+  if('fsh' %in% boundSlx){
+    ## first check if slx was fixed at all
+    # if(length(grep("log_fsh_slx_pars", mappy)) != 0){
+    #   ## make a master array with everything
+    #   array(1:length(obj$par[names(obj$par) == "log_fsh_slx_pars"]), dim = c(7,2,2))
+    #   ## identify which fleets were NA
+    #   which(is.na(mappy[[grep("log_fsh_slx_pars", mappy)]]))
+    # }
+    
     ## if no fleets to fix, go with the normal slx bounds
     p1_logistic_idx <- c(1:2,15:16) #c(1:4,19:22)
     p2_logistic_idx <- p1_logistic_idx+df$nfleets_fish
@@ -75,30 +78,41 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = FALSE){
   # array(exp(lower[names(lower) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
   # # array(lower[names(lower) == 'log_fsh_slx_pars'], dim = dim = c(7,2,2))
   
-  ## currently srv slx all logistic with a95, a50
-  nsurvsel = dim(df$parms$log_srv_slx_pars)[1]
-  ## lower for everything
-  lower[names(lower) == 'log_srv_slx_pars'] <- log(0.0001)
+  # currently srv slx all logistic with a95, a50
+  # nsurvsel = dim(df$parms$log_srv_slx_pars)[1]
+  # array(1:length(  lower[names(lower) == 'log_srv_slx_pars']),
+  # dim= c(dim(df$parms$log_srv_slx_pars)[1],2,2))
+  if("srv" %in% boundSlx){
+    
+    ## lower for everything
+    lower[names(lower) == 'log_srv_slx_pars'][c(1:8,17:24)] <- log(35) ## p1
+    lower[names(lower) == 'log_srv_slx_pars'][c(9:16,25:32)] <- log(60) ## p2
+    
+    upper[names(upper) == 'log_srv_slx_pars'][c(1:8,17:24)] <- log(60) ## p1
+    upper[names(upper) == 'log_srv_slx_pars'][c(9:16,25:32)] <- log(70) ## p2
+    
+  }
+  
   ## lower bound for p2 (a95)
-  lower[names(lower) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)] <- log(70)
+  # lower[names(lower) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)] <- log(70)
   ## upper bound for p1 (a50 or mean)
-  upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel)))] <- log(70)
+  # upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel)))] <- log(70)
   ## upper bound for p2 (a95)
-  upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)]  <- log(70)
-  lower[names(lower) == 'omega_0ij'] = 0
-  upper[names(upper) == 'omega_0ij'] = 1
+  # upper[names(upper) == 'log_srv_slx_pars'][c(c(1:nsurvsel,17:(16+nsurvsel))+nsurvsel)]  <- log(70)
+  
   
   ## sanity check
   
   ## last five flts p2 should be 10; p2 for first 4 fleets should be > p1
   
   ##  p2 should be > p1
-  array(exp(upper[names(upper) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
+  # array(exp(upper[names(upper) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
   ## all zero and/or
   
-  array(exp(lower[names(lower) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
+  # array(exp(lower[names(lower) == 'log_srv_slx_pars']), dim = dim(df$parms$log_srv_slx_pars))
   # upper[names(upper) == 'PSEL'] <- 9
   # upper[names(upper) == 'logh'] <- log(0.999)
   # upper[names(upper) == 'F0'] <- 2
   return(list("upper"=upper, "lower"=lower))
 }
+

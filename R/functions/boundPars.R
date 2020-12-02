@@ -7,19 +7,20 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   
   lower[names(lower) == 'logh_k'] <- log(0.2) ## duh
   upper[names(upper) == 'logh_k'] <- log(0.99)
+  
   lower[names(lower) == 'epsilon_tau'] <- 0
   lower[names(lower) == 'logR_0k'] <- r0_lower
   
   lower[names(lower) == 'mort_k'] <- 0 ## duh
   upper[names(upper) == 'mort_k'] <- 1
   lower[names(lower) == 'logSDR'] <- log(0.0001)
-  lower[names(lower) == 'omega_0ij'] <- log(0.0001)
-  upper[names(upper) == 'omega_0ij'] <- log(0.999)
+  # lower[names(lower) == 'omega_0ij'] <- log(0.0001)
+  # upper[names(upper) == 'omega_0ij'] <- log(0.999)
   # 
-  lower[names(lower) == 'b'] <- 0
-  upper[names(upper) == 'b'] <- 1
+  # lower[names(lower) == 'b'] <- 0
+  # upper[names(upper) == 'b'] <- 1
   
-  lower[names(lower) == 'logq_f'] <- log(0.0001)
+  # lower[names(lower) == 'logq_f'] <- log(0.0001)
   # upper[names(upper) == 'logq_f'] <- log(1)
   ## bounds on fsh slx ----
   

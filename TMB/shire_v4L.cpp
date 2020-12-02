@@ -102,70 +102,70 @@ Type objective_function<Type>::operator() ()
   // vector<Type>Z_a_TEMP2(nage);
   // array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();
   array<Type> instF_yf(tEnd,nfleets_fish,2); // intermediate biannual Fs by year, fleet
-  array<Type> instF_yafs(tEnd,nage,nfleets_fish,nsex,2); instF_yafs.setZero() // instF_yf times slx_yafs
-    array<Type> instF_yais(tEnd,nage,nspace,nsex,2);  instF_yais.setZero() // sum instF_yafs over flt biannually
-      
-      // array<Type> F_yf(tEnd,nfleets_fish); // finalized instantaenous F (catch/mean(expbio))
-      
-      
-      // array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
-      // array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
-      // array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
-      // array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
-      // array<Type> F_ym(tEnd,nmgmt_reg); //dodo
-      
-      // biology storage
-      array<Type> Ninit_ais(nage,nspace,nsex); // initial numbers at age in subarea, just once
-    array<Type> N_0ais(nage, nspace,nsex); // numbers in year 0 at age in subarea
-    vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
-    vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
-    array<Type> N_yais_beg( tEnd+1, nage, nspace,nsex); N_yais_beg.setZero();
-    array<Type> N_yais_mid( tEnd+1, nage, nspace,nsex); N_yais_mid.setZero();
-    array<Type> N_yais_end( tEnd+1, nage, nspace,nsex); N_yais_end.setZero();
-    array<Type> SSB_yk(tEnd,nstocks);
-    array<Type> SSB_yi(tEnd,nspace);
-    array<Type> SSB_ym(tEnd,nmgmt_reg);
-    // Recruits
-    array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
-    array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
-    array<Type>  R_ym(tEnd,nmgmt_reg); // subarea-level recruitment (downscaled)
-    
-    // Length at age
-    array<Type> Length_yais_beg(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
-    array<Type> Length_yais_mid(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
-    array<Type> Length_yais_end(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
-    array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
-    array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
-    array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
-    // age comps
-    array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // placeholder multiplier for all acomp fleets
-    array<Type> comm_acomp_yafs_pred(tEnd, nage, 4, nsex); // predicted acomps from commercial fisheries
-    array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-4, nsex); // predicted acomps from surveys (without biomass)
-    array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
-    // // PARAMETERS //
-    PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
-    PARAMETER_VECTOR(mort_k); // mortality in stock
-    PARAMETER_VECTOR(logh_k); // Steepness by stock
-    PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
-    PARAMETER_MATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
-    PARAMETER_VECTOR(logq_f); // Q by survey fleet
-    PARAMETER_VECTOR(b); // bias adjustment factor
-    PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
-    PARAMETER(logSDR);
-    PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
-    PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
-    // // Transform out of log space
-    // // Type SDsurv = exp(logSDsurv);
-    // // Type SDcatch = exp(logSDcatch);
-    Type SDR = exp(logSDR);
-    vector<Type> R_0k = exp(logR_0k);
-    vector<Type> h_k = exp(logh_k);
-    vector<Type> q_f = exp(logq_f);
-    vector<Type> pi_acomp = exp(logpi_acomp);
-    array<Type> tildeR_yk(tEnd,nstocks); // recdevs
-    vector<Type> tildeR_initk(nstocks); // recdevs for init
-    
-    
+  array<Type> instF_yafs(tEnd,nage,nfleets_fish,nsex,2); instF_yafs.setZero(); // instF_yf times slx_yafs
+  array<Type> instF_yais(tEnd,nage,nspace,nsex,2);  instF_yais.setZero(); // sum instF_yafs over flt biannually
+  
+  // array<Type> F_yf(tEnd,nfleets_fish); // finalized instantaenous F (catch/mean(expbio))
+  
+  
+  // array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
+  // array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
+  // array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
+  // array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
+  // array<Type> F_ym(tEnd,nmgmt_reg); //dodo
+  
+  // biology storage
+  array<Type> Ninit_ais(nage,nspace,nsex); // initial numbers at age in subarea, just once
+  array<Type> N_0ais(nage, nspace,nsex); // numbers in year 0 at age in subarea
+  vector<Type> SSB_0k(nstocks); // virgin spawnbio by stock
+  vector<Type> SSB_0i(nspace); // virgin spawnbio by subarea
+  array<Type> N_yais_beg( tEnd+1, nage, nspace,nsex); N_yais_beg.setZero();
+  array<Type> N_yais_mid( tEnd+1, nage, nspace,nsex); N_yais_mid.setZero();
+  array<Type> N_yais_end( tEnd+1, nage, nspace,nsex); N_yais_end.setZero();
+  array<Type> SSB_yk(tEnd,nstocks);
+  array<Type> SSB_yi(tEnd,nspace);
+  array<Type> SSB_ym(tEnd,nmgmt_reg);
+  // Recruits
+  array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
+  array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
+  array<Type>  R_ym(tEnd,nmgmt_reg); // subarea-level recruitment (downscaled)
+  
+  // Length at age
+  array<Type> Length_yais_beg(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
+  array<Type> Length_yais_mid(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
+  array<Type> Length_yais_end(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
+  array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
+  array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
+  array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
+  // age comps
+  array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // placeholder multiplier for all acomp fleets
+  array<Type> comm_acomp_yafs_pred(tEnd, nage, 4, nsex); // predicted acomps from commercial fisheries
+  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-4, nsex); // predicted acomps from surveys (without biomass)
+  array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
+  // // PARAMETERS //
+  PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
+  PARAMETER_VECTOR(mort_k); // mortality in stock
+  PARAMETER_VECTOR(logh_k); // Steepness by stock
+  PARAMETER_VECTOR(logR_0k); // Recruitment at equil by stock
+  PARAMETER_MATRIX(omega_0ij); // estimated age-0 movment among areas (used upon recruit gen)
+  PARAMETER_VECTOR(logq_f); // Q by survey fleet
+  PARAMETER_VECTOR(b); // bias adjustment factor
+  PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
+  PARAMETER(logSDR);
+  PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
+  PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
+  // // Transform out of log space
+  // // Type SDsurv = exp(logSDsurv);
+  // // Type SDcatch = exp(logSDcatch);
+  Type SDR = exp(logSDR);
+  vector<Type> R_0k = exp(logR_0k);
+  vector<Type> h_k = exp(logh_k);
+  vector<Type> q_f = exp(logq_f);
+  vector<Type> pi_acomp = exp(logpi_acomp);
+  array<Type> tildeR_yk(tEnd,nstocks); // recdevs
+  vector<Type> tildeR_initk(nstocks); // recdevs for init
+  
+  
     
     // Fishery selectivity
     // Number of parameters in the chosen selectivity type:
@@ -604,7 +604,7 @@ Type objective_function<Type>::operator() ()
                 exp(-mort_k(phi_ik2(j))/2);
             } // end i != j
           } // end subareas j
-          N_yais_mid(y,a,i,s) = ((1-pLeave)*1-instF_yais(y,a,i,s,0))*N_yais_beg(y,a,i,s) + NCome);
+          N_yais_mid(y,a,i,s) = ((1-pLeave)*(1-instF_yais(y,a,i,s,0))*N_yais_beg(y,a,i,s) + NCome);
         } // end ages for N
         // for(int a=5;a<(nage-1);a++){
         //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*

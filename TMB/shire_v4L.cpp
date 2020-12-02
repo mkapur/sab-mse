@@ -434,7 +434,8 @@ Type objective_function<Type>::operator() ()
   for(int s=0;s<nsex;s++){
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<(nage);a++){
-        Ninit_ais(a,i,s) =   N_0ais(a,i,s)*exp(-0.5*logSDR*logSDR+tildeR_initk(phi_ik2(i)));
+        Ninit_ais(a,i,s) =   N_0ais(a,i,s)*exp(-0.5*b(0)*logSDR*logSDR+
+          tildeR_initk(phi_ik2(i)));
       } // end ages
     } // end space
   } // end sex

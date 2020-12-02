@@ -538,7 +538,7 @@ Type objective_function<Type>::operator() ()
                 instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
                   instF_yf(y, fish_flt,0);
 
-                catch_yaf_pred(y,a,fish_flt,1) +=
+                catch_yaf_pred(y,a,fish_flt,0) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,0)*
                   N_yais_beg(y,a,i,s)*
@@ -549,12 +549,12 @@ Type objective_function<Type>::operator() ()
               } // end selType_fish
             } // end sex
           } // end space
-          catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,1);
+          catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
         } // end age
       } // end -1 NA trap
     } // end nfleets_fish
     
-    // sum instF_yafs over fleets to get F in i and build N_yais_mid
+    // sum instF_yafs over fleets to get F in i  
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         for(int a=1;a<(nage);a++){
@@ -565,7 +565,7 @@ Type objective_function<Type>::operator() ()
       } // end ages
     } // end subarea i
     
-    
+    // build N_yais_mid
     // Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year 
     for(int i=0;i<(nspace);i++){

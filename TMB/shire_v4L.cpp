@@ -65,7 +65,7 @@ Type objective_function<Type>::operator() ()
   // // Survey Biomass
   DATA_ARRAY(surv_yf_obs);
   DATA_ARRAY(surv_yf_err);
-  array<Type> surv_yf_pred(nyear, nfleets_surv);
+  array<Type> surv_yf_pred(nyear, nfleets_surv); surv_yf_pred.setZero();
   
   // Age Comps
   DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
@@ -610,7 +610,6 @@ Type objective_function<Type>::operator() ()
             NCome);
         } // end ages for N
         
-        
         // for(int a=5;a<(nage-1);a++){
         //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
         //     exp(-kappa_yk(y,phi_ik2(i),s)*a);
@@ -984,12 +983,12 @@ Type objective_function<Type>::operator() ()
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
     for(int y=0;y<yRun;y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
-        std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
-        std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
+        // std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
+        // std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
         ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
                             log(surv_yf_obs(y,surv_flt)),
                             surv_yf_err(y,surv_flt), TRUE);
-        std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
+        // std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
       } // end flag for neg 1
     } // end y
   } // end surv_flt
@@ -1000,8 +999,8 @@ Type objective_function<Type>::operator() ()
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       catch_yf_pred_total(y,fish_flt) = catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1);
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
-        // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1) << "\n";
+        std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
+        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1) << "\n";
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)+1e-9),
                            log(catch_yf_obs(y,fish_flt+1)+1e-9),
                            catch_yf_error(y,fish_flt), TRUE);

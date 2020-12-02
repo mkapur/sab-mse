@@ -13,6 +13,100 @@ save(reps, file = here("TMB",paste0('reps_',Sys.Date(),".rdata")))
 
 
 
+array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), 
+      dim = c(7,2,2))
+# ## up to 30s
+
+rep1$fsh_slx_yafs[1,,2,1]; rep1$fsh_slx_yafs[1,,3,1];
+rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
+# rep1$R_0i_vect
+
+
+# neqnm %>%  mutate(age = 0:70) %>%
+#   reshape2::melt(id = 'age') %>%
+#   ggplot(., aes(x = age, y = value, color = variable)) +
+#   ggsidekick::theme_sleek() +
+#   geom_line(lwd = 1.1) +
+#   scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]]) +
+#   facet_wrap(~variable, scales = 'free_y' )
+
+
+head(round(rep1$catch_yf_pred,2)/round(df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
+data.frame('NEQN_m' =colSums(neqnm) , 
+           "N_0_Fem" = colSums(rep1$N_0ais)[,1],
+           "N_0_Mal" = colSums(rep1$N_0ais)[,2],
+           "N_init_Fem" = colSums(rep1$Ninit_ais)[,1],
+           "N_init_Mal" = colSums(rep1$Ninit_ais)[,2],
+           "N_beg_y1_Fem" = colSums(rep1$N_yais_beg[1,,,1]),
+           "N_mid_y1_Fem" = colSums(rep1$N_yais_mid[1,,,1]),
+           "N_end_y1_Fem" = colSums(rep1$N_yais_end[1,,,1]))
+
+
+rep1$SSB_0i ## should not be small or negative nor disproportionate
+ans = rep(0,6)
+for(i in 1:6){
+  for(a in 1:71){
+    ans[i] = ans[i] + rep1$N_0ais[a,i,1]*
+      df$wtatlen_kab[df$phi_ik2[i]+1,1]*
+      df$unfished_ALK_F[a,1]^df$wtatlen_kab[df$phi_ik2[i]+1,2]*
+      df$mat_ak[a,df$phi_ik2[i]+1]
+  }
+}
+ans = rep(0,4)
+for(k in 1:4){
+  for(i in 1:6){
+    ans[k] = ans[k]+  df$phi_ki[k,i]*rep1$SSB_0i[i];
+  } 
+} 
+
+rep1$SSB_0k ## should not be small or negative
+
+## should match SSB0 without fishing
+round(rep1$SSB_yi[1:df$yRun,]) ## should not be small or negative
+round(rep1$R_yi[1:df$yRun,])
+rowSums(rep1$N_yais_beg[1:df$yRun,,,1])
+rowSums(rep1$N_yais_mid[1:df$yRun,,,1])
+rowSums(rep1$N_yais_end[1:df$yRun,,,1])
+
+# rep1$N_yais_beg[1:7,c(0:4,71),,1]
+# rep1$N_yais_mid[1:7,c(0:4,71),,1]
+# rep1$N_yais_end[1:7,c(0:4,71),,1]
+
+array(round(exp(best[names(best)=='log_fsh_slx_pars'])), 
+      dim = c(7,2,2))
+# dimnames = list(df$fltnames_fish))
+## 81 s
+
+dat$catch_yf_pred %>%
+  mutate()
+group_by()
+head(round(dat$catch_yf_pred_total)/df$catch_yf_obs[,2:ncol(df$catch_yf_obs)],2),df$yRun)
+colSums(dat$N_0ais) ## should not be super small anywhere
+dat$SSB_0i ## should not be small or negative
+round(dat$R_yi[1:df$yRun,])
+round(dat$SSB_yi[1:df$yRun,]) ## should not be small or negative
+rowSums(dat$N_yais_beg[1:df$yRun,,,1])
+rowSums(dat$N_yais_end[1:df$yRun,,,1])
+
+opt2$par
+opt2$objective
+opt$time_for_MLE
+opt2$Convergence_check
+opt$AIC
+
+# rep1$NeqnR
+likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
+likes
+neqnm <- matrix(rep1$NeqnR, ncol = 6, nrow = length(0:70)) %>%
+  data.frame(.) 
+
+# df$selShape_fish[3:5] <-  -1 ## slx = 1.0 for all BC fisheries
+# mappy <- buildMap(toFix = c(3,5,8),
+
+## the numbers are in order of df$parms
+## if you are fixing fish fleets, be sure that selShape is correct!
+
 
 
 plot.figures = FALSE # Set true for printing to file 

@@ -479,8 +479,41 @@ Type objective_function<Type>::operator() ()
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
     
-// now calc f for first half of year using n_yais beg, and apply that f during movement to get mid naa
-    
+    // now calc f for first half of year using n_yais beg, and apply that f during movement to get mid naa
+    // Catch at first half of year
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+        // std::cout << fish_flt << " F TUNING" << "\n";
+        // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
+        Type denom = 0; // exploitable biomass
+        for(int s=0;s<nsex;s++){
+          for(int i=0;i<(nspace);i++){
+            for(int a=0;a<(nage);a++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_beg(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
+                // catch_yf_obs(y,fish_flt+1);
+                break;
+              case 1: // length sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+                  N_yais_beg(y,a,i,s)*
+                  mla_yais(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              } // end selType_fish
+            } // end age
+            // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
+          } // end space
+        } // end sex
+        instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
+      } // end -1 NA trap
+    } // end nfleets_fish
     
     // Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year 
@@ -677,6 +710,9 @@ Type objective_function<Type>::operator() ()
         // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
       } // end subareas i
     } // end sexes
+    
+    
+    
     // std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement eq 5
     // for(int s=0;s<nsex;s++){

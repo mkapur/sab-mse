@@ -78,7 +78,10 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   DATA_ARRAY(catch_yf_error); // right now just 0.1 for all fleets and all years
   array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish,2);  catch_yaf_pred.setZero();  // estimated catches at age by fleet
-  array<Type> catch_yf_pred(tEnd,nfleets_fish,2);  catch_yf_pred.setZero();       
+  array<Type> catch_yf_pred(tEnd,nfleets_fish,2);  catch_yf_pred.setZero();  
+  array<Type> catch_yf_pred_total(tEnd,nfleets_fish);  catch_yf_pred_total.setZero();   
+  
+  
   // array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);  catch_yfi_pred.setZero();
   // array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  catch_yaif_pred.setZero();
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
@@ -833,6 +836,8 @@ Type objective_function<Type>::operator() ()
       } // end space
     } //end mgmt
     // std::cout << y << "\t" << "end R_ym" << "\n";
+    
+    
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
@@ -993,13 +998,14 @@ Type objective_function<Type>::operator() ()
   Type ans_catch = 0.0;
   for(int y=0;y<yRun;y++){
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      catch_yf_pred_total(y,fish_flt) = catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1);
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
-        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1) << "\n";
+        // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
+        // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1) << "\n";
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)+1e-9),
                            log(catch_yf_obs(y,fish_flt+1)+1e-9),
                            catch_yf_error(y,fish_flt), TRUE);
-        std::cout << y << "\t" << fish_flt << "\t ans_catch = " <<  ans_catch  << "\n";
+        // std::cout << y << "\t" << fish_flt << "\t ans_catch = " <<  ans_catch  << "\n";
       } // end flag for neg 1
     } // end y
   } // end fish_flt
@@ -1103,7 +1109,7 @@ Type objective_function<Type>::operator() ()
   Type ans =
     // ans_SDR+
     ans_catch
-    // +ans_survey
+    +ans_survey
     // -ans_survcomp
     // -ans_catchcomp
     +ans_priors;//
@@ -1139,7 +1145,8 @@ Type objective_function<Type>::operator() ()
   
   // catches and tuning
   REPORT(catch_yaf_pred);  
-  REPORT(catch_yf_pred);  
+  REPORT(catch_yf_pred); 
+  REPORT(catch_yf_pred_total);
   // REPORT(catch_yfi_pred);  
   // REPORT(catch_yaif_pred);  
   // REPORT(catch_afk_TEMP);

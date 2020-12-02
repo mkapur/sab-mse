@@ -419,7 +419,7 @@ Type objective_function<Type>::operator() ()
         N_0ais(a,i,0)*
         wtatlen_kab(phi_ik2(i),0)*
         pow(unfished_ALK_F(a,i),wtatlen_kab(phi_ik2(i),1))*
-        mort_k(phi_ik2(i));
+        mat_ak(a,phi_ik2(i));
     } // end ages
   } // end space 
   for(int k=0;k<(nstocks);k++){
@@ -790,7 +790,7 @@ Type objective_function<Type>::operator() ()
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
           wtatlen_kab(phi_ik2(i),0)*
           pow(mla_yais(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
-          mort_k(phi_ik2(i));
+          mat_ak(a,phi_ik2(i));
       } // end ages
     } // end space
     // std::cout << y << "\t" << "end SSB_yi" << "\n";

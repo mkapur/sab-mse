@@ -19,12 +19,12 @@ df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$yRun =  df$tEnd-1 ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
-
+df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
 mappy <-
   buildMap(toFix =  c("omega_0ij",
                       "epsilon_tau", 
-                      # "logh_k", 
-                      "mort_k")) #,
+                      # "logh_k"))
+                     "mort_k")) #,
            # fixFlt = c("BC_LL","BC_TRAP","BC_TWL")) )
 
 ## ~90s with full years
@@ -36,12 +36,14 @@ system.time(obj <- MakeADFun(df,
 
 # system.time(rep1 <- obj$report()) ## one off caclulation using start pars
 
-bounds <- boundPars(obj, r0_lower = 0, boundSlx = TRUE)
+bounds <- boundPars(obj, 
+                    r0_lower = 0, 
+                    boundSlx = c('fsh','srv')[1])
 
 # with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
 #                    dimnames = list(df$fltnames_fish)))
-# with(bounds, array(exp(upper[names(upper)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
-#                    dimnames = list(df$fltnames_fish)))
+# with(bounds, array(exp(upper[names(upper)=='log_srv_slx_pars']), dim = c(7,2,1,2),
+# dimnames = list(df$fltnames_fish)))
 
 system.time(opt <-
               TMBhelper::fit_tmb(
@@ -71,7 +73,7 @@ cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname,
         runname = paste0("-",df$yRun,"y_",cppname,"_M=",
                          paste(df$parms$mort_k,collapse="-"),
-                         "_survON"))
+                         "_survOFF"))
 
 
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

@@ -662,39 +662,35 @@ Type objective_function<Type>::operator() ()
     
     
     // F denom at second half of year
-    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //   if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-    //     // std::cout << fish_flt << " F TUNING" << "\n";
-    //     // std::cout << y << 	" " << fish_flt << 	" THIS # IS NOT -1 " << catch_yf_obs(y,fish_flt+1) << std::endl;
-    //     Type denom = 0; // exploitable biomass
-    //     for(int s=0;s<nsex;s++){
-    //       for(int i=0;i<(nspace);i++){
-    //         for(int a=0;a<(nage);a++){
-    //           switch(selType_fish(fish_flt)){
-    //           case 0: // age sel
-    //             denom += phi_if_fish(fish_flt,i)*
-    //               fsh_slx_yafs(y,a,fish_flt,s)*
-    //               N_yais_mid(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
-    //             // catch_yf_obs(y,fish_flt+1);
-    //             break;
-    //           case 1: // length sel
-    //             denom += phi_if_fish(fish_flt,i)*
-    //               fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
-    //               N_yais_mid(y,a,i,s)*
-    //               mla_yais(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             break;
-    //           } // end selType_fish
-    //         } // end age
-    //         // std::cout << y  <<"\t area"<< i <<"\t flt"<<  fish_flt << "\t first loop denom \t" << denom  << "\n";
-    //       } // end space
-    //     } // end sex
-    //     instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
-    //   } // end -1 NA trap
-    // } // end nfleets_fish
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+        Type denom = 0; // exploitable biomass
+        for(int s=0;s<nsex;s++){
+          for(int i=0;i<(nspace);i++){
+            for(int a=0;a<(nage);a++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              case 1: // length sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+                  N_yais_mid(y,a,i,s)*
+                  mla_yais(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              } // end selType_fish
+            } // end age
+          } // end space
+        } // end sex
+        instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
+      } // end -1 NA trap
+    } // end nfleets_fish
     
     // predicted catches second half of year
     // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -998,8 +994,8 @@ Type objective_function<Type>::operator() ()
   for(int y=0;y<yRun;y++){
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt+1)   << "\n";
-        // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
+        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
+        std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
         ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)+1e-9),
                            log(catch_yf_obs(y,fish_flt+1)+1e-9),
                            catch_yf_error(y,fish_flt), TRUE);

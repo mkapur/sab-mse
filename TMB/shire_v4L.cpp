@@ -1000,12 +1000,12 @@ Type objective_function<Type>::operator() ()
   for(int y=0;y<yRun;y++){
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
-        // std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
-        // std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt) << "\n";
-        // ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)+1e-9),
-        //                    log(catch_yf_obs(y,fish_flt+1)+1e-9),
-        //                    catch_yf_error(y,fish_flt), TRUE);
-        // std::cout << y << "\t" << fish_flt << "\t ans_catch = " <<  ans_catch  << "\n";
+        std::cout << y << "\t" << fish_flt << "\t pred catch \t" <<  catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)  << "\n";
+        std::cout << y << "\t" << fish_flt << "\t obs catch \t" <<  catch_yf_obs(y,fish_flt) << "\n";
+        ans_catch -= dnorm(log(catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1)+1e-9),
+                           log(catch_yf_obs(y,fish_flt+1)+1e-9),
+                           catch_yf_error(y,fish_flt), TRUE);
+        std::cout << y << "\t" << fish_flt << "\t ans_catch = " <<  ans_catch  << "\n";
       } // end flag for neg 1
     } // end y
   } // end fish_flt

@@ -513,7 +513,7 @@ Type objective_function<Type>::operator() ()
             } // end age
           } // end space
         } // end sex
-        instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
+        instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
       } // end -1 NA trap
     } // end nfleets_fish
     
@@ -691,7 +691,7 @@ Type objective_function<Type>::operator() ()
             } // end age
           } // end space
         } // end sex
-        instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1));
+        instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
       } // end -1 NA trap
     } // end nfleets_fish
     

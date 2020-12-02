@@ -658,28 +658,27 @@ Type objective_function<Type>::operator() ()
     //fill EOY and beginning of next year using Ztuned
     //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
     //of the mortality and the tuned F extraction.
-    // 
-    // 
-    // Type instF_yafs_sum; // using final one
-    // for(int i=0;i<(nspace);i++){
-    //   instF_yafs_sum = 0;
-    //   for(int s=0;s<nsex;s++){
-    //     for(int a=0;a<(nage);a++){
-    //       // sum over fleets targeting this area
-    //       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //         instF_yafs_sum += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s); // note instF is Sa
-    //       }
-    //       N_yais_end(y,a,i,s) = (1-instF_yafs_sum)*N_yais_mid(y,a,i,s)*exp(-(mort_k(phi_ik2(i)))/2);
-    //       // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
-    //     } // end ages
-    //     for(int a=1;a<(nage-1);a++){
-    //       N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
-    //       //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
-    //     }
-    //     N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
-    //     // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
-    //   } // end subareas i
-    // } // end sexes
+ 
+    Type instF_yafs_sum; // using final one
+    for(int i=0;i<(nspace);i++){
+      instF_yafs_sum = 0;
+      for(int s=0;s<nsex;s++){
+        for(int a=0;a<(nage);a++){
+          // sum over fleets targeting this area
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            instF_yafs_sum += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s); // note instF is Sa
+          }
+          N_yais_end(y,a,i,s) = (1-instF_yafs_sum)*N_yais_mid(y,a,i,s)*exp(-(mort_k(phi_ik2(i)))/2);
+          // N_yais_end(y,a,i,s) = N_yais_mid(y,a,i,s)*exp(-(Zreal_yai(y,a,i)));
+        } // end ages
+        for(int a=1;a<(nage-1);a++){
+          N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+          //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
+        }
+        N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+        // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
+      } // end subareas i
+    } // end sexes
     // std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement eq 5
     // for(int s=0;s<nsex;s++){

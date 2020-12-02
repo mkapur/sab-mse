@@ -215,9 +215,9 @@ writeOM <- function(dat,
     facet_wrap(~ variable, scales = 'free')
   
   ## catch pred by fleet ----
-  catch_yf_predt <- data.frame(dat$catch_yf_pred)
-  names(catch_yf_predt) <- df$fltnames_fish
-  catch_yf_predt <- catch_yf_predt %>%
+  catch_yf_pred_totalt <- data.frame(dat$catch_yf_pred_total)
+  names(catch_yf_pred_totalt) <- df$fltnames_fish
+  catch_yf_pred_totalt <- catch_yf_pred_totalt %>%
     mutate(Year = years) %>%
     group_by(Year) %>%
     # mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
@@ -244,7 +244,7 @@ writeOM <- function(dat,
   
   ggplot(data = catch_yf_obst, 
          aes(x = Year, y = value, color = variable)) +
-    geom_line(data = catch_yf_predt, lwd = 0.75) +
+    geom_line(data = catch_yf_pred_totalt, lwd = 0.75) +
     scale_color_manual(values = fishfltPal) +
     scale_x_continuous(limits = c(1960,1960+df$yRun)) +
     geom_point(pch = 1, fill = NA, col = 'black') +
@@ -260,7 +260,7 @@ writeOM <- function(dat,
   
   
   ## catch pred by m ----
-  catch_yf_predm <- catch_yf_predt %>% 
+  catch_yf_pred_totalm <- catch_yf_pred_totalt %>% 
     group_by(Year, REG) %>%
     summarise(totC = sum(value)) %>%  mutate(Type = 'PRED') 
   catch_yf_obsm <- catch_yf_obst %>% 
@@ -272,7 +272,7 @@ writeOM <- function(dat,
   
   ggplot(data = catch_yf_obsm, 
          aes(x = Year, y = totC, color = REG)) +
-    geom_line(data = catch_yf_predm, lwd = 1.1) +
+    geom_line(data = catch_yf_pred_totalm, lwd = 1.1) +
     scale_color_manual(values = mgmtPal) +
     scale_x_continuous(limits = c(1960,1960+df$yRun)) +
     geom_point(pch = 1, fill = NA, col = 'black') +

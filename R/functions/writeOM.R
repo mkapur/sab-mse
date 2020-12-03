@@ -98,7 +98,7 @@ writeOM <- function(dat,
          main = inames[i], 
          col.main = rev(rev(subareaPal)[i]), 
          ylim = c(0,ylt),
-         xlim = c(0,nyear),xaxt='n',
+         xlim = c(0,df$yRun-1),xaxt='n',
          xlab = "Model Year", 
          ylab = 'Numbers (M+F)')
     lines(rowSums(dat$N_yais_mid[,,i,]),
@@ -115,10 +115,11 @@ writeOM <- function(dat,
            legend = c("beg",
                       "mid (move)",
                       "end (fished)"), cex = 0.7, lty =1, lwd = 5)
-    axis(1, at = seq(1,nyear,5), labels = years[seq(1,nyear,5)])
+    axis(1, at = seq(1,df$yRun,5), labels = years[seq(1,df$yRun,5)])
   }
   dev.off()
-  ## ssb ----
+  
+  ## ssb_yk ----
   dat$SSB_yk %>%
     data.frame() %>%
     mutate('Yr' = years[1:nrow(.)]) %>%
@@ -126,8 +127,10 @@ writeOM <- function(dat,
     ggplot(., aes(x = Yr, y = value, color = variable )) +
     scale_color_manual(values = demPal) +
     geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
+    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
     ggsidekick::theme_sleek() + 
     theme( legend.position = c(0.8,0.8))
+  
   ggsave(last_plot(),
          file = paste0(dumpfile,"/", Sys.Date(),'-SSB_yk.png'),
          width = 10, height = 6, unit = 'in',
@@ -154,7 +157,7 @@ writeOM <- function(dat,
   
   # anim_save(paste0(dumpfile,"SSB_yk_animate.gif",animation = last_animation())) 
   ## ssb_ym with compare ----
-  spmat <- data.frame(subarea = c('A1',"A2","B2","B1","C2","C1"),
+  spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
   
@@ -183,6 +186,8 @@ writeOM <- function(dat,
     geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG)) +
     scale_color_manual(values = mgmtPal)+
     geom_point()+  ggsidekick::theme_sleek() +
+    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
+    
     labs(x = 'Modeled Year',y = 'SSB', color = 'Mgmt Region') +
     facet_wrap(~REG,scales = 'free_y')
   ggsave(last_plot(),
@@ -220,9 +225,6 @@ writeOM <- function(dat,
   catch_yf_pred_totalt <- catch_yf_pred_totalt %>%
     mutate(Year = years) %>%
     group_by(Year) %>%
-    # mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
-    #        "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
-    # select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
     mutate(REG = substr(variable,0,2)) %>% filter(value != 0)
@@ -246,7 +248,7 @@ writeOM <- function(dat,
          aes(x = Year, y = value, color = variable)) +
     geom_line(data = catch_yf_pred_totalt, lwd = 0.75) +
     scale_color_manual(values = fishfltPal) +
-    scale_x_continuous(limits = c(1960,1960+df$yRun)) +
+    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
     theme_sleek() + 
@@ -274,7 +276,7 @@ writeOM <- function(dat,
          aes(x = Year, y = totC, color = REG)) +
     geom_line(data = catch_yf_pred_totalm, lwd = 1.1) +
     scale_color_manual(values = mgmtPal) +
-    scale_x_continuous(limits = c(1960,1960+df$yRun)) +
+    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
     theme_sleek() + 
@@ -298,7 +300,6 @@ writeOM <- function(dat,
   
   
   survey_yf_obst <- data.frame( df$surv_yf_obs)  %>%
-    
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
     filter(value > -1) %>%
@@ -315,7 +316,7 @@ writeOM <- function(dat,
     scale_color_manual(values = fishfltPal) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
-    scale_x_continuous(limits = c(1960,1960+df$yRun)) +
+    scale_x_continuous(limits = c(1980,1959+df$yRun)) +
     theme_sleek() + 
     theme(legend.position = 'none')+
     labs(y = 'survey', color = 'Fishing Fleet')+
@@ -372,6 +373,7 @@ writeOM <- function(dat,
       if(s == 1) plot(tmp, 
                       col = sexPal[1], 
                       type = 'l', 
+                      yaxt = 'n',
                       lwd = 2, 
                       xlab = ifelse(df$selType_fish[flt] == 0,
                                     'Age','Length'), 
@@ -379,10 +381,11 @@ writeOM <- function(dat,
                       lty = 1,
                       ylim = c(0,1), 
                       main = mapped_fsh_selnames[flt], xlim = c(0,75),
-                      col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+                      col.main  = c(rep(mgmtPal[1],2), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
       box(which = 'plot', lty = 'solid', 
           col = c(rep(mgmtPal[1],2), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
           lwd = 2)
+      axis(2, at = seq(0,1,0.2), labels = seq(0,1,0.2))
       if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
     }
   }

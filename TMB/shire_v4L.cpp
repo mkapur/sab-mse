@@ -46,6 +46,7 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(Linf_yk); // sex, stock, year specific
   DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
   DATA_ARRAY(kappa_yk);
+  DATA_ARRAY(mat_ak);
   DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
   DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
   DATA_INTEGER(LBins); // maximum length bin in CM

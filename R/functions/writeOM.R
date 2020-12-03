@@ -313,7 +313,7 @@ writeOM <- function(dat,
   ggplot(data = survey_yf_obst, 
          aes(x = Year, y = value, color = variable)) +
     geom_line(data = survey_yf_predt, lwd = 0.75) +
-    scale_color_manual(values = fishfltPal) +
+    scale_color_manual(values = survfltPal) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
     scale_x_continuous(limits = c(1980,1959+df$yRun)) +

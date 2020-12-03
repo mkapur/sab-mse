@@ -109,12 +109,12 @@ writeOM <- function(dat,
           type = 'l',
           lwd = 3,
           col = scales::alpha(rev(rev(subareaPal)[i]),0.8))
-    legend("topright",col = c(scales::alpha(rev(rev(subareaPal)[i]),0.2),
-                              scales::alpha(rev(rev(subareaPal)[i]),0.4),
-                              scales::alpha(rev(rev(subareaPal)[i]),0.8)), 
+    legend("topright",col = c(scales::alpha(subareaPal)[i],0.2,
+                              scales::alpha(subareaPal)[i],0.4,
+                              scales::alpha(subareaPal)[i],0.8), 
            legend = c("beg",
-                      "mid (move)",
-                      "end (fished)"), cex = 0.7, lty =1, lwd = 5)
+                      "mid (move, 1/2 fishing and mort)",
+                      "end (1/2 fishing and mort)"), cex = 0.7, lty =1, lwd = 5)
     axis(1, at = seq(1,df$yRun,5), labels = years[seq(1,df$yRun,5)])
   }
   dev.off()

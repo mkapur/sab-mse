@@ -183,7 +183,7 @@ writeOM <- function(dat,
     filter(Year >1965 ) %>%
     ggplot(., aes(x = Year, y = assSSBMT, color = REG)) +
     geom_line(aes(y = omSSBMT),lwd = 1.1) +
-    geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG)) +
+    geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG,width=0)) +
     scale_color_manual(values = mgmtPal)+
     geom_point()+  ggsidekick::theme_sleek() +
     scale_x_continuous(limits = c(1960,1959+df$yRun)) +
@@ -250,7 +250,7 @@ writeOM <- function(dat,
     scale_color_manual(values = fishfltPal) +
     scale_x_continuous(limits = c(1960,1959+df$yRun)) +
     geom_point(pch = 1, fill = NA, col = 'black') +
-    geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
+    geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black',width=0) +
     theme_sleek() + 
     theme(legend.position = 'none')+
     labs(y = 'catch', color = 'Fishing Fleet')+
@@ -278,7 +278,7 @@ writeOM <- function(dat,
     scale_color_manual(values = mgmtPal) +
     scale_x_continuous(limits = c(1960,1959+df$yRun)) +
     geom_point(pch = 1, fill = NA, col = 'black') +
-    geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
+    geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black',width=0) +
     theme_sleek() + 
     theme(legend.position = 'none')+
     labs(y = 'catch', color = 'Fishing Fleet')+
@@ -315,7 +315,7 @@ writeOM <- function(dat,
     geom_line(data = survey_yf_predt, lwd = 0.75) +
     scale_color_manual(values = survfltPal) +
     geom_point(pch = 1, fill = NA, col = 'black') +
-    geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black') +
+    geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black',width=0) +
     scale_x_continuous(limits = c(1980,1959+df$yRun)) +
     theme_sleek() + 
     theme(legend.position = 'none')+

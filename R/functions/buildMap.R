@@ -1,7 +1,7 @@
 buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
                      fixFlt = c("BC_LL","BC_TRAP","BC_TWL")){
   
-  mappy <- list(); idx = 1
+  mappy <- list(); idx <- 1
   
   # for(i in 1:length(df$parms)){
   for(i in seq_along(toFix)){
@@ -12,7 +12,7 @@ buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
       idx = idx+1
       ## end non slx pars
     } else{
-      if(i == 'log_fsh_slx_pars'){
+      if(toFix[i]  == 'log_fsh_slx_pars'){
           fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars),
                                dim = dim(df$parms$log_fsh_slx_pars),
                                dimnames = dimnames(df$parms$log_fsh_slx_pars))
@@ -20,11 +20,22 @@ buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
             fsh_slx_map[row.names(fsh_slx_map) == flt,1:2,1,1:2] <- factor(NA)
           }
           mappy[[idx]] <- factor(fsh_slx_map)
-          names(mappy[[idx]]) <- toFix[i]
+          names(mappy)[idx] <- 'log_fsh_slx_pars'
           
           idx = idx+1
-        } else if( toFix[i] != 'log_srv_slx_pars' ){
-          stop("fx not ready to automate fixing survey slx")
+        } else if( toFix[i]  == 'log_srv_slx_pars' ){
+          # stop("fx not ready to automate fixing survey slx")
+          srv_slx_map <- array(1:length(df$parms$log_srv_slx_pars),
+                               dim = dim(df$parms$log_srv_slx_pars),
+                               dimnames = dimnames(df$parms$log_srv_slx_pars))
+          for(flt in fixFlt){
+            srv_slx_map[row.names(srv_slx_map) == flt,1:2,1,1:2] <- factor(NA)
+          }
+          mappy[[idx]] <- factor(srv_slx_map)
+          names(mappy)[idx] <-'log_srv_slx_pars'
+          
+          idx = idx+1
+          
         }
       } ## end  slx pars
     } ## end i in to fix

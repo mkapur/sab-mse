@@ -394,7 +394,7 @@ load_data_OM <- function(nspace = 6,
     logpi_acomp = rep(log(50),nfleets_acomp),
     logSDR = 1.4,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 
-    log_fsh_slx_pars =log_fsh_slx_pars,
+    log_fsh_slx_pars = log_fsh_slx_pars,
     log_srv_slx_pars = log_srv_slx_pars,
     epsilon_tau = rep(log(5),nspace),
     mort_k = mort_k ## mortality

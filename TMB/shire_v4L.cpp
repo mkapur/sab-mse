@@ -81,8 +81,6 @@ Type objective_function<Type>::operator() ()
   array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish,2);  catch_yaf_pred.setZero();  // estimated catches at age by fleet
   array<Type> catch_yf_pred(tEnd,nfleets_fish,2);  catch_yf_pred.setZero();  
   array<Type> catch_yf_pred_total(tEnd,nfleets_fish);  catch_yf_pred_total.setZero();   
-  
-  
   // array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);  catch_yfi_pred.setZero();
   // array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  catch_yaif_pred.setZero();
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
@@ -94,29 +92,11 @@ Type objective_function<Type>::operator() ()
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-4),nsex);  // four acomp fleets are comm
   vector<Type>selG(nage);
   vector<Type>selGL(LBins);
-  
-  // F tuning
-  // int niter = 22;
-  // DATA_INTEGER(niter);
-  // DATA_SCALAR(v1);
-  // DATA_SCALAR(Fmax);
-  
-  // vector<Type>Z_a_TEMP(nage);
-  // vector<Type>Z_a_TEMP2(nage);
-  // array<Type> catch_afk_TEMP(nage, nfleets_fish, niter+1);  catch_afk_TEMP.setZero();
+
   array<Type> instF_yf(tEnd,nfleets_fish,2); // intermediate biannual Fs by year, fleet
   array<Type> instF_yafs(tEnd,nage,nfleets_fish,nsex,2); instF_yafs.setZero(); // instF_yf times slx_yafs
   array<Type> instF_yais(tEnd,nage,nspace,nsex,2);  instF_yais.setZero(); // sum instF_yafs over flt biannually
-  
-  // array<Type> F_yf(tEnd,nfleets_fish); // finalized instantaenous F (catch/mean(expbio))
-  
-  
-  // array<Type> Freal_yf(tEnd,nfleets_fish); // final tuned fleet and yr specific F
-  // array<Type> Zreal_ya(tEnd,nage); // temp tuned fleet Z by y and age
-  // array<Type> Zreal_yai(tEnd,nage,nspace); // temp tuned fleet Z by y and age and area
-  // array<Type> F_area_yfi(tEnd,nfleets_fish,nspace); // temp tuned fleet Z by y and age
-  // array<Type> F_ym(tEnd,nmgmt_reg); //dodo
-  
+
   // biology storage
   array<Type> Ninit_ais(nage,nspace,nsex); // initial numbers at age in subarea, just once
   array<Type> N_0ais(nage, nspace,nsex); // numbers in year 0 at age in subarea
@@ -390,8 +370,6 @@ Type objective_function<Type>::operator() ()
   // Equilibrium Unfished numbers-at-age, subarea (outside of y loop)
   // identical to Ninit except no recdevs
   // https://groups.google.com/u/2/g/tmb-users/c/y2hVhNQKVqo/m/WHw4NTSzBAAJ
-  // matrix<Type> LN = lltCovMAT.matrixL(); // matrixL is a function, lltcovmat is an object
-  // matrix<Type> LinvN = LN.inverse(); // now LN is an object and we do inverse on it
   
   N_0ais.setZero();
   // calc true Neqn given recruitment (matrix multiplication)
@@ -1084,7 +1062,7 @@ Type objective_function<Type>::operator() ()
   // for(int i=0;i<(nspace);i++){
   //   for(int a=0;a<(nage-1);a++){ // needs to loop over all years of inits
   //     for(int s=0;s<nsex;s++){
-  //       ans_priors += Type(0.5)*(Ninit_ais(a,i,s)*Ninit_ai(a,i,s))/(SDR*SDR);
+  //       ans_priors += Type(0.5)*(Ninit_ais(a,i,s)*Ninit_ais(a,i,s))/(SDR*SDR);
   //     } // end sex
   //   } // end ages
   // } // end space

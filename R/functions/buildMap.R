@@ -13,9 +13,11 @@ buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
       ## end non slx pars
     } else{
       if(toFix[i]  == 'log_fsh_slx_pars'){
+        
           fsh_slx_map <- array(1:length(df$parms$log_fsh_slx_pars),
                                dim = dim(df$parms$log_fsh_slx_pars),
                                dimnames = dimnames(df$parms$log_fsh_slx_pars))
+          if('all_fsh' %in% fixFlt) fsh_slx_map[1:length(df$parms$log_fsh_slx_pars)]  <- factor(NA)
           for(flt in fixFlt){
             fsh_slx_map[row.names(fsh_slx_map) == flt,1:2,1,1:2] <- factor(NA)
           }

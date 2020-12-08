@@ -1001,6 +1001,9 @@ Type objective_function<Type>::operator() ()
   
   // // LIKELIHOODS //
   // Likelihood: survey biomass
+  // "Recall that the adjusted standard deviation \epsilon_y^f is a constant variance
+  // term plus a time-varying term calculated externally 
+  // as a part of the kriging and extrapolation procedures within VAST"
   Type ans_survey=0.0;
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
     for(int y=0;y<yRun;y++){ // Survey Surveyobs

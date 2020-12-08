@@ -30,13 +30,13 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   
   
   if('fsh' %in% boundSlx){
-    ## first check if slx was fixed at all
-    # if(length(grep("log_fsh_slx_pars", mappy)) != 0){
-    #   ## make a master array with everything
-    #   array(1:length(obj$par[names(obj$par) == "log_fsh_slx_pars"]), dim = c(7,2,2))
-    #   ## identify which fleets were NA
-    #   which(is.na(mappy[[grep("log_fsh_slx_pars", mappy)]]))
-    # }
+    
+    ## build fish bounds as if everything is there, then remove fixed fleets
+    ## will have same dims as mappy and df$parms
+    fsh_slx_map_lower <- fsh_slx_map_upper <- array(rep(NA,length(mappy$log_fsh_slx_pars)),
+                         dim = dim(df$parms$log_fsh_slx_pars),
+                         dimnames = dimnames(df$parms$log_fsh_slx_pars))
+    
     
     ## if no fleets to fix, go with the normal slx bounds
     p1_logistic_idx <- c(1:2,15:16) #c(1:4,19:22)
@@ -49,30 +49,53 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
     # ## logistic p1 (a50)
     # array(1:length(lower[names(lower) == 'log_fsh_slx_pars']), dim = c(7,2,2))
     
-    lower[names(lower) == 'log_fsh_slx_pars'][p1_logistic_idx] <- log(35)
+    fsh_slx_map_lower[p1_logistic_idx] <- log(35)
     ## logistic p2 (a95)
-    lower[names(lower) == 'log_fsh_slx_pars'][p2_logistic_idx] <- log(60)
+    fsh_slx_map_lower[p2_logistic_idx] <- log(60)
     ## normal p1 (mean)
-    lower[names(lower) == 'log_fsh_slx_pars'][p1_norm_idx] <- log(15)
+    fsh_slx_map_lower[p1_norm_idx] <- log(15)
     ## normal p2 (sd)
-    lower[names(lower) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(1)
+    fsh_slx_map_lower[p2_norm_idx] <- log(1)
     ## gamma shape (k*theta equals mean)
-    lower[names(lower) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(15)
+    fsh_slx_map_lower[p1_gamma_idx] <- log(15)
     ## gamma rate
-    lower[names(lower) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(2)
+    fsh_slx_map_lower[p2_gamma_idx] <- log(2)
     # #* fsh slx upper bounds ----
     # ## logistic p1 (a50)
-    upper[names(upper) == 'log_fsh_slx_pars'][p1_logistic_idx] <- log(60)
+    fsh_slx_map_upper[p1_logistic_idx] <- log(60)
     ## logistic p2 (a95)
-    upper[names(upper) == 'log_fsh_slx_pars'][p2_logistic_idx] <- log(70)
+    fsh_slx_map_upper[p2_logistic_idx] <- log(70)
     ## normal p1 (mean)
-    upper[names(upper) == 'log_fsh_slx_pars'][p1_norm_idx] <- log(65)
+    fsh_slx_map_upper[p1_norm_idx] <- log(65)
     ## normal p2 (sd)
-    upper[names(upper) == 'log_fsh_slx_pars'][p2_norm_idx] <- log(15)
+    fsh_slx_map_upper[p2_norm_idx] <- log(15)
     ## gamma shape (k*theta equals mean)
-    upper[names(upper) == 'log_fsh_slx_pars'][p1_gamma_idx] <- log(35)
+    fsh_slx_map_upper[p1_gamma_idx] <- log(35)
     ## gamma rate
-    upper[names(upper) == 'log_fsh_slx_pars'][p2_gamma_idx] <- log(2)
+    fsh_slx_map_upper[p2_gamma_idx] <- log(2)
+    
+    
+    ##  check if slx was fixed at all
+    if(length(grep("log_fsh_slx_pars", names(mappy))) != 0){
+      ## identify positions of fixed fleet pars
+      Nas <- which(is.na(mappy[[grep("log_fsh_slx_pars", names(mappy))]]))
+      ## drop these from master bounds array
+      fsh_slx_map_upper <- fsh_slx_map_upper[-Nas]
+      fsh_slx_map_lower <- fsh_slx_map_lower[-Nas]
+      
+      ## only for sanity check
+      # nfixedfleets <- length(Nas)/4
+      # seeddim <- df$nfleets_fish-nfixedfleets
+      # length(fsh_slx_map_upper) ==  length(mappy$log_fsh_slx_pars)-length(Nas)
+      # array(fsh_slx_map_upper, dim = c(seeddim,2,1,2))
+      # array(1:length(obj$par[names(obj$par) == "log_fsh_slx_pars"]), dim = c(6,2,2))
+      ## identify which fleets were NA
+      # rownames(mappy$log_fsh_slx_pars)
+      # which(is.na(mappy[[grep("log_fsh_slx_pars", mappy)]]))
+    }
+    
+    upper[names(upper) == "log_fsh_slx_pars"] <- fsh_slx_map_upper
+    lower[names(lower) == "log_fsh_slx_pars"] <- fsh_slx_map_lower
     
   }
   # array(exp(upper[names(upper) == 'log_fsh_slx_pars']), dim = dim(df$parms$log_fsh_slx_pars))
@@ -92,15 +115,17 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
       nfixedfleets <- length(Nas)/4
       # array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), dim = c(8-nfixedfleets,2,1,2))
+      seeddim <-  df$nfleets_surv+df$nfleets_acomp-4-nfixedfleets
+      ## specific bounds on p1 and p2
+      # lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(35) ## p1
+      # lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(60) ## p2
+      # upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(60) ## p1
+      # upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
       
-      seeddim <- 8-nfixedfleets
-      
-      lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(35) ## p1
-      lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(60) ## p2
-      
-      upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(60) ## p1
-      upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
-      
+      ## just rational bounds
+      lower[names(lower) == 'log_srv_slx_pars'] <- 0
+      upper[names(upper) == 'log_srv_slx_pars'] <- log(70)
+
       
     } else   if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
       

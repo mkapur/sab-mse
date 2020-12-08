@@ -1009,7 +1009,7 @@ Type objective_function<Type>::operator() ()
         std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
         ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
                             log(surv_yf_obs(y,surv_flt)),
-                            surv_yf_err(y,surv_flt), TRUE);
+                            0.2+surv_yf_err(y,surv_flt), TRUE);
         // std::cout << y << "\t" << surv_flt << "\t" << "\t ans_survey = " <<   ans_survey  << "\n";
       } // end flag for neg 1
     } // end y

@@ -665,7 +665,7 @@ Type objective_function<Type>::operator() ()
                 denom += phi_if_fish(fish_flt,i)*
                   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
                   N_yais_mid(y,a,i,s)*
-                  mla_yais(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
@@ -885,7 +885,7 @@ Type objective_function<Type>::operator() ()
                   srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s)*
-                  mla_yais(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 

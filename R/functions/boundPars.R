@@ -124,7 +124,7 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       
       ## just rational bounds
       lower[names(lower) == 'log_srv_slx_pars'] <- 0
-      upper[names(upper) == 'log_srv_slx_pars'] <- log(70)
+        upper[names(upper) == 'log_srv_slx_pars'] <- log(70)
 
       
     } else   if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){

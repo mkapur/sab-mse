@@ -109,9 +109,9 @@ writeOM <- function(dat,
           type = 'l',
           lwd = 3,
           col = scales::alpha(subareaPal[i],0.8))
-    legend("topright",col = c(scales::alpha(subareaPal)[i],0.2,
-                              scales::alpha(subareaPal)[i],0.4,
-                              scales::alpha(subareaPal)[i],0.8), 
+    legend("topright",col = c(scales::alpha(subareaPal[i],0.2),
+                              scales::alpha(subareaPal[i],0.4),
+                              scales::alpha(subareaPal[i],0.8)), 
            legend = c("beg",
                       "mid (move + 1/2 fishing + 1/2 M)",
                       "end (1/2 fishing + 1/2 M)"), cex = 0.7, lty =1, lwd = 5)

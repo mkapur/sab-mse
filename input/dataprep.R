@@ -977,10 +977,10 @@ spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                     stock = c("R4","R3","R3","R2","R2","R1"),
                     mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
 bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
-  mutate(CPUE =  1e3*nominal.Trap.CPUE,
-    SE = 0.317*1e3, 
-         lci = CPUE-1.96*SE,
-         uci = CPUE+1.96*SE, Fleet = "BC_early") %>%
+  mutate(CPUE =  nominal.Trap.CPUE,
+    SE = 0.317,#, 
+         lci = (CPUE-1.96*SE)*1e3,
+         uci = (CPUE+1.96*SE)*1e3, Fleet = "BC_early") %>%
   select(YEAR, CPUE, SE, Fleet)
 bcnom[bcnom < 0 ] <- NA ## -1, -1000
 names(bcnom) <- c('Year','value', 'sigma', 'fleet')
@@ -1052,7 +1052,7 @@ write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_ind
 #* survey plot ----
 surv_vals %>%
   # select(-BC_EARLY) %>%
-  # mutate(BC_EARLY = BC_EARLY*1000) %>%
+  mutate(BC_EARLY = BC_EARLY*1000) %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
@@ -1067,15 +1067,17 @@ ggsave(last_plot(),
 
 #* survey + error plot ----
 surv_vals %>%
+  mutate(BC_EARLY = BC_EARLY*1000) %>%
   mutate(Year = 1960:2019) %>%  
   melt(., id = c('Year')) %>% 
   merge(., 
         survsigMT %>%
+          mutate(BC_EARLY = BC_EARLY*1000) %>%
           mutate(Year = 1960:2019) %>%  
           melt(.,id = 'Year'),
           by = c("Year","variable")) %>%
   mutate(lci = value.x-value.y, uci = value.x + value.y) %>%
-  filter(variable == 'BC_VAST') %>%
+  # filter(variable == 'BC_VAST') %>%
   ggplot(., aes(x = Year, y = value.x, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
   scale_color_manual(values = survfltPal)+

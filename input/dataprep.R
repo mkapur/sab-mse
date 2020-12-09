@@ -991,7 +991,8 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   mutate(value = Estimate_metric_tons,
-         sigma = SD_log, 
+         # sigma = SD_log, 
+         sigma = log(SD_mt),
          fleet = Fleet, 
          mgmt = fleet, 
          type = 'survey') %>%
@@ -1001,6 +1002,7 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
   pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
   merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
   select(-Year) 
+
 survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
@@ -1029,7 +1031,8 @@ vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv
   merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
   mutate(value = Estimate_metric_tons,
-         sigma = SD_log, 
+         # sigma = SD_log, 
+         sigma =SD_mt,
          Fleet = Fleet, 
          mgmt = Fleet, 
          type = 'survey') %>%
@@ -1063,7 +1066,7 @@ ggsave(last_plot(),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
 #* survey + error plot ----
-survey%>%
+surv_vals %>%
   mutate(Year = 1960:2019) %>%  
   melt(., id = c('Year')) %>% 
   merge(., 
@@ -1072,6 +1075,7 @@ survey%>%
           melt(.,id = 'Year'),
           by = c("Year","variable")) %>%
   mutate(lci = value.x-value.y, uci = value.x + value.y) %>%
+  filter(variable == 'BC_VAST') %>%
   ggplot(., aes(x = Year, y = value.x, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
   scale_color_manual(values = survfltPal)+

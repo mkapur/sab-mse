@@ -978,7 +978,7 @@ spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                     mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
 bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
   mutate(CPUE =  nominal.Trap.CPUE,
-    SE = 0.317,#, 
+    SE = exp(0.317),#, BC email said "in log space"
          lci = (CPUE-1.96*SE)*1e3,
          uci = (CPUE+1.96*SE)*1e3, Fleet = "BC_early") %>%
   select(YEAR, CPUE, SE, Fleet)

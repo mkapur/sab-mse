@@ -397,8 +397,16 @@ writeOM <- function(dat,
   for(flt in 1:length(mapped_fsh_selnames)){
     for(s in 1:2){
       tmp <- fsh_sel_afs[,flt,s]
+      
+      ## if fixed overwrite colors
+      if(length(mappy$log_fsh_slx_pars) == length(df$parms$log_fsh_slx_pars) ){
+        sexPal_temp = c('grey22','grey66')
+      } else{
+        sexPal_temp = sexPal
+      }
+      
       if(s == 1) plot(tmp, 
-                      col = sexPal[1], 
+                      col = sexPal_temp[1], 
                       type = 'l', 
                       yaxt = 'n',
                       lwd = 2, 
@@ -408,12 +416,15 @@ writeOM <- function(dat,
                       lty = 1,
                       ylim = c(0,1), 
                       main = mapped_fsh_selnames[flt], xlim = c(0,75),
-                      col.main  = c(rep(mgmtPal[1],2), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+                      col.main  = c(rep(mgmtPal[1],2), 
+                                    rep(mgmtPal[2],3),
+                                    rep(mgmtPal[3],2))[flt])
+      
       box(which = 'plot', lty = 'solid', 
           col = c(rep(mgmtPal[1],2), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
           lwd = 2)
       axis(2, at = seq(0,1,0.2), labels = seq(0,1,0.2))
-      if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
+      if(s == 2) lines(tmp, col = sexPal_temp[2], type = 'l', lty = 2, lwd = 2)
     }
   }
   dev.off()

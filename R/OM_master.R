@@ -16,23 +16,23 @@ dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
-df$yRun =   df$tEnd-1 ## number of years to run model
+df$yRun =   27# df$tEnd-1 ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
 
-# load("C:/Users/mkapur/Dropbox/UW/sab-mse/output/2020-12-07-59y_v4L_M=0.2-0.2-0.2-0.2_slxestwithnobnds/opt.rdata")
+load("C:/Users/mkapur/Dropbox/UW/sab-mse/output/2020-12-10-59y_v4L_M=0.2-0.2-0.2-0.2_allslxest_withbounds/opt.rdata")
 # df$parms$log_srv_slx_pars <- array(opt$par[names(opt$par) == 'log_srv_slx_pars'],dim= c(8,2,1,2),
 #                                    dimnames = dimnames(df$parms$log_srv_slx_pars))
-# df$parms$log_fsh_slx_pars <- array(opt$par[names(opt$par) == 'log_fsh_slx_pars'],dim= c(7,2,1,2),
-                                   # dimnames = dimnames(df$parms$log_fsh_slx_pars))
+df$parms$log_fsh_slx_pars <- array(opt$par[names(opt$par) == 'log_fsh_slx_pars'],dim= c(7,2,1,2),
+dimnames = dimnames(df$parms$log_fsh_slx_pars))
 
 mappy <-
   buildMap(toFix =  c("omega_0ij",
-                      "epsilon_tau"), 
-                      # "log_fsh_slx_pars",
+                      "epsilon_tau", 
+                      "log_fsh_slx_pars",
                       # "log_srv_slx_pars",
-                    # "mort_k"),
+                    "mort_k"),
            fixFlt = c("all_fsh"))
 
 # array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,1,2), dimnames = dimnames(df$parms$log_fsh_slx_pars))
@@ -49,7 +49,7 @@ system.time(obj <- MakeADFun(df,
 
 bounds <- boundPars(obj,
                     r0_lower = 0, 
-                    boundSlx = c(NA,'fsh','srv')[1])
+                    boundSlx = c(NA,'fsh','srv')[2:3])
 ## confirm that we've only bounded unfixed fleets by number
 # length(bounds$upper[names(bounds$upper)=='log_fsh_slx_pars']) == length(mappy$log_fsh_slx_pars[!is.na(mappy$log_fsh_slx_pars)])
 # length(bounds$upper[names(bounds$upper)=='log_srv_slx_pars']) == length(mappy$log_srv_slx_pars[!is.na(mappy$log_srv_slx_pars)])
@@ -103,7 +103,7 @@ cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname, mappy = mappy,
         runname = paste0("-",df$yRun,"y_",cppname,"_M=",
                          paste(df$parms$mort_k,collapse="-"),
-                         "_allslxest_nobounds"))
+                         "_srvslxest_withbounds"))
 
 
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

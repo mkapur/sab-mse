@@ -992,8 +992,8 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   mutate(value = Estimate_metric_tons,
-         # sigma = SD_log, 
-         sigma = log(SD_mt),
+         sigma = SD_log,
+         # sigma = log(SD_mt),
          fleet = Fleet, 
          mgmt = fleet, 
          type = 'survey') %>%

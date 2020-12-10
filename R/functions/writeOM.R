@@ -344,14 +344,26 @@ writeOM <- function(dat,
   
   # plot FISH selex ----
   ## bring estimates out and rearrange
-  inputSel <- array(exp(obj$par[grep('fsh_slx',names(obj$par))]),
-                    dim = dim(df$parms$log_fsh_slx_pars),
-                    dimnames = dimnames(df$parms$log_fsh_slx_pars))
+  
+  ## if everythign fixed use
+  if(length(mappy$log_fsh_slx_pars) == length(df$parms$log_fsh_slx_pars) ){
+    inputSel <- array(exp(df$parms$log_fsh_slx_pars),
+                      dim = dim(df$parms$log_fsh_slx_pars),
+                      dimnames = dimnames(df$parms$log_fsh_slx_pars))
+    
+    selP <- array(exp(df$parms$log_fsh_slx_pars),
+                  dim = c(7,2,1,2))
+  } else{
+    inputSel <- array(exp(obj$par[grep('fsh_slx',names(obj$par))]),
+                      dim = dim(df$parms$log_fsh_slx_pars),
+                      dimnames = dimnames(df$parms$log_fsh_slx_pars))
+    
+    selP <- array(exp(opt$par[grep('fsh_slx',names(opt$par))]),
+                  dim = c(7,2,1,2))
+  }
   
   mapped_fsh_selnames <- c('AK_FIX','AK_TWL',paste(df$fltnames_fish[3:df$nfleets_fish]))
-  
-  selP <- array(exp(opt$par[grep('fsh_slx',names(opt$par))]),
-                dim = c(7,2,1,2))
+
   dimnames(selP)[[1]] <- mapped_fsh_selnames
   
   fsh_sel_afs <- array(NA, dim = c(df$nage,

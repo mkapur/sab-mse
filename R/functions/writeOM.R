@@ -303,7 +303,7 @@ writeOM <- function(dat,
     mutate(Type = 'PRED') %>%
     mutate(REG = substr(variable,0,2)) %>% filter(value > 0)
   
-  survey_yf_errt <- data.frame( exp(df$surv_yf_err)) %>%    
+  survey_yf_errt <- data.frame(df$surv_yf_err) %>%    
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
     filter(!is.na(value)) 
@@ -318,8 +318,8 @@ writeOM <- function(dat,
     ## convert CV to SD via CV = mean/sd
     ## we think these are sds in mt (input to model as log)
     mutate(Type = 'OBS',
-           lci = round(value - (value.y)),
-           uci = round(value + (value.y))) %>%
+           lci = round(value - value*(value.y)),
+           uci = round(value + (value*value.y))) %>%
     mutate(REG = substr(variable,0,2)) %>%
       select(Year, variable, value, lci, uci)
   

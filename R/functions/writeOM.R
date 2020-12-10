@@ -301,19 +301,27 @@ writeOM <- function(dat,
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
-    mutate(REG = substr(variable,0,2)) #%>%
+    mutate(REG = substr(variable,0,2)) %>% filter(value > 0)
+  
+  survey_yf_errt <- data.frame( exp(df$surv_yf_err)) %>%    
+    mutate(Year = years) %>%
+    melt(id = 'Year') %>%
+    filter(!is.na(value)) 
   
   
   survey_yf_obst <- data.frame( df$surv_yf_obs)  %>%
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
-    filter(value > -1) %>%
+    filter(value > 0) %>%
+    merge(survey_yf_errt, by = c('Year','variable')) %>%
+    mutate(value = value.x) %>%
     ## convert CV to SD via CV = mean/sd
-    mutate(Type = 'OBS', 
-           lci = value - 1.96*(0.1*value),
-           uci = value + 1.96*(0.1*value)) %>%
+    ## we think these are sds in mt (input to model as log)
+    mutate(Type = 'OBS',
+           lci = round(value - (value.y)),
+           uci = round(value + (value.y))) %>%
     mutate(REG = substr(variable,0,2)) %>%
-    filter(value > 0) #%>% View()
+      select(Year, variable, value, lci, uci)
   
   ggplot(data = survey_yf_obst, 
          aes(x = Year, y = value, color = variable)) +
@@ -321,7 +329,9 @@ writeOM <- function(dat,
     scale_color_manual(values = survfltPal) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black',width=0) +
-    scale_x_continuous(limits = c(1980,1959+df$yRun)) +
+    scale_x_continuous(limits = c(1980,ifelse(df$yRun == 59,2021,1959+df$yRun)), 
+                       breaks = seq(1980,1960+df$yRun,10),
+                       labels = seq(1980,1960+df$yRun,10)) +
     theme_sleek() + 
     theme(legend.position = 'none')+
     labs(y = 'survey', color = 'Fishing Fleet')+

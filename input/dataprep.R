@@ -986,6 +986,8 @@ bcnom[bcnom < 0 ] <- NA ## -1, -1000
 names(bcnom) <- c('Year','value', 'sigma', 'fleet')
 #* survey error ----
 ## reformat this and save      
+
+# survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization
 # survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
 survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
@@ -1004,8 +1006,11 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
   merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
   select(-Year) 
 
+# survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization
+  
 # survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-  survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization  distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
+  survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
+  distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   mutate(value = Estimate_metric_tons,
@@ -1022,13 +1027,15 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
 
 names(survsig) <-names(survsigMT) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,1,2,3)])
 write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indices_sigma.csv"),row.names = FALSE)
-write.csv(survsigMT %>% select(fltnames_surv),here("input","input_data","OM_indices_sigmaMT.csv"),row.names = FALSE)
+write.csv(survsigMT %>% select(fltnames_surv),
+          here("input","input_data","OM_indices_sigmaMT.csv"),row.names = FALSE)
 
 ## make columns as fleets, include extra  bc surv
 names(bcnom) <- c('Year','value', 'sigma', 'Fleet')
 #* survey biomass ----
 # vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization  filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
+vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization 
+  filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
   mutate(value = Estimate_metric_tons,
@@ -1052,7 +1059,6 @@ names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)])
 write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
 #* survey plot ----
 surv_vals %>%
-  # select(-BC_EARLY) %>%
   mutate(BC_EARLY = BC_EARLY*1000) %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
@@ -1063,17 +1069,17 @@ surv_vals %>%
   labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') +
   labs(subtitle = "BC_EARLY has been multiplied by 1000 for comparison")
 ggsave(last_plot(),
-       file = here('input','input_data','input_figs','OM_indices-09-22-2020.png'),
+       file = here('input','input_data','input_figs','OM_indices-09-22-2020_BaseQ=GOA_Late.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
 #* survey + error plot ----
 surv_vals %>%
-  mutate(BC_EARLY = BC_EARLY*1000) %>%
+  # mutate(BC_EARLY = BC_EARLY*1000) %>%
   mutate(Year = 1960:2019) %>%  
   melt(., id = c('Year')) %>% 
   merge(., 
         survsigMT %>%
-          mutate(BC_EARLY = BC_EARLY*1000) %>%
+          # mutate(BC_EARLY = BC_EARLY*1000) %>%
           mutate(Year = 1960:2019) %>%  
           melt(.,id = 'Year'),
           by = c("Year","variable")) %>%

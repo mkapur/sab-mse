@@ -16,7 +16,7 @@ dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
-df$yRun =   27# df$tEnd-1 ## number of years to run model
+df$yRun =  df$tEnd-1 ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))

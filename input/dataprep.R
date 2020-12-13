@@ -980,16 +980,17 @@ bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
   mutate(CPUE =  nominal.Trap.CPUE,
     SE = 0.317,#, BC email said "in log space" so leave that, adj for plotting only
          lci = (CPUE-1.96*exp(SE))*1e3,
-         uci = (CPUE+1.96*exp(SE))*1e3, Fleet = "BC_early") %>%
+         uci = (CPUE+1.96*exp(SE))*1e3, 
+    Fleet = "BC_EARLY") %>%
   select(YEAR, CPUE, SE, Fleet)
 bcnom[bcnom < 0 ] <- NA ## -1, -1000
 names(bcnom) <- c('Year','value', 'sigma', 'fleet')
 #* survey error ----
 ## reformat this and save      
-
+survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=WCGBTS.csv"))  %>% ## VAST stdization
 # survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization
 # survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
+# survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
@@ -1006,10 +1007,10 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
   merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
   select(-Year) 
 
-# survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization
-  
-# survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-  survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
+survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=WCGBTS.csv"))  %>% ## VAST stdization
+  # survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization
+  # survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
+  # survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
@@ -1026,15 +1027,15 @@ survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.c
   select(-Year) 
 
 names(survsig) <-names(survsigMT) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,1,2,3)])
-write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indices_sigma.csv"),row.names = FALSE)
+write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indices_sigma_BaseQ=WCGBTS.csv"),row.names = FALSE)
 write.csv(survsigMT %>% select(fltnames_surv),
-          here("input","input_data","OM_indices_sigmaMT.csv"),row.names = FALSE)
+          here("input","input_data","OM_indices_sigmaMT_BaseQ=WCGBTS.csv"),row.names = FALSE)
 
 ## make columns as fleets, include extra  bc surv
 names(bcnom) <- c('Year','value', 'sigma', 'Fleet')
 #* survey biomass ----
 # vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization 
+vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_Late.csv"))  %>% ## VAST stdization 
   filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
   merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
   distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
@@ -1056,10 +1057,10 @@ merge(., data.frame('Year' = 1960:2019), all = TRUE)
 
 names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) 
 
-write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices.csv"),row.names = FALSE) ## save in special order
+write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices_BaseQ=WCGBTS.csv"),row.names = FALSE) ## save in special order
 #* survey plot ----
 surv_vals %>%
-  mutate(BC_EARLY = BC_EARLY*1000) %>%
+  # mutate(BC_EARLY = BC_EARLY*1000) %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +

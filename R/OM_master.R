@@ -49,7 +49,7 @@ system.time(obj <- MakeADFun(df,
 
 bounds <- boundPars(obj,
                     r0_lower = 0, 
-                    boundSlx = c(NA,'fsh','srv')[2:3])
+                    boundSlx = c(NA,'fsh','srv')[1])
 ## confirm that we've only bounded unfixed fleets by number
 # length(bounds$upper[names(bounds$upper)=='log_fsh_slx_pars']) == length(mappy$log_fsh_slx_pars[!is.na(mappy$log_fsh_slx_pars)])
 # length(bounds$upper[names(bounds$upper)=='log_srv_slx_pars']) == length(mappy$log_srv_slx_pars[!is.na(mappy$log_srv_slx_pars)])
@@ -67,7 +67,7 @@ system.time(opt <-
                 control = list(eval.max = 1e6,
                                iter.max = 1e6,
                                rel.tol = 1e-4)
-              )$opt) ## estimate; can repreat for stability)
+              )$opt) ## estimate; can repeat for stability)
   # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 dat <- obj$report(par = best)

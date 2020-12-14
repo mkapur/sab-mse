@@ -305,7 +305,8 @@ writeOM <- function(dat,
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
-    mutate(REG = substr(variable,0,2)) %>% filter(value > 0)
+    mutate(REG = substr(variable,0,2)) %>% 
+    filter(value > 0)
   
   survey_yf_errt <- data.frame(df$surv_yf_err) %>%    
     mutate(Year = years) %>%

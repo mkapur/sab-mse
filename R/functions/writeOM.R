@@ -236,7 +236,8 @@ writeOM <- function(dat,
     group_by(Year) %>%
     melt(id = 'Year') %>%
     mutate(Type = 'PRED') %>%
-    mutate(REG = substr(variable,0,2)) %>% filter(value != 0)
+    mutate(REG = substr(variable,0,2)) %>% 
+    filter(value != 0  | variable == 'AK_FIX')
   
   catch_yf_obst <- df$catch_yf_obs %>%  data.frame() %>%select(-Year) 
   
@@ -251,7 +252,8 @@ writeOM <- function(dat,
     mutate(Type = 'OBS', 
            lci = value - 1.96*(0.1*value),
            uci = value + 1.96*(0.1*value)) %>%
-    mutate(REG = substr(variable,0,2)) %>% filter(value > -1)
+    mutate(REG = substr(variable,0,2)) %>% 
+    filter(value > -1)
   
   ggplot(data = catch_yf_obst, 
          aes(x = Year, y = value, color = variable)) +

@@ -1,0 +1,192 @@
+$upper
+          logh_k           logh_k           logh_k 
+     -0.01005034      -0.01005034      -0.01005034 
+          logh_k          logR_0k          logR_0k 
+     -0.01005034              Inf              Inf 
+         logR_0k          logR_0k           logq_f 
+             Inf              Inf              Inf 
+          logq_f           logq_f           logq_f 
+             Inf              Inf              Inf 
+          logq_f                b                b 
+             Inf       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b                b                b 
+      1.00000000       1.00000000       1.00000000 
+               b      logpi_acomp      logpi_acomp 
+      1.00000000              Inf              Inf 
+     logpi_acomp      logpi_acomp      logpi_acomp 
+             Inf              Inf              Inf 
+     logpi_acomp      logpi_acomp           logSDR 
+             Inf              Inf              Inf 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      4.09434456       4.09434456       4.17438727 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      4.17438727       3.55534806       4.17438727 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      4.17438727       4.24849524       4.24849524 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      2.70805020       2.70805020       0.69314718 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      2.70805020       2.70805020       4.09434456 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      4.09434456       4.17438727       4.17438727 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      3.55534806       4.17438727       4.17438727 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      4.24849524       4.24849524       2.70805020 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+      2.70805020       0.69314718       2.70805020 
+log_fsh_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      2.70805020       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      4.24849524       4.24849524       4.24849524 
+
+$lower
+          logh_k           logh_k           logh_k 
+      -1.6094379       -1.6094379       -1.6094379 
+          logh_k          logR_0k          logR_0k 
+      -1.6094379        0.0000000        0.0000000 
+         logR_0k          logR_0k           logq_f 
+       0.0000000        0.0000000        0.0000000 
+          logq_f           logq_f           logq_f 
+       0.0000000        0.0000000        0.0000000 
+          logq_f                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b                b                b 
+       0.0000000        0.0000000        0.0000000 
+               b      logpi_acomp      logpi_acomp 
+       0.0000000             -Inf             -Inf 
+     logpi_acomp      logpi_acomp      logpi_acomp 
+            -Inf             -Inf             -Inf 
+     logpi_acomp      logpi_acomp           logSDR 
+            -Inf             -Inf       -9.2103404 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       3.5553481        3.5553481        2.7080502 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       2.7080502        2.7080502        2.7080502 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       2.7080502        4.0943446        4.0943446 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       0.0000000        0.0000000        0.6931472 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       0.0000000        0.0000000        3.5553481 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       3.5553481        2.7080502        2.7080502 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       2.7080502        2.7080502        2.7080502 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       4.0943446        4.0943446        0.0000000 
+log_fsh_slx_pars log_fsh_slx_pars log_fsh_slx_pars 
+       0.0000000        0.6931472        0.0000000 
+log_fsh_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       0.0000000        0.0000000        0.0000000 
+

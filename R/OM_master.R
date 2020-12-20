@@ -11,17 +11,19 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shire_v3L",'shire_v4L')[2]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
+df$surv_yf_obs[df$surv_yf_obs >0] <- 
+  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <-  df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
 
-load(here("output","2020-12-10-59y_v4L_M=0.2-0.2-0.2-0.2_allslxest_withbounds/opt.rdata"))
+load(here("output","2020-12-15-60y_v4L_baseQ=WCGBTS_allest_lwrbounds/opt.rdata"))
 df$parms$log_srv_slx_pars <- array(opt$par[names(opt$par) == 'log_srv_slx_pars'],dim= c(8,2,1,2),
                                    dimnames = dimnames(df$parms$log_srv_slx_pars))
 df$parms$log_fsh_slx_pars <- array(opt$par[names(opt$par) == 'log_fsh_slx_pars'],dim= c(7,2,1,2),
@@ -35,7 +37,7 @@ mappy <-
                       "log_fsh_slx_pars",
                       "log_srv_slx_pars",
                     "mort_k"),
-           fixFlt = c("all_fsh"))
+           fixFlt = c("all_fsh", "WC_VAST","BC_EARLY"))
 
 # array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,1,2), dimnames = dimnames(df$parms$log_fsh_slx_pars))
 # array(mappy$log_srv_slx_pars, dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,1,2),
@@ -103,10 +105,10 @@ likes
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname, mappy = mappy,
-        runname = paste0("-",df$yRun,"y_",cppname,
+        runname = paste0("-",df$yRun-1,"y_",cppname,
                          # "_M=", paste(df$parms$mort_k,collapse="-"),
-                         "_baseQ=WCGBTS"
-                         "_allest_withbounds"))
+                         "_baseQ=WCGBTS",
+                         "_fshfixed_wcbcearlyfixed_withbounds"))
 
 
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

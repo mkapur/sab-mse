@@ -1,7 +1,8 @@
 ## OM_Master.R
 ## M S Kapur 
-## Inspiration from J Sullivan, N Jacobsen Summer 2020
+## Inspiration & code guidance from J Sullivan, N Jacobsen Summer 2020
 ## kapurm@uw.edu
+rm(list = ls())
 
 library(TMB)
 library(dplyr)
@@ -10,8 +11,8 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shire_v3L",'shire_v4L')[2]
-# compile(here("TMB",paste0(dllUSE,".cpp")))
+dllUSE = c("shire_v4L",'shire_v4')[2]
+compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -23,9 +24,9 @@ df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
 
-load(here("output","2020-12-15-60y_v4L_baseQ=WCGBTS_allest_lwrbounds/opt.rdata"))
+load(here("output","2020-12-15-59y_v4L_baseQ=WCGBTS_allest_lwrbounds/opt.rdata"))
 df$parms$log_srv_slx_pars <- array(opt$par[names(opt$par) == 'log_srv_slx_pars'],dim= c(8,2,1,2),
-                                   dimnames = dimnames(df$parms$log_srv_slx_pars))
+dimnames = dimnames(df$parms$log_srv_slx_pars))
 df$parms$log_fsh_slx_pars <- array(opt$par[names(opt$par) == 'log_fsh_slx_pars'],dim= c(7,2,1,2),
                                    dimnames = dimnames(df$parms$log_fsh_slx_pars))
 
@@ -34,8 +35,8 @@ rm(opt)
 mappy <-
   buildMap(toFix =  c("omega_0ij",
                       "epsilon_tau", 
-                      "log_fsh_slx_pars",
-                      "log_srv_slx_pars",
+                      # "log_fsh_slx_pars",
+                      # "log_srv_slx_pars",
                     "mort_k"),
            fixFlt = c("all_fsh", "WC_VAST","BC_EARLY"))
 
@@ -108,7 +109,7 @@ writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname, mappy = mappy,
         runname = paste0("-",df$yRun-1,"y_",cppname,
                          # "_M=", paste(df$parms$mort_k,collapse="-"),
                          "_baseQ=WCGBTS",
-                         "_fshfixed_wcbcearlyfixed_withbounds"))
+                         "_lengthon_fixedto1215"))
 
 
 system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

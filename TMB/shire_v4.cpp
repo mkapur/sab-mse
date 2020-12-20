@@ -890,7 +890,7 @@ Type objective_function<Type>::operator() ()
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
-                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,Length_yais_mid(y,a,i,s),surv_flt,s)*
+                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y, mla_yais(y,a,i,s),surv_flt,s)*
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s);
               }

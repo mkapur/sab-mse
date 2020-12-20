@@ -1,21 +1,6 @@
 {
     "debugBreakpointsState" : {
         "breakpoints" : [
-            {
-                "editor_line_number" : 31,
-                "editor_state" : 1,
-                "function_name" : "writeOM",
-                "function_steps" : "7",
-                "id" : 0,
-                "is_package_breakpoint" : false,
-                "is_pending_debug_completion" : false,
-                "line_number" : 31,
-                "needs_updated_steps" : false,
-                "package_name" : "",
-                "path" : "C:/Users/Maia Kapur/Dropbox/UW/sab-mse/R/functions/writeOM.R",
-                "state" : 1,
-                "type" : 0
-            }
         ]
     }
 }

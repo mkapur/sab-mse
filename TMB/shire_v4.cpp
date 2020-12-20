@@ -481,15 +481,16 @@ Type objective_function<Type>::operator() ()
                   fsh_slx_yafs(y,a,fish_flt,s)*
                   N_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow( Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               case 1: // length sel
                 denom += phi_if_fish(fish_flt,i)*
                   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
                   N_yais_beg(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
+                  Length_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               } // end selType_fish
             } // end age
@@ -516,7 +517,7 @@ Type objective_function<Type>::operator() ()
                   instF_yafs(y,a,fish_flt,s,0) *
                   N_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               case 1: // length sel
                 // instantaneous version
@@ -528,8 +529,9 @@ Type objective_function<Type>::operator() ()
                   instF_yafs(y,a,fish_flt,s,0)*
                   N_yais_beg(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
+                  Length_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               } // end selType_fish
             } // end sex
@@ -656,15 +658,16 @@ Type objective_function<Type>::operator() ()
                   fsh_slx_yafs(y,a,fish_flt,s)*
                   N_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow( Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               case 1: // length sel
                 denom += phi_if_fish(fish_flt,i)*
                   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
                   N_yais_mid(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
+                  Length_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow( Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               } // end selType_fish
             } // end age
@@ -691,7 +694,7 @@ Type objective_function<Type>::operator() ()
                   instF_yafs(y,a,fish_flt,s,1) *
                   N_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               case 1: // length sel
                 // instantaneous (midyear) version
@@ -703,8 +706,9 @@ Type objective_function<Type>::operator() ()
                   instF_yafs(y,a,fish_flt,s,1)*
                   N_yais_mid(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
+                  Length_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               } // end selType_fish
             } // end sex
@@ -755,7 +759,7 @@ Type objective_function<Type>::operator() ()
                 N_yais_mid(y,a,i,s)+
                 N_yais_end(y,a,i,s))/3*
                 wtatlen_kab(phi_ik2(i),0)*
-                pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
+                pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
               break;
             case 1: // length sel
               // get mean exploitable biomass summed over areas, sexes, ages
@@ -767,7 +771,7 @@ Type objective_function<Type>::operator() ()
                 N_yais_mid(y,a,i,s)+
                 N_yais_end(y,a,i,s))/3*
                 wtatlen_kab(phi_ik2(i),0)*
-                pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
+                pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
               break;
             } // end seltype switch
           } // end ages
@@ -797,7 +801,6 @@ Type objective_function<Type>::operator() ()
             (N_yais_end(y,a,i,s)+NCome);
           Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
             (N_yais_end(y,a,i,s)+NCome);
-
         } // end ages
       } // end subareas i
     } // end sexes
@@ -807,7 +810,7 @@ Type objective_function<Type>::operator() ()
       for(int a=0;a<(nage);a++){
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
           wtatlen_kab(phi_ik2(i),0)*
-          pow(mla_yais(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
+          pow(Length_yais_mid(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
           mat_ak(a,phi_ik2(i));
       } // end ages
     } // end space
@@ -869,7 +872,7 @@ Type objective_function<Type>::operator() ()
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
                 Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
                   phi_if_surv(surv_flt,i)*
@@ -883,10 +886,11 @@ Type objective_function<Type>::operator() ()
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
+                  Length_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow(mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
-                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
+                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,Length_yais_mid(y,a,i,s),surv_flt,s)*
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s);
               }

@@ -481,8 +481,7 @@ Type objective_function<Type>::operator() ()
                   fsh_slx_yafs(y,a,fish_flt,s)*
                   N_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
-                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));//+
-                // catch_yf_obs(y,fish_flt+1);
+                  pow( mla_yais(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               case 1: // length sel
                 denom += phi_if_fish(fish_flt,i)*
@@ -552,29 +551,27 @@ Type objective_function<Type>::operator() ()
     } // end subarea i
     
     // build N_yais_mid
-    // Type lenstep = 0.0; Type lenslope = 0.0;
+    Type lenstep = 0.0; Type lenslope = 0.0;
     // N- and Nominal Length - at-age for the middle of this year 
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
         // linear growth below A4 as in synthesis
-        // if(L1_yk(y,phi_ik2(i),s) < 3){
-        //   lenstep = L1_yk(y,phi_ik2(i),s);
-        //   lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
-        // } else if(L1_yk(y,phi_ik2(i),s) >= 3){
-        //   lenstep = 3.0;
-        //   lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
-        // }
-        // for(int a=0;a<4;a++){
-        //   Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
-        // } // end linear age
-        // Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
-        // for(int a=0;a<4;a++){
-        // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
-        //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
-        // } // end linear age
-        
-        
+        if(L1_yk(y,phi_ik2(i),s) < 3){
+          lenstep = L1_yk(y,phi_ik2(i),s);
+          lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        } else if(L1_yk(y,phi_ik2(i),s) >= 3){
+          lenstep = 3.0;
+          lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        }
+        for(int a=0;a<4;a++){
+          Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
+        } // end linear age
+        Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
+        for(int a=0;a<4;a++){
+        Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
+          (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
+        } // end linear age
         for(int a=1;a<(nage);a++){
           Type pLeave = 0.0; Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){
@@ -593,35 +590,35 @@ Type objective_function<Type>::operator() ()
             NCome);
         } // end ages for N
         
-        // for(int a=5;a<(nage-1);a++){
-        //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-        //     exp(-kappa_yk(y,phi_ik2(i),s)*a);
-        //   // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
-        //   //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
-        //   //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
-        //   Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
-        //     (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-        //     (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-        // } // end nonlinear growth ages
+        for(int a=5;a<(nage-1);a++){
+          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+            exp(-kappa_yk(y,phi_ik2(i),s)*a);
+          // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
+          //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
+          //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
+          Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
+            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+        } // end nonlinear growth ages
         
         // plus group weighted average (we already have the numbers at age)
-        // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
-        //   (Length_yais_beg(y,nage-2,i,s)+
-        //   (Linf_yk(y,phi_ik2(i),s))-
-        //   Length_yais_beg(y,nage-2,i,s)*
-        //   (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
-        //   N_yais_beg(y,nage-1,i,s)  *
-        //   (Length_yais_beg(y,nage-1,i,s) +
-        //   (Linf_yk(y,phi_ik2(i),s) -
-        //   Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
-        //     (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
-        // Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
-        //   (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-        //   Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
-        //   N_yais_mid(y,nage-1,i,s)*
-        //   (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-        //   Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
-        //     (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
+        Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
+          (Length_yais_beg(y,nage-2,i,s)+
+          (Linf_yk(y,phi_ik2(i),s))-
+          Length_yais_beg(y,nage-2,i,s)*
+          (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
+          N_yais_beg(y,nage-1,i,s)  *
+          (Length_yais_beg(y,nage-1,i,s) +
+          (Linf_yk(y,phi_ik2(i),s) -
+          Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
+            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
+        Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
+          (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+          Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
+          N_yais_mid(y,nage-1,i,s)*
+          (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+          Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
+            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
       } // end subareas i
     } // end sexes
     
@@ -786,24 +783,24 @@ Type objective_function<Type>::operator() ()
     
     // std::cout << y << " N yais end" << "\n";
     // //reweight length-at-age given movement eq 5
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=0;a<(nage);a++){
-    //       Type LCome = 0.0; Type NCome = 0.0;
-    //       for(int j=0;j<(nspace);j++){
-    //         if(i != j){
-    //           LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
-    //           NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
-    //         }
-    //       } // end subareas j
-    //       Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-    //         (N_yais_end(y,a,i,s)+NCome);
-    //       Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-    //         (N_yais_end(y,a,i,s)+NCome);
-    //       
-    //     } // end ages
-    //   } // end subareas i
-    // } // end sexes
+    for(int s=0;s<nsex;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage);a++){
+          Type LCome = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              LCome = LCome + phi_ij(i,j)*N_yais_end(y,a,j,s)*Length_yais_mid(y,a,j,s); // for numerator
+              NCome = NCome + phi_ij(i,j)*N_yais_end(y,a,j,s); // for denom
+            }
+          } // end subareas j
+          Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+            (N_yais_end(y,a,i,s)+NCome);
+          Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+            (N_yais_end(y,a,i,s)+NCome);
+
+        } // end ages
+      } // end subareas i
+    } // end sexes
     // std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){

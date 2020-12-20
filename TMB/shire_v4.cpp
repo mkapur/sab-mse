@@ -433,7 +433,7 @@ Type objective_function<Type>::operator() ()
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
-          // Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
+          Length_yais_beg(0,0,i,s) = L1_yk(y,phi_ik2(i),s);
           N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
           N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
           for(int a=1;a<(nage-1);a++){ // we will fill recruits (a0) later

@@ -488,7 +488,7 @@ Type objective_function<Type>::operator() ()
                   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
                   N_yais_beg(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
-                  Length_yais_beg(y,a,i,s)*
+                  // Length_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
@@ -529,7 +529,7 @@ Type objective_function<Type>::operator() ()
                   instF_yafs(y,a,fish_flt,s,0)*
                   N_yais_beg(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
-                  Length_yais_beg(y,a,i,s)*
+                  // Length_yais_beg(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
@@ -665,7 +665,7 @@ Type objective_function<Type>::operator() ()
                   fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
                   N_yais_mid(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
-                  Length_yais_mid(y,a,i,s)*
+                  // Length_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow( Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
@@ -706,7 +706,7 @@ Type objective_function<Type>::operator() ()
                   instF_yafs(y,a,fish_flt,s,1)*
                   N_yais_mid(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
-                  Length_yais_mid(y,a,i,s)*
+                  // Length_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
@@ -886,7 +886,7 @@ Type objective_function<Type>::operator() ()
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s)*
                   // mla_yais(y,a,i,s)*
-                  Length_yais_mid(y,a,i,s)*
+                  // Length_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 

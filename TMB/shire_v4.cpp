@@ -446,8 +446,8 @@ Type objective_function<Type>::operator() ()
             } // end subareas j
             Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
               exp(-kappa_yk(0,phi_ik2(i),s)*a); 
-            Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-              exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
+            // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+            //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
             N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mort_k(phi_ik2(i))/2);
           } // end ages
           Type pLeave = 0.0; Type NCome = 0.0; // reset for plusgroup age
@@ -461,8 +461,8 @@ Type objective_function<Type>::operator() ()
             exp(-mort_k(phi_ik2(i))/2);
           Length_yais_beg(y,nage-1,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
             exp(-kappa_yk(0,phi_ik2(i),s)*(nage-1));
-          Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-            exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
+          // Length_yais_mid(y,nage-1,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
+          //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*(nage-1));
         } // end sexes
       } // end subareas i
     } // end y == 0
@@ -604,16 +604,17 @@ Type objective_function<Type>::operator() ()
         } // end nonlinear growth ages
         
         // plus group weighted average (we already have the numbers at age)
-        Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
-          (Length_yais_beg(y,nage-2,i,s)+
-          (Linf_yk(y,phi_ik2(i),s))-
-          Length_yais_beg(y,nage-2,i,s)*
-          (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
-          N_yais_beg(y,nage-1,i,s)  *
-          (Length_yais_beg(y,nage-1,i,s) +
-          (Linf_yk(y,phi_ik2(i),s) -
-          Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
-            (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
+        // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
+        //   (Length_yais_beg(y,nage-2,i,s)+
+        //   (Linf_yk(y,phi_ik2(i),s))-
+        //   Length_yais_beg(y,nage-2,i,s)*
+        //   (1-exp(-kappa_yk(y,phi_ik2(i),s)))) +
+        //   N_yais_beg(y,nage-1,i,s)  *
+        //   (Length_yais_beg(y,nage-1,i,s) +
+        //   (Linf_yk(y,phi_ik2(i),s) -
+        //   Length_yais_beg(y,nage-1,i,s))*(1-exp(-kappa_yk(y,phi_ik2(i),s)))))/
+        //     (N_yais_beg(y,nage-2,i,s) + N_yais_beg(y,nage-1,i,s));
+        
         Length_yais_mid(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
           (Length_yais_beg(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
           Length_yais_beg(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +

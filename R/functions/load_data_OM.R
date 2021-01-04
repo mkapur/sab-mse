@@ -125,8 +125,8 @@ load_data_OM <- function(nspace = 6,
   
   survey <- read.csv(here("input","input_data",'OM_indices_BaseQ=WCGBTS.csv'))
   survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
-  survey[,"BC_EARLY"] <-  survey[,"BC_EARLY"] +0.0111 ## flag for numeric TMB checks
-  survey <- round(survey,  1)
+  # survey[,"BC_EARLY"] <-  survey[,"BC_EARLY"] +0.0111 ## flag for numeric TMB checks
+  # survey <- round(survey,  1)
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma_BaseQ=WCGBTS.csv'))
   
   
@@ -496,7 +496,7 @@ load_data_OM <- function(nspace = 6,
     
     #* DATA ----
     acomp_yafs_obs = OM_agecomps_yafs,
-    surv_yf_obs = as.matrix(round(survey)), # Make sure the survey has the same length as the catch time series
+    surv_yf_obs = as.matrix(survey), # Make sure the survey has the same length as the catch time series
     surv_yf_err = as.matrix(survey_err), 
     age_error = as.matrix(ageerr_ExpAge[,2:ncol(ageerr_ExpAge)]),
     age_error_SD = as.matrix(ageerr_SD[,2:ncol(ageerr_SD)]),

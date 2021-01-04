@@ -19,7 +19,7 @@ source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
 df$surv_yf_obs[df$surv_yf_obs >0] <- 
   df$surv_yf_obs[df$surv_yf_obs >0]*1000
-df$yRun <-  4# df$tEnd ## number of years to run model
+df$yRun <-   df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))

@@ -433,22 +433,19 @@ Type objective_function<Type>::operator() ()
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
-          
           // define LAA at beginning of first year
           Length_yais_beg(0,0,i,s) = 0;
           Type lenslope = 0.0;
           lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-          for(int a=0;a<4;a++){
+          for(int a=0;a<3;a++){
             // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
             Length_yais_beg(y,a,i,s) = lenslope*a;
           } // end linear age
-          Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
           // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-          for(int a=5;a<(nage);a++){
+          for(int a=3;a<(nage);a++){
             Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
               exp(-kappa_yk(y,phi_ik2(i),s)*a);
           }
-          
           // define NAA age 0
           N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
           N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
@@ -587,13 +584,12 @@ Type objective_function<Type>::operator() ()
         // }
         Type lenslope = 0.0;
         lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-        for(int a=0;a<4;a++){
+        for(int a=0;a<3;a++){
           // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
           Length_yais_beg(y,a,i,s) = lenslope*a;
         } // end linear age
-        Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
         // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-        for(int a=5;a<(nage);a++){
+        for(int a=3;a<(nage);a++){
           Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
             exp(-kappa_yk(y,phi_ik2(i),s)*a);
         }

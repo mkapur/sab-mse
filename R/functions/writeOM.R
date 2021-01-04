@@ -89,13 +89,13 @@ writeOM <- function(dat,
   ## N_yseason ----
   png(file =paste0(dumpfile,"/",
                    Sys.Date(),'-N_season_iy.png'),
-      width = 10, height = 8, unit = 'in', res = 420)
+      width = 12, height = 10, unit = 'in', res = 540)
   par(mfrow = c(2,3))
   for(i in 1:6){
-    ylt = 2*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
+    ylt = 20*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
                 sum(dat$N_yais_end[df$yRun,,i,][!is.na(dat$N_yais_end[df$yRun,,i,])]))
-    
-    plot(rowSums(dat$N_yais_beg[1:(df$yRun-1),,i,]),
+    ylt = 1.3*max(rowSums(dat$N_yais_beg[1:(df$yRun),,i,]))
+    plot(rowSums(dat$N_yais_beg[1:(df$yRun),,i,]),
          type = 'l',
          lwd = 2, 
          col = scales::alpha(subareaPal[i],0.2),
@@ -105,11 +105,11 @@ writeOM <- function(dat,
          xlim = c(0,df$yRun-1),xaxt='n',
          xlab = "Model Year", 
          ylab = 'Numbers (M+F)')
-    lines(rowSums(dat$N_yais_mid[,,i,]),
+    lines(rowSums(dat$N_yais_mid[1:(df$yRun),,i,]),
           type = 'l',
           lwd = 3,
           col = scales::alpha(subareaPal[i],0.4))
-    lines(rowSums(dat$N_yais_end[,,i,]),
+    lines(rowSums(dat$N_yais_end[1:(df$yRun),,i,]),
           type = 'l',
           lwd = 3,
           col = scales::alpha(subareaPal[i],0.8))
@@ -118,7 +118,7 @@ writeOM <- function(dat,
                               scales::alpha(subareaPal[i],0.8)), 
            legend = c("beg",
                       "mid (move + 1/2 fishing + 1/2 M)",
-                      "end (1/2 fishing + 1/2 M)"), cex = 0.7, lty =1, lwd = 5)
+                      "end (1/2 fishing + 1/2 M)"), lty =1, lwd = 5)
     axis(1, at = seq(1,df$yRun,5), labels = years[seq(1,df$yRun,5)])
   }
   dev.off()
@@ -348,6 +348,9 @@ writeOM <- function(dat,
          file =paste0(dumpfile,"/", Sys.Date(),'-survey_fits.png'),
          width = 10, height = 6, unit = 'in',
          dpi = 420)
+  
+  # plot lengths at age ----
+  
   
   # plot FISH selex ----
   ## bring estimates out and rearrange

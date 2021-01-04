@@ -12,18 +12,17 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4')[1]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, move = TRUE) ## data that works with OM
-df$surv_yf_obs[df$surv_yf_obs >0] <- 
-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
-df$yRun <-   df$tEnd ## number of years to run model
+df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
+df$yRun <-   30 #df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
-
+exp(df$parms$log_srv_slx_pars)
 # load(here("output","2020-12-15-59y_v4L_baseQ=WCGBTS_allest_lwrbounds/opt.rdata"))
 # df$parms$log_srv_slx_pars <- array(opt$par[names(opt$par) == 'log_srv_slx_pars'],dim= c(8,2,1,2),
 # dimnames = dimnames(df$parms$log_srv_slx_pars))
@@ -35,7 +34,7 @@ df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
 mappy <-
   buildMap(toFix =  c("omega_0ij",
                       "epsilon_tau", 
-                      # "log_fsh_slx_pars",
+                      "log_fsh_slx_pars",
                       # "log_srv_slx_pars",
                     "mort_k"),
            fixFlt = c("all_fsh", "WC_VAST","BC_EARLY"))
@@ -58,12 +57,11 @@ tEnd <- length(years)
 age <- 0:70 
 nage <- length(age)
 
-N_yais_beg[1:2,,1,1]
-N_yais_mid[1:2,,1,1]
-N_yais_end[1:2,,1,1]
-Length_yais_beg[1:2,,1,1]
-Length_yais_mid[1:2,,1,1]
-Length_yais_end[1:2,,1,1]
+
+
+
+
+
 
 bounds <- boundPars(obj,
                     r0_lower = 0, 

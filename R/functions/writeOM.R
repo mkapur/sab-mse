@@ -349,8 +349,67 @@ writeOM <- function(dat,
          width = 10, height = 6, unit = 'in',
          dpi = 420)
   
-  # plot lengths at age ----
+  ## plot length_yais thru time ----
+  templyais<-NULL
+  for(i in 1:6){
+    for(y in seq_along(years)){
+      templyais <- bind_rows(templyais,
+                             Length_yais_end[y,,i,] %>% melt() %>% # head() %>%
+                               plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
+                               mutate(year =  y, 
+                                      subarea = paste("Subarea ",i),
+                                      sex = ifelse(sex == 1,'Fem','Mal')))
+    }
+  }
   
+  ggplot(templyais %>% filter(sex == 'Fem'), aes(x = age, y = length, group = year)) +
+    geom_line(aes(color = year), alpha = 0.2) +
+    scale_color_viridis_c() +
+    ggsidekick::theme_sleek() +
+    facet_wrap(~sex+subarea)
+  ## plot dist of LAA using length_alyis ----
+  pA1 <- list() ## for area 1
+  for(y in 1:5){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
+    a1 <- 
+      LengthAge_alyis_end[,,y,1,1] %>%
+      melt() %>%
+      group_by(Var2) %>% 
+      mutate(sumP = sum(value), ## total prob within A-L bin
+             pbin = value/sumP) ## relative prob within A-L bin
+    
+    ggplot(a1,aes( x = Var2, y = pbin, color = factor(Var1))) +
+      # geom_histogram(stat ='identity', position = 'stack') +
+      geom_line() + 
+      geom_area(aes(fill=factor(Var1))) +
+      # geom_density( )+
+      labs(x = 'len', y = 'prob(Bin)', fill = 'age', 
+           title = paste("year ",y), 
+           subtitle= 'subarea 1') +
+      theme_sleek()
+    
+    ggplot(a1,aes( x = Var1, y = pbin, color = factor(Var2))) +
+      # geom_histogram(stat ='identity', position = 'stack') +
+      geom_line() + 
+      # geom_area(aes(fill=factor(Var2))) +
+      # geom_density( )+
+      labs(x = 'age', y = 'prob(Bin)', fill = 'len', 
+           title = paste("year ",y), 
+           subtitle= 'subarea 1') +
+      theme_sleek()
+    
+    pA1[[y]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
+      geom_tile() +
+      labs(x = 'age', y = 'len', 
+           title = paste("year ",y), 
+           subtitle= 'subarea 1') +
+      theme_sleek()
+    rm(a1)
+    # p[[i]] <- qplot(1:10,10:1,main=i)
+  }
+  # png(here("figs","LAA_Dist_A1.png"), 
+  #     height = 10, width = 10, unit = 'in', res = 420)
+  do.call(gridExtra::grid.arrange,pA1)
+  dev.off()
   
   # plot FISH selex ----
   ## bring estimates out and rearrange

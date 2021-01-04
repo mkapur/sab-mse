@@ -58,6 +58,13 @@ tEnd <- length(years)
 age <- 0:70 
 nage <- length(age)
 
+N_yais_beg[1:2,,1,1]
+N_yais_mid[1:2,,1,1]
+N_yais_end[1:2,,1,1]
+Length_yais_beg[1:2,,1,1]
+Length_yais_mid[1:2,,1,1]
+Length_yais_end[1:2,,1,1]
+
 bounds <- boundPars(obj,
                     r0_lower = 0, 
                     boundSlx = c(NA,'fsh','srv')[2:3])

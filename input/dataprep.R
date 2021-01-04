@@ -14,6 +14,9 @@ require(PNWColors)
 
 ## 2019 Sab WC SS ----
 wc <- SS_output(here("input","raw_data","2019 WC Stock Assessment"))
+## data from MH Jan 2020 ---
+# NEED EXTRACTION CODE THIS IS A MONSTER 
+load("C:/Users/mkapur/Dropbox/UW/sab-mse/input/raw_data/PacFIN.SABL.bds.03.Dec.2020.RData")
 
 ## Fltnames ----
 fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE)

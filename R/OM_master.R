@@ -11,7 +11,7 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c("shire_v4_5fe487c4e037d55620b3b9f90f660e22568fc9ad",'shire_v4')[1]
+dllUSE = c('shire_v4')[1]
 compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 

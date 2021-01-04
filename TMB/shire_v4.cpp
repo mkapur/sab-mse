@@ -839,7 +839,7 @@ Type objective_function<Type>::operator() ()
       for(int a=0;a<(nage);a++){
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
           wtatlen_kab(phi_ik2(i),0)*
-          pow(Length_yais_mid(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
+          pow(Length_yais_end(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
           mat_ak(a,phi_ik2(i));
       } // end ages
     } // end space

@@ -572,9 +572,14 @@ Type objective_function<Type>::operator() ()
         for(int a=0;a<4;a++){
           // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
           Length_yais_beg(y,a,i,s) = lenslope*a;
-          
         } // end linear age
         Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
+        // beginning year LAA for other ages
+        for(int a=5;a<(nage-1);a++){
+          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+            exp(-kappa_yk(y,phi_ik2(i),s)*a);
+        }
+        
         // for(int a=0;a<4;a++){
         // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
         //   (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))));
@@ -597,16 +602,16 @@ Type objective_function<Type>::operator() ()
             NCome);
         } // end ages for N
         
-        for(int a=5;a<(nage-1);a++){
-          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-            exp(-kappa_yk(y,phi_ik2(i),s)*a);
+        for(int a=0;a<(nage-1);a++){
+          // Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+            // exp(-kappa_yk(y,phi_ik2(i),s)*a);
           // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
           //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
           //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
           Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-        } // end nonlinear growth ages
+        } // end mid year LAA
         
         // plus group weighted average (we already have the numbers at age)
         // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*

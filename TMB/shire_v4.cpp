@@ -1211,9 +1211,11 @@ Type objective_function<Type>::operator() ()
     
     // REPORT PARS & DERIVED QUANTS
     REPORT(instF_yf);
-    REPORT(instF_ym);
     REPORT(instF_yafs);
     REPORT(instF_yais);
+    REPORT(F_ym);
+    REPORT(F_yf);
+
     REPORT(fsh_slx_yafs);
     REPORT(srv_slx_yafs);
     REPORT(R_0i_vect);

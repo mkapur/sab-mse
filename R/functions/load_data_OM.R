@@ -375,20 +375,36 @@ load_data_OM <- function(nspace = 6,
                                            c("p1","p2"),
                                            c(paste0('block',1)),
                                            c('Fem','Mal')))
-
-  log_srv_slx_pars['BC_StRS',1,1,1] <- 64.2127
-  log_srv_slx_pars['BC_StRS',1,1,2] <-64.2127
-  log_srv_slx_pars['BC_StRS',2,1,1] <- 12.9197
-  log_srv_slx_pars['BC_StRS',2,1,2] <- 12.9197
-  log_srv_slx_pars['BC_SS',1,1,1] <- 54.1045
-  log_srv_slx_pars['BC_SS',1,1,2] <- 54.1045
-  log_srv_slx_pars['BC_SS',2,1,1] <- 4.55724
-  log_srv_slx_pars['BC_SS',2,1,2] <- 4.55724
+  ## males and females
+  log_srv_slx_pars['AK_VAST_W','p1',,] <- 50
+  log_srv_slx_pars['AK_VAST_W','p2',,] <- 65
+  log_srv_slx_pars['AK_VAST_E','p1',,] <- 50
+  log_srv_slx_pars['AK_VAST_E','p2',,] <- 65
+  log_srv_slx_pars['BC_EARLY','p1',,] <- 50
+  log_srv_slx_pars['BC_EARLY','p2',,] <- 65
+  log_srv_slx_pars['BC_VAST','p1',,] <- 50
+  log_srv_slx_pars['BC_VAST','p2',,] <- 65
+  log_srv_slx_pars['WC_VAST','p1',,] <- 50
+  log_srv_slx_pars['WC_VAST','p2',,] <- 65
   
-  for(i in 1:2){
-    log_srv_slx_pars[,1,,i][log_srv_slx_pars[,1,,i] ==0]<- 60
-    log_srv_slx_pars[,2,,i][log_srv_slx_pars[,2,,i] ==0]<- 8
-  }
+  ## comps
+  log_srv_slx_pars['AK_GOA_SURV','p1',,] <- 50
+  log_srv_slx_pars['AK_GOA_SURV','p2',,] <- 65
+  
+  log_srv_slx_pars['BC_StRS',1,1,1] <- 64.2127 - 12.9197
+  log_srv_slx_pars['BC_StRS',1,1,2] <-  64.2127 - 12.9197
+  log_srv_slx_pars['BC_StRS',2,1,1] <- 70
+  log_srv_slx_pars['BC_StRS',2,1,2] <- 70
+  log_srv_slx_pars['BC_SS',1,1,1] <- 54.1045-4.55724
+  log_srv_slx_pars['BC_SS',1,1,2] <- 54.1045-4.55724
+  log_srv_slx_pars['BC_SS',2,1,1] <- 65
+  log_srv_slx_pars['BC_SS',2,1,2] <- 65
+  # 
+  # for(i in 1:2){
+  #   log_srv_slx_pars[,1,,i][log_srv_slx_pars[,1,,i] ==0] <- 60
+  #   log_srv_slx_pars[,2,,i][log_srv_slx_pars[,2,,i] ==0] <- 8
+  # }
+  
   log_srv_slx_pars = log(log_srv_slx_pars)
   
   mort_k <- c(0.2,0.15,0.05,0.1)

@@ -266,6 +266,8 @@ writeOM <- function(dat,
     theme(legend.position = 'none')+
     labs(y = 'catch', color = 'Fishing Fleet')+
     facet_wrap(~variable, scales = "free_y", ncol = 2)
+  
+  
   ggsave(last_plot(),
          file = paste0(dumpfile,"/", Sys.Date(),'-catch_fits.png'),
          width = 8, height = 6, unit = 'in',

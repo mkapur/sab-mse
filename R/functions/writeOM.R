@@ -350,6 +350,7 @@ writeOM <- function(dat,
          dpi = 420)
   
   ## plot length_yais thru time ----
+
   templyais<-NULL
   for(i in 1:6){
     for(y in 1:df$yRun){
@@ -365,15 +366,33 @@ writeOM <- function(dat,
     }
   }
   
-  ggplot(templyais %>% 
-           filter(sex == 'Fem', subarea == 'Subarea 1'), 
+  ggplot(filter(templyais, sex == 'Fem') , 
          aes(x = age, y = length, group = year)) +
-    geom_line(aes(color = year), alpha = 0.2) +
+    geom_line(aes(color = year), alpha = 0.2, lwd = 0.5) +
     scale_color_viridis_c() +
     ggsidekick::theme_sleek() +
-    facet_wrap(~sex+subarea)
+    labs(x = 'Age (years)', y = 'Length (cm)', 
+         title = 'Mean LAA in Subarea, Females') +
+    facet_wrap(~subarea, ncol = 6)
   
-
+  
+  ggsave(last_plot(),
+         file =paste0(dumpfile,"/",
+                      Sys.Date(),'-meanLAA_fem.png'),
+         width = 8, height = 6, units = 'in', dpi = 520)
+  
+  ggplot(filter(templyais, sex == 'Mal') , 
+         aes(x = age, y = length, group = year)) +
+    geom_line(aes(color = year), alpha = 0.2, lwd = 0.5) +
+    scale_color_viridis_c() +
+    ggsidekick::theme_sleek() +
+    labs(x = 'Age (years)', y = 'Length (cm)', 
+         title = 'Mean LAA in Subarea, Males') +
+    facet_wrap(~subarea, ncol = 6)
+  ggsave(last_plot(),
+         file =paste0(dumpfile,"/",
+                      Sys.Date(),'-meanLAA_mal.png'),
+         width = 8, height = 6, units = 'in', dpi = 520)
   ## plot dist of LAA using length_alyis ----
   pA1 <- list() ## for area 1
   for(y in 1:5){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years

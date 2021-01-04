@@ -828,8 +828,9 @@ Type objective_function<Type>::operator() ()
           } // end subareas j
           Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
             (N_yais_end(y,a,i,s)+NCome);
-          Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_end(y,a,i,s) + LCome)/
-            (N_yais_end(y,a,i,s)+NCome);
+          Length_yais_beg(y+1,a,i,s) =  Length_yais_end(y,a,i,s);
+          // Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_end(y,a,i,s) + LCome)/
+          //   (N_yais_end(y,a,i,s)+NCome);
         } // end ages
       } // end subareas i
     } // end sexes

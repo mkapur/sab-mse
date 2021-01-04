@@ -354,15 +354,20 @@ writeOM <- function(dat,
   for(i in 1:6){
     for(y in seq_along(years)){
       templyais <- bind_rows(templyais,
-                             Length_yais_end[y,,i,] %>% melt() %>% # head() %>%
+                             Length_yais_beg[y,,i,] %>% 
+                               # Length_yais_mid[y,,i,] %>% 
+                               # Length_yais_end[y,,i,] %>% 
+                               melt() %>% 
                                plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
                                mutate(year =  y, 
-                                      subarea = paste("Subarea ",i),
+                                      subarea = paste0("Subarea ",i),
                                       sex = ifelse(sex == 1,'Fem','Mal')))
     }
   }
   
-  ggplot(templyais %>% filter(sex == 'Fem'), aes(x = age, y = length, group = year)) +
+  ggplot(templyais %>% 
+           filter(sex == 'Fem', subarea == 'Subarea 1'), 
+         aes(x = age, y = length, group = year)) +
     geom_line(aes(color = year), alpha = 0.2) +
     scale_color_viridis_c() +
     ggsidekick::theme_sleek() +

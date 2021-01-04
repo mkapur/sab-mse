@@ -512,6 +512,8 @@ Type objective_function<Type>::operator() ()
           } // end space
         } // end sex
         instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
+        // std::cout << y << "\t" << fish_flt << "\t" <<instF_yf(y,fish_flt,0)<< "\n";
+        std::cout << y << "\t" << fish_flt << "\t" <<denom<< "\n";
       } // end -1 NA trap
     } // end nfleets_fish
     
@@ -833,12 +835,12 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end sexes
     // std::cout << y << " reweight length-at-age given movement" << "\n";
-    // // SSB_yi, SSB_yk
+    // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<(nage);a++){
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
           wtatlen_kab(phi_ik2(i),0)*
-          pow(Length_yais_end(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
+          pow(Length_yais_mid(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
           mat_ak(a,phi_ik2(i));
       } // end ages
     } // end space
@@ -1200,14 +1202,6 @@ Type objective_function<Type>::operator() ()
   REPORT(catch_yaf_pred);  
   REPORT(catch_yf_pred); 
   REPORT(catch_yf_pred_total);
-  // REPORT(catch_yfi_pred);  
-  // REPORT(catch_yaif_pred);  
-  // REPORT(catch_afk_TEMP);
-  // REPORT(Freal_yf);
-  // REPORT(F1_yf);
-  // REPORT(F2_yf);
-  // REPORT(Zreal_yai);
-  // REPORT(F_area_yfi);
   
   // survey biomass
   REPORT(surv_yf_pred);
@@ -1217,7 +1211,12 @@ Type objective_function<Type>::operator() ()
   REPORT(surv_acomp_yafs_pred);
   REPORT(Nsamp_acomp_yf);
   
-  // REPORT PARS
+  // REPORT PARS & DERIVED QUANTS
+  REPORT(F_yf);
+  REPORT(instF_yf);
+  REPORT(instF_yafs);
+  REPORT(F_ym);
+  
   REPORT(fsh_slx_yafs);
   REPORT(srv_slx_yafs);
   REPORT(R_0i_vect);

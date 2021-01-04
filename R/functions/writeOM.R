@@ -354,8 +354,8 @@ writeOM <- function(dat,
   for(i in 1:6){
     for(y in seq_along(years)){
       templyais <- bind_rows(templyais,
-                             Length_yais_beg[y,,i,] %>% 
-                               # Length_yais_mid[y,,i,] %>% 
+                             Length_yais_beg[y,,i,] %>%
+                               # Length_yais_mid[y,,i,] %>%
                                # Length_yais_end[y,,i,] %>% 
                                melt() %>% 
                                plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
@@ -372,6 +372,13 @@ writeOM <- function(dat,
     scale_color_viridis_c() +
     ggsidekick::theme_sleek() +
     facet_wrap(~sex+subarea)
+  
+  N_yais_beg[1:2,,1,1]
+  N_yais_mid[1:2,,1,1]
+  N_yais_end[1:2,,1,1]
+  Length_yais_beg[1:2,,1,1]
+  Length_yais_mid[1:2,,1,1]
+  Length_yais_end[1:2,,1,1]
   ## plot dist of LAA using length_alyis ----
   pA1 <- list() ## for area 1
   for(y in 1:5){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years

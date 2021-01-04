@@ -12,7 +12,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shire_v4L",'shire_v4')[2]
-# compile(here("TMB",paste0(dllUSE,".cpp")))
+compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -50,7 +50,13 @@ system.time(obj <- MakeADFun(df,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 
-# system.time(rep1 <- obj$report()) ## one off caclulation using start pars
+system.time(rep1 <- obj$report()) ## one off caclulation using start pars
+dat = rep1;attach(dat)
+years <- 1960:2019
+nyear <- length(years)
+tEnd <- length(years)
+age <- 0:70 
+nage <- length(age)
 
 bounds <- boundPars(obj,
                     r0_lower = 0, 

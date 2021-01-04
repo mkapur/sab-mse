@@ -12,7 +12,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c("shire_v4L",'shire_v4')[2]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -24,13 +24,13 @@ df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
 
-load(here("output","2020-12-15-59y_v4L_baseQ=WCGBTS_allest_lwrbounds/opt.rdata"))
-df$parms$log_srv_slx_pars <- array(opt$par[names(opt$par) == 'log_srv_slx_pars'],dim= c(8,2,1,2),
-dimnames = dimnames(df$parms$log_srv_slx_pars))
-df$parms$log_fsh_slx_pars <- array(opt$par[names(opt$par) == 'log_fsh_slx_pars'],dim= c(7,2,1,2),
-                                   dimnames = dimnames(df$parms$log_fsh_slx_pars))
+# load(here("output","2020-12-15-59y_v4L_baseQ=WCGBTS_allest_lwrbounds/opt.rdata"))
+# df$parms$log_srv_slx_pars <- array(opt$par[names(opt$par) == 'log_srv_slx_pars'],dim= c(8,2,1,2),
+# dimnames = dimnames(df$parms$log_srv_slx_pars))
+# df$parms$log_fsh_slx_pars <- array(opt$par[names(opt$par) == 'log_fsh_slx_pars'],dim= c(7,2,1,2),
+#                                    dimnames = dimnames(df$parms$log_fsh_slx_pars))
 
-rm(opt)
+# rm(opt)
 
 mappy <-
   buildMap(toFix =  c("omega_0ij",
@@ -58,9 +58,9 @@ bounds <- boundPars(obj,
 ## confirm that we've only bounded unfixed fleets by number
 # length(bounds$upper[names(bounds$upper)=='log_fsh_slx_pars']) == length(mappy$log_fsh_slx_pars[!is.na(mappy$log_fsh_slx_pars)])
 # length(bounds$upper[names(bounds$upper)=='log_srv_slx_pars']) == length(mappy$log_srv_slx_pars[!is.na(mappy$log_srv_slx_pars)])
-with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
-                   dimnames = list(df$fltnames_fish)))
-with(bounds, array(exp(upper[names(upper)=='log_srv_slx_pars']), dim = c(5,2,1,2)))
+# with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
+#                    dimnames = list(df$fltnames_fish)))
+# with(bounds, array(exp(upper[names(upper)=='log_srv_slx_pars']), dim = c(5,2,1,2)))
 
 system.time(opt <-
               TMBhelper::fit_tmb(
@@ -73,28 +73,25 @@ system.time(opt <-
                                iter.max = 1e6,
                                rel.tol = 1e-4)
               )$opt) ## estimate; can repeat for stability)
-  # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
+# for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 dat <- obj$report(par = best)
+
+## save everything and plot
+cppname = substr(dllUSE,7,nchar(dllUSE))
+writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname, mappy = mappy,
+        runname = paste0("-",df$yRun-1,"y_",cppname,
+                         # "_M=", paste(df$parms$mort_k,collapse="-"),
+                         "_baseQ=WCGBTS",
+                         "_lengthon"))
+
+
+system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
+
 
 array(mappy$log_srv_slx_pars, 
       dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,1,2),
       dimnames = dimnames(df$parms$log_srv_slx_pars))
-
-
-opt$diagnostics %>%
-  # mutate('fixed' = starting_value == MLE) %>% 
-  # group_by(Param) %>%
-  # filter(Param =="log_fsh_slx_pars") %>%
-  filter(Param =="log_srv_slx_pars") %>%
-  select(MLE) %>%
-  exp(.) #%>%
-
-  # select(fixed) %>%
-  # ungroup() %>%
-  array(., dim = c(3*2*2,2,1,2))
-
-  summarise(sum(fixed == TRUE))
 
 steep <- exp(opt$par[names(opt$par) == 'logh_k']); names(steep) <- paste0("h","_R",1:4);steep
 logR_0 <- opt$par[names(opt$par) == 'logR_0k'];names(logR_0) <- paste0("logR_0","_R",1:4);logR_0
@@ -103,14 +100,3 @@ logR_0 <- opt$par[names(opt$par) == 'logR_0k'];names(logR_0) <- paste0("logR_0",
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
-## save everything and plot
-cppname = substr(dllUSE,7,nchar(dllUSE))
-writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname, mappy = mappy,
-        runname = paste0("-",df$yRun-1,"y_",cppname,
-                         # "_M=", paste(df$parms$mort_k,collapse="-"),
-                         "_baseQ=WCGBTS",
-                         "_lengthon_fixedto1215"))
-
-
-system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
-

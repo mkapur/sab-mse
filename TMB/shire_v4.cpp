@@ -585,18 +585,18 @@ Type objective_function<Type>::operator() ()
           // lenstep = 3.0;
           // lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         // }
-        // Type lenslope = 0.0;
-        // lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-        // for(int a=0;a<4;a++){
-        //   // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
-        //   Length_yais_beg(y,a,i,s) = lenslope*a;
-        // } // end linear age
-        // Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
-        // // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-        // for(int a=5;a<(nage);a++){
-        //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-        //     exp(-kappa_yk(y,phi_ik2(i),s)*a);
-        // }
+        Type lenslope = 0.0;
+        lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
+        for(int a=0;a<4;a++){
+          // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
+          Length_yais_beg(y,a,i,s) = lenslope*a;
+        } // end linear age
+        Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
+        // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
+        for(int a=5;a<(nage);a++){
+          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+            exp(-kappa_yk(y,phi_ik2(i),s)*a);
+        }
         // 
         // for(int a=0;a<4;a++){
         // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
@@ -828,7 +828,7 @@ Type objective_function<Type>::operator() ()
           } // end subareas j
           Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
             (N_yais_end(y,a,i,s)+NCome);
-          Length_yais_beg(y+1,a,i,s) =  Length_yais_end(y,a,i,s);
+          // Length_yais_beg(y+1,a,i,s) =  Length_yais_end(y,a,i,s);
           // Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_end(y,a,i,s) + LCome)/
           //   (N_yais_end(y,a,i,s)+NCome);
         } // end ages
@@ -840,7 +840,7 @@ Type objective_function<Type>::operator() ()
       for(int a=0;a<(nage);a++){
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
           wtatlen_kab(phi_ik2(i),0)*
-          pow(Length_yais_mid(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
+          pow(Length_yais_end(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
           mat_ak(a,phi_ik2(i));
       } // end ages
     } // end space

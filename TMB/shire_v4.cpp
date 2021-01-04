@@ -92,7 +92,7 @@ Type objective_function<Type>::operator() ()
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-4),nsex);  // four acomp fleets are comm
   vector<Type>selG(nage);
   vector<Type>selGL(LBins);
-
+  
   array<Type> instF_yf(tEnd,nfleets_fish,2); // intermediate biannual Fs by year, fleet
   array<Type> instF_yafs(tEnd,nage,nfleets_fish,nsex,2); instF_yafs.setZero(); // instF_yf times slx_yafs
   array<Type> instF_yais(tEnd,nage,nspace,nsex,2);  instF_yais.setZero(); // sum instF_yafs over flt biannually
@@ -433,11 +433,13 @@ Type objective_function<Type>::operator() ()
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
+          
           // define LAA at beginning of first year
           Length_yais_beg(0,0,i,s) = 0;
           Type lenslope = 0.0;
           lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
           for(int a=0;a<4;a++){
+            // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
             Length_yais_beg(y,a,i,s) = lenslope*a;
           } // end linear age
           Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
@@ -446,6 +448,7 @@ Type objective_function<Type>::operator() ()
             Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
               exp(-kappa_yk(y,phi_ik2(i),s)*a);
           }
+          
           // define NAA age 0
           N_yais_beg(0,0,i,s) = Ninit_ais(0,i,s);
           N_yais_mid(0,0,i,s) = N_yais_beg(0,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
@@ -459,7 +462,7 @@ Type objective_function<Type>::operator() ()
               } // end i != j
             } // end subareas j
             // Length_yais_beg(y,a,i,s) = Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
-              // exp(-kappa_yk(0,phi_ik2(i),s)*a); 
+            // exp(-kappa_yk(0,phi_ik2(i),s)*a); 
             // Length_yais_mid(y,a,i,s) =  Linf_yk(0,phi_ik2(i),s)+(L1_yk(0,phi_ik2(i),s)-Linf_yk(0,phi_ik2(i),s))*
             //   exp(-0.5*kappa_yk(0,phi_ik2(i),s)*a);
             N_yais_beg(y,a,i,s) = ((1-pLeave)*Ninit_ais(a,i,s) + NCome)*exp(-mort_k(phi_ik2(i))/2);
@@ -512,8 +515,6 @@ Type objective_function<Type>::operator() ()
           } // end space
         } // end sex
         instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
-        // std::cout << y << "\t" << fish_flt << "\t" <<instF_yf(y,fish_flt,0)<< "\n";
-        std::cout << y << "\t" << fish_flt << "\t" <<denom<< "\n";
       } // end -1 NA trap
     } // end nfleets_fish
     
@@ -528,7 +529,7 @@ Type objective_function<Type>::operator() ()
                 // instantaneous F x Slx for each fleet
                 instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
                   instF_yf(y, fish_flt,0);
-
+                
                 catch_yaf_pred(y,a,fish_flt,0) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,0) *
@@ -540,7 +541,7 @@ Type objective_function<Type>::operator() ()
                 // instantaneous version
                 instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
                   instF_yf(y, fish_flt,0);
-
+                
                 catch_yaf_pred(y,a,fish_flt,0) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,0)*
@@ -571,31 +572,31 @@ Type objective_function<Type>::operator() ()
     
     // build N_yais_mid
     // Type lenstep = 0.0; 
-
+    
     // N- and Nominal Length - at-age for the middle of this year 
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
         // linear growth below A4 as in synthesis
         // if(L1_yk(y,phi_ik2(i),s) < 3){
-          // lenstep = L1_yk(y,phi_ik2(i),s);
-          // lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        // lenstep = L1_yk(y,phi_ik2(i),s);
+        // lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         // } else if(L1_yk(y,phi_ik2(i),s) >= 3){
-          // lenstep = 3.0;
-          // lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
+        // lenstep = 3.0;
+        // lenslope = (L1_yk(y,phi_ik2(i),s) - lenstep) / 3;
         // }
-        Type lenslope = 0.0;
-        lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-        for(int a=0;a<4;a++){
-          // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
-          Length_yais_beg(y,a,i,s) = lenslope*a;
-        } // end linear age
-        Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
-        // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-        for(int a=5;a<(nage);a++){
-          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-            exp(-kappa_yk(y,phi_ik2(i),s)*a);
-        }
+        // Type lenslope = 0.0;
+        // lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
+        // for(int a=0;a<4;a++){
+        //   // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
+        //   Length_yais_beg(y,a,i,s) = lenslope*a;
+        // } // end linear age
+        // Length_yais_beg(y,4,i,s) =  L1_yk(y,phi_ik2(i),s);
+        // // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
+        // for(int a=5;a<(nage);a++){
+        //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+        //     exp(-kappa_yk(y,phi_ik2(i),s)*a);
+        // }
         // 
         // for(int a=0;a<4;a++){
         // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) + (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s)*
@@ -621,7 +622,7 @@ Type objective_function<Type>::operator() ()
         
         for(int a=0;a<(nage-1);a++){
           // Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-            // exp(-kappa_yk(y,phi_ik2(i),s)*a);
+          // exp(-kappa_yk(y,phi_ik2(i),s)*a);
           // Length_yais_beg(y+1,a,i,s)  = Length_yais_beg(y,a-1,i,s) +
           //   (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a-1,i,s))*
           //   (1-exp(-kappa_yk(y,phi_ik2(i),s)));
@@ -629,7 +630,7 @@ Type objective_function<Type>::operator() ()
             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
         } // end mid year LAA
-
+        
         // plus group weighted average (we already have the numbers at age)
         // Length_yais_beg(y,nage-1,i,s) = (N_yais_beg(y,nage-2,i,s)*
         //   (Length_yais_beg(y,nage-2,i,s)+
@@ -649,7 +650,6 @@ Type objective_function<Type>::operator() ()
           (Length_yais_beg(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
           Length_yais_beg(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
             (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
-        std::cout << y << i << "\t" <<  Length_yais_mid(y,nage-1,i,s) << "\n";
       } // end subareas i
     } // end sexes
     
@@ -717,7 +717,7 @@ Type objective_function<Type>::operator() ()
                 // instantaneous (midyear) version
                 instF_yafs(y,a,fish_flt,s,1) = fsh_slx_yafs(y,a,fish_flt,s)*
                   instF_yf(y, fish_flt,1);
-
+                
                 catch_yaf_pred(y,a,fish_flt,1) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,1) *
@@ -729,7 +729,7 @@ Type objective_function<Type>::operator() ()
                 // instantaneous (midyear) version
                 instF_yafs(y,a,fish_flt,s,1) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
                   instF_yf(y, fish_flt,1);
-
+                
                 catch_yaf_pred(y,a,fish_flt,1) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,1)*
@@ -828,14 +828,13 @@ Type objective_function<Type>::operator() ()
           } // end subareas j
           Length_yais_end(y,a,i,s) =    (N_yais_end(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
             (N_yais_end(y,a,i,s)+NCome);
-          // Length_yais_beg(y+1,a,i,s) =  Length_yais_end(y,a,i,s);
-          // Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_end(y,a,i,s) + LCome)/
-          //   (N_yais_end(y,a,i,s)+NCome);
+          Length_yais_beg(y+1,a,i,s) = (N_yais_end(y,a,i,s)*Length_yais_end(y,a,i,s) + LCome)/
+            (N_yais_end(y,a,i,s)+NCome);
         } // end ages
       } // end subareas i
     } // end sexes
     // std::cout << y << " reweight length-at-age given movement" << "\n";
-    // SSB_yi, SSB_yk
+    // // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<(nage);a++){
         SSB_yi(y,i) += N_yais_end(y,a,i,0)*
@@ -1168,66 +1167,64 @@ Type objective_function<Type>::operator() ()
     // -ans_survcomp
     // -ans_catchcomp
     +ans_priors;//
-  // Type ans = 0.0;
-  // Report calculations
-  
-  // numbers @ age
-  
-  REPORT(Ninit_ais);
-  REPORT(N_0ais);
-  REPORT(N_yais_beg);
-  REPORT(N_yais_mid);
-  REPORT(N_yais_end);
-  
-  // len at age
-  REPORT(Length_yais_beg);
-  REPORT(Length_yais_mid);
-  REPORT(Length_yais_end);
-  REPORT(LengthAge_alyis_beg);
-  REPORT(LengthAge_alyis_mid);
-  REPORT(LengthAge_alyis_end);
-  
-  // SSB and recruits
-  REPORT(SSB_yi);
-  REPORT(SSB_ym);
-  REPORT(SSB_yk);
-  REPORT(SSB_0i);
-  REPORT(SSB_0k);
-  REPORT(R_yi);
-  REPORT(R_ym);
-  REPORT(R_yk);
-  REPORT(R_0k);
-  
-  // catches and tuning
-  REPORT(catch_yaf_pred);  
-  REPORT(catch_yf_pred); 
-  REPORT(catch_yf_pred_total);
-  
-  // survey biomass
-  REPORT(surv_yf_pred);
-  
-  // age comps
-  REPORT(comm_acomp_yafs_pred);
-  REPORT(surv_acomp_yafs_pred);
-  REPORT(Nsamp_acomp_yf);
-  
-  // REPORT PARS & DERIVED QUANTS
-  REPORT(F_yf);
-  REPORT(instF_yf);
-  REPORT(instF_yafs);
-  REPORT(F_ym);
-  
-  REPORT(fsh_slx_yafs);
-  REPORT(srv_slx_yafs);
-  REPORT(R_0i_vect);
-  REPORT(NeqnR);
-  ADREPORT(epsilon_tau);
-  ADREPORT(logR_0k);
-  ADREPORT(omega_0ij);
-  ADREPORT(logh_k);
-  ADREPORT(logq_f);
-  REPORT(tildeR_yk);
-  REPORT(tildeR_initk);
-  REPORT(ans_tot);
-  return ans;
+    // Type ans = 0.0;
+    // Report calculations
+    
+    // numbers @ age
+    
+    REPORT(Ninit_ais);
+    REPORT(N_0ais);
+    REPORT(N_yais_beg);
+    REPORT(N_yais_mid);
+    REPORT(N_yais_end);
+    
+    // len at age
+    REPORT(Length_yais_beg);
+    REPORT(Length_yais_mid);
+    REPORT(Length_yais_end);
+    REPORT(LengthAge_alyis_beg);
+    REPORT(LengthAge_alyis_mid);
+    REPORT(LengthAge_alyis_end);
+    
+    // SSB and recruits
+    REPORT(SSB_yi);
+    REPORT(SSB_ym);
+    REPORT(SSB_yk);
+    REPORT(SSB_0i);
+    REPORT(SSB_0k);
+    REPORT(R_yi);
+    REPORT(R_ym);
+    REPORT(R_yk);
+    REPORT(R_0k);
+    
+    // catches and tuning
+    REPORT(catch_yaf_pred);  
+    REPORT(catch_yf_pred); 
+    REPORT(catch_yf_pred_total);
+    
+    // survey biomass
+    REPORT(surv_yf_pred);
+    // age comps
+    REPORT(comm_acomp_yafs_pred);
+    REPORT(surv_acomp_yafs_pred);
+    REPORT(Nsamp_acomp_yf);
+    
+    // REPORT PARS & DERIVED QUANTS
+    REPORT(instF_yf);
+    REPORT(instF_ym);
+    REPORT(instF_yafs);
+    REPORT(instF_yais);
+    REPORT(fsh_slx_yafs);
+    REPORT(srv_slx_yafs);
+    REPORT(R_0i_vect);
+    REPORT(NeqnR);
+    ADREPORT(epsilon_tau);
+    ADREPORT(logR_0k);
+    ADREPORT(omega_0ij);
+    ADREPORT(logh_k);
+    ADREPORT(logq_f);
+    REPORT(tildeR_yk);
+    REPORT(tildeR_initk);
+    REPORT(ans_tot);
+    return ans;
 }

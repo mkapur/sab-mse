@@ -264,7 +264,7 @@ pLAA2M <- Length_yais_beg[,,2,2] %>% data.frame() %>%
 pA1 <- list() ## for area 1
 for(y in 1:5){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
   a1 <- 
-    LengthAge_alyis_beg[,,y,1,1] %>%
+    LengthAge_alyis_end[,,y,1,1] %>%
     melt() %>%
     group_by(Var2) %>% 
     mutate(sumP = sum(value), ## total prob within A-L bin

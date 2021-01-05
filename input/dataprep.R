@@ -563,7 +563,7 @@ growPar$Sex <- substrRight(as.character(growPar$Sex), 1)## overwrite for loops
 Linf_yk <- L1_yk <- kappa_yk <- sigmaG_yk <- t0_yk <- array(NA, 
                                                    dim = c(length(1960:2019),
                                                            length(unique(growPar$Region)),2),
-                                                   dimnames = list(c(year),
+                                                   dimnames = list(c(1960:2019),
                                                                    c(paste0("R",1:4)),
                                                                    c('Fem','Mal')))
 
@@ -578,20 +578,20 @@ for(s in 1:2){
       t0_yk[,r,s] <- temp$t0
       next()
     }
-    Linf_yk[1:(2009-1960),r,s] <- temp$Linf[temp$Period == 'early']
-    Linf_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$Linf[temp$Period == 'late']
+    Linf_yk[1:50,r,s] <- temp$Linf[temp$Period == 'early']
+    Linf_yk[51:nrow(Linf_yk),r,s] <- temp$Linf[temp$Period == 'late']
     
-    t0_yk[1:(2009-1960),r,s] <- temp$t0[temp$Period == 'early']
-    t0_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$t0[temp$Period == 'late']
+    t0_yk[1:50,r,s] <- temp$t0[temp$Period == 'early']
+    t0_yk[51:nrow(Linf_yk),r,s] <- temp$t0[temp$Period == 'late']
     
-    L1_yk[1:(2009-1960),r,s] <- temp$L1[temp$Period == 'early']
-    L1_yk[(2009-1960):nrow(L1_yk),r,s] <- temp$L1[temp$Period == 'late']
+    L1_yk[1:50,r,s] <- temp$L1[temp$Period == 'early']
+    L1_yk[51:nrow(L1_yk),r,s] <- temp$L1[temp$Period == 'late']
     
-    kappa_yk[1:(2009-1960),r,s] <- temp$k[temp$Period == 'early']
-    kappa_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$k[temp$Period == 'late']
+    kappa_yk[1:50,r,s] <- temp$k[temp$Period == 'early']
+    kappa_yk[51:nrow(Linf_yk),r,s] <- temp$k[temp$Period == 'late']
     
-    sigmaG_yk[1:(2009-1960),r,s] <- temp$Sigma[temp$Period == 'early']
-    sigmaG_yk[(2009-1960):nrow(Linf_yk),r,s] <- temp$Sigma[temp$Period == 'late']
+    sigmaG_yk[1:50,r,s] <- temp$Sigma[temp$Period == 'early']
+    sigmaG_yk[51:nrow(Linf_yk),r,s] <- temp$Sigma[temp$Period == 'late']
   }
 }
 

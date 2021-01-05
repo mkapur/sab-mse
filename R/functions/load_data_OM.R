@@ -380,8 +380,8 @@ load_data_OM <- function(nspace = 6,
   log_srv_slx_pars['AK_VAST_W','p2',,] <- 65
   log_srv_slx_pars['AK_VAST_E','p1',,] <- 50
   log_srv_slx_pars['AK_VAST_E','p2',,] <- 65
-  log_srv_slx_pars['BC_EARLY','p1',,] <- 50
-  log_srv_slx_pars['BC_EARLY','p2',,] <- 65
+  log_srv_slx_pars['BC_EARLY','p1',,] <- 75.62026
+  log_srv_slx_pars['BC_EARLY','p2',,] <- 77.27014
   log_srv_slx_pars['BC_VAST','p1',,] <- 50
   log_srv_slx_pars['BC_VAST','p2',,] <- 65
   log_srv_slx_pars['WC_VAST','p1',,] <- 50

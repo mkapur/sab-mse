@@ -2,7 +2,8 @@
 # require(patchwork)
 # library(gridExtra)
 # require(dplyr)
-writeOM <- function(dat, 
+writeOM <- function(justPlots = FALSE,
+                    dat, 
                     opt,
                     obj,
                     mappy,
@@ -73,7 +74,7 @@ writeOM <- function(dat,
     X6 = dimnames(df$X_ijas)[[1]][6]
   )
   
-  ggplot(neqnm, aes(x = age, y = value, color = variable)) +
+  neqm_plot <- ggplot(neqnm, aes(x = age, y = value, color = variable)) +
     ggsidekick::theme_sleek() +
     geom_line(lwd = 1.1) +
     scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]]) +
@@ -81,13 +82,14 @@ writeOM <- function(dat,
                labeller = labeller(variable =conservation_status)) +
     labs(x = 'Age',y = 'Numbers (M+F)', color = 'Subarea')
   
-  ggsave(last_plot(),
+  if(justPlots) neqm_plot
+ if(!justPlots) ggsave(neqm_plot,
          file =paste0(dumpfile,"/",
                       Sys.Date(),'-Neqn.png'),
          width = 8, height = 6, units = 'in', dpi = 520)
   
   ## N_yseason ----
-  png(file =paste0(dumpfile,"/",
+  if(!justPlots)  png(file =paste0(dumpfile,"/",
                    Sys.Date(),'-N_season_iy.png'),
       width = 12, height = 10, unit = 'in', res = 540)
   par(mfrow = c(2,3))
@@ -121,10 +123,10 @@ writeOM <- function(dat,
                       "end (1/2 fishing + 1/2 M)"), lty =1, lwd = 5)
     axis(1, at = seq(1,df$yRun,5), labels = years[seq(1,df$yRun,5)])
   }
-  dev.off()
+  if(!justPlots) dev.off()
   
   ## ssb_yk ----
-  dat$SSB_yk %>%
+  ssbyk_plot <- dat$SSB_yk %>%
     data.frame() %>%
     mutate('Yr' = years[1:nrow(.)]) %>%
     reshape2::melt(id = c('Yr')) %>%
@@ -135,7 +137,8 @@ writeOM <- function(dat,
     ggsidekick::theme_sleek() + 
     theme( legend.position = c(0.8,0.8))
   
-  ggsave(last_plot(),
+  if(justPlots) ssbyk_plot
+  if(!justPlots) ggsave(ssbyk_plot,
          file = paste0(dumpfile,"/", Sys.Date(),'-SSB_yk.png'),
          width = 10, height = 6, unit = 'in',
          dpi = 420)
@@ -359,7 +362,7 @@ writeOM <- function(dat,
       templyais <- bind_rows(templyais,
                              # Length_yais_beg[y,,i,] %>%
                                # Length_yais_mid[y,,i,] %>%
-                               Length_yais_end[y,,i,] %>%
+                               dat$Length_yais_end[y,,i,] %>%
                                melt() %>% 
                                plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
                                mutate(year =  y, 
@@ -395,49 +398,50 @@ writeOM <- function(dat,
          file =paste0(dumpfile,"/",
                       Sys.Date(),'-meanLAA_mal.png'),
          width = 8, height = 6, units = 'in', dpi = 520)
+  
   ## plot dist of LAA using length_alyis ----
-  pA1 <- list() ## for area 1
-  for(y in 1:5){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
-    a1 <- 
-      LengthAge_alyis_end[,,y,1,1] %>%
-      melt() %>%
-      group_by(Var2) %>% 
-      mutate(sumP = sum(value), ## total prob within A-L bin
-             pbin = value/sumP) ## relative prob within A-L bin
-    
-    ggplot(a1,aes( x = Var2, y = pbin, color = factor(Var1))) +
-      # geom_histogram(stat ='identity', position = 'stack') +
-      geom_line() + 
-      geom_area(aes(fill=factor(Var1))) +
-      # geom_density( )+
-      labs(x = 'len', y = 'prob(Bin)', fill = 'age', 
-           title = paste("year ",y), 
-           subtitle= 'subarea 1') +
-      theme_sleek()
-    
-    ggplot(a1,aes( x = Var1, y = pbin, color = factor(Var2))) +
-      # geom_histogram(stat ='identity', position = 'stack') +
-      geom_line() + 
-      # geom_area(aes(fill=factor(Var2))) +
-      # geom_density( )+
-      labs(x = 'age', y = 'prob(Bin)', fill = 'len', 
-           title = paste("year ",y), 
-           subtitle= 'subarea 1') +
-      theme_sleek()
-    
-    pA1[[y]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
-      geom_tile() +
-      labs(x = 'age', y = 'len', 
-           title = paste("year ",y), 
-           subtitle= 'subarea 1') +
-      theme_sleek()
-    rm(a1)
-    # p[[i]] <- qplot(1:10,10:1,main=i)
-  }
-  # png(here("figs","LAA_Dist_A1.png"), 
-  #     height = 10, width = 10, unit = 'in', res = 420)
-  do.call(gridExtra::grid.arrange,pA1)
-  dev.off()
+  # pA1 <- list() ## for area 1
+  # for(y in 1:5){ #45:dim(LengthAge_alyi_beg)[3]){ ## loop years
+  #   a1 <- 
+  #     LengthAge_alyis_end[,,y,1,1] %>%
+  #     melt() %>%
+  #     group_by(Var2) %>% 
+  #     mutate(sumP = sum(value), ## total prob within A-L bin
+  #            pbin = value/sumP) ## relative prob within A-L bin
+  #   
+  #   ggplot(a1,aes( x = Var2, y = pbin, color = factor(Var1))) +
+  #     # geom_histogram(stat ='identity', position = 'stack') +
+  #     geom_line() + 
+  #     geom_area(aes(fill=factor(Var1))) +
+  #     # geom_density( )+
+  #     labs(x = 'len', y = 'prob(Bin)', fill = 'age', 
+  #          title = paste("year ",y), 
+  #          subtitle= 'subarea 1') +
+  #     theme_sleek()
+  #   
+  #   ggplot(a1,aes( x = Var1, y = pbin, color = factor(Var2))) +
+  #     # geom_histogram(stat ='identity', position = 'stack') +
+  #     geom_line() + 
+  #     # geom_area(aes(fill=factor(Var2))) +
+  #     # geom_density( )+
+  #     labs(x = 'age', y = 'prob(Bin)', fill = 'len', 
+  #          title = paste("year ",y), 
+  #          subtitle= 'subarea 1') +
+  #     theme_sleek()
+  #   
+  #   pA1[[y]] <- ggplot(a1,aes(x = Var1, y = Var2, fill = pbin)) +
+  #     geom_tile() +
+  #     labs(x = 'age', y = 'len', 
+  #          title = paste("year ",y), 
+  #          subtitle= 'subarea 1') +
+  #     theme_sleek()
+  #   rm(a1)
+  #   # p[[i]] <- qplot(1:10,10:1,main=i)
+  # }
+  # # png(here("figs","LAA_Dist_A1.png"), 
+  # #     height = 10, width = 10, unit = 'in', res = 420)
+  # do.call(gridExtra::grid.arrange,pA1)
+  # dev.off()
   
   # plot FISH selex ----
   ## bring estimates out and rearrange

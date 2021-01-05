@@ -1,0 +1,72 @@
+$upper
+          logh_k           logh_k           logh_k           logh_k          logR_0k          logR_0k          logR_0k 
+     -0.01005034      -0.01005034      -0.01005034      -0.01005034              Inf              Inf              Inf 
+         logR_0k           logq_f           logq_f           logq_f           logq_f           logq_f                b 
+             Inf              Inf              Inf              Inf              Inf              Inf       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b                b                b                b                b 
+      1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000       1.00000000 
+               b                b                b      logpi_acomp      logpi_acomp      logpi_acomp      logpi_acomp 
+      1.00000000       1.00000000       1.00000000              Inf              Inf              Inf              Inf 
+     logpi_acomp      logpi_acomp      logpi_acomp           logSDR log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+             Inf              Inf              Inf              Inf              Inf              Inf              Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+             Inf              Inf              Inf              Inf              Inf              Inf              Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+             Inf              Inf              Inf              Inf              Inf              Inf              Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+             Inf              Inf              Inf              Inf              Inf              Inf              Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+             Inf              Inf              Inf              Inf              Inf              Inf              Inf 
+log_srv_slx_pars 
+             Inf 
+
+$lower
+          logh_k           logh_k           logh_k           logh_k          logR_0k          logR_0k          logR_0k 
+       -1.609438        -1.609438        -1.609438        -1.609438         0.000000         0.000000         0.000000 
+         logR_0k           logq_f           logq_f           logq_f           logq_f           logq_f                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b                b                b                b                b 
+        0.000000         0.000000         0.000000         0.000000         0.000000         0.000000         0.000000 
+               b                b                b      logpi_acomp      logpi_acomp      logpi_acomp      logpi_acomp 
+        0.000000         0.000000         0.000000             -Inf             -Inf             -Inf             -Inf 
+     logpi_acomp      logpi_acomp      logpi_acomp           logSDR log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+            -Inf             -Inf             -Inf        -9.210340             -Inf             -Inf             -Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+            -Inf             -Inf             -Inf             -Inf             -Inf             -Inf             -Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+            -Inf             -Inf             -Inf             -Inf             -Inf             -Inf             -Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+            -Inf             -Inf             -Inf             -Inf             -Inf             -Inf             -Inf 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+            -Inf             -Inf             -Inf             -Inf             -Inf             -Inf             -Inf 
+log_srv_slx_pars 
+            -Inf 
+

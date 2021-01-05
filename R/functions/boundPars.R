@@ -115,26 +115,26 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       # array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), dim = c(8-nfixedfleets,2,1,2))
       seeddim <-  df$nfleets_surv+df$nfleets_acomp-4-nfixedfleets
       ## specific bounds on p1 and p2
-      # lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(35) ## p1
-      # lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(60) ## p2
-      # upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(60) ## p1
-      # upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
+      lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(10) ## p1
+      lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(55) ## p2
+      upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(40) ## p1
+      upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
       
       ## just rational bounds
-      lower[names(lower) == 'log_srv_slx_pars'] <- 0
-      upper[names(upper) == 'log_srv_slx_pars'] <- log(70)
+      # lower[names(lower) == 'log_srv_slx_pars'] <- 0
+      # upper[names(upper) == 'log_srv_slx_pars'] <- log(70)
 
       
     } else   if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
+      seeddim = df$nfleets_surv+df$nfleets_acomp-4
+      lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(10) ## p1
+      lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(40) ## p2
       
-      # lower[names(lower) == 'log_srv_slx_pars'][c(1:8,17:24)] <- log(35) ## p1
-      # lower[names(lower) == 'log_srv_slx_pars'][c(9:16,25:32)] <- log(60) ## p2
+      upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(55) ## p1
+      upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
       
-      # upper[names(upper) == 'log_srv_slx_pars'][c(1:8,17:24)] <- log(60) ## p1
-      # upper[names(upper) == 'log_srv_slx_pars'][c(9:16,25:32)] <- log(70) ## p2
-      
-      lower[names(lower) == 'log_srv_slx_pars'] <- 0
-      upper[names(upper) == 'log_srv_slx_pars']<- log(70)
+      # lower[names(lower) == 'log_srv_slx_pars'] <- 0
+      # upper[names(upper) == 'log_srv_slx_pars']<- log(70)
 
     }
 

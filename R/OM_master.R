@@ -12,7 +12,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4')[1]
-# compile(here("TMB",paste0(dllUSE,".cpp")))
+compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -21,7 +21,8 @@ df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <-   30 #df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
-df$parms$logq_f <- rep(log(1e-5),length(df$parms$logq_f))
+df$selshape
+# df$parms$logq_f <- 
 exp(df$parms$log_srv_slx_pars)
 # load(here("output","2020-12-15-59y_v4L_baseQ=WCGBTS_allest_lwrbounds/opt.rdata"))
 # df$parms$log_srv_slx_pars <- array(opt$par[names(opt$par) == 'log_srv_slx_pars'],dim= c(8,2,1,2),
@@ -35,9 +36,9 @@ mappy <-
   buildMap(toFix =  c("omega_0ij",
                       "epsilon_tau", 
                       "log_fsh_slx_pars",
-                      # "log_srv_slx_pars",
+                      "log_srv_slx_pars",
                     "mort_k"),
-           fixFlt = c("all_fsh", "WC_VAST","BC_EARLY"))
+           fixFlt = c("all_fsh", "BC_EARLY"))
 
 # array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,1,2), dimnames = dimnames(df$parms$log_fsh_slx_pars))
 # array(mappy$log_srv_slx_pars, dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,1,2),
@@ -50,18 +51,15 @@ system.time(obj <- MakeADFun(df,
                  checkParameterOrder = TRUE)) 
 
 system.time(rep1 <- obj$report()) ## one off caclulation using start pars
+
+rep1$surv_yf_pred/df$surv_yf_obs
+
 dat = rep1;attach(dat)
 years <- 1960:2019
 nyear <- length(years)
 tEnd <- length(years)
 age <- 0:70 
 nage <- length(age)
-
-
-
-
-
-
 
 bounds <- boundPars(obj,
                     r0_lower = 0, 
@@ -71,7 +69,8 @@ bounds <- boundPars(obj,
 # length(bounds$upper[names(bounds$upper)=='log_srv_slx_pars']) == length(mappy$log_srv_slx_pars[!is.na(mappy$log_srv_slx_pars)])
 # with(bounds, array(exp(lower[names(lower)=='log_fsh_slx_pars']), dim = c(7,2,1,2),
 #                    dimnames = list(df$fltnames_fish)))
-# with(bounds, array(exp(upper[names(upper)=='log_srv_slx_pars']), dim = c(5,2,1,2)))
+# with(bounds, array(exp(upper[names(upper)=='log_srv_slx_pars']), dim = c(8,2,1,2)))
+# with(bounds, array(exp(lower[names(lower)=='log_srv_slx_pars']), dim = c(8,2,1,2)))
 
 system.time(opt <-
               TMBhelper::fit_tmb(
@@ -92,8 +91,7 @@ dat <- obj$report(par = best)
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(dat=dat,obj = obj, opt = opt, rep=rep, cppname =cppname, mappy = mappy,
         runname = paste0("-",df$yRun-1,"y_",cppname,
-                         # "_M=", paste(df$parms$mort_k,collapse="-"),
-                         "_baseQ=WCGBTS",
+                         "_fixBCEarly",
                          "_lengthon"))
 
 

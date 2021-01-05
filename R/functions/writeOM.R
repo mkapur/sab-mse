@@ -31,9 +31,11 @@ writeOM <- function(justPlots = FALSE,
   save(df, file = paste0(dumpfile,"/df_used.rdata"))
   save(mappy, file = paste0(dumpfile,"/mappy.rdata"))
   
-  sink(paste0(dumpfile,"/bounds.txt"))
-  print(bounds)
-  sink()  
+  save(bounds, file = paste0(dumpfile,"/bounds.rdata"))
+  
+  # sink(paste0(dumpfile,"/bounds.txt"))
+  # print(bounds)
+  # sink()  
   
   spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),

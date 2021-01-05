@@ -599,6 +599,8 @@ for(s in 1:2){
 
 ## sanity check: the first subarea (i == 1) should return the first stock (k =1  or C1)
 ## and thus the LOWEST Linfs
+Linf_yk[51,4,1] == Linf_yk[50,4,1] ## female r4 shouldn't change
+Linf_yk[51,3,1] != Linf_yk[50,3,1] ## female r2 should change
 Linf_yk[1,phi_ik2[1],1] ## 60 ish
 Linf_yk[1,phi_ik2[6],1] ## 80 ish
 

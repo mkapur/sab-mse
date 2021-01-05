@@ -287,23 +287,28 @@ Type objective_function<Type>::operator() ()
       do{
         switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
         case 0: // enter age based sel
+          // Selectivity switch (case 0 or 1 references the value of slx_type)
+          switch (selShape_surv(srv_flt)) { // age sel
           for (int s = 0; s < nsex; s++) { // loop sexes
-            // Selectivity switch (case 0 or 1 references the value of slx_type)
-            switch (selShape_surv(srv_flt)) { // age sel
-            case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
-              for (int a= 0; a < nage; a++){
-                srv_slx_yafs(i,a,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-                  (a -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -
-                  srv_slx_pars(srv_flt,0,0,s))));
-              } // end ages
-              break;
-            case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
-              //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
-              for (int a= 0; a < nage; a++){
-                srv_slx_yafs(i,a,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-                  srv_slx_pars(srv_flt,1,0,s) * (a -  srv_slx_pars(srv_flt,0,0,s)) ) );
-              } // end ages
-              break;
+          case -1:
+            for (int a= 0; a < nage; a++){
+              srv_slx_yafs(i,a,srv_flt,s) = Type(1.0);
+            } // end ages
+            break;
+          case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
+            for (int a= 0; a < nage; a++){
+              srv_slx_yafs(i,a,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
+                (a -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -
+                srv_slx_pars(srv_flt,0,0,s))));
+            } // end ages
+            break;
+          case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
+            //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
+            for (int a= 0; a < nage; a++){
+              srv_slx_yafs(i,a,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                srv_slx_pars(srv_flt,1,0,s) * (a -  srv_slx_pars(srv_flt,0,0,s)) ) );
+            } // end ages
+            break;
             case 2: // Dome Normal with alpha (mean) and beta (sd)
               for (int a= 0; a < nage; a++){
                 srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,0,s))/pow(   srv_slx_pars(srv_flt,1,0,s),2)));
@@ -324,6 +329,11 @@ Type objective_function<Type>::operator() ()
         case 1: // enter length based sel
           for (int s = 0; s < nsex; s++) {
             switch (selShape_surv(srv_flt)) {
+            case -1:
+              for (int l = 0; l < LBins; l++){
+                srv_slx_yafs(i,l,srv_flt,s) = Type(1.0); 
+              } // end lengths
+              break;
             case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
               for (int l = 0; l < LBins; l++){
                 srv_slx_yafs(i,l,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *

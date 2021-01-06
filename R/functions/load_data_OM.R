@@ -376,16 +376,16 @@ load_data_OM <- function(nspace = 6,
                                            c(paste0('block',1)),
                                            c('Fem','Mal')))
   ## males and females
-  log_srv_slx_pars['AK_VAST_W','p1',,] <- 50
-  log_srv_slx_pars['AK_VAST_W','p2',,] <- 65
+  log_srv_slx_pars['AK_VAST_W','p1',,] <- c(35.36234,42.69320)
+  log_srv_slx_pars['AK_VAST_W','p2',,] <- c(45.31228,44.42085)
   log_srv_slx_pars['AK_VAST_E','p1',,] <- 50
   log_srv_slx_pars['AK_VAST_E','p2',,] <- 65
   log_srv_slx_pars['BC_EARLY','p1',,] <- 75.62026
-  log_srv_slx_pars['BC_EARLY','p2',,] <- 77.27014
-  log_srv_slx_pars['BC_VAST','p1',,] <- 50
-  log_srv_slx_pars['BC_VAST','p2',,] <- 65
-  log_srv_slx_pars['WC_VAST','p1',,] <- 50
-  log_srv_slx_pars['WC_VAST','p2',,] <- 65
+  log_srv_slx_pars['BC_EARLY','p2',,] <- 69.27150
+  log_srv_slx_pars['BC_VAST','p1',,] <-  c(38.31500,50)
+  log_srv_slx_pars['BC_VAST','p2',,] <- c(43.05036,69.27150)
+  log_srv_slx_pars['WC_VAST','p1',,1:2] <- c(43.04513,39.59406)
+  log_srv_slx_pars['WC_VAST','p2',,1:2] <- c(55.41398,41.78538)
   
   ## comps
   log_srv_slx_pars['AK_GOA_SURV','p1',,] <- 50

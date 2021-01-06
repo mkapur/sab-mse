@@ -105,6 +105,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   # array(1:length(  lower[names(lower) == 'log_srv_slx_pars']),
   # dim= c(dim(df$parms$log_srv_slx_pars)[1],2,2))
   if("srv" %in% boundSlx){
+
+    
     ## first check if slx was fixed at all
     if(length(grep("log_srv_slx_pars", names(mappy)))  > 0){
       ## now figure out which fleets are 
@@ -112,13 +114,17 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       ## identify which fleets were NA
       Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
       nfixedfleets <- length(Nas)/4
+      
       # array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), dim = c(8-nfixedfleets,2,1,2))
       seeddim <-  df$nfleets_surv+df$nfleets_acomp-4-nfixedfleets
+      
+      srvslxmst <- array(1:df$nfleets_surv+df$nfleets_acomp,
+                         dimnames = )
       ## specific bounds on p1 and p2
       lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1 
-      lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(80) ## p2
+      lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(30) ## p2
       
-      upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1 3.91202301
+      upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(80) ## p1 3.91202301
       upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(80) ## p2 3.91202301
       
       ## just rational bounds

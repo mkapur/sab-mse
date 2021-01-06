@@ -461,7 +461,7 @@ writeOM <- function(justPlots = FALSE,
                       dim = dim(df$parms$log_fsh_slx_pars),
                       dimnames = dimnames(df$parms$log_fsh_slx_pars))
     
-    selP <- array(exp(opt$par[grep('fsh_slx',names(opt$par))]),
+    selP <- array(exp(best[grep('fsh_slx',names(best))]),
                   dim = c(7,2,1,2))
   }
   
@@ -536,15 +536,16 @@ writeOM <- function(justPlots = FALSE,
   # plot SURV selex ----
   ## bring estimates out and rearrange
   nsurvmod = df$nfleets_surv+(df$nfleets_acomp-4) ## bc we got selex for acomp flts too
-  
-  
-  inputSel <- array(exp(obj$par[grep('srv_slx',names(obj$par))]),
+  Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
+  nfixedfleets <- length(Nas)/4
+  nsurvmod <- nsurvmod - nfixedfleets
+  inputSel <- array(exp(obj$par[grep('log_srv_slx_pars',names(obj$par))]),
                     dim = dim(df$parms$log_srv_slx_pars),
                     dimnames = dimnames(df$parms$log_srv_slx_pars))
   
-  selP <- array(exp(opt$par[grep('srv_slx',names(opt$par))]),
-                dim = dim(df$parms$log_srv_slx_pars),
-                dimnames = dimnames(df$parms$log_srv_slx_pars))
+  selP <- array(exp(best[grep('log_srv_slx_pars',names(best))]),
+                dim = c(nestflts,2,1,2))
+  
   dimnames(selP)[[1]] <- dimnames(df$parms$log_srv_slx_pars)[[1]]
   
   srv_sel_afs <- array(NA, dim =  c(df$nage,nsurvmod,2),
@@ -555,7 +556,7 @@ writeOM <- function(justPlots = FALSE,
   ## and info about selType, selShape
   ## and spit out vector of selx@a or selx@L
   
-  for(a in 1:df$nage){
+  # for(a in 1:df$nage){
     for(s in 1:2){
       for(surv_flt in 1:nsurvmod){
         srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
@@ -564,10 +565,10 @@ writeOM <- function(justPlots = FALSE,
                                               selType = df$selType_surv[surv_flt], 
                                               selShape = df$selShape_surv[surv_flt],
                                               fltType = 'surv')
-        
+
       }
     }
-  }
+  # }
   
   
   

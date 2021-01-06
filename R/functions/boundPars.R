@@ -121,8 +121,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
             dim = c(8-nfixedfleets,2,1,2),
             dimnames = list(keptflts,c('p1','p2'),NA,c('Fem','Mal')))
       
-      lwr.temp['AK_VAST_W',"p1",,] <- 3.401197; upr.temp['AK_VAST_W',"p1",,'Fem'] <- 3.68887945; upr.temp['AK_VAST_W',"p1",,'Mal'] <- log(60)
-      lwr.temp['AK_VAST_W',"p2",,] <- log(30); upr.temp['AK_VAST_W',"p2",,] <- 4.24849524
+      lwr.temp['AK_VAST_W',"p1",,] <- log(30); upr.temp['AK_VAST_W',"p1",,] <- 3.68887945; #upr.temp['AK_VAST_W',"p1",,'Mal'] <- log(60)
+      lwr.temp['AK_VAST_W',"p2",,] <- log(40); upr.temp['AK_VAST_W',"p2",,] <- 4.24849524
       
       lwr.temp['AK_VAST_E',"p1",,] <- 3.401197; upr.temp['AK_VAST_E',"p1",,] <- 3.68887945
       lwr.temp['AK_VAST_E',"p2",,] <- 4.007333; upr.temp['AK_VAST_E',"p2",,] <- 4.24849524
@@ -133,8 +133,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       lwr.temp['BC_VAST',"p1",,] <- 3.401197; upr.temp['BC_VAST',"p1",,] <-3.68887945
       lwr.temp['BC_VAST',"p2",,] <- 4.007333; upr.temp['BC_VAST',"p2",,] <- 4.24849524
       
-      lwr.temp['WC_VAST',"p1",,] <- 3.401197; upr.temp['WC_VAST',"p1",,] <- 3.68887945
-      lwr.temp['WC_VAST',"p2",,] <- 4.007333; upr.temp['WC_VAST',"p2",,] <- 4.24849524
+      lwr.temp['WC_VAST',"p1",,] <- log(10); upr.temp['WC_VAST',"p1",,] <- 3.68887945
+      lwr.temp['WC_VAST',"p2",,] <- 4.007333; upr.temp['WC_VAST',"p2",,] <- log(75)
       
       lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp
       upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp

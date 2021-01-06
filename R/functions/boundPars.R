@@ -114,7 +114,6 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       ## identify which fleets were NA
       Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
       nfixedfleets <- length(Nas)/4
-      
       keptflts <- dimnames(df$parms$log_srv_slx_pars)[[1]][-Nas] ## return non-fixed fltnames
       
       lwr.temp <- upr.temp <- array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), 
@@ -133,8 +132,9 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       lwr.temp['BC_VAST',"p1",,] <- 3.401197; upr.temp['BC_VAST',"p1",,] <-3.68887945
       lwr.temp['BC_VAST',"p2",,] <- 4.007333; upr.temp['BC_VAST',"p2",,] <- 4.24849524
       
-      lwr.temp['WC_VAST',"p1",,] <- log(10); upr.temp['WC_VAST',"p1",,] <- 3.68887945
-      lwr.temp['WC_VAST',"p2",,] <- 4.007333; upr.temp['WC_VAST',"p2",,] <- log(75)
+      lwr.temp['WC_VAST',"p1",,] <- log(30); upr.temp['WC_VAST',"p1",,] <- log(75)
+      lwr.temp['WC_VAST',"p2",,'Mal'] <- log(50);   lwr.temp['WC_VAST',"p2",,'Fem'] <- log(45);
+      upr.temp['WC_VAST',"p2",,] <- log(75)
       
       lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp
       upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp

@@ -115,24 +115,43 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
       nfixedfleets <- length(Nas)/4
       
-      # array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), dim = c(8-nfixedfleets,2,1,2))
-      seeddim <-  df$nfleets_surv+df$nfleets_acomp-4-nfixedfleets
+      keptflts <- dimnames(df$parms$log_srv_slx_pars)[[1]][-Nas] ## return non-fixed fltnames
       
-      srvslxmst <- array(1:df$nfleets_surv+df$nfleets_acomp,
-                         dimnames = )
-      ## specific bounds on p1 and p2
-      lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1 
-      lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(30) ## p2
+      lwr.temp <- upr.temp <- array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), 
+            dim = c(8-nfixedfleets,2,1,2),
+            dimnames = list(keptflts,c('p1','p2'),NA,c('Fem','Mal')))
       
-      upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(80) ## p1 3.91202301
-      upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(80) ## p2 3.91202301
+      lwr.temp['AK_VAST_W',"p1",,] <- 3.401197; upr.temp['AK_VAST_W',"p1",,] <- 3.68887945
+      lwr.temp['AK_VAST_W',"p2",,] <- 4.007333; upr.temp['AK_VAST_W',"p2",,] <- 4.24849524
+      
+      lwr.temp['AK_VAST_E',"p1",,] <- 3.401197; upr.temp['AK_VAST_E',"p1",,] <- 3.68887945
+      lwr.temp['AK_VAST_E',"p2",,] <- 4.007333; upr.temp['AK_VAST_E',"p2",,] <- 4.24849524
+      
+      lwr.temp['BC_EARLY',"p1",,] <- 3.401197; upr.temp['BC_EARLY',"p1",,] <- 3.68887945
+      lwr.temp['BC_EARLY',"p2",,] <- 4.007333; upr.temp['BC_EARLY',"p2",,] <- 4.24849524
+      
+      lwr.temp['BC_VAST',"p1",,] <- 3.401197; upr.temp['BC_VAST',"p1",,] <-3.68887945
+      lwr.temp['BC_VAST',"p2",,] <- 4.007333; upr.temp['BC_VAST',"p2",,] <- 4.24849524
+      
+      lwr.temp['WC_VAST',"p1",,] <- 3.401197; upr.temp['WC_VAST',"p1",,] <- 3.68887945
+      lwr.temp['WC_VAST',"p2",,] <- 4.007333; upr.temp['WC_VAST',"p2",,] <- 4.24849524
+      
+      lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp
+      upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp
+      ## general bounds on p1 and p2 for all fleets
+      # seeddim <-  df$nfleets_surv+df$nfleets_acomp-4-nfixedfleets
+      # lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1 
+      # lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(30) ## p2
+      # 
+      # upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(55) ## p1 3.91202301
+      # upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(80) ## p2 3.91202301
       
       ## just rational bounds
       # lower[names(lower) == 'log_srv_slx_pars'] <- 0
       # upper[names(upper) == 'log_srv_slx_pars'] <- log(80)
 
       
-    } else   if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
+    } else if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
       
       seeddim = df$nfleets_surv+df$nfleets_acomp-4
       lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1

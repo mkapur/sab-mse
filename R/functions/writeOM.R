@@ -593,6 +593,8 @@ writeOM <- function(justPlots = FALSE,
           col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
           lwd = 2)
       if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
+      # seeddim = nestflts
+      # lines(bounds$lower type = 'v', col = sexPal[2])
     }
   }
   dev.off()

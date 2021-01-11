@@ -60,6 +60,7 @@ Type objective_function<Type>::operator() ()
   
   // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
   // // each time block. Used for both selectivity and catchability
+  // these need to be indexed by fleet and called accordingly inside the h loop
   DATA_IMATRIX(fsh_blks);        // fishery
   DATA_IMATRIX(srv_blks);       // survey
   //
@@ -283,7 +284,7 @@ Type objective_function<Type>::operator() ()
   // doing five of these to account for five surveys w acomp
   for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0
-    for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
+    // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
       do{
         switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
         case 0: // enter age based sel
@@ -367,7 +368,7 @@ Type objective_function<Type>::operator() ()
         } // end switch selType
         i++;
       } while (i <= srv_blks(y,srv_flt)); // bracket i estimation for years designated by this block
-    } // end y blocks
+    } // end h blocks
   } // end srv
   
   //  END DATA & PARS, BEGIN MODEL //

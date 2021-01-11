@@ -61,8 +61,10 @@ Type objective_function<Type>::operator() ()
   // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
   // // each time block. Used for both selectivity and catchability
   // these need to be indexed by fleet and called accordingly inside the h loop
-  DATA_IMATRIX(fsh_blks);        // fishery
-  DATA_IMATRIX(srv_blks);       // survey
+  DATA_IMATRIX(fsh_blks);        // max(h) x nfleets_fish; endyr of time block for slx
+  DATA_IMATRIX(srv_blks);       // max(h) x nfleets_surv; endyr of time block for slx
+  DATA_IMATRIX(fsh_blks_size);        // 1 x nfleets_fish; how many time blocks per fleet
+  DATA_IMATRIX(srv_blks_size);       //  1 x nfleets_surv; how many time blocks per fleet
   //
   // // Survey Biomass
   DATA_ARRAY(surv_yf_obs);
@@ -163,11 +165,11 @@ Type objective_function<Type>::operator() ()
   fsh_slx_pars.setZero();
   for (int fish_flt = 0; fish_flt < nfleets_fish; fish_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
-      // for (int h = 0; h < fsh_blks.size(); h++) { // loop time blocks
-      for (int s = 0; s < nsex; s++) { // loop sexes
-        fsh_slx_pars(fish_flt,n,0,s) = exp(log_fsh_slx_pars(fish_flt,n,0,s));
-      } // end sex
-      // } // end blocks
+      for (int h = 0; h < fsh_blks_size(); h++) { // loop time blocks
+        for (int s = 0; s < nsex; s++) { // loop sexes
+          fsh_slx_pars(fish_flt,n,h,s) = exp(log_fsh_slx_pars(fish_flt,n,h,s));
+        } // end sex
+      } // end blocks
     } // end alpha, beta
   } // end fish fleets
   // Notes on the following syntax: the do while allows you to estimate parameters within a y block. It
@@ -181,7 +183,7 @@ Type objective_function<Type>::operator() ()
   // slx pars setup is fleet x alpha, beta x time block (1 for now) x sex
   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){ // loop fleets
     int i = 0;
-    for(int y = 0; y < nyear; y++){ // loop years; this should really loop over the # of blocks and replace the fixed zero
+    for(int h = 0; h < fsh_blks.size(); h++){
       do{
         switch (selType_fish(fish_flt)) { // 0 is age, 1 is leng
         case 0: // enter age based sel
@@ -274,17 +276,17 @@ Type objective_function<Type>::operator() ()
   srv_slx_pars.setZero();
   for (int srv_flt = 0; srv_flt < a2_dim(0); srv_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
-      // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
+      for (int h = 0; h < srv_blks_size(); h++) { // loop time blocks
       for (int s = 0; s < nsex; s++) { // loop sexes
-        srv_slx_pars(srv_flt,n,0,s) = exp(log_srv_slx_pars(srv_flt,n,0,s));
+        srv_slx_pars(srv_flt,n,h,s) = exp(log_srv_slx_pars(srv_flt,n,h,s));
       } // end sex
-      // } // end blocks
+      } // end blocks
     } // end alpha, beta
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
   for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0
-    // for (int h = 0; h < srv_blks.size(); h++) { // loop time blocks
+    for (int h = 0; h < srv_blks_size(srv_flt); h++) { // unique no. timeblocks per fleet (min 1)
       do{
         switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
         case 0: // enter age based sel
@@ -367,7 +369,7 @@ Type objective_function<Type>::operator() ()
           break;
         } // end switch selType
         i++;
-      } while (i <= srv_blks(y,srv_flt)); // bracket i estimation for years designated by this block
+      } while (i <= srv_blks(h,srv_flt)); // matrix with max year of block for each fleet
     } // end h blocks
   } // end srv
   

@@ -366,26 +366,32 @@ load_data_OM <- function(nspace = 6,
   fsh_blks[1:fsh_blks_size[,'WC_TWL'],'WC_TWL' ] <- c(1982,2003,2010,2019)
   fsh_blks[1:fsh_blks_size[,'AK_FIX'],'AK_FIX' ] <- c(1995,2019)
   
-  
-  log_fsh_slx_pars = array(0, dim = c(nfleets_fish,2,1,2), 
+  ## fill all blocks with start pars
+  log_fsh_slx_pars = array(NA, dim = c(nfleets_fish,2, max(fsh_blks_size),2), 
                            dimnames = list(c(paste(fltnames_fish)),
                                            c("p1","p2"),
-                                           c(paste0('block',1)),
+                                           c(paste0('block',1: max(fsh_blks_size))),
                                            c('Fem','Mal')))
   
-  # fleets 5+ are mean sd, ak fleets are a50, a95
-  log_fsh_slx_pars[1:2,1,1,1] <- log(50) ## a50 fem
-  log_fsh_slx_pars[1:2,1,1,2] <- log(50)## a50 mal 
-  log_fsh_slx_pars[1:2,2,1,1] <- log(67) ## a95
-  log_fsh_slx_pars[1:2,2,1,2] <- log(67)
-  log_fsh_slx_pars[c(4,3,5),1,1,1:2] <- log(c(62.8329, 63.6959, 33.8898)) ## mean
-  log_fsh_slx_pars[c(4,3,5),2,1,1:2] <- log(c(7.04483, 3.09715, 1.41494)) ## sd
-  ## share wc with bc
-  log_fsh_slx_pars[6:7,1,1,1:2] <-   log_fsh_slx_pars[4:5,1,1,1:2]
-  log_fsh_slx_pars[6:7,2,1,1:2] <-   log_fsh_slx_pars[4:5,2,1,1:2]
-  
-  
-  
+  ## ak fix is logistic
+  log_fsh_slx_pars["AK_FIX","p1",1:fsh_blks_size[,"AK_FIX"], c('Fem','Mal')] <- log(50)
+  log_fsh_slx_pars["AK_FIX","p2",1:fsh_blks_size[,"AK_FIX"], c('Fem','Mal')] <-  log(67)
+  ## ak twl is dome normal
+  log_fsh_slx_pars["AK_TWL","p1",1:fsh_blks_size[,"AK_TWL"], c('Fem','Mal')] <- log(45)
+  log_fsh_slx_pars["AK_TWL","p2",1:fsh_blks_size[,"AK_TWL"], c('Fem','Mal')] <-  log(10)
+  ## have custom start pars for bc fleets, which are dome normal and gamma
+  log_fsh_slx_pars["BC_LL","p1",1:fsh_blks_size[,"BC_LL"], c('Fem','Mal')] <- log( 63.6959)
+  log_fsh_slx_pars["BC_LL","p2",1:fsh_blks_size[,"BC_LL"], c('Fem','Mal')] <-  log(3.09715)
+  log_fsh_slx_pars["BC_TRAP","p1",1:fsh_blks_size[,"BC_TRAP"], c('Fem','Mal')] <- log( 62.8329)
+  log_fsh_slx_pars["BC_TRAP","p2",1:fsh_blks_size[,"BC_TRAP"], c('Fem','Mal')] <-  log(7.04483)
+  log_fsh_slx_pars["BC_TWL","p1",1:fsh_blks_size[,"BC_TWL"], c('Fem','Mal')] <- log( 33.8898)
+  log_fsh_slx_pars["BC_TWL","p2",1:fsh_blks_size[,"BC_TWL"], c('Fem','Mal')] <-  log(1.41494)
+  ## Just copy dome normal values for wc
+  log_fsh_slx_pars["WC_FIX","p1",1:fsh_blks_size[,"WC_FIX"], c('Fem','Mal')] <- log( 63.6959)
+  log_fsh_slx_pars["WC_FIX","p2",1:fsh_blks_size[,"WC_FIX"], c('Fem','Mal')] <-  log(3.09715)
+  log_fsh_slx_pars["WC_TWL","p1",1:fsh_blks_size[,"WC_TWL"], c('Fem','Mal')] <- log( 62.8329)
+  log_fsh_slx_pars["WC_TWL","p2",1:fsh_blks_size[,"WC_TWL"], c('Fem','Mal')] <-  log(7.04483)
+
   ## log_srv_slx_pars ----
   
   # srv_blks_size is a 1 x nfleets_surv ivector which indicates the number of timeblocks applicable
@@ -431,11 +437,7 @@ load_data_OM <- function(nspace = 6,
   log_srv_slx_pars['BC_SS',1,1,2] <- 54.1045-4.55724
   log_srv_slx_pars['BC_SS',2,1,1] <- 65
   log_srv_slx_pars['BC_SS',2,1,2] <- 65
-  # 
-  # for(i in 1:2){
-  #   log_srv_slx_pars[,1,,i][log_srv_slx_pars[,1,,i] ==0] <- 60
-  #   log_srv_slx_pars[,2,,i][log_srv_slx_pars[,2,,i] ==0] <- 8
-  # }
+
   
   log_srv_slx_pars = log(log_srv_slx_pars)
   

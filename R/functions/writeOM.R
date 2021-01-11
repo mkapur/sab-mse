@@ -544,13 +544,13 @@ writeOM <- function(justPlots = FALSE,
                     dimnames = dimnames(df$parms$log_srv_slx_pars))
   
   selP <- array(exp(best[grep('log_srv_slx_pars',names(best))]),
-                dim = c(nestflts,2,1,2))
+                dim = c(nsurvmod,2,1,2))
   
-  dimnames(selP)[[1]] <- dimnames(df$parms$log_srv_slx_pars)[[1]]
+  dimnames(selP)[[1]] <- dimnames(df$parms$log_srv_slx_pars)[[1]][1:nsurvmod]
   
   srv_sel_afs <- array(NA, dim =  c(df$nage,nsurvmod,2),
                        dimnames = list(c(df$age),
-                                       c( dimnames(df$parms$log_srv_slx_pars)[[1]]),
+                                       c(dimnames(df$parms$log_srv_slx_pars)[[1]][1:nsurvmod]),
                                        c('Fem','Mal')))
   ## function to take the estimated parameters
   ## and info about selType, selShape

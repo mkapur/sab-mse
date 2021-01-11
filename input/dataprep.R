@@ -61,6 +61,22 @@ names(bccatch)[2:4] = paste(fltnames$NAME[fltnames$M == 'BC' & fltnames$COMM]  )
 wccatch <- wc$catch %>% select(Yr, Obs, Fleet_Name) %>%
   pivot_wider(., names_from = Fleet_Name, values_from = Obs) %>%
   select(-NONE) %>% filter(Yr > 1959)
+
+## make this in PACFIN.sablefish.landings based on recent draw
+
+
+wccatch2 <- read.csv(here("input","raw_data","catch","Catch.sum.state.HKL_POT.csv")) %>% 
+  filter(YEAR > 2018) %>% mutate(FIX = Obs) %>%
+ merge(., read.csv(here("input","raw_data","catch","Catch.sum.state.trawlgears.csv")) %>% 
+         group_by(Year) %>%
+         summarise(TWL = sum( Catch.MT))%>% 
+         filter(Year > 2018),
+       by.x = 'YEAR',by.y = 'Year') %>%
+  mutate(Yr = YEAR) %>%
+  select(Yr, FIX, TWL)
+
+wccatch <- rbind(wccatch,wccatch2)
+
 names(wccatch)[2:3] = paste(fltnames$NAME[fltnames$M == 'WC' & fltnames$COMM]  )
 
 names(bccatch)[1] <- names(wccatch)[1] <- names(akcatch)[1] <- 'Year'

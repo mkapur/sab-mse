@@ -107,7 +107,7 @@ load_data_OM <- function(nspace = 6,
   ## note that the first two acomp fleets are already inside seltype fish
   ## only first ONE if AK fix not aggregated
   selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]))-1
-  selShape_fish <- c(rep(0,2),2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_fish <- c(0,2,2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-4))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
@@ -349,7 +349,7 @@ load_data_OM <- function(nspace = 6,
   #   #   stop('why')
   #   # }
   # }  
-  
+  ## log_fsh_slx_pars ----
   log_fsh_slx_pars = array(0, dim = c(nfleets_fish,2,1,2), 
                            dimnames = list(c(paste(fltnames_fish)),
                                            c("p1","p2"),
@@ -367,8 +367,24 @@ load_data_OM <- function(nspace = 6,
   log_fsh_slx_pars[6:7,1,1,1:2] <-   log_fsh_slx_pars[4:5,1,1,1:2]
   log_fsh_slx_pars[6:7,2,1,1:2] <-   log_fsh_slx_pars[4:5,2,1,1:2]
   
-
   
+  
+  ## log_srv_slx_pars ----
+  
+  # srv_blks_size is a 1 x nfleets_surv ivector which indicates the number of timeblocks applicable
+  # to each fleet.
+  srv_blks_size <- matrix(1, nrow = 1, ncol = nfleets_surv+nfleets_acomp-4)
+  colnames(srv_blks_size) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
+  srv_blks_size[,'WC_VAST'] <- 3
+  # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
+  # it will be a ragged array bc some fleets have fewer blocks.
+  srv_blks <- matrix(NA, nrow = max(srv_blks_size), 
+                     ncol = nfleets_surv+nfleets_acomp-4)
+  colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
+  
+  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
+  
+
   ## all of these are currently logistic with l/a50, and a delta
   log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-4),2,1,2),   
                             dimnames = list(c(paste(fltnames_surv),paste(fltnames_acomp[c(2,4,5)])),

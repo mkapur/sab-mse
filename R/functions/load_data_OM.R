@@ -350,6 +350,23 @@ load_data_OM <- function(nspace = 6,
   #   # }
   # }  
   ## log_fsh_slx_pars ----
+  # fsh_blks_size is a 1 x nfleets_surv ivector which indicates the number of timeblocks applicable
+  # to each fleet.
+  fsh_blks_size <- matrix(1, nrow = 1, ncol = nfleets_fish)
+  colnames(fsh_blks_size) <- c( as.character(fltnames_fish))
+  fsh_blks_size[,'WC_FIX'] <- 4
+  fsh_blks_size[,'WC_TWL'] <- 4
+  fsh_blks_size[,'AK_FIX'] <- 2
+  # fsh_blks is an h x nfleets_fish imatrix with the MAX year of a given timeblock.
+  # it will be a ragged array bc some fleets have fewer blocks.
+  fsh_blks <- matrix(2019, nrow = max(fsh_blks_size), 
+                     ncol = nfleets_fish)
+  colnames(fsh_blks) <- c( as.character(fltnames_fish))
+  fsh_blks[1:fsh_blks_size[,'WC_FIX'],'WC_FIX' ] <- c(1997,2003,2010,2019)
+  fsh_blks[1:fsh_blks_size[,'WC_TWL'],'WC_TWL' ] <- c(1982,2003,2010,2019)
+  fsh_blks[1:fsh_blks_size[,'AK_FIX'],'AK_FIX' ] <- c(1995,2019)
+  
+  
   log_fsh_slx_pars = array(0, dim = c(nfleets_fish,2,1,2), 
                            dimnames = list(c(paste(fltnames_fish)),
                                            c("p1","p2"),
@@ -378,12 +395,11 @@ load_data_OM <- function(nspace = 6,
   srv_blks_size[,'WC_VAST'] <- 3
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
-  srv_blks <- matrix(NA, nrow = max(srv_blks_size), 
+  srv_blks <- matrix(2019, nrow = max(srv_blks_size), 
                      ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
-  
   srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
-  
+
 
   ## all of these are currently logistic with l/a50, and a delta
   log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-4),2,1,2),   
@@ -539,8 +555,10 @@ load_data_OM <- function(nspace = 6,
     #* SELEX ----
     fish_selex_yafs = OM_fish_selex_yafs,
     surv_selex_yafs = OM_surv_selex_yafs,
-    fsh_blks = fsh_blks, ## currently not ready to be fleet-specific
+    fsh_blks = fsh_blks, 
     srv_blks = srv_blks,
+    fsh_blks_size = fsh_blks_size,
+    srv_blks_size = srv_blks_size,
     # Neqn = Neqn, ## solve(I-Mat2) ## load externally once M is setup
     # fsh_blks = t(fsh_blks), ## currently not ready to be fleet-specific
     # srv_blks = t(srv_blks),

@@ -273,19 +273,19 @@ Type objective_function<Type>::operator() ()
     } // end within h blocks
   } // end fish_flt
   
-  // vector<int> a2_dim = log_srv_slx_pars.dim;
-  // array<Type> srv_slx_pars(a2_dim);
-  // srv_slx_pars.setZero();
-  // for (int srv_flt = 0; srv_flt < a2_dim(0); srv_flt++) {
-  //   for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
-  //     for (int h = 0; h < srv_blks_size(srv_flt); h++) { // loop time blocks
-  //       for (int s = 0; s < nsex; s++) { // loop sexes
-  //         srv_slx_pars(srv_flt,n,h,s) = exp(log_srv_slx_pars(srv_flt,n,h,s));
-  //       } // end sex
-  //     } // end blocks
-  //   } // end alpha, beta
-  // } // end srv fleets
-  // // doing five of these to account for five surveys w acomp
+  vector<int> a2_dim = log_srv_slx_pars.dim;
+  array<Type> srv_slx_pars(a2_dim);
+  srv_slx_pars.setZero();
+  for (int srv_flt = 0; srv_flt < nfleets_surv; srv_flt++) {
+    for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
+      for (int h = 0; h < srv_blks_size(srv_flt); h++) { // loop time blocks
+        for (int s = 0; s < nsex; s++) { // loop sexes
+          srv_slx_pars(srv_flt,n,h,s) = Type(1.0);//exp(log_srv_slx_pars(srv_flt,n,h,s));
+        } // end sex
+      } // end blocks
+    } // end alpha, beta
+  } // end srv fleets
+  // doing five of these to account for five surveys w acomp
   // for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
   //   int i = 0; // re-set i to 0
   //   for (int h = 0; h < srv_blks_size(srv_flt); h++) { // unique no. timeblocks per fleet (min 1)
@@ -300,29 +300,29 @@ Type objective_function<Type>::operator() ()
   //               srv_slx_yafs(i,a,srv_flt,s) = Type(1.0);
   //             } // end ages
   //             break;
-  //           case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
+  //           case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,h,s) = a50 and  srv_slx_pars(srv_flt,1,h,s) = a95
   //             for (int a= 0; a < nage; a++){
   //               srv_slx_yafs(i,a,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-  //                 (a -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -
-  //                 srv_slx_pars(srv_flt,0,0,s))));
+  //                 (a -  srv_slx_pars(srv_flt,0,h,s)) / ( srv_slx_pars(srv_flt,1,h,s) -
+  //                 srv_slx_pars(srv_flt,0,h,s))));
   //             } // end ages
   //             break;
-  //           case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
+  //           case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,h,s) = a50 and  srv_slx_pars(srv_flt,1,h,s) = slope.
   //             //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
   //             for (int a= 0; a < nage; a++){
   //             srv_slx_yafs(i,a,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-  //               srv_slx_pars(srv_flt,1,0,s) * (a -  srv_slx_pars(srv_flt,0,0,s)) ) );
+  //               srv_slx_pars(srv_flt,1,h,s) * (a -  srv_slx_pars(srv_flt,0,h,s)) ) );
   //           } // end ages
   //           break;
   //           case 2: // Dome Normal with alpha (mean) and beta (sd)
   //             for (int a= 0; a < nage; a++){
-  //               srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,0,s))/pow(   srv_slx_pars(srv_flt,1,0,s),2)));
+  //               srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,h,s))/pow(   srv_slx_pars(srv_flt,1,h,s),2)));
   //             } // end ages
   //             break;
   //           case 3: // Dome Gamma with alpha (mean) and beta (sd)
   //             selG.setZero();
   //             for (int a= 0; a < nage; a++) {
-  //               selG(a)= pow(a, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-a/   srv_slx_pars(srv_flt,1,0,s));
+  //               selG(a)= pow(a, (   srv_slx_pars(srv_flt,0,h,s) - 1)) * exp(-a/   srv_slx_pars(srv_flt,1,h,s));
   //             } // end ages
   //             for (int a= 0;a < nage; a++) {
   //               srv_slx_yafs(i,a,srv_flt,s) = selG(a) / max(selG);
@@ -336,31 +336,31 @@ Type objective_function<Type>::operator() ()
   //           switch (selShape_surv(srv_flt)) {
   //           case -1:
   //             for (int l = 0; l < LBins; l++){
-  //               srv_slx_yafs(i,l,srv_flt,s) = Type(1.0); 
+  //               srv_slx_yafs(i,l,srv_flt,s) = Type(1.0);
   //             } // end lengths
   //             break;
-  //           case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = a95
+  //           case 0: // Logistic with a50 and a95, where  srv_slx_pars(srv_flt,0,h,s) = a50 and  srv_slx_pars(srv_flt,1,h,s) = a95
   //             for (int l = 0; l < LBins; l++){
   //               srv_slx_yafs(i,l,srv_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19)) *
-  //                 (l -  srv_slx_pars(srv_flt,0,0,s)) / ( srv_slx_pars(srv_flt,1,0,s) -  srv_slx_pars(srv_flt,0,0,s))));
+  //                 (l -  srv_slx_pars(srv_flt,0,h,s)) / ( srv_slx_pars(srv_flt,1,h,s) -  srv_slx_pars(srv_flt,0,h,s))));
   //             } // end ages
   //             break;
-  //           case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,0,s) = a50 and  srv_slx_pars(srv_flt,1,0,s) = slope.
+  //           case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,h,s) = a50 and  srv_slx_pars(srv_flt,1,h,s) = slope.
   //             //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
   //             for (int l = 0; l < LBins; l++){
   //               srv_slx_yafs(i,l,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-  //                 srv_slx_pars(srv_flt,1,0,s) * (l -  srv_slx_pars(srv_flt,0,0,s)) ) );
+  //                 srv_slx_pars(srv_flt,1,h,s) * (l -  srv_slx_pars(srv_flt,0,h,s)) ) );
   //             } // end len
   //             break;
   //           case 2: // Dome Normal with alpha (mean) and beta (sd)
   //             for (int l = 0; l < LBins; l++){
-  //               srv_slx_yafs(i,l,srv_flt,s)  = exp(-(0.5 * (l -    srv_slx_pars(srv_flt,0,0,s))/pow(   srv_slx_pars(srv_flt,1,0,s),2)));
+  //               srv_slx_yafs(i,l,srv_flt,s)  = exp(-(0.5 * (l -    srv_slx_pars(srv_flt,0,h,s))/pow(   srv_slx_pars(srv_flt,1,h,s),2)));
   //             } // end len
   //             break;
   //           case 3: // Dome Gamma with alpha (mean) and beta (sd)
   //             selGL.setZero();
   //             for (int l = 0; l < LBins; l++){
-  //               selG(l)= pow(l, (   srv_slx_pars(srv_flt,0,0,s) - 1)) * exp(-l/   srv_slx_pars(srv_flt,1,0,s));
+  //               selG(l)= pow(l, (   srv_slx_pars(srv_flt,0,h,s) - 1)) * exp(-l/   srv_slx_pars(srv_flt,1,h,s));
   //             } // end len
   //             for (int l = 0; l < LBins; l++){
   //               srv_slx_yafs(i,l,srv_flt,s) = selG(l) / max(selG);

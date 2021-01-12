@@ -464,12 +464,14 @@ Type objective_function<Type>::operator() ()
               exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
           }
           for(int a=0;a<(nage);a++){ 
-            N_yais_beg(0,a,i,s) = Ninit_ais(0,i,s);
+            N_yais_beg(0,a,i,s) = Ninit_ais(a,i,s);
           }
+          
         } // end sexes
       } // end subareas i
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
+    std::cout << y << "\t" << N_yais_beg(y,1,1,1) << " NAA_beg_a=1i=1s=1" << "\n";
     
     // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -587,6 +589,7 @@ Type objective_function<Type>::operator() ()
             exp(-mort_k(phi_ik2(i))/2) +
             NCome);
         } // end ages for N
+        // std::cout << y << "\t" << i << "\t" << s << "\t" << N_yais_mid(y,1,i,s) << " NAA_MIDa=1" << "\n";
         
         // for(int a=0;a<(nage);a++){
         //   Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
@@ -597,6 +600,8 @@ Type objective_function<Type>::operator() ()
     } // end sexes
     
     // Calc midyear LAA with half growth and reweighting due to movement
+    // note that we use the N and L_begs since we wanna know what numbers/lengths
+    // were present in other areas BEFORE movement (whereas Nmid records movement)
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
@@ -609,9 +614,9 @@ Type objective_function<Type>::operator() ()
           } // end subareas j
           // concurrently calculate the expected midyear LAA given VB growth
           // and reweight given the lengths and numbers of fish which came in
-          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*Length_yais_beg(y,a,i,s) +
+          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
                 (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-                (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))) + LCome)/
+                (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
             (N_yais_mid(y,a,i,s)+NCome);
         } // end ages
       } // end subareas i

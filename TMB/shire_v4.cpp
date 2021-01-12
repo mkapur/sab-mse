@@ -280,17 +280,17 @@ Type objective_function<Type>::operator() ()
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
       for (int h = 0; h < srv_blks_size(srv_flt); h++) { // loop time blocks
         for (int s = 0; s < nsex; s++) { // loop sexes
-          srv_slx_pars(srv_flt,n,h,s) = Type(1.0);//exp(log_srv_slx_pars(srv_flt,n,h,s));
+          srv_slx_pars(srv_flt,n,h,s) = exp(log_srv_slx_pars(srv_flt,n,h,s));
         } // end sex
       } // end blocks
     } // end alpha, beta
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
   for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
-    int i = 0; // re-set i to 0 (do not redeclare)
+    int i = 0; // re-set i to 0 
     for (int h = 0; h < srv_blks_size(srv_flt); h++) { // unique no. timeblocks per fleet (min 1)
-      std::cout << srv_flt << "\t" << h <<"\t" << i <<    std::endl;
       do{
+        // std::cout << srv_flt << "\t" << h <<"\t" << i << std::endl;
         switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
         case 0: // enter age based sel
           for (int s = 0; s < nsex; s++) { // loop sexes

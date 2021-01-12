@@ -588,35 +588,34 @@ Type objective_function<Type>::operator() ()
             NCome);
         } // end ages for N
         
-        for(int a=0;a<(nage);a++){
-          Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
-            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-        } // end mid year LAA phase 1
+        // for(int a=0;a<(nage);a++){
+        //   Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
+        //     (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+        //     (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+        // } // end mid year LAA phase 1
       } // end subareas i
     } // end sexes
     
-    // EQ 5 reweight ALL ages of midyear LAA due to movement
-    // overwrite mid
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=0;a<(nage);a++){
-    //       Type LCome = 0.0; Type NCome = 0.0;
-    //       for(int j=0;j<(nspace);j++){
-    //         if(i != j){
-    //           LCome = phi_ij(i,j)*(LCome + N_yais_mid(y,a,j,s)*Length_yais_beg(y,a,j,s) +
-    //             (Linf_yk(y,phi_ik2(j),s)-Length_yais_beg(y,a,j,s))*
-    //             (1-exp(-0.5*kappa_yk(y,phi_ik2(j),s))); // for numerator
-    //           NCome = phi_ij(i,j)*(NCome + Length_yais_beg(y,a,i,s) +
-    //             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-    //             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))); // for denom
-    //         }
-    //       } // end subareas j
-    //       Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
-    //         (N_yais_mid(y,a,i,s)+NCome);
-    //     } // end ages
-    //   } // end subareas i
-    // } // end sexes
+    // Calc midyear LAA with half growth and reweighting due to movement
+    for(int s=0;s<nsex;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage);a++){
+          Type LCome = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              LCome = phi_ij(i,j)*(LCome + N_yais_mid(y,a,j,s)*Length_yais_beg(y,a,j,s) +
+                (Linf_yk(y,phi_ik2(j),s)-Length_yais_beg(y,a,j,s))*
+                (1-exp(-0.5*kappa_yk(y,phi_ik2(j),s))); // for numerator
+              NCome = phi_ij(i,j)*(NCome + Length_yais_beg(y,a,i,s) +
+                (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+                (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))); // for denom
+            }
+          } // end subareas j
+          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+            (N_yais_mid(y,a,i,s)+NCome);
+        } // end ages
+      } // end subareas i
+    } // end sexes
     
     
     // std::cout << y << " before prob LAA" << "\n";

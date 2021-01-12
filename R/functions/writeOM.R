@@ -539,12 +539,26 @@ writeOM <- function(justPlots = FALSE,
   Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
   nfixedfleets <- length(Nas)/4
   nsurvmod <- nsurvmod - nfixedfleets
-  inputSel <- array(exp(obj$par[grep('log_srv_slx_pars',names(obj$par))]),
-                    dim = dim(df$parms$log_srv_slx_pars),
-                    dimnames = dimnames(df$parms$log_srv_slx_pars))
   
-  selP <- array(exp(best[grep('log_srv_slx_pars',names(best))]),
-                dim = c(nsurvmod,2,1,2))
+  ## use map to match input pars which were actually used
+  # inputSel <- array(exp(obj$par[grep('log_srv_slx_pars',names(obj$par))]),
+  #                   dim = dim(df$parms$log_srv_slx_pars),
+  #                   dimnames = dimnames(df$parms$log_srv_slx_pars))
+  
+  map_srvslx <- array(mappy$log_srv_slx_pars, 
+                      dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+                      dimnames = dimnames(df$parms$log_srv_slx_pars))
+  ## replace non-fixed values with starting pars
+  map_srvslx[!is.na(map_srvslx)] <- exp(obj$par[grep('log_srv_slx_pars',names(obj$par))])
+  inputSel <- map_srvslx
+  
+  map_srvslx <- array(mappy$log_srv_slx_pars, 
+                      dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+                      dimnames = dimnames(df$parms$log_srv_slx_pars))
+  ## replace non-fixed values with starting pars
+  map_srvslx[!is.na(map_srvslx)] <- array(exp(best[grep('log_srv_slx_pars',names(best))]))
+  selP <- map_srvslx
+ 
   
   dimnames(selP)[[1]] <- dimnames(df$parms$log_srv_slx_pars)[[1]][1:nsurvmod]
   

@@ -348,17 +348,17 @@ load_data_OM <- function(nspace = 6,
   # to each fleet.
   fsh_blks_size <- matrix(1, nrow = 1, ncol = nfleets_fish)
   colnames(fsh_blks_size) <- c( as.character(fltnames_fish))
-  fsh_blks_size[,'WC_FIX'] <- 4
-  fsh_blks_size[,'WC_TWL'] <- 4
-  fsh_blks_size[,'AK_FIX'] <- 2
+  # fsh_blks_size[,'WC_FIX'] <- 4
+  # fsh_blks_size[,'WC_TWL'] <- 4
+  # fsh_blks_size[,'AK_FIX'] <- 2
   # fsh_blks is an h x nfleets_fish imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
   fsh_blks <- matrix(2019, nrow = max(fsh_blks_size), 
                      ncol = nfleets_fish)
   colnames(fsh_blks) <- c( as.character(fltnames_fish))
-  fsh_blks[1:fsh_blks_size[,'WC_FIX'],'WC_FIX' ] <- c(1997,2003,2010,2019)
-  fsh_blks[1:fsh_blks_size[,'WC_TWL'],'WC_TWL' ] <- c(1982,2003,2010,2019)
-  fsh_blks[1:fsh_blks_size[,'AK_FIX'],'AK_FIX' ] <- c(1995,2019)
+  # fsh_blks[1:fsh_blks_size[,'WC_FIX'],'WC_FIX' ] <- c(1997,2003,2010,2019)
+  # fsh_blks[1:fsh_blks_size[,'WC_TWL'],'WC_TWL' ] <- c(1982,2003,2010,2019)
+  # fsh_blks[1:fsh_blks_size[,'AK_FIX'],'AK_FIX' ] <- c(1995,2019)
   fsh_blks <- fsh_blks-1960 ## zero index!
   ## fill all blocks with start pars
   log_fsh_slx_pars = array(NA, dim = c(nfleets_fish,2, max(fsh_blks_size),2), 
@@ -392,13 +392,13 @@ load_data_OM <- function(nspace = 6,
   # to each fleet.
   srv_blks_size <- matrix(1, nrow = 1, ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks_size) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
-  srv_blks_size[,'WC_VAST'] <- 3
+  # srv_blks_size[,'WC_VAST'] <- 3
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
   srv_blks <- matrix(2019, nrow = max(srv_blks_size), 
                      ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
-  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
+  # srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta

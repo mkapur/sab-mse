@@ -359,7 +359,7 @@ load_data_OM <- function(nspace = 6,
   fsh_blks[1:fsh_blks_size[,'WC_FIX'],'WC_FIX' ] <- c(1997,2003,2010,2019)
   fsh_blks[1:fsh_blks_size[,'WC_TWL'],'WC_TWL' ] <- c(1982,2003,2010,2019)
   fsh_blks[1:fsh_blks_size[,'AK_FIX'],'AK_FIX' ] <- c(1995,2019)
-  
+  fsh_blks <- fsh_blks-1960 ## zero index!
   ## fill all blocks with start pars
   log_fsh_slx_pars = array(NA, dim = c(nfleets_fish,2, max(fsh_blks_size),2), 
                            dimnames = list(c(paste(fltnames_fish)),
@@ -399,7 +399,7 @@ load_data_OM <- function(nspace = 6,
                      ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
   srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
-
+  srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta
   log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-4),2,1,2),   

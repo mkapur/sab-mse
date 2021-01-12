@@ -358,21 +358,38 @@ writeOM <- function(justPlots = FALSE,
   
   ## plot length_yais thru time ----
 
-  templyais<-NULL
+  templyais <-  templyais_beg <-templyais_mid <-templyais_end <- NULL
   for(i in 1:6){
     for(y in 1:df$yRun){
-      templyais <- bind_rows(templyais,
-                             # Length_yais_beg[y,,i,] %>%
-                               # Length_yais_mid[y,,i,] %>%
-                               dat$Length_yais_end[y,,i,] %>%
+      templyais_beg <- bind_rows(templyais_beg,
+                             Length_yais_beg[y,,i,] %>%
                                melt() %>% 
                                plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
                                mutate(year =  y, 
                                       subarea = paste0("Subarea ",i),
-                                      sex = ifelse(sex == 1,'Fem','Mal')))
+                                      sex = ifelse(sex == 1,'Fem','Mal')))%>%
+        mutate(PD = 'BEG')
+      templyais_mid <- bind_rows(templyais_mid,
+                                   Length_yais_mid[y,,i,] %>%
+                                   melt() %>% 
+                                   plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
+                                   mutate(year =  y, 
+                                          subarea = paste0("Subarea ",i),
+                                          sex = ifelse(sex == 1,'Fem','Mal')))%>%
+        mutate(PD = 'MID')
+      templyais_end <- bind_rows(templyais_end,
+                                   dat$Length_yais_end[y,,i,] %>%
+                                   melt() %>% 
+                                   plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
+                                   mutate(year =  y, 
+                                          subarea = paste0("Subarea ",i),
+                                          sex = ifelse(sex == 1,'Fem','Mal'))) %>%
+        mutate(PD = 'END')
     }
   }
-  
+  templyais <- rbind(templyais_beg,templyais_mid,templyais_end)
+  templyais$PD <- factor(templyais$PD, 
+                         levels = c('BEG','MID','END'))
   ggplot(filter(templyais, sex == 'Fem') , 
          aes(x = age, y = length, group = year)) +
     geom_line(aes(color = year), alpha = 0.2, lwd = 0.5) +
@@ -380,8 +397,7 @@ writeOM <- function(justPlots = FALSE,
     ggsidekick::theme_sleek() +
     labs(x = 'Age (years)', y = 'Length (cm)', 
          title = 'Mean LAA in Subarea, Females') +
-    facet_wrap(~subarea, ncol = 6)
-  
+    facet_grid(subarea ~ PD )
   
   ggsave(last_plot(),
          file =paste0(dumpfile,"/",
@@ -395,7 +411,8 @@ writeOM <- function(justPlots = FALSE,
     ggsidekick::theme_sleek() +
     labs(x = 'Age (years)', y = 'Length (cm)', 
          title = 'Mean LAA in Subarea, Males') +
-    facet_wrap(~subarea, ncol = 6)
+    facet_grid(subarea ~ PD )
+  
   ggsave(last_plot(),
          file =paste0(dumpfile,"/",
                       Sys.Date(),'-meanLAA_mal.png'),

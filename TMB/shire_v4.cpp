@@ -563,16 +563,6 @@ Type objective_function<Type>::operator() ()
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
-        // Type lenslope = 0.0;
-        // lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-        // for(int a=0;a<3;a++){
-        //   Length_yais_beg(y,a,i,s) = lenslope*a;
-        // } // end linear age
-        // // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-        // for(int a=3;a<(nage);a++){
-        //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-        //     exp(-kappa_yk(y,phi_ik2(i),s)*a);
-        // }
         for(int a=1;a<(nage);a++){
           Type pLeave = 0.0; Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){
@@ -591,12 +581,6 @@ Type objective_function<Type>::operator() ()
             NCome);
         } // end ages for N
         // std::cout << y << "\t" << i << "\t" << s << "\t" << N_yais_mid(y,1,i,s) << " NAA_MIDa=1" << "\n";
-        
-        // for(int a=0;a<(nage);a++){
-        //   Length_yais_mid(y,a,i,s)= Length_yais_beg(y,a,i,s) +
-        //     (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-        //     (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-        // } // end mid year LAA phase 1
       } // end subareas i
     } // end sexes
     
@@ -626,25 +610,7 @@ Type objective_function<Type>::operator() ()
     // std::cout << y << "\t" << Length_yais_mid(y,5,1,1) << " LAA_mid_a=5i=1s=1" << "\n";
     
     
-    // std::cout << y << " before prob LAA" << "\n";
-    // prob of length-at-age
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=0;a<(nage);a++){
-    //       LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    //       LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    //       for(int l=1;l<(LBins-1);l++){
-    //         LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-    //           pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    //         LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-    //           pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    //       } // end LBins
-    //       LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    //       LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    //     } // end ages
-    //   } // end nspace
-    // } // end sex
-    // std::cout << y << " after LengthAge_alyis_mid" << "\n";
+
     
     // F denom at second half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -794,10 +760,9 @@ Type objective_function<Type>::operator() ()
           Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s) +
             (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-          // Length_yais_beg(y+1,a,i,s)=  Length_yais_end(y,a,i,s);
         } // end ages
         // overwrite plus group via reweighting [eq 3]
-        // use mid since you dont want to count growth a third time
+        // use mid in growth since you dont want to count growth a third time
         // Length_yais_end(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
         //   (Length_yais_mid(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
         //   Length_yais_mid(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
@@ -807,6 +772,26 @@ Type objective_function<Type>::operator() ()
         //     (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
       } // mid subareas i
     } // end sexes
+    
+    // std::cout << y << " before prob LAA" << "\n";
+    // prob of length-at-age
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=0;a<(nage);a++){
+    //       LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       for(int l=1;l<(LBins-1);l++){
+    //         LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //         LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       } // end LBins
+    //       LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //     } // end ages
+    //   } // end nspace
+    // } // end sex
+    // std::cout << y << " after LengthAge_alyis_mid" << "\n";
     
     // std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk

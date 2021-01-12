@@ -603,15 +603,15 @@ Type objective_function<Type>::operator() ()
           Type LCome = 0.0; Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){
             if(i != j){
-              LCome = phi_ij(i,j)*(LCome + N_yais_mid(y,a,j,s)*Length_yais_beg(y,a,j,s) +
-                (Linf_yk(y,phi_ik2(j),s)-Length_yais_beg(y,a,j,s))*
-                (1-exp(-0.5*kappa_yk(y,phi_ik2(j),s))); // for numerator
-              NCome = phi_ij(i,j)*(NCome + Length_yais_beg(y,a,i,s) +
-                (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-                (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))); // for denom
+              LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
+              NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
             }
           } // end subareas j
-          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*Length_yais_mid(y,a,i,s) + LCome)/
+          // concurrently calculate the expected midyear LAA given VB growth
+          // and reweight given the lengths and numbers of fish which came in
+          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*Length_yais_beg(y,a,i,s) +
+                (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+                (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))) + LCome)/
             (N_yais_mid(y,a,i,s)+NCome);
         } // end ages
       } // end subareas i

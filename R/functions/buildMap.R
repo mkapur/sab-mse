@@ -31,8 +31,19 @@ buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
                                dim = dim(df$parms$log_srv_slx_pars),
                                dimnames = dimnames(df$parms$log_srv_slx_pars))
           for(flt in fixFlt){
-            srv_slx_map[row.names(srv_slx_map) == flt,1:2,,1:2] <- factor(NA)
+            srv_slx_map[row.names(srv_slx_map) == flt,1:2,,1:2] <- factor(NA) ## fix all designated fleets
+
+            
           }
+          ## also fix fleets which have no time block population
+          for(i in seq_along(dimnames(df$parms$log_srv_slx_pars)[[1]])){
+            if(df$srv_blks_size[i] != max(df$srv_blks_size)){
+              srv_slx_map[row.names(srv_slx_map) == dimnames(df$parms$log_srv_slx_pars)[[1]][i],
+                          1:2,(df$srv_blks_size[i]+1):max(df$srv_blks_size),1:2] <- factor(NA)
+            } 
+            
+          }
+          
           mappy[[idx]] <- factor(srv_slx_map)
           names(mappy)[idx] <-'log_srv_slx_pars'
           

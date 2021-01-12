@@ -402,11 +402,14 @@ load_data_OM <- function(nspace = 6,
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta
-  log_srv_slx_pars =  array(0, dim = c( nfleets_surv+(nfleets_acomp-4),2,1,2),   
-                            dimnames = list(c(paste(fltnames_surv),paste(fltnames_acomp[c(2,4,5)])),
-                                           c("p1","p2"),
-                                           c(paste0('block',1)),
-                                           c('Fem','Mal')))
+  log_srv_slx_pars =  array(NA,
+                            dim = c(nfleets_surv + (nfleets_acomp - 4), 2, max(srv_blks_size), 2),
+                            dimnames = list(c(
+                              paste(fltnames_surv), paste(fltnames_acomp[c(2, 4, 5)])
+                            ),
+                            c("p1", "p2"),
+                            c(paste0('block', 1:max(srv_blks_size))),
+                            c('Fem', 'Mal')))
   ## males and females
   log_srv_slx_pars['AK_VAST_W','p1',,] <- c(35.36234,42.69320)
   log_srv_slx_pars['AK_VAST_W','p2',,] <- c(45.31228,44.42085)

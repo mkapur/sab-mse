@@ -287,8 +287,9 @@ Type objective_function<Type>::operator() ()
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
   for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
-    int i = 0; // re-set i to 0
+    i = 0; // re-set i to 0 (do not redeclare)
     for (int h = 0; h < srv_blks_size(srv_flt); h++) { // unique no. timeblocks per fleet (min 1)
+      std::cout << srv_flt << "\t" << h <<"\t" << i <<    std::endl;
       do{
         switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
         case 0: // enter age based sel
@@ -316,7 +317,8 @@ Type objective_function<Type>::operator() ()
             break;
             case 2: // Dome Normal with alpha (mean) and beta (sd)
               for (int a= 0; a < nage; a++){
-                srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,h,s))/pow(   srv_slx_pars(srv_flt,1,h,s),2)));
+                srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,h,s))/
+                  pow(   srv_slx_pars(srv_flt,1,h,s),2)));
               } // end ages
               break;
             case 3: // Dome Gamma with alpha (mean) and beta (sd)

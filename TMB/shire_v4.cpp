@@ -472,7 +472,7 @@ Type objective_function<Type>::operator() ()
           }// end ages
         } // end sexes
       } // end subareas i
-      std::cout << y << "\t" << Length_yais_beg(y,5,1,1) << " LAA_beg_a=5i=1s=1" << "\n";
+      // std::cout << y << "\t" << Length_yais_beg(y,5,1,1) << " LAA_beg_a=5i=1s=1" << "\n";
     
     // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -606,23 +606,24 @@ Type objective_function<Type>::operator() ()
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
-          //       Type LCome = 0.0; Type NCome = 0.0;
-          //       for(int j=0;j<(nspace);j++){
-          //         if(i != j){
-          //           LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
-          //           NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
-          //         }
-          //       } // end subareas j
-          //       // concurrently calculate the expected midyear LAA given VB growth
-          //       // and reweight given the lengths and numbers of fish which came in
-          Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) ; // placeholder
-          //       Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
-          //             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-          //             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
-          //         (N_yais_mid(y,a,i,s)+NCome);
+          Type LCome = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
+              NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
+            }
+          } // end subareas j
+          // concurrently calculate the expected midyear LAA given VB growth
+          // and reweight given the lengths and numbers of fish which came in
+          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
+            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
+              (N_yais_mid(y,a,i,s)+NCome);
+          // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) ; // placeholder
         } // end ages
       } // end subareas i
     } // end sexes
+    // std::cout << y << "\t" << Length_yais_mid(y,5,1,1) << " LAA_mid_a=5i=1s=1" << "\n";
     
     
     // std::cout << y << " before prob LAA" << "\n";

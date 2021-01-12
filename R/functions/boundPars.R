@@ -5,6 +5,9 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   lower <- obj$par-Inf
   upper <- obj$par+Inf
   
+  lower[names(lower) == 'log_srv_slx_pars'] <-   lower[names(lower) == 'log_fsh_slx_pars'] <- 0
+  upper[names(upper) == 'log_srv_slx_pars'] <-   upper[names(upper) == 'log_fsh_slx_pars'] <- log(100)
+  
   lower[names(lower) == 'logh_k'] <- log(0.2) ## duh
   upper[names(upper) == 'logh_k'] <- log(0.99)
   

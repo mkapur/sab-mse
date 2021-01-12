@@ -287,7 +287,7 @@ Type objective_function<Type>::operator() ()
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
   for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
-    i = 0; // re-set i to 0 (do not redeclare)
+    int i = 0; // re-set i to 0 (do not redeclare)
     for (int h = 0; h < srv_blks_size(srv_flt); h++) { // unique no. timeblocks per fleet (min 1)
       std::cout << srv_flt << "\t" << h <<"\t" << i <<    std::endl;
       do{
@@ -1003,8 +1003,8 @@ Type objective_function<Type>::operator() ()
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
     for(int y=0;y<yRun;y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
-        std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
-        std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
+        // std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
+        // std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
         ans_survey -= dnorm(log(surv_yf_pred(y,surv_flt)+1e-9),
                             log(surv_yf_obs(y,surv_flt)),
                             0.2+surv_yf_err(y,surv_flt), TRUE);

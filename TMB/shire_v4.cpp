@@ -454,14 +454,11 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
-    std::cout << y << "\t" << N_yais_beg(y,5,1,1) << " NAA_beg_a=5i=1s=1" << "\n";
-    std::cout << y << "\t" << Length_yais_beg(y,5,1,1) << " LAA_beg_a=5i=1s=1" << "\n";
-    
+
     // define mean (expected) LAA at beginning of year
     // need to do this first so F calcs can take place
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
-        for(int a=0;a<(nage);a++){ 
           Length_yais_beg(0,0,i,s) = 0;
           Type lenslope = 0.0;
           lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
@@ -475,6 +472,7 @@ Type objective_function<Type>::operator() ()
           }// end ages
         } // end sexes
       } // end subareas i
+      std::cout << y << "\t" << Length_yais_beg(y,5,1,1) << " LAA_beg_a=5i=1s=1" << "\n";
     
     // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -605,25 +603,26 @@ Type objective_function<Type>::operator() ()
     // Calc midyear LAA with half growth and reweighting due to movement
     // note that we use the N and L_begs since we wanna know what numbers/lengths
     // were present in other areas BEFORE movement (whereas Nmid records movement)
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=0;a<(nage);a++){
-    //       Type LCome = 0.0; Type NCome = 0.0;
-    //       for(int j=0;j<(nspace);j++){
-    //         if(i != j){
-    //           LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
-    //           NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
-    //         }
-    //       } // end subareas j
-    //       // concurrently calculate the expected midyear LAA given VB growth
-    //       // and reweight given the lengths and numbers of fish which came in
-    //       Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
-    //             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-    //             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
-    //         (N_yais_mid(y,a,i,s)+NCome);
-    //     } // end ages
-    //   } // end subareas i
-    // } // end sexes
+    for(int s=0;s<nsex;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage);a++){
+          //       Type LCome = 0.0; Type NCome = 0.0;
+          //       for(int j=0;j<(nspace);j++){
+          //         if(i != j){
+          //           LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
+          //           NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
+          //         }
+          //       } // end subareas j
+          //       // concurrently calculate the expected midyear LAA given VB growth
+          //       // and reweight given the lengths and numbers of fish which came in
+          Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) ; // placeholder
+          //       Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
+          //             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+          //             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
+          //         (N_yais_mid(y,a,i,s)+NCome);
+        } // end ages
+      } // end subareas i
+    } // end sexes
     
     
     // std::cout << y << " before prob LAA" << "\n";

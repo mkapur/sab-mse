@@ -442,36 +442,39 @@ Type objective_function<Type>::operator() ()
   
   // std::cout << " Here" << "\n";
   for(int y=0;y<yRun;y++){ // Start y loop
-    // model year zero, use last year of Ninit_ai, and equil movement (omega) and downscaling (tau)
-    // note we are assuming unfished here as the exponent is M only
-    // note that in tmb, plus group is in slot nage-1
-    // so the incoming plus-groupers will be in slots nage-1 or nage-2 in prior year
-    // std::cout << y << " start year loop" << "\n";
+    
+    // define year zero numbers at age
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
-          // define LAA at beginning of first year
+          for(int a=0;a<(nage);a++){ 
+            N_yais_beg(0,a,i,s) = Ninit_ais(a,i,s);
+          } // end ages
+        } // end sexes
+      } // end subareas i
+    } // end y == 0
+    // std::cout << y << " did year zero" << "\n";
+    std::cout << y << "\t" << N_yais_beg(y,5,1,1) << " NAA_beg_a=5i=1s=1" << "\n";
+    std::cout << y << "\t" << Length_yais_beg(y,5,1,1) << " LAA_beg_a=5i=1s=1" << "\n";
+    
+    // define mean (expected) LAA at beginning of year
+    // need to do this first so F calcs can take place
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        for(int a=0;a<(nage);a++){ 
           Length_yais_beg(0,0,i,s) = 0;
           Type lenslope = 0.0;
           lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
           for(int a=0;a<3;a++){
-            // Length_yais_beg(y,a,i,s) = lenstep+lenslope*a;
             Length_yais_beg(y,a,i,s) = lenslope*a;
           } // end linear age
           // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
           for(int a=3;a<(nage);a++){
             Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
               exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
-          }
-          for(int a=0;a<(nage);a++){ 
-            N_yais_beg(0,a,i,s) = Ninit_ais(a,i,s);
-          }
-          
+          }// end ages
         } // end sexes
       } // end subareas i
-    } // end y == 0
-    // std::cout << y << " did year zero" << "\n";
-    std::cout << y << "\t" << N_yais_beg(y,1,1,1) << " NAA_beg_a=1i=1s=1" << "\n";
     
     // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -562,16 +565,16 @@ Type objective_function<Type>::operator() ()
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
-        Type lenslope = 0.0;
-        lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-        for(int a=0;a<3;a++){
-          Length_yais_beg(y,a,i,s) = lenslope*a;
-        } // end linear age
-        // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-        for(int a=3;a<(nage);a++){
-          Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-            exp(-kappa_yk(y,phi_ik2(i),s)*a);
-        }
+        // Type lenslope = 0.0;
+        // lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
+        // for(int a=0;a<3;a++){
+        //   Length_yais_beg(y,a,i,s) = lenslope*a;
+        // } // end linear age
+        // // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
+        // for(int a=3;a<(nage);a++){
+        //   Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+        //     exp(-kappa_yk(y,phi_ik2(i),s)*a);
+        // }
         for(int a=1;a<(nage);a++){
           Type pLeave = 0.0; Type NCome = 0.0;
           for(int j=0;j<(nspace);j++){
@@ -602,25 +605,25 @@ Type objective_function<Type>::operator() ()
     // Calc midyear LAA with half growth and reweighting due to movement
     // note that we use the N and L_begs since we wanna know what numbers/lengths
     // were present in other areas BEFORE movement (whereas Nmid records movement)
-    for(int s=0;s<nsex;s++){
-      for(int i=0;i<(nspace);i++){
-        for(int a=0;a<(nage);a++){
-          Type LCome = 0.0; Type NCome = 0.0;
-          for(int j=0;j<(nspace);j++){
-            if(i != j){
-              LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
-              NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
-            }
-          } // end subareas j
-          // concurrently calculate the expected midyear LAA given VB growth
-          // and reweight given the lengths and numbers of fish which came in
-          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
-                (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-                (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
-            (N_yais_mid(y,a,i,s)+NCome);
-        } // end ages
-      } // end subareas i
-    } // end sexes
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=0;a<(nage);a++){
+    //       Type LCome = 0.0; Type NCome = 0.0;
+    //       for(int j=0;j<(nspace);j++){
+    //         if(i != j){
+    //           LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
+    //           NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
+    //         }
+    //       } // end subareas j
+    //       // concurrently calculate the expected midyear LAA given VB growth
+    //       // and reweight given the lengths and numbers of fish which came in
+    //       Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
+    //             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+    //             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
+    //         (N_yais_mid(y,a,i,s)+NCome);
+    //     } // end ages
+    //   } // end subareas i
+    // } // end sexes
     
     
     // std::cout << y << " before prob LAA" << "\n";

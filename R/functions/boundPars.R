@@ -119,8 +119,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       keptflts <- dimnames(df$parms$log_srv_slx_pars)[[1]][-Nas] ## return non-fixed fltnames
       
       lwr.temp <- upr.temp <- array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), 
-            dim = c(8-nfixedfleets,2,1,2),
-            dimnames = list(keptflts,c('p1','p2'),NA,c('Fem','Mal')))
+            dim = c(8-nfixedfleets,2,max(df$srv_blks_size),2),
+            dimnames = list(keptflts,c('p1','p2'),c('block',1:max(df$srv_blks_size)),c('Fem','Mal')))
       
       lwr.temp['AK_VAST_W',"p1",,] <- log(30); upr.temp['AK_VAST_W',"p1",,] <- 3.68887945; #upr.temp['AK_VAST_W',"p1",,'Mal'] <- log(60)
       lwr.temp['AK_VAST_W',"p2",,] <- log(40); upr.temp['AK_VAST_W',"p2",,] <- 4.24849524

@@ -769,8 +769,10 @@ Type objective_function<Type>::operator() ()
           Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s)+
             (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-            Length_yais_beg(y+1,a+1,i,s) =  Length_yais_end(y,a,i,s);
-        } // end ages
+        } // end ages for LAA_END
+        for(int a=0;a<(nage-1);a++){
+          Length_yais_beg(y+1,a+1,i,s) =  Length_yais_end(y,a,i,s);
+        } // end ages for LAA_BEG_Y+1
         // overwrite plus group via reweighting [eq 3]
         // use mid in growth since you dont want to count growth a third time
         Length_yais_beg(y+1,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*

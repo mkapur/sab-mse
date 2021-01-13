@@ -41,7 +41,7 @@ writeOM <- function(justPlots = FALSE,
   print(opt)
   sink()
   
-  spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
+  spmat <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
   inames = rev(unique(spmat$subarea))
@@ -170,7 +170,7 @@ writeOM <- function(justPlots = FALSE,
   
   # anim_save(paste0(dumpfile,"SSB_yk_animate.gif",animation = last_animation())) 
   ## ssb_ym with compare ----
-  spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
+  spmat <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
   

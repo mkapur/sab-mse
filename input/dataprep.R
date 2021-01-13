@@ -45,11 +45,11 @@ omcatch0 <- data.frame(Year = 1960:2019)
 ## read files
 ## ak_comm_catch has sptlly aggregated data back to 1977
 ## back to 1960 is not aggregated in bygear_and_byarea
-# akcatch <- read.csv(here("input","raw_data","catch","AK_comm_catch.csv")) ## this is separated at 145W, corresponding to A1 and A2
+# akcatch <- read.csv(here("input","raw_data","catch","AK_comm_catch.csv")) ## this is separated at 145W, corresponding to A4 and A3
 # names(akcatch)[2:ncol(akcatch)] = rev(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$COMM]))
 # names(akcatch)[1] <- 'Year'
 
-akcatch <- read.csv(here("input","raw_data","catch","AK_catch_byGear_and_byarea.csv"))[c(1,11,12)] ## this is separated at 145W, corresponding to A1 and A2
+akcatch <- read.csv(here("input","raw_data","catch","AK_catch_byGear_and_byarea.csv"))[c(1,11,12)] ## this is separated at 145W, corresponding to A4 and A3
 names(akcatch) <- c('Year',rev(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$COMM])))
 
 
@@ -994,7 +994,7 @@ for(flt in 1:nfleets_surv){
 dev.off()
 ## survey ----
 ## spatial matrix -- for matching on region, stock, sub_area, etc
-spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
+spmat <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                     stock = c("R4","R3","R3","R2","R2","R1"),
                     mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
 bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%

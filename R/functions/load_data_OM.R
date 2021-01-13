@@ -392,13 +392,13 @@ load_data_OM <- function(nspace = 6,
   # to each fleet.
   srv_blks_size <- matrix(1, nrow = 1, ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks_size) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
-  # srv_blks_size[,'WC_VAST'] <- 3
+  srv_blks_size[,'WC_VAST'] <- 3
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
   srv_blks <- matrix(2019, nrow = max(srv_blks_size), 
                      ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
-  # srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
+  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta
@@ -448,7 +448,7 @@ load_data_OM <- function(nspace = 6,
     logR_0k = rep(log(8*10e6),4), #c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
-    b = rep(0,nyear),  
+    b_y = rep(0,nyear),  
     logpi_acomp = rep(log(50),nfleets_acomp),
     logSDR = 1.4,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 

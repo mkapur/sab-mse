@@ -467,25 +467,6 @@ Type objective_function<Type>::operator() ()
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
 
-    // define mean (expected) LAA at beginning of year
-    // need to do this first so F calcs can take place
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //       Length_yais_beg(0,0,i,s) = 0;
-    //       Type lenslope = 0.0;
-    //       lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-    //       for(int a=0;a<3;a++){
-    //         Length_yais_beg(y,a,i,s) = lenslope*a;
-    //       } // end linear age
-    //       // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-    //       for(int a=3;a<(nage);a++){
-    //         Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-    //           exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
-    //       }// end ages
-    //     } // end sexes
-    //   } // end subareas i
-      // std::cout << y << "\t" << Length_yais_beg(y,5,1,1) << " LAA_beg_a=5i=1s=1" << "\n";
-    
     // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){

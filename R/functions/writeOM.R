@@ -10,7 +10,7 @@ writeOM <- function(justPlots = FALSE,
                     rep =NA,
                     cppname = NA,
                     runname = NA,
-                    dumpfile =  here('output',paste0(Sys.Date(),"/"))){
+                    dumpfile =  here('output',paste0(Sys.time(),"/"))){
   ## allow for extra name
   if(!is.na(runname)) dumpfile = paste0(dumpfile,runname,"/")
   

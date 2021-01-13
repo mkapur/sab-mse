@@ -41,8 +41,6 @@ buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
                                dimnames = dimnames(df$parms$log_srv_slx_pars))
           for(flt in fixFlt){
             srv_slx_map[row.names(srv_slx_map) == flt,1:2,,1:2] <- factor(NA) ## fix all designated fleets
-
-            
           }
           ## also fix fleets which have no time block population
           for(i in seq_along(dimnames(df$parms$log_srv_slx_pars)[[1]])){
@@ -52,6 +50,9 @@ buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
             } 
             
           }
+          
+          if('all_srv' %in% fixFlt) srv_slx_map[1:length(df$parms$log_srv_slx_pars)]  <- factor(NA)
+          
           
           mappy[[idx]] <- factor(srv_slx_map)
           names(mappy)[idx] <-'log_srv_slx_pars'

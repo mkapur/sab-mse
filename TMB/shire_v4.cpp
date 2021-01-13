@@ -398,7 +398,7 @@ Type objective_function<Type>::operator() ()
   vector<Type>R_0i_vect(Neqn.cols()); // 0 is rows 1 is cols
   R_0i_vect.setZero();
   for(int i=0;i<(nspace);i++){
-    R_0i_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i); // consider tau epsilon here
+    R_0i_vect(i*nage) = R_0k(phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i)); // consider tau epsilon here
     // std::cout << i*nage << "\t" << R_0k(phi_ik2(i)) << std::endl;
   }
   vector<Type> NeqnR = Neqn*R_0i_vect;

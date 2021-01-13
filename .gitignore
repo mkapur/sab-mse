@@ -1,4 +1,6 @@
 *.Rproj.*
+*.dll
+*.o
 *.Rhistory*
 *Rdata
 *.docx

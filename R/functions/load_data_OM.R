@@ -343,6 +343,8 @@ load_data_OM <- function(nspace = 6,
   #   #   stop('why')
   #   # }
   # }  
+  
+  
   ## log_fsh_slx_pars ----
   # fsh_blks_size is a 1 x nfleets_surv ivector which indicates the number of timeblocks applicable
   # to each fleet.

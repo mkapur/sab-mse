@@ -1171,6 +1171,7 @@ Type objective_function<Type>::operator() ()
     REPORT(R_ym);
     REPORT(R_yk);
     REPORT(R_0k);
+    REPORT(SDR);
     
     // catches and tuning
     REPORT(catch_yaf_pred);  
@@ -1193,7 +1194,7 @@ Type objective_function<Type>::operator() ()
 
     REPORT(fsh_slx_yafs);
     REPORT(srv_slx_yafs);
-    REPORT(R_0i_vect);
+    // REPORT(R_0i_vect);
     REPORT(NeqnR);
     ADREPORT(epsilon_tau);
     ADREPORT(logR_0k);

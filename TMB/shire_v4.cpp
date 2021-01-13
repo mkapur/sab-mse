@@ -450,15 +450,6 @@ Type objective_function<Type>::operator() ()
           for(int a=0;a<(nage);a++){ 
             N_yais_beg(0,a,i,s) = Ninit_ais(a,i,s);
           } // end ages
-        } // end sexes
-      } // end subareas i
-    } // end y == 0
-    // std::cout << y << " did year zero" << "\n";
-
-    // define mean (expected) LAA at beginning of year
-    // need to do this first so F calcs can take place
-    for(int i=0;i<(nspace);i++){
-      for(int s=0;s<nsex;s++){
           Length_yais_beg(0,0,i,s) = 0;
           Type lenslope = 0.0;
           lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
@@ -470,8 +461,29 @@ Type objective_function<Type>::operator() ()
             Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
               exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
           }// end ages
+          
         } // end sexes
       } // end subareas i
+    } // end y == 0
+    // std::cout << y << " did year zero" << "\n";
+
+    // define mean (expected) LAA at beginning of year
+    // need to do this first so F calcs can take place
+    // for(int i=0;i<(nspace);i++){
+    //   for(int s=0;s<nsex;s++){
+    //       Length_yais_beg(0,0,i,s) = 0;
+    //       Type lenslope = 0.0;
+    //       lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
+    //       for(int a=0;a<3;a++){
+    //         Length_yais_beg(y,a,i,s) = lenslope*a;
+    //       } // end linear age
+    //       // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
+    //       for(int a=3;a<(nage);a++){
+    //         Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+    //           exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
+    //       }// end ages
+    //     } // end sexes
+    //   } // end subareas i
       // std::cout << y << "\t" << Length_yais_beg(y,5,1,1) << " LAA_beg_a=5i=1s=1" << "\n";
     
     // F denom at first half of year
@@ -754,19 +766,23 @@ Type objective_function<Type>::operator() ()
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
-          Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s) //+
-            // (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
-            // (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+          Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s)+
+            (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
+            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+            Length_yais_beg(y+1,a+1,i,s) =  Length_yais_end(y,a,i,s);
         } // end ages
         // overwrite plus group via reweighting [eq 3]
         // use mid in growth since you dont want to count growth a third time
-        // Length_yais_end(y,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
-        //   (Length_yais_mid(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-        //   Length_yais_mid(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
-        //   N_yais_mid(y,nage-1,i,s)*
-        //   (Length_yais_mid(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-        //   Length_yais_mid(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
-        //     (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
+        Length_yais_beg(y+1,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
+          (Length_yais_mid(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+          Length_yais_mid(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
+          N_yais_mid(y,nage-1,i,s)*
+          (Length_yais_mid(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+          Length_yais_mid(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
+            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
+        
+        // fill age-0 size
+        Length_yais_beg(0,0,i,s) = 0;
       } // mid subareas i
     } // end sexes
     

@@ -596,7 +596,6 @@ Type objective_function<Type>::operator() ()
             (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
               (N_yais_mid(y,a,i,s)+NCome);
-          // Length_yais_mid(y,a,i,s) = Length_yais_beg(y,a,i,s) ; // placeholder
         } // end ages
       } // end subareas i
     } // end sexes
@@ -751,7 +750,7 @@ Type objective_function<Type>::operator() ()
             (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
             (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
         } // end ages for LAA_END
-        for(int a=0;a<(nage-1);a++){
+        for(int a=1;a<(nage-1);a++){
           Length_yais_beg(y+1,a+1,i,s) =  Length_yais_end(y,a,i,s);
         } // end ages for LAA_BEG_Y+1
         // overwrite plus group via reweighting [eq 3]
@@ -763,9 +762,8 @@ Type objective_function<Type>::operator() ()
           (Length_yais_mid(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
           Length_yais_mid(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
             (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
-        
         // fill age-0 size
-        Length_yais_beg(0,0,i,s) = 0;
+        Length_yais_beg(y+1,0,i,s) = 0;
       } // mid subareas i
     } // end sexes
     

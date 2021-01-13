@@ -196,7 +196,7 @@ writeOM <- function(justPlots = FALSE,
     select(Year, REG, CV, 'Last Assessment', 'Operating Model') %>%
     # filter(Year >1965 ) %>%
     melt(id = c('Year','REG', 'CV')) %>%
-    ggplot(., aes(x = Year, y = value, color = REG)) +
+    ggplot(., aes(x = Year, y = log(value), color = REG)) +
     # ggplot(., aes(x = Year, y = assSSBMT, color = REG)) +
     geom_line(aes(y = value),lwd = 1.1) +
     # geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG,width=0)) +
@@ -205,7 +205,7 @@ writeOM <- function(justPlots = FALSE,
     geom_point()+ 
     ggsidekick::theme_sleek() +
     scale_x_continuous(limits = c(1960,1959+df$yRun)) +
-    labs(x = 'Modeled Year',y = 'SSB (units vary)', color = 'Mgmt Region') +
+    labs(x = 'Modeled Year',y = 'log SSB (units vary)', color = 'Mgmt Region') +
     facet_wrap(~REG+variable,scales = 'free_y', ncol = 2)
   # facet_wrap(~REG,scales = 'free_y')
   ggsave(last_plot(),

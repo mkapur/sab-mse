@@ -21,7 +21,7 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   lower[names(lower) == 'logSDR'] <- log(0.0001)
   lower[names(lower) == 'omega_0ij'] <- log(0.0001)
   upper[names(upper) == 'omega_0ij'] <- log(0.999)
-
+  
   lower[names(lower) == 'b'] <- 0
   upper[names(upper) == 'b'] <- 1
   
@@ -39,8 +39,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
     ## build fish bounds as if everything is there, then remove fixed fleets
     ## will have same dims as mappy and df$parms
     fsh_slx_map_lower <- fsh_slx_map_upper <- array(rep(NA,length(mappy$log_fsh_slx_pars)),
-                         dim = dim(df$parms$log_fsh_slx_pars),
-                         dimnames = dimnames(df$parms$log_fsh_slx_pars))
+                                                    dim = dim(df$parms$log_fsh_slx_pars),
+                                                    dimnames = dimnames(df$parms$log_fsh_slx_pars))
     
     ## if no fleets to fix, go with the normal slx bounds
     p1_logistic_idx <- c(1:2,15:16) #c(1:4,19:22)
@@ -109,18 +109,16 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   # nsurvsel = dim(df$parms$log_srv_slx_pars)[1]
   # array(1:length(  lower[names(lower) == 'log_srv_slx_pars']),
   # dim= c(dim(df$parms$log_srv_slx_pars)[1],2,2))
+  ## SRV SLX ----
   if("srv" %in% boundSlx){
-
+    
     
     ## first check if slx was fixed at all
     if(length(grep("log_srv_slx_pars", names(mappy)))  > 0){
-
-      
-      
       map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
                           dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
                           dimnames = dimnames(df$parms$log_srv_slx_pars))
-
+      
       lwr.temp <- upr.temp <- map_srvslx ## now there are only values where we need to fill them
       ## identify which fleets were fixed by just looking at first block
       # mappy_srvslx <- mappy[[grep("log_srv_slx_pars", names(mappy))]]
@@ -134,33 +132,38 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       #       dim = c(8-nfixedfleets,2,max(df$srv_blks_size),2),
       #       dimnames = list(keptflts,c('p1','p2'),
       #                       c('block',1:max(df$srv_blks_size)),c('Fem','Mal')))
-      #
-      lwr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(30); 
-      upr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- 3.68887945; 
-      lwr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(40); 
-      upr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- 4.24849524
       
-      lwr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- 3.401197;
-      upr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- 3.68887945
-      lwr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- 4.007333; 
-      upr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- 4.24849524
-      
-      lwr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- 3.401197; 
-      upr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- 3.68887945
-      lwr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- 4.007333; 
-      upr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- 4.24849524
-      
-      lwr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <- 3.401197; 
-      upr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <-3.68887945
-      lwr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.007333; 
-      upr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.24849524
-      
-      lwr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(30);
-      upr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(75)
-      lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Mal'] <- log(50);  
-      lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Fem'] <- log(45);
-      upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(75)
-      
+      if(all(!is.na(map_srvslx['AK_VAST_W',,,]))){
+        lwr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(30); 
+        upr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- 3.68887945; 
+        lwr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(40); 
+        upr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- 4.24849524
+      }
+      if(all(!is.na(map_srvslx['AK_VAST_E',,,]))){
+        lwr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- 3.401197;
+        upr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- 3.68887945
+        lwr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- 4.007333; 
+        upr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- 4.24849524
+      }
+      if(all(!is.na(map_srvslx['BC_EARLY',,,]))){
+        lwr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- 3.401197; 
+        upr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- 3.68887945
+        lwr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- 4.007333; 
+        upr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- 4.24849524
+      }
+      if(all(!is.na(map_srvslx['BC_VAST',,,]))){
+        lwr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <- 3.401197; 
+        upr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <-3.68887945
+        lwr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.007333; 
+        upr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.24849524
+      }
+      if(all(!is.na(map_srvslx['WC_VAST',,,]))){
+        lwr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(30);
+        upr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(75)
+        lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Mal'] <- log(50);  
+        lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Fem'] <- log(45);
+        upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(75)
+      }
       lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp[!is.na(lwr.temp)]
       upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp[!is.na(upr.temp)]
       ## general bounds on p1 and p2 for all fleets
@@ -174,14 +177,14 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       ## just rational bounds
       # lower[names(lower) == 'log_srv_slx_pars'] <- 0
       # upper[names(upper) == 'log_srv_slx_pars'] <- log(80)
-
+      
       
     } else if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
       
       seeddim = df$nfleets_surv+df$nfleets_acomp-4
       lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
       lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
-
+      
       upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
       upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
       
@@ -203,11 +206,11 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       
       # lower[names(lower) == 'log_srv_slx_pars'] <- 0
       # upper[names(upper) == 'log_srv_slx_pars']<- log(80)
-
+      
     }
-
+    
   } ## end srv in boundslx
-
+  
   return(list("upper"=upper, "lower"=lower))
 }
 

@@ -1136,7 +1136,7 @@ Type objective_function<Type>::operator() ()
   // 
   // // Likelihood: TOTAL
   Type ans =
-    // ans_SDR+
+    ans_SDR+
     ans_catch
     +ans_survey
     // -ans_survcomp

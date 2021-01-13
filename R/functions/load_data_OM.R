@@ -394,13 +394,13 @@ load_data_OM <- function(nspace = 6,
   # to each fleet.
   srv_blks_size <- matrix(1, nrow = 1, ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks_size) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
-  srv_blks_size[,'WC_VAST'] <- 3
+  # srv_blks_size[,'WC_VAST'] <- 3
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
   srv_blks <- matrix(2019, nrow = max(srv_blks_size), 
                      ncol = nfleets_surv+nfleets_acomp-4)
   colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
-  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
+  # srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2010,2019)
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta

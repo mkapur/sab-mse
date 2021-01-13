@@ -9,12 +9,13 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   upper[names(upper) == 'log_srv_slx_pars'] <-   upper[names(upper) == 'log_fsh_slx_pars'] <- log(100)
   
   lower[names(lower) == 'logh_k'] <- log(0.2) ## duh
-  upper[names(upper) == 'logh_k'] <- log(0.99)
+  upper[names(upper) == 'logh_k'] <- log(1)
   
   lower[names(lower) == 'epsilon_tau'] <- 0
   # upper[names(upper) == 'epsilon_tau'] <- 1
   
   lower[names(lower) == 'logR_0k'] <- r0_lower
+  upper[names(upper) == 'logR_0k'] <- 50
   
   lower[names(lower) == 'mort_k'] <- 0 ## duh
   upper[names(upper) == 'mort_k'] <- 1

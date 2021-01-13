@@ -608,10 +608,7 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end sexes
     // std::cout << y << "\t" << Length_yais_mid(y,5,1,1) << " LAA_mid_a=5i=1s=1" << "\n";
-    
-    
-
-    
+  
     // F denom at second half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
@@ -757,9 +754,9 @@ Type objective_function<Type>::operator() ()
     for(int s=0;s<nsex;s++){
       for(int i=0;i<(nspace);i++){
         for(int a=0;a<(nage);a++){
-          Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s) +
-            (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
-            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+          Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s) //+
+            // (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
+            // (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
         } // end ages
         // overwrite plus group via reweighting [eq 3]
         // use mid in growth since you dont want to count growth a third time

@@ -366,7 +366,7 @@ writeOM <- function(justPlots = FALSE,
   for(i in 1:6){
     for(y in 1:df$yRun){
       templyais_beg <- bind_rows(templyais_beg,
-                                 Length_yais_beg[y,,i,] %>%
+                                 dat$Length_yais_beg[y,,i,] %>%
                                    melt() %>% 
                                    plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
                                    mutate(year =  y, 
@@ -374,7 +374,7 @@ writeOM <- function(justPlots = FALSE,
                                           sex = ifelse(sex == 1,'Fem','Mal')))%>%
         mutate(PD = 'BEG')
       templyais_mid <- bind_rows(templyais_mid,
-                                 Length_yais_mid[y,,i,] %>%
+                                 dat$Length_yais_mid[y,,i,] %>%
                                    melt() %>% 
                                    plyr::rename(c('Var1' = 'age','Var2' = 'sex', 'value' = 'length')) %>% 
                                    mutate(year =  y, 
@@ -576,33 +576,41 @@ writeOM <- function(justPlots = FALSE,
     # map_srvslx[!is.na(map_srvslx)] <- exp(obj$par[grep('log_srv_slx_pars',names(obj$par))])
     # inputSel <- map_srvslx
     
-    map_srvslx <- array(mappy$log_srv_slx_pars, 
+    map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
                         dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
                         dimnames = dimnames(df$parms$log_srv_slx_pars))
     ## replace non-fixed values with starting pars
-    map_srvslx[!is.na(map_srvslx)] <- array(exp(best[grep('log_srv_slx_pars',names(best))]))
+    map_srvslx[!is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
     selP <- map_srvslx
-    dimnames(selP)[[1]] <- dimnames(df$parms$log_srv_slx_pars)[[1]][1:nsurvmod]
-    srv_sel_afs <- array(NA, dim =  c(df$nage,nsurvmod,2),
+    srv_sel_afs <- array(NA, dim =  c(df$nage,df$nfleets_surv+df$nfleets_acomp-4,2),
                          dimnames = list(c(df$age),
-                                         c(dimnames(df$parms$log_srv_slx_pars)[[1]][1:nsurvmod]),
+                                         c(dimnames(df$parms$log_srv_slx_pars)[[1]]),
                                          c('Fem','Mal')))
-    for(s in 1:2){
-      for(surv_flt in 1:nsurvmod){
-        srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
-                                              selP = selP,
-                                              flt_idx = surv_flt,
-                                              selType = df$selType_surv[surv_flt], 
-                                              selShape = df$selShape_surv[surv_flt],
-                                              fltType = 'surv')
-        
+
+    for(surv_flt in 1:8){
+      for(s in 1:2){
+        if(!is.na(map_srvslx[flt,1,1,1])){
+          srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
+                                                selP = selP,
+                                                flt_idx = surv_flt,
+                                                selType = df$selType_surv[surv_flt], 
+                                                selShape = df$selShape_surv[surv_flt],
+                                                fltType = 'surv')
+        } else if(is.na(map_srvslx[flt,1,1,1])){
+          srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
+                                                selP = inputSel,
+                                                flt_idx = surv_flt,
+                                                selType = df$selType_surv[surv_flt], 
+                                                selShape = df$selShape_surv[surv_flt],
+                                                fltType = 'surv')
+        }
       } ## end surv fleet
     } ## end sex
     
     png(paste0(dumpfile,'/survey_selex.png'),
         height = 8, width = 6, unit = 'in', res = 420)
     par(mfrow = c(4,2) )
-    for(flt in 1:nsurvmod){
+    for(flt in 1:8){
       ## if fixed overwrite colors
       if(is.na(map_srvslx[flt,1,1,1])){
         sexPal_temp = c('grey22','grey66')
@@ -613,7 +621,7 @@ writeOM <- function(justPlots = FALSE,
       for(s in 1:2){
         tmp <- srv_sel_afs[,flt,s]
         if(s == 1) plot(tmp, 
-                        col = sexPal[1], 
+                        col = sexPal_temp[1], 
                         type = 'l', 
                         lwd = 2, 
                         xlab = ifelse(df$selType_surv[flt] == 0,
@@ -626,7 +634,7 @@ writeOM <- function(justPlots = FALSE,
         box(which = 'plot', lty = 'solid', 
             col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
             lwd = 2)
-        if(s == 2) lines(tmp, col = sexPal[2], type = 'l', lty = 2, lwd = 2)
+        if(s == 2) lines(tmp, col = sexPal_temp[2], type = 'l', lty = 2, lwd = 2)
         # seeddim = nestflts
         # lines(bounds$lower type = 'v', col = sexPal[2])
       }

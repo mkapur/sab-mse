@@ -12,24 +12,24 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4')[1]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, 
                    move = TRUE) ## data that works with OM
 df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
-df$yRun <- 5# df$tEnd ## number of years to run model
+df$yRun <- df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 
 mappy <-
   buildMap(toFix =  c("omega_0ij",
-                      # "epsilon_tau",
+                      "epsilon_tau",
                       "log_fsh_slx_pars",
                       "log_srv_slx_pars",
                     "mort_k"),
-           fixFlt = c("all_fsh", "AK_GOA_SURV", "BC_StRS", "BC_SS"))
+           fixFlt = c("all_fsh", "WC_VAST", "AK_GOA_SURV", "BC_StRS", "BC_SS"))
 
 array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
       dimnames = dimnames(df$parms$log_fsh_slx_pars))
@@ -81,6 +81,7 @@ system.time(opt <-
 best <- obj$env$last.par.best ## update object with the best parameters
 dat <- obj$report(par = best)
 dat$surv_yf_pred/df$surv_yf_obs
+dat$catch_yf_pred_total/df$catch_yf_obs[,2:ncol(df$catch_yf_obs)]
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(justPlots = FALSE,
@@ -91,8 +92,8 @@ writeOM(justPlots = FALSE,
         cppname =cppname, 
         mappy = mappy,
         runname = paste0("-",df$yRun,"y_",cppname,
-                         "_fixAcompslx",
-                         "_epstauon"))
+                         "_fixedallslx",
+                         "_epstauoff"))
 
 
 # system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

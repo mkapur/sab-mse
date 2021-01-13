@@ -22,8 +22,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   lower[names(lower) == 'omega_0ij'] <- log(0.0001)
   upper[names(upper) == 'omega_0ij'] <- log(0.999)
   
-  lower[names(lower) == 'b'] <- 0
-  upper[names(upper) == 'b'] <- 1
+  lower[names(lower) == 'b_y'] <- 0
+  upper[names(upper) == 'b_y'] <- 1
   
   lower[names(lower) == 'logq_f'] <- 0
   # upper[names(upper) == 'logq_f'] <- log(1)
@@ -133,33 +133,35 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       #       dimnames = list(keptflts,c('p1','p2'),
       #                       c('block',1:max(df$srv_blks_size)),c('Fem','Mal')))
       
-      if(all(!is.na(map_srvslx['AK_VAST_W',,,]))){
+      if(all(!is.na(map_srvslx['AK_VAST_W',,1,]))){
         lwr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(30); 
         upr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- 3.68887945; 
+        
         lwr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(40); 
         upr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- 4.24849524
       }
-      if(all(!is.na(map_srvslx['AK_VAST_E',,,]))){
+      if(all(!is.na(map_srvslx['AK_VAST_E',,1,]))){
         lwr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- 3.401197;
         upr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- 3.68887945
         lwr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- 4.007333; 
         upr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- 4.24849524
       }
-      if(all(!is.na(map_srvslx['BC_EARLY',,,]))){
+      if(all(!is.na(map_srvslx['BC_EARLY',,1,]))){
         lwr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- 3.401197; 
         upr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- 3.68887945
         lwr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- 4.007333; 
         upr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- 4.24849524
       }
-      if(all(!is.na(map_srvslx['BC_VAST',,,]))){
+      if(all(!is.na(map_srvslx['BC_VAST',,1,]))){
         lwr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <- 3.401197; 
         upr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <-3.68887945
         lwr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.007333; 
         upr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.24849524
       }
-      if(all(!is.na(map_srvslx['WC_VAST',,,]))){
+      if(all(!is.na(map_srvslx['WC_VAST',,1,]))){
         lwr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(30);
         upr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(75)
+        
         lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Mal'] <- log(50);  
         lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Fem'] <- log(45);
         upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(75)
@@ -169,10 +171,10 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       ## general bounds on p1 and p2 for all fleets
       # seeddim <-  df$nfleets_surv+df$nfleets_acomp-4-nfixedfleets
       # lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1 
-      # lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(30) ## p2
+      # lower[names(lower) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(30) ## p2
       # 
       # upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(55) ## p1 3.91202301
-      # upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(80) ## p2 3.91202301
+      # upper[names(upper) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(80) ## p2 3.91202301
       
       ## just rational bounds
       # lower[names(lower) == 'log_srv_slx_pars'] <- 0
@@ -183,10 +185,10 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       
       seeddim = df$nfleets_surv+df$nfleets_acomp-4
       lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
-      lower[names(lower) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
+      lower[names(lower) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
       
       upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
-      upper[names(upper) == 'log_srv_slx_pars'][c((seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
+      upper[names(upper) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
       
       
       
@@ -211,6 +213,7 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
     
   } ## end srv in boundslx
   
-  return(list("upper"=upper, "lower"=lower))
+  return(list("upper"=upper, "lower"=lower,
+              "srv_bnds_lwr" = lwr.temp,"srv_bnds_upr" = upr.temp))
 }
 

@@ -25,11 +25,13 @@ df$Neqn <- buildNeqn(df)
 
 mappy <-
   buildMap(toFix =  c("omega_0ij",
+                      # "b_y",
                       "epsilon_tau",
                       "log_fsh_slx_pars",
                       "log_srv_slx_pars",
                     "mort_k"),
-           fixFlt = c("all_fsh", "WC_VAST", "AK_GOA_SURV", "BC_StRS", "BC_SS"))
+           fixFlt = c("all_fsh", "AK_GOA_SURV", "BC_StRS", "BC_SS"))
+mappy$b_y <- factor(c(1,rep(NA,df$yRun-1))) ## enable estimation of year 1 b_y
 
 array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
       dimnames = dimnames(df$parms$log_fsh_slx_pars))
@@ -43,7 +45,7 @@ system.time(obj <- MakeADFun(df,
                  checkParameterOrder = TRUE)) 
 
 system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-dat = rep1;attach(dat)
+# dat = rep1;attach(dat)
 
 rep1$N_yais_beg[,c(1,2,65:71),1,1]
 # rep1$N_yais_mid[,c(1,2,65:71),1,1]
@@ -56,15 +58,10 @@ bounds <- boundPars(obj,
                     r0_lower = 0, 
                     boundSlx = c(NA,'fsh','srv')[3])
 
-# with(bounds, array(
-#   exp(lower[names(lower) == 'log_fsh_slx_pars']),
-#   dim = c(7, 2, max(df$srv_blks), 2),
-#   dimnames = list(df$fltnames_fish)
-# ))
-with(bounds, array(exp(lower[names(lower) == 'log_srv_slx_pars']),
-                   dim = c(5, 2, max(df$srv_blks_size), 2)))
-with(bounds, array(exp(upper[names(upper) == 'log_srv_slx_pars']),
-                   dim = c(5, 2, max(df$srv_blks_size), 2)))
+
+## inspect survey bounds in proper format
+exp(bounds$srv_bnds_lwr)
+exp(bounds$srv_bnds_upr)
 
 system.time(opt <-
               TMBhelper::fit_tmb(
@@ -92,7 +89,7 @@ writeOM(justPlots = FALSE,
         cppname =cppname, 
         mappy = mappy,
         runname = paste0("-",df$yRun,"y_",cppname,
-                         "_fixedallslx",
+                         "_b_y0on",
                          "_epstauoff"))
 
 
@@ -103,6 +100,7 @@ steep <- exp(best[names(best) == 'logh_k']); names(steep) <- paste0("h","_R",1:4
 logR_0 <- best[names(best) == 'logR_0k'];names(logR_0) <- paste0("logR_0","_R",1:4);logR_0
 epstau <- exp(best[names(best) == 'epsilon_tau']); names(epstau) <- paste0("epstau_",
                                                                       c('C1','C2','B2','B3','A3','A4'));epstau
+by <- exp(best[names(best) == 'b_y']); names(steep) <- paste0("b_y",1:length((best[names(best) == 'b_y']));steep
 
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")

@@ -6,7 +6,7 @@ load_data_OM <- function(nspace = 6,
                          logSDR = 1.4, 
                          bfuture = 0.5,
                          yr_future  = 0,
-                         b = 0.5
+                         b_y_max = 0.87
 ){
   
   #' @nspace = Spatial areas
@@ -310,39 +310,40 @@ load_data_OM <- function(nspace = 6,
     # tau_ki <- matrix(c(0.25,0.75,0.9,0.1), nrow = nstocks, byrow = TRUE, ncol = nspace) ## placeholder for alternative spatial stratifications
   }
   
-  # b <- matrix(NA, nyear)
-  # Yr <- 1946:max(years)
-  # # Parameters 
-  # yb_1 <- 1965 #_last_early_yr_nobias_adj_in_MPD
-  # yb_2 <- 1971 #_first_yr_fullbias_adj_in_MPD
-  # yb_3 <- 2016 #_last_yr_fullbias_adj_in_MPD
-  # yb_4 <- max(years) #_first_recent_yr_nobias_adj_in_MPD
-  # b_max <- 0.87 #_max_bias_adj_in_MPD
-  # 
-  # b[1] <- 0
-  # for(j in 2:length(Yr)){
-  #   
-  #   if (Yr[j] <= yb_1){
-  #     b[j] = 0}
-  #   
-  #   if(Yr[j] > yb_1 & Yr[j]< yb_2){
-  #     b[j] = b_max*((Yr[j]-yb_1)/(yb_2-yb_1));
-  #   }
-  #   
-  #   if(Yr[j] >= yb_2 & Yr[j] <= yb_3){
-  #     b[j] = b_max}
-  #   
-  #   if(Yr[j] > yb_3 & Yr[j] < yb_4){
-  #     b[j] = b_max*(1-(yb_3-Yr[j])/(yb_4-yb_3))
-  #   }
-  #   
-  #   if(Yr[j] >= yb_4){
-  #     b[j] = 0
-  #   }
-  #   # if (b[j]<b[j-1]){
-  #   #   stop('why')
-  #   # }
-  # }  
+  ## build b_y ramp ----
+  b_y <- matrix(NA, nyear)
+  Yr <- 1960:max(years)
+  # Parameters
+  yb_1 <- 1965 #_last_early_yr_nobias_adj_in_MPD
+  yb_2 <- 1971 #_first_yr_fullbias_adj_in_MPD
+  yb_3 <- 2019 #_last_yr_fullbias_adj_in_MPD
+  yb_4 <- max(years) #_first_recent_yr_nobias_adj_in_MPD
+  b_max <- b_y_max #_max_bias_adj_in_MPD
+
+  b_y[1] <- 0 ## likely estimate this
+  for(j in 2:length(Yr)){
+
+    if (Yr[j] <= yb_1){
+      b_y[j] = 0}
+
+    if(Yr[j] > yb_1 & Yr[j]< yb_2){
+      b_y[j] = b_max*((Yr[j]-yb_1)/(yb_2-yb_1));
+    }
+
+    if(Yr[j] >= yb_2 & Yr[j] <= yb_3){
+      b_y[j] = b_max}
+
+    if(Yr[j] > yb_3 & Yr[j] < yb_4){
+      b_y[j] = b_max*(1-(yb_3-Yr[j])/(yb_4-yb_3))
+    }
+
+    if(Yr[j] >= yb_4){
+      b_y[j] = 0
+    }
+    # if (b_y[j]<b[j-1]){
+    #   stop('why')
+    # }
+  }
   
   
   ## log_fsh_slx_pars ----
@@ -450,7 +451,7 @@ load_data_OM <- function(nspace = 6,
     logR_0k = rep(log(8*10e6),4), #c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
-    b_y = rep(0,nyear),  
+    b_y = b_y, ## setup in if loop above  
     logpi_acomp = rep(log(50),nfleets_acomp),
     logSDR = 1.4,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex 

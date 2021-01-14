@@ -1047,7 +1047,7 @@ survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3
   merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
   select(-Year) 
 
-names(survsig) <-names(survsigMT) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,1,2,3)])
+names(survsig) <-names(survsigMT) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,2,1,3)])
 write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indices_sigma_BaseQ=WCGBTS.csv"),row.names = FALSE)
 write.csv(survsigMT %>% select(fltnames_surv),
           here("input","input_data","OM_indices_sigmaMT_BaseQ=WCGBTS.csv"),row.names = FALSE)
@@ -1076,7 +1076,7 @@ surv_vals <- vast0 %>%
   filter(Year > 1964 & Year < 2020) %>%
 merge(., data.frame('Year' = 1960:2019), all = TRUE) 
 
-names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,2,1,4,5)]) 
+names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,1,2,4,5)]) 
 
 write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices_BaseQ=WCGBTS.csv"),row.names = FALSE) ## save in special order
 #* survey plot ----
@@ -1109,7 +1109,7 @@ surv_vals %>%
   # filter(variable == 'BC_VAST') %>%
   ggplot(., aes(x = Year, y = value.x, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
-  scale_color_manual(values = survfltPal)+
+  scale_color_manual(values = survfltPal) +
   scale_fill_manual(values = survfltPal, guide = FALSE)+
   scale_x_continuous(limits =  c(1980,2020), breaks = seq(1980,2020,10)) +
   geom_line(lwd = 1) +

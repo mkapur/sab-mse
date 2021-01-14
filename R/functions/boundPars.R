@@ -29,8 +29,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   lower[names(lower) == 'b_y'] <- 0
   upper[names(upper) == 'b_y'] <- 1
 
-  lower[names(lower) == 'logq_f'] <- 0
-  upper[names(upper) == 'logq_f'] <- log(1)
+  lower[names(lower) == 'logq_f'] <- -15
+  upper[names(upper) == 'logq_f'] <- 15
   ## bounds on fsh slx ----
   
   ## brute force par locations; if mappy mirrors first ak fleets,

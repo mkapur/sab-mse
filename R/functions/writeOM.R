@@ -217,7 +217,8 @@ writeOM <- function(justPlots = FALSE,
   
   
   ## plot bias ramp ----
-  png(here("figs","bias_ramp.png"),
+  png(file =paste0(dumpfile,"/",
+                       Sys.Date(),'-bias_ramp.png'),
       height = 4, width = 6, unit = 'in', res = 420)
   plot(df$parms$b_y[1:59],  type = 'l', lwd = 2, 
        xlab = 'Year',
@@ -228,8 +229,9 @@ writeOM <- function(justPlots = FALSE,
 
   ## blue for estimated points
   points(best[names(best) == 'b_y'][which(!is.na(mappy$b_y))], col = 'blue', pch = 19) 
+  
   ## grey for fixed points
-  points(best[names(best) == 'b_y'][which(is.na(mappy$b_y))], col = 'grey44', pch = 19) 
+  points(df$parms$b_y[which(is.na(mappy$b_y))], col = 'grey44', pch = 19) 
   legend('topright',
          col = c('black','blue','grey44'),
          pch = c(NA,19,19),

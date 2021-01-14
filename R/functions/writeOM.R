@@ -216,6 +216,10 @@ writeOM <- function(justPlots = FALSE,
          dpi = 420)
   
   
+  ## plot bias ramp ----
+  ## plot tilde_ry ----
+  
+  
   ## plot SRR----
   dat$R_yk %>% 
     data.frame() %>%

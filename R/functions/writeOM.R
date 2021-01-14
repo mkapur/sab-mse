@@ -198,9 +198,11 @@ writeOM <- function(justPlots = FALSE,
     melt(id = c('Year','REG', 'CV')) %>%
     ggplot(., aes(x = Year, y = log(value), color = REG)) +
     # ggplot(., aes(x = Year, y = assSSBMT, color = REG)) +
-    geom_line(aes(y = value),lwd = 1.1) +
+    geom_line(aes(y = log(value)),lwd = 1.1) +
     # geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG,width=0)) +
-    geom_errorbar(aes(ymin = value-CV*value,ymax= value+CV*value, color = REG,width=0)) +
+    geom_errorbar(aes(ymin = log(value-CV*value),
+                      ymax = log(value+CV*value), 
+                      color = REG,width=0)) +
     scale_color_manual(values = mgmtPal)+
     geom_point()+ 
     ggsidekick::theme_sleek() +

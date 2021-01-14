@@ -242,7 +242,7 @@ writeOM <- function(justPlots = FALSE,
                     'fixed'))
   dev.off()
   ## plot tilde_ry ----
-  
+  dat$tildeR_yk
   
   ## plot SRR----
   dat$R_yk %>% 

@@ -134,6 +134,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(logq_f); // Q by survey fleet
   PARAMETER_VECTOR(b_y); // bias adjustment factor by year
   PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
+  PARAMETER_MATRIX(tildeR_yk); //yikes; recdev by stock and year
   PARAMETER(logSDR);
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
   PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
@@ -144,7 +145,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> h_k = exp(logh_k);
   vector<Type> q_f = exp(logq_f);
   vector<Type> pi_acomp = exp(logpi_acomp);
-  array<Type> tildeR_yk(tEnd,nstocks); // recdevs
+  // array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
 
   // Fishery selectivity
@@ -376,7 +377,7 @@ Type objective_function<Type>::operator() ()
   //   }
   //   tildeR_initk(k) =0;
   // }
-  tildeR_yk.setZero();
+  // tildeR_yk.setZero();
   tildeR_initk.setZero();
   
   // Equilibrium Unfished numbers-at-age, subarea (outside of y loop)

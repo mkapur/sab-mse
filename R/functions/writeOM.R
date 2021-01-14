@@ -217,6 +217,28 @@ writeOM <- function(justPlots = FALSE,
   
   
   ## plot bias ramp ----
+  png(here("figs","bias_ramp.png"),
+      height = 4, width = 6, unit = 'in', res = 420)
+  plot(df$parms$b_y[1:59],  type = 'l', lwd = 2, 
+       xlab = 'Year',
+       xaxt = 'n',
+       ylab = 'B_y',
+       ylim = c(0,1.2*max(df$parms$b_y,round(best[names(best) == 'b_y'],3) )))
+  axis(side = 1, at = seq(0,60,5), labels= seq(1960,2020,5))
+
+  ## blue for estimated points
+  points(best[names(best) == 'b_y'][which(!is.na(mappy$b_y))], col = 'blue', pch = 19) 
+  ## grey for fixed points
+  points(best[names(best) == 'b_y'][which(is.na(mappy$b_y))], col = 'grey44', pch = 19) 
+  legend('topright',
+         col = c('black','blue','grey44'),
+         pch = c(NA,19,19),
+         lwd = 2,
+         lty = c(1,NA,NA),
+         legend = c('input (start)',
+                    'estimated',
+                    'fixed'))
+  dev.off()
   ## plot tilde_ry ----
   
   

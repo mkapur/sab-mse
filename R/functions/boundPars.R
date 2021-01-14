@@ -11,6 +11,10 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   lower[names(lower) == 'logh_k'] <- log(0.2) ## duh
   upper[names(upper) == 'logh_k'] <- log(1)
   
+  # lower[names(lower) == 'tildeR_yk'] <- -1 ## duh
+  # upper[names(upper) == 'tildeR_yk'] <- 1
+  
+  
   lower[names(lower) == 'epsilon_tau'] <- 0
   # upper[names(upper) == 'epsilon_tau'] <- 1
   

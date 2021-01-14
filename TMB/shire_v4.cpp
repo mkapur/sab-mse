@@ -3,7 +3,6 @@ template<class Type>
 
 Type objective_function<Type>::operator() ()
 {
-  
   // DATA INPUT //
   // structure //
   DATA_INTEGER(nspace); // number of subreas to track
@@ -37,36 +36,33 @@ Type objective_function<Type>::operator() ()
   
   // // DEMOGRAPHY //
   DATA_MATRIX(Neqn); // solve(I - (X %*% (A %*% (S %*% (H %*% S)))))
-  // // movement //
   DATA_ARRAY(X_ijas); // prob trans between subareas at age
   
-  // // growth //
+  // growth //
   DATA_ARRAY(unfished_ALK_F); // for use in SSB0 calcs
   DATA_ARRAY(wtatlen_kab); // aL^b values by stock
   DATA_ARRAY(Linf_yk); // sex, stock, year specific
   DATA_ARRAY(L1_yk); // length at age 4 by stock; linear before this
-  DATA_ARRAY(kappa_yk);
-  DATA_ARRAY(mat_ak);
+  DATA_ARRAY(kappa_yk); // von b k
+  DATA_ARRAY(mat_ak); // maturity at age, stock
   DATA_ARRAY(sigmaG_yk); // perhaps turn to parameter later
   DATA_ARRAY(phi_ij); // matrix of whether i,j are from distinct stocks (0 otherwise)
   DATA_INTEGER(LBins); // maximum length bin in CM
   DATA_IARRAY(mla_yais); // most likely length bin in age bin
   
-  // // Selectivity
+  // Selectivity
   DATA_IVECTOR(selType_fish); // 0 == AGESEL, 1= LENSEL
   DATA_IVECTOR(selShape_fish);
   DATA_IVECTOR(selType_surv); // 0 == AGESEL, 1 = LENSEL
   DATA_IVECTOR(selShape_surv);
   
-  // // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of
-  // // each time block. Used for both selectivity and catchability
-  // these need to be indexed by fleet and called accordingly inside the h loop
+  // Time varying parameter blocks (indexed as h) - each vector contains the terminal years of the blk.
   DATA_IMATRIX(fsh_blks);        // max(h) x nfleets_fish; endyr of time block for slx
   DATA_IMATRIX(srv_blks);       // max(h) x nfleets_surv; endyr of time block for slx
   DATA_IMATRIX(fsh_blks_size);        // 1 x nfleets_fish; how many time blocks per fleet
   DATA_IMATRIX(srv_blks_size);       //  1 x nfleets_surv; how many time blocks per fleet
-  //
-  // // Survey Biomass
+
+  // Survey Biomass
   DATA_ARRAY(surv_yf_obs);
   DATA_ARRAY(surv_yf_err);
   array<Type> surv_yf_pred(nyear, nfleets_surv); surv_yf_pred.setZero();
@@ -77,20 +73,16 @@ Type objective_function<Type>::operator() ()
   DATA_IMATRIX(acomp_flt_type); // 0 for commercial, 1 for survey
   DATA_ARRAY(acomp_yafs_obs);
   
-  // // STORAGE ///
   // Catches
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   DATA_ARRAY(catch_yf_error); // right now just 0.1 for all fleets and all years
+  
   array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish,2);  catch_yaf_pred.setZero();  // estimated catches at age by fleet
   array<Type> catch_yf_pred(tEnd,nfleets_fish,2);  catch_yf_pred.setZero();  
   array<Type> catch_yf_pred_total(tEnd,nfleets_fish);  catch_yf_pred_total.setZero();   
-  // array<Type> catch_yfi_pred(tEnd,nfleets_fish,nspace);  catch_yfi_pred.setZero();
-  // array<Type> catch_yaif_pred(tEnd,nage,nspace,nfleets_fish);  catch_yaif_pred.setZero();
   array<Type> CatchN_yaf(tEnd,nage,nfleets_fish);
   array<Type> N_avail_yf(tEnd, nfleets_fish);
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
-  // Switch for selectivity type: 0 = a50, a95 logistic; 1 = a50, slope logistic
-  // Predicted selectivity
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish, nsex);           // Fishery selectivity-at-age by sex (on natural scale)
   array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-4),nsex);  // four acomp fleets are comm
   vector<Type>selG(nage);
@@ -114,23 +106,25 @@ Type objective_function<Type>::operator() ()
   array<Type> SSB_yk(tEnd,nstocks);
   array<Type> SSB_yi(tEnd,nspace);
   array<Type> SSB_ym(tEnd,nmgmt_reg);
-  // Recruits
+  
+  // Recruits storage
   array<Type>  R_yk(tEnd,nstocks); // stock-level recruitment (bev-holt)
   array<Type>  R_yi(tEnd,nspace); // subarea-level recruitment (downscaled)
   array<Type>  R_ym(tEnd,nmgmt_reg); // subarea-level recruitment (downscaled)
   
-  // Length at age
+  // Length at age storage
   array<Type> Length_yais_beg(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
   array<Type> Length_yais_mid(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
   array<Type> Length_yais_end(tEnd+1,nage,nspace,nsex); // placeholder for true lengths-at-age
   array<Type> LengthAge_alyis_beg(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
   array<Type> LengthAge_alyis_mid(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
   array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
-  // age comps
+  // age comps storage
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // placeholder multiplier for all acomp fleets
   array<Type> comm_acomp_yafs_pred(tEnd, nage, 4, nsex); // predicted acomps from commercial fisheries
   array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-4, nsex); // predicted acomps from surveys (without biomass)
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
+  
   // // PARAMETERS //
   PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
   PARAMETER_VECTOR(mort_k); // mortality in stock
@@ -143,9 +137,8 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logSDR);
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
   PARAMETER_ARRAY(log_srv_slx_pars);       // Survey selectivity (selShape controls parameterization)
+  
   // // Transform out of log space
-  // // Type SDsurv = exp(logSDsurv);
-  // // Type SDcatch = exp(logSDcatch);
   Type SDR = exp(logSDR);
   vector<Type> R_0k = exp(logR_0k);
   vector<Type> h_k = exp(logh_k);
@@ -153,9 +146,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> pi_acomp = exp(logpi_acomp);
   array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
-  
-  
-  
+
   // Fishery selectivity
   // Number of parameters in the chosen selectivity type:
   int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type

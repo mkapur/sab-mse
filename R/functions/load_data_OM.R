@@ -156,9 +156,9 @@ load_data_OM <- function(nspace = 6,
     for(i in 1:nrow(phi_if_surv)){
       reg = substr(rownames(phi_if_surv)[i],1,2)
       if(reg == 'AK') {
-        # phi_if_surv[i,5:6] <- 1 ## both E/W surveys in both areas
-        phi_if_surv[1,6] <- 1 ## AK VAST W (AI) only in a4
-        phi_if_surv[2,5] <- 1 ## AK VAST E (GOA) ONLY IN A3
+        phi_if_surv[i,5:6] <- 1 ## both E/W surveys in both areas
+        # phi_if_surv[1,6] <- 1 ## AK VAST W (AI) only in a4
+        # phi_if_surv[2,5] <- 1 ## AK VAST E (GOA) ONLY IN A3
       } else  if(reg == 'BC'){
         phi_if_surv[i,3:4] <- 1
       }else{

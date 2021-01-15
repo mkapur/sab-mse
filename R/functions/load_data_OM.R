@@ -389,8 +389,8 @@ load_data_OM <- function(nspace = 6,
   log_fsh_slx_pars["BC_TWL","p1",1:fsh_blks_size[,"BC_TWL"], c('Fem','Mal')] <- log( 33.8898)
   log_fsh_slx_pars["BC_TWL","p2",1:fsh_blks_size[,"BC_TWL"], c('Fem','Mal')] <-  log(1.41494)
   ## Just copy dome normal values for wc
-  log_fsh_slx_pars["WC_FIX","p1",1:fsh_blks_size[,"WC_FIX"], c('Fem','Mal')] <- log( 63.6959)
-  log_fsh_slx_pars["WC_FIX","p2",1:fsh_blks_size[,"WC_FIX"], c('Fem','Mal')] <-  log(3.09715)
+  log_fsh_slx_pars["WC_FIX","p1",1:fsh_blks_size[,"WC_FIX"], c('Fem','Mal')] <- log(  34.556990,23.53858)
+  log_fsh_slx_pars["WC_FIX","p2",1:fsh_blks_size[,"WC_FIX"], c('Fem','Mal')] <-  log(3.432461,1.000068)
   log_fsh_slx_pars["WC_TWL","p1",1:fsh_blks_size[,"WC_TWL"], c('Fem','Mal')] <- log( 62.8329)
   log_fsh_slx_pars["WC_TWL","p2",1:fsh_blks_size[,"WC_TWL"], c('Fem','Mal')] <-  log(7.04483)
 

@@ -1,0 +1,134 @@
+$par
+         logR_0k          logR_0k          logR_0k          logR_0k           logq_f           logq_f 
+    1.747831e+01     1.691756e+01     1.114912e+01     1.703252e+01    -5.673503e+00    -7.239118e+00 
+          logq_f           logq_f           logq_f         tildeR_y         tildeR_y         tildeR_y 
+   -1.048643e+01    -3.781053e+00    -4.146566e+00    -2.718503e-01    -2.404128e-01    -2.062257e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+   -1.550534e-01    -8.057241e-02     2.244351e-02     1.605402e-01     3.404040e-01     5.706683e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+    8.403913e-01     9.505853e-01     7.347420e-01     4.748710e-01     2.828691e-01     1.922565e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+    1.675245e-01     1.705592e-01     2.070074e-01     3.026348e-01     2.790071e+00     3.519510e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+    1.865853e-01     7.419265e-02    -3.132290e-02    -1.261667e-01    -2.099715e-01    -3.042152e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+   -3.559812e-01    -3.407101e-01    -2.641824e-01    -1.313372e-01     5.209489e-02     2.269675e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+    2.497341e-01     9.501067e-02    -1.097904e-01    -2.917283e-01    -4.352004e-01    -5.385254e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+   -6.012220e-01    -6.374345e-01    -6.524329e-01    -6.115973e-01    -5.180090e-01    -4.039685e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+   -2.567896e-01    -9.126355e-02     8.805610e-02     3.407129e-01     2.669935e+00     4.069338e-01 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+    2.378091e-01     1.506927e-01     8.026130e-02     2.477238e-02     1.230978e-03    -5.810094e-04 
+        tildeR_y         tildeR_y         tildeR_y log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+    5.016768e-04     2.615859e-04     1.784831e-04     3.881229e+00     3.881180e+00     3.700774e+00 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+    3.696775e+00     2.995732e+00     4.248495e+00     3.699022e+00     3.701826e+00 
+
+$objective
+[1] -406.8957
+
+$iterations
+[1] 5954
+
+$evaluations
+function gradient 
+   11718     5954 
+
+$time_for_MLE
+Time difference of 15.93797 mins
+
+$max_gradient
+[1] 0.2784869
+
+$Convergence_check
+[1] "The model is likely not converged"
+
+$number_of_coefficients
+ Total  Fixed Random 
+    77     77      0 
+
+$AIC
+[1] -659.7914
+
+$diagnostics
+              Param starting_value      Lower           MLE     Upper final_gradient
+1           logR_0k     18.1975372   0.000000  1.747831e+01 50.000000  -6.750043e-02
+2           logR_0k     18.1975372   0.000000  1.691756e+01 50.000000  -6.216599e-02
+3           logR_0k     18.1975372   0.000000  1.114912e+01 50.000000  -7.795108e-04
+4           logR_0k     18.1975372   0.000000  1.703252e+01 50.000000  -2.912816e-02
+5            logq_f     -0.6931472 -15.000000 -5.673503e+00 15.000000   1.464618e-02
+6            logq_f     -0.6931472 -15.000000 -7.239118e+00 15.000000   1.313278e-02
+7            logq_f     -0.6931472 -15.000000 -1.048643e+01 15.000000   7.682855e-03
+8            logq_f     -0.6931472 -15.000000 -3.781053e+00 15.000000   1.465632e-02
+9            logq_f     -0.6931472 -15.000000 -4.146566e+00 15.000000  -6.225630e-02
+10         tildeR_y     -0.6931472       -Inf -2.718503e-01       Inf  -1.207722e-03
+11         tildeR_y     -0.6931472       -Inf -2.404128e-01       Inf  -1.264721e-03
+12         tildeR_y     -0.6931472       -Inf -2.062257e-01       Inf  -1.239384e-03
+13         tildeR_y     -0.6931472       -Inf -1.550534e-01       Inf  -1.155094e-03
+14         tildeR_y     -0.6931472       -Inf -8.057241e-02       Inf  -9.008345e-04
+15         tildeR_y     -0.6931472       -Inf  2.244351e-02       Inf  -5.245617e-04
+16         tildeR_y     -0.6931472       -Inf  1.605402e-01       Inf   8.055138e-05
+17         tildeR_y     -0.6931472       -Inf  3.404040e-01       Inf   8.336940e-04
+18         tildeR_y     -0.6931472       -Inf  5.706683e-01       Inf   9.334197e-04
+19         tildeR_y     -0.6931472       -Inf  8.403913e-01       Inf  -4.137119e-03
+20         tildeR_y     -0.6931472       -Inf  9.505853e-01       Inf  -1.050332e-02
+21         tildeR_y     -0.6931472       -Inf  7.347420e-01       Inf  -4.076027e-03
+22         tildeR_y     -0.6931472       -Inf  4.748710e-01       Inf  -9.004431e-04
+23         tildeR_y     -0.6931472       -Inf  2.828691e-01       Inf   1.712663e-04
+24         tildeR_y     -0.6931472       -Inf  1.922565e-01       Inf  -1.137202e-04
+25         tildeR_y     -0.6931472       -Inf  1.675245e-01       Inf   8.401872e-04
+26         tildeR_y     -0.6931472       -Inf  1.705592e-01       Inf   3.099063e-03
+27         tildeR_y     -0.6931472       -Inf  2.070074e-01       Inf   7.271943e-03
+28         tildeR_y     -0.6931472       -Inf  3.026348e-01       Inf   1.946164e-02
+29         tildeR_y     -0.6931472       -Inf  2.790071e+00       Inf  -2.827072e-02
+30         tildeR_y     -0.6931472       -Inf  3.519510e-01       Inf   2.732622e-02
+31         tildeR_y     -0.6931472       -Inf  1.865853e-01       Inf   6.449189e-03
+32         tildeR_y     -0.6931472       -Inf  7.419265e-02       Inf   1.102330e-03
+33         tildeR_y     -0.6931472       -Inf -3.132290e-02       Inf  -5.615221e-04
+34         tildeR_y     -0.6931472       -Inf -1.261667e-01       Inf  -1.095773e-03
+35         tildeR_y     -0.6931472       -Inf -2.099715e-01       Inf  -1.417161e-03
+36         tildeR_y     -0.6931472       -Inf -3.042152e-01       Inf  -1.194184e-03
+37         tildeR_y     -0.6931472       -Inf -3.559812e-01       Inf  -1.251370e-03
+38         tildeR_y     -0.6931472       -Inf -3.407101e-01       Inf  -1.574033e-03
+39         tildeR_y     -0.6931472       -Inf -2.641824e-01       Inf  -2.067724e-03
+40         tildeR_y     -0.6931472       -Inf -1.313372e-01       Inf  -2.833877e-03
+41         tildeR_y     -0.6931472       -Inf  5.209489e-02       Inf  -3.787850e-03
+42         tildeR_y     -0.6931472       -Inf  2.269675e-01       Inf  -4.763376e-03
+43         tildeR_y     -0.6931472       -Inf  2.497341e-01       Inf  -4.571124e-03
+44         tildeR_y     -0.6931472       -Inf  9.501067e-02       Inf  -3.562223e-03
+45         tildeR_y     -0.6931472       -Inf -1.097904e-01       Inf  -2.834553e-03
+46         tildeR_y     -0.6931472       -Inf -2.917283e-01       Inf  -2.126345e-03
+47         tildeR_y     -0.6931472       -Inf -4.352004e-01       Inf  -1.526698e-03
+48         tildeR_y     -0.6931472       -Inf -5.385254e-01       Inf  -1.027654e-03
+49         tildeR_y     -0.6931472       -Inf -6.012220e-01       Inf  -5.473755e-04
+50         tildeR_y     -0.6931472       -Inf -6.374345e-01       Inf  -4.654590e-05
+51         tildeR_y     -0.6931472       -Inf -6.524329e-01       Inf   4.049991e-04
+52         tildeR_y     -0.6931472       -Inf -6.115973e-01       Inf  -8.562610e-05
+53         tildeR_y     -0.6931472       -Inf -5.180090e-01       Inf  -1.425636e-03
+54         tildeR_y     -0.6931472       -Inf -4.039685e-01       Inf  -1.289803e-03
+55         tildeR_y     -0.6931472       -Inf -2.567896e-01       Inf  -5.335545e-04
+56         tildeR_y     -0.6931472       -Inf -9.126355e-02       Inf   1.127145e-03
+57         tildeR_y     -0.6931472       -Inf  8.805610e-02       Inf   6.193102e-03
+58         tildeR_y     -0.6931472       -Inf  3.407129e-01       Inf   2.839943e-02
+59         tildeR_y     -0.6931472       -Inf  2.669935e+00       Inf  -1.576164e-02
+60         tildeR_y     -0.6931472       -Inf  4.069338e-01       Inf   3.209575e-02
+61         tildeR_y     -0.6931472       -Inf  2.378091e-01       Inf   1.057621e-02
+62         tildeR_y     -0.6931472       -Inf  1.506927e-01       Inf   4.593873e-03
+63         tildeR_y     -0.6931472       -Inf  8.026130e-02       Inf   2.502592e-03
+64         tildeR_y     -0.6931472       -Inf  2.477238e-02       Inf   1.195249e-03
+65         tildeR_y     -0.6931472       -Inf  1.230978e-03       Inf   3.832497e-04
+66         tildeR_y     -0.6931472       -Inf -5.810094e-04       Inf   1.417650e-04
+67         tildeR_y     -0.6931472       -Inf  5.016768e-04       Inf   1.023213e-04
+68         tildeR_y     -0.6931472       -Inf  2.615859e-04       Inf   7.324327e-05
+69         tildeR_y     -0.6931472       -Inf  1.784831e-04       Inf   4.341427e-05
+70 log_srv_slx_pars      3.4011970   2.995732  3.881229e+00  3.912023  1.004644e-258
+71 log_srv_slx_pars      4.2484952   3.688879  3.881180e+00  4.248495 -1.009543e-258
+72 log_srv_slx_pars      3.6888795   2.995732  3.700774e+00  3.912023   4.514578e-05
+73 log_srv_slx_pars      4.0073330   3.688879  3.696775e+00  4.248495   1.608708e-04
+74 log_srv_slx_pars      3.4011970   2.995732  2.995732e+00  3.912023   2.784869e-01
+75 log_srv_slx_pars      4.2484952   3.688879  4.248495e+00  4.248495  -1.099157e-01
+76 log_srv_slx_pars      3.6888795   2.995732  3.699022e+00  3.912023  -8.766993e-05
+77 log_srv_slx_pars      4.0073330   3.688879  3.701826e+00  4.248495   6.840491e-05
+

@@ -168,11 +168,11 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       }
       if(all(!is.na(map_srvslx['WC_VAST',,1,]))){
         lwr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(20);
-        upr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(80)
+        upr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(70)
         
         lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Mal'] <- log(50);  
         lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Fem'] <- log(45);
-        upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(80)
+        upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(70)
       }
       lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp[!is.na(lwr.temp)]
       upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp[!is.na(upr.temp)]

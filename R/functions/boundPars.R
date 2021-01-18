@@ -150,8 +150,8 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       }
       if(all(!is.na(map_srvslx['AK_VAST_E',,1,]))){
         lwr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(20);
-        upr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(70)
-        lwr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(20); 
+        upr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(50)
+        lwr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(40); 
         upr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(70)
       }
       if(all(!is.na(map_srvslx['BC_EARLY',,1,]))){

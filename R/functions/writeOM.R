@@ -169,7 +169,7 @@ writeOM <- function(justPlots = FALSE,
   # anim_save(paste0(dumpfile,'/SSB_yk-animate-',Sys.Date(),'.png'))
   
   # anim_save(paste0(dumpfile,"SSB_yk_animate.gif",animation = last_animation())) 
-  ## ssb_ym with compare ----
+  ## SSB_ym with compare ----
   spmat <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
@@ -211,10 +211,33 @@ writeOM <- function(justPlots = FALSE,
     facet_wrap(~REG+variable,scales = 'free_y', ncol = 2)
   # facet_wrap(~REG,scales = 'free_y')
   ggsave(last_plot(),
-         file = paste0(dumpfile,"/", Sys.Date(),'-SSB_ym.png'),
+         file = paste0(dumpfile,"/", Sys.Date(),'-LOG_SSB_ym.png'),
          width = 10, height = 6, unit = 'in',
          dpi = 420)
   
+  merge(assSB, SSB_ym, by.x = c('Year','REG'), by.y = c('Yr','mgmt')) %>%
+    mutate('Last Assessment' = assSSBMT, 'Operating Model' =omSSBMT) %>%
+    select(Year, REG, CV, 'Last Assessment', 'Operating Model') %>%
+    # filter(Year >1965 ) %>%
+    melt(id = c('Year','REG', 'CV')) %>%
+    ggplot(., aes(x = Year, y = value, color = REG)) +
+    # ggplot(., aes(x = Year, y = assSSBMT, color = REG)) +
+    geom_line(aes(y = value),lwd = 1.1) +
+    # geom_errorbar(aes(ymin = assSSBMT-CV*assSSBMT,ymax= assSSBMT+CV*assSSBMT, color = REG,width=0)) +
+    geom_errorbar(aes(ymin = (value-CV*value),
+                      ymax = (value+CV*value), 
+                      color = REG,width=0)) +
+    scale_color_manual(values = mgmtPal) +
+    geom_point()+ 
+    ggsidekick::theme_sleek() +
+    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
+    labs(x = 'Modeled Year',y = ' SSB (units vary)', color = 'Mgmt Region') +
+    facet_wrap(~REG+variable,scales = 'free_y', ncol = 2)
+  # facet_wrap(~REG,scales = 'free_y')
+  ggsave(last_plot(),
+         file = paste0(dumpfile,"/", Sys.Date(),'-SSB_ym.png'),
+         width = 10, height = 6, unit = 'in',
+         dpi = 420)
   
   ## plot bias ramp ----
   png(file =paste0(dumpfile,"/",
@@ -602,7 +625,7 @@ writeOM <- function(justPlots = FALSE,
     inputSel <- selP <- array(exp(best[grep('log_fsh_slx_pars',names(best))]),
                               dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
                               dimnames = dimnames(df$parms$log_fsh_slx_pars))
-    fsh_sel_afs <- array(NA, dim =  c(df$nage,8,2),
+    fsh_sel_afs <- array(NA, dim =  c(df$nage,df$nfleets_fish,2),
                          dimnames = list(c(df$age),
                                          c(dimnames(df$parms$log_fsh_slx_pars)[[1]]),
                                          c('Fem','Mal')))
@@ -660,14 +683,7 @@ writeOM <- function(justPlots = FALSE,
     inputSel <- array(exp(obj$par[grep('log_srv_slx_pars',names(obj$par))]),
                       dim = dim(df$parms$log_srv_slx_pars),
                       dimnames = dimnames(df$parms$log_srv_slx_pars))
-    
-    # map_srvslx <- array(mappy$log_srv_slx_pars, 
-    #                     dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
-    #                     dimnames = dimnames(df$parms$log_srv_slx_pars))
-    # ## replace non-fixed values with starting pars
-    # map_srvslx[!is.na(map_srvslx)] <- exp(obj$par[grep('log_srv_slx_pars',names(obj$par))])
-    # inputSel <- map_srvslx
-    
+
     map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
                         dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
                         dimnames = dimnames(df$parms$log_srv_slx_pars))

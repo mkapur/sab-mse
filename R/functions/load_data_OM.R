@@ -419,17 +419,26 @@ load_data_OM <- function(nspace = 6,
                             c(paste0('block', 1:max(srv_blks_size))),
                             c('Fem', 'Mal')))
   ## males and females
-  log_srv_slx_pars['AK_VAST_W','p1',1:srv_blks_size[,"AK_VAST_W"],] <- c(35.36234,42.69320)
-  log_srv_slx_pars['AK_VAST_W','p2',1:srv_blks_size[,"AK_VAST_W"],] <- c(45.31228,44.42085)
+  log_srv_slx_pars['AK_VAST_W','p1',1:srv_blks_size[,"AK_VAST_W"],c('Fem','Mal')] <- c(40.00000,36.70639)
+  log_srv_slx_pars['AK_VAST_W','p2',1:srv_blks_size[,"AK_VAST_W"],c('Fem','Mal')] <- c(53.27599,44.95700)
   
-  log_srv_slx_pars['AK_VAST_E','p1',1:srv_blks_size[,"AK_VAST_E"],] <- 50
-  log_srv_slx_pars['AK_VAST_E','p2',1:srv_blks_size[,"AK_VAST_E"],] <- 65
-  log_srv_slx_pars['BC_EARLY','p1',1:srv_blks_size[,"BC_EARLY"],] <- 75.62026
-  log_srv_slx_pars['BC_EARLY','p2',1:srv_blks_size[,"BC_EARLY"],] <- 69.27150
-  log_srv_slx_pars['BC_VAST','p1',1:srv_blks_size[,"BC_VAST"],] <-  c(38.31500,50)
-  log_srv_slx_pars['BC_VAST','p2',1:srv_blks_size[,"BC_VAST"],] <- c(43.05036,69.27150)
-  log_srv_slx_pars['WC_VAST','p1',1:srv_blks_size[,"WC_VAST"],1:2] <- c(43.04513,39.59406)
-  log_srv_slx_pars['WC_VAST','p2',1:srv_blks_size[,"WC_VAST"],1:2] <- c(55.41398,41.78538)
+  log_srv_slx_pars['AK_VAST_E','p1',1:srv_blks_size[,"AK_VAST_E"],] <- c(29.99999,40.00000)
+  log_srv_slx_pars['AK_VAST_E','p2',1:srv_blks_size[,"AK_VAST_E"],] <- c(70.00000,54.99999)
+  
+  log_srv_slx_pars['BC_EARLY','p1',1:srv_blks_size[,"BC_EARLY"],] <- c(29.99999, 29.99999)
+  log_srv_slx_pars['BC_EARLY','p2',1:srv_blks_size[,"BC_EARLY"],] <- c(54.99999, 70.00000)
+  
+  log_srv_slx_pars['BC_VAST','p1',1:srv_blks_size[,"BC_VAST"],] <-  c(40.00000, 40.00000)
+  log_srv_slx_pars['BC_VAST','p2',1:srv_blks_size[,"BC_VAST"],] <- c(54.99999,54.99999)
+
+  log_srv_slx_pars['WC_VAST','p1',"block1",c('Fem','Mal')] <- c(52.16405,73.30675)
+  log_srv_slx_pars['WC_VAST','p2',"block1",c('Fem','Mal')] <- c(75.00000,73.30675)
+  
+  log_srv_slx_pars['WC_VAST','p1',"block2",c('Fem','Mal')] <- c(36.08715,39.59406)
+  log_srv_slx_pars['WC_VAST','p2',"block2",c('Fem','Mal')] <- c(45,41.78538)
+  
+  log_srv_slx_pars['WC_VAST','p1',"block3",c('Fem','Mal')] <- c(66.28409,39.59406)
+  log_srv_slx_pars['WC_VAST','p2',"block3",c('Fem','Mal')] <- c(66.29109,41.78538)
   
   ## comps
   log_srv_slx_pars['AK_GOA_SURV','p1',1:srv_blks_size[,"AK_GOA_SURV"],] <- 50

@@ -407,8 +407,18 @@ writeOM <- function(justPlots = FALSE,
     mutate(REG = substr(variable,0,2)) %>%
     select(Year, variable, value, lci, uci)
   
-  ggplot(data = survey_yf_obst, 
-         aes(x = Year, y = value, color = variable)) +
+  melt(df$srv_blks) %>% 
+    filter(value != 59) %>% 
+    mutate(variable = Var2, blk = value+1960) %>%
+    select(variable, blk) %>% 
+    merge(.,
+          survey_yf_obst,
+          by = 'variable', all.y = TRUE) %>%
+    ggplot(data = ., 
+           aes(x = Year, y = value, color = variable)) +
+    geom_vline(aes( xintercept = blk), col = 'grey75', 
+               lwd = 1, linetype = 'dashed') +
+    
     geom_line(data = survey_yf_predt, lwd = 0.75) +
     scale_color_manual(values = survfltPal) +
     geom_point(pch = 1, fill = NA, col = 'black') +

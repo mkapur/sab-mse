@@ -527,10 +527,10 @@ load_data_OM <- function(nspace = 6,
     selType_fish = selType_fish, ## 0 for age, 1 for length-based
     selType_surv = selType_surv,
     
-    fltnames_surv = fltnames_surv,
-    fltnames_fish = fltnames_fish,
-    fltnames_acomp = fltnames_acomp,
-    fltnames_lcomp = fltnames_lcomp,
+    fltnames_surv = list(fltnames_surv),
+    fltnames_fish = list(fltnames_fish),
+    fltnames_acomp = list(fltnames_acomp),
+    fltnames_lcomp = list(fltnames_lcomp),
     
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,

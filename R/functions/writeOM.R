@@ -276,7 +276,7 @@ writeOM <- function(justPlots = FALSE,
        # lwd = 2, 
        xlab = 'Year',
        xaxt = 'n',
-       ylab = 'TildeR_y',
+       ylab = 'Log Recruitment Deviation',
        ylim = c(1.2*min(best[names(best) == 'tildeR_y'] ),1.2*max(best[names(best) == 'tildeR_y'] )))
   axis(side = 1, at = seq(0,60,5), labels= seq(1960,2020,5))
   abline(h=0,col = 'blue')
@@ -634,9 +634,7 @@ writeOM <- function(justPlots = FALSE,
     } ## end blks
     
   } else{
-    inputSel <- selP <- array(exp(best[grep('log_fsh_slx_pars',names(best))]),
-                              dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
-                              dimnames = dimnames(df$parms$log_fsh_slx_pars))
+    inputSel <- selP <- exp(df$parms$log_fsh_slx_pars)
     fsh_sel_afs <- array(NA, dim =  c(df$nage,df$nfleets_fish,2),
                          dimnames = list(c(df$age),
                                          c(dimnames(df$parms$log_fsh_slx_pars)[[1]]),

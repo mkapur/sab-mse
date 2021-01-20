@@ -132,16 +132,25 @@ writeOM <- function(justPlots = FALSE,
   if(!justPlots) dev.off()
   
   ## ssb_yk ----
-  ssbyk_plot <- dat$SSB_yk %>%
-    data.frame() %>%
+  SSB_yk <- data.frame(dat$SSB_yk) ## 
+  names(SSB_yk) <- c(paste('Stock',1:4))
+  ssbyk_plot <- SSB_yk %>%
     mutate('Yr' = years[1:nrow(.)]) %>%
     reshape2::melt(id = c('Yr')) %>%
     ggplot(., aes(x = Yr, y = value, color = variable )) +
-    scale_color_manual(values = demPal) +
-    geom_line(lwd = 2) + labs(x = 'Modeled Year',y = 'SSB', color = 'stock') +
+    scale_color_manual(values = rev(demPal)) +
+    geom_line(lwd = 2) + 
+    labs(x = 'Modeled Year',y = 'SSB', color = '') +
     scale_x_continuous(limits = c(1960,1959+df$yRun)) +
-    ggsidekick::theme_sleek() + 
-    theme( legend.position = c(0.8,0.8))
+    ggsidekick::theme_sleek(base_size = 18) +
+    theme(legend.position = c(0.8,0.8))
+    # theme(legend.position = c(0.8,0.8),
+    #       legend.text  = element_text(color = "white"),
+    #       axis.title = element_text(color = 'white'),
+    #       axis.text = element_text(color = "white"),
+    #       panel.background = element_rect(fill="#01514E"),
+    #       plot.background = element_rect(fill = "#01514E")) 
+    
   
   if(justPlots) ssbyk_plot
   if(!justPlots) ggsave(ssbyk_plot,
@@ -274,30 +283,40 @@ writeOM <- function(justPlots = FALSE,
   wcrd <- recdev %>% select(Value,Label) %>% mutate(Year = substr(Label,14,17)) %>%
     select(Value,Year)
   
-  
-  png(file =paste0(dumpfile,"/",
-                   Sys.Date(),'-recdevs.png'),
-      height = 4, width = 6, unit = 'in', res = 420)
-  plot(best[names(best) == 'tildeR_y'] [1:59], 
-       type = 'b', 
-       pch = 19,
-       xlab = 'Year',
-       xaxt = 'n',
-       col = 'grey44',
-       ylab = 'Log Recruitment Deviation',
-       ylim = c(4*min(best[names(best) == 'tildeR_y'] ),1.2*max(best[names(best) == 'tildeR_y'] )))
-  axis(side = 1, at = seq(0,60,5), labels= seq(1960,2020,5))
-  abline(h=0,col = 'blue')
-  lines(wcrd$Value[wcrd$Year >1959], col = mgmtPal[3], pch = 19, lwd = 2)
-  legend('bottomleft',
-         legend = c('OM','WC-2019','BC','AK'),
-         pch = c(19,NA,NA,NA),
-         lty = c(NA,1,1,1),
-         lwd = 2,
-         col = c('grey44',rev(mgmtPal))
-         )
-  
-  dev.off()
+  for(r in 1:2){
+    if(r == 1){
+      png(file =paste0(dumpfile,"/",
+                       Sys.Date(),'-recdevs.png'),
+          height = 4, width = 6, unit = 'in', res = 420)
+    } else{
+      png(file =paste0(dumpfile,"/",
+                       Sys.Date(),'-recdevs_WC.png'),
+          height = 4, width = 6, unit = 'in', res = 420)
+    }
+    plot(best[names(best) == 'tildeR_y'] [1:59], 
+         type = 'b', 
+         pch = 19,
+         xlab = 'Year',
+         xaxt = 'n',
+         col = 'grey44',
+         ylab = 'Log Recruitment Deviation',
+         ylim = c(4*min(best[names(best) == 'tildeR_y'] ),1.2*max(best[names(best) == 'tildeR_y'] )))
+    axis(side = 1, at = seq(0,60,5), labels= seq(1960,2020,5))
+    abline(h=0,col = 'blue')
+    if(r == 2){
+      lines(wcrd$Value[wcrd$Year >1959], col = mgmtPal[3], pch = 19, lwd = 2)
+      legend('bottomleft',
+             cex = 0.8,
+             legend = c('OM','WC-2019','BC-placeholder','AK-placeholder'),
+             pch = c(19,NA,NA,NA),
+             lty = c(NA,1,1,1),
+             lwd = 2,
+             col = c('grey44',rev(mgmtPal))
+      )
+    }
+    
+    dev.off()
+  }
   
   # R_ym versus past assessments (?) ----
   yvec = read.csv(here('input','downloads','AssessmentDat_thru2018.csv'),fileEncoding="UTF-8-BOM") %>%

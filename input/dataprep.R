@@ -11,12 +11,12 @@ require(here)
 require(ggplot2)
 require(ggsidekick)
 require(PNWColors)
-
+require(ggpattern)
 ## 2019 Sab WC SS ----
 wc <- SS_output(here("input","raw_data","2019 WC Stock Assessment"))
 ## data from MH Jan 2020 ---
 # NEED EXTRACTION CODE THIS IS A MONSTER 
-load("C:/Users/mkapur/Dropbox/UW/sab-mse/input/raw_data/PacFIN.SABL.bds.03.Dec.2020.RData")
+# load("C:/Users/mkapur/Dropbox/UW/sab-mse/input/raw_data/PacFIN.SABL.bds.03.Dec.2020.RData")
 
 ## Fltnames ----
 fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE)
@@ -40,7 +40,7 @@ nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
 ## format: year x fleet
 
 #* catches ----
-omcatch0 <- data.frame(Year = 1960:2019)
+omcatch0 <- data.frame(Year = 1960:2020)
 
 ## read files
 ## ak_comm_catch has sptlly aggregated data back to 1977
@@ -86,12 +86,14 @@ omcatch <- merge(omcatch0, akcatch,  by = "Year", all = TRUE) %>%
   merge(., wccatch, by = "Year", all = TRUE) 
 omcatch[6:13,'BC_TRAP'] <- NA
 
-write.csv(omcatch %>% select(Year,fltnames_fish) , file = here("input","input_data","OM_catch.csv"), row.names = FALSE)
+write.csv(omcatch %>% select(Year,fltnames_fish) , 
+          file = here("input","input_data","OM_catch.csv"), row.names = FALSE)
 
 omcatch <- read.csv(here("input","input_data","OM_catch.csv") )
 ## plot values, GROUPING AK FOR CONFIDENTIALITY
 omcatch %>%
-  group_by(Year) %>%
+  group_by(Year) %>% 
+  filter(Year < 2020) %>%
   # mutate("AK_FIX (aggregate)" = sum(AK_FIX_W, AK_FIX_E),
   #        "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
   # select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
@@ -99,7 +101,7 @@ omcatch %>%
   ggplot(., aes(x = Year, y = value/1000, fill = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
   scale_fill_manual(values = fishfltPal )+
-  # scale_x_continuous(breaks = seq(1960,2020,10)) +
+  scale_x_continuous(breaks = seq(1960,2020,10)) +
   # geom_line(lwd = 1) +
   geom_bar(position = 'stack',stat = 'identity') +
   labs(x = 'Year', y = 'Obs Catch (kt)', fill = 'Comm. Fleet')
@@ -114,6 +116,7 @@ omcatch %>%
   #        "AK_TWL (aggregate)"= sum(AK_TWL_W, AK_TWL_E)) %>%
   # select(-AK_TWL_W,-AK_TWL_E,-AK_FIX_W,-AK_FIX_E) %>%
   melt(id = "Year") %>%
+  filter(Year < 2020) %>%
   mutate(REG = substr(variable,1,2)) %>%
   ggplot(., aes(x = Year, y = value/1000, fill = REG)) +
   theme_sleek() + 
@@ -304,12 +307,31 @@ save(bc_lencomps_male, file = here('input','raw_data',"comps","bc_lencomps_male_
 
 #* wc len comps ----
 ## these are only from NWCBO
-wcdat <- SS_readdat(here('input',"raw_data","2019 WC Stock Assessment","data.ss"))
-wcLC <- wcdat$lencomp %>% select(-Seas, -Gender, -Part, -Nsamp)
+# wcdat <- SS_readdat(here('input',"raw_data","2019 WC Stock Assessment","data.ss"))
+wcLC <- read.csv('C:/Users/mkapur/Dropbox/UW/assessments/sab-2021/dataprep/processed_data/survey/forSS/Survey_Sex3_Bins_18_90_LengthComps.csv')%>%
+  select(-month, -fleet, -sex, -Nsamp, -partition)
+# wcLC0 <- read.csv('C:/Users/mkapur/Dropbox/UW/assessments/sab-2021/dataprep/processed_data/survey/forSS/Survey_Sex3_Bins_-999_90_LengthComps.csv')
 
-wc_lencomps_female <- bind_cols( Year = wcLC[,1],data.frame(matrix(0, ncol = length(seq(0,16,2)), nrow = 16)),wcLC[,3:39])
-wc_lencomps_male <- bind_cols(Year = wcLC[,1],data.frame(matrix(0, ncol = length(seq(0,16,2)), nrow = 16)), wcLC[,40:76])
-names(wc_lencomps_female) <- names(wc_lencomps_male) <- c('Year',seq(0,90,2))
+# wcLC <- wcdat$lencomp %>% select(-Seas, -Gender, -Part, -Nsamp)
+
+## aggregate into 76 plusgroup
+f76idx <- which(names(wcLC) == 'F76') ## col position of f50
+f90idx <- which(names(wcLC) == 'F90') ## col position of f60
+m76idx <- which(names(wcLC) == 'M76')
+
+wcLC[,f76idx] <- rowSums(wcLC[,c(f76idx:f90idx)]) ## sum 50:60 for fems
+wcLC[,m76idx] <- rowSums(wcLC[,c(m76idx:ncol(wcLC))]) ## sum 50:60 for mals
+wcLC <- wcLC[,-c((f76idx+1):f90idx, c((m76idx+1):ncol(wcLC)))]
+
+wc_lencomps_female <- bind_cols( Year = wcLC[,1],
+                                 data.frame(matrix(NA, 
+                                                   ncol = length(seq(0,16,2)),
+                                                   nrow = 17)),wcLC[,2:f76idx])
+wc_lencomps_male <- bind_cols(Year = wcLC[,1],
+                              data.frame(matrix(0, 
+                                                ncol = length(seq(0,16,2)), nrow = 17)), 
+                              wcLC[,(which(names(wcLC) == 'F76')+1):ncol(wcLC)])
+names(wc_lencomps_female) <- names(wc_lencomps_male) <- c('Year',seq(0,76,2))
 
 
 save(wc_lencomps_female, file = here('input','raw_data',"comps","wc_lencomps_female_BINDME.rdata"))
@@ -946,8 +968,32 @@ for(y in 1:nyear){
 
 save(OM_fish_selex_yafs, file = here('input','input_data',"OM_fish_selex_yafs.rdata"))
 save(OM_surv_selex_yafs, file = here('input','input_data',"OM_surv_selex_yafs.rdata"))
+#* plot input selex shapes ----
 
-#* plot input selex ----
+selSurv <- data.frame(cbind( paste(as.character(df$fltnames_surv)),
+       paste(fltnames$SELTYPE[fltnames$SURV]),
+      df$selShape_surv[1:5]))
+names(selSurv) <- c('flt','selType','selShape')
+
+selsh_LUT <- c("Logistic","Dome_Gamma" ,"Dome_Normal")
+selSurv$selShape<-selsh_LUT[selSurv$selShape]
+
+ggplot(selSurv, aes(x = flt, y = selShape, fill = flt, color = selType)) +
+  theme_sleek( ) +
+  # theme(legend.position="bottom", legend.box = "horizontal")+
+  geom_tile(size = 2) +
+  scale_fill_manual(values = survfltPal)+
+  scale_color_manual(values = c('goldenrod','black'))+
+  coord_equal() +
+ guides(color=guide_legend(override.aes=list(fill=NA)))+
+  labs(x = 'Biomass Survey Fleet',y = 'Selectivity Shape',fill = 'Fleet',
+       color = 'Slx Type')
+
+ggsave(last_plot(),
+       file = here('input','input_data','input_figs','SurvB_Slx_ShapeType.png'),
+       height = 6, width = 8, unit = 'in', dpi = 420)
+
+#* plot input selex curves ----
 png(here('input','input_data','input_figs','fishery_selex.png'),
     height = 8, width = 6, unit = 'in', res = 420)
 par(mfrow = c(3,3) )
@@ -1213,6 +1259,16 @@ ggsave(last_plot(),
        file = here('input','input_data','input_figs',
                    'datplot_acomp.png'),
        width = 4.5, height = 6, unit = 'in', dpi = 420)
+
+dimnames(df$acomp_yafs_obs)[[3]] <- paste(as.character(df$fltnames_acomp))
+
+df$acomp_yafs_obs[,6,,1] %>%
+  data.frame(.) %>%
+  mutate(Year = df$years) %>%
+  reshape2::melt(., id = c('Year')) %>% 
+  filter(!is.na(value)) %>%
+  group_by(variable) %>%
+  summarise(n(), min(Year), max(Year))
 
 
 #* fleet x type tile ----

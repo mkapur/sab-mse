@@ -267,21 +267,98 @@ writeOM <- function(justPlots = FALSE,
                     'fixed'))
   dev.off()
   ## plot tilde_ry ----
+  parameters <- wc$parameters
+  recdev <- parameters[substring(parameters[["Label"]], 1, 12) %in% c("Main_RecrDev"), ]
+
+  
+  wcrd <- recdev %>% select(Value,Label) %>% mutate(Year = substr(Label,14,17)) %>%
+    select(Value,Year)
+  
   
   png(file =paste0(dumpfile,"/",
                    Sys.Date(),'-recdevs.png'),
       height = 4, width = 6, unit = 'in', res = 420)
   plot(best[names(best) == 'tildeR_y'] [1:59], 
-       type = 'p', 
-       # lwd = 2, 
+       type = 'b', 
+       pch = 19,
        xlab = 'Year',
        xaxt = 'n',
+       col = 'grey44',
        ylab = 'Log Recruitment Deviation',
-       ylim = c(1.2*min(best[names(best) == 'tildeR_y'] ),1.2*max(best[names(best) == 'tildeR_y'] )))
+       ylim = c(4*min(best[names(best) == 'tildeR_y'] ),1.2*max(best[names(best) == 'tildeR_y'] )))
   axis(side = 1, at = seq(0,60,5), labels= seq(1960,2020,5))
   abline(h=0,col = 'blue')
+  lines(wcrd$Value[wcrd$Year >1959], col = mgmtPal[3], pch = 19, lwd = 2)
+  legend('bottomleft',
+         legend = c('OM','WC-2019','BC','AK'),
+         pch = c(19,NA,NA,NA),
+         lty = c(NA,1,1,1),
+         lwd = 2,
+         col = c('grey44',rev(mgmtPal))
+         )
+  
   dev.off()
   
+  # R_ym versus past assessments (?) ----
+  yvec = read.csv(here('input','downloads','AssessmentDat_thru2018.csv'),fileEncoding="UTF-8-BOM") %>%
+    mutate(REG = substr(Index,1,2)) %>% 
+    filter(Type == 'Recruitment') %>%
+    select(Year, Value, REG) %>% 
+    melt(id = c('Year', 'REG')) %>% select(Year)
+  assRec <- read.csv(here('input','downloads','AssessmentDat_thru2018.csv'),fileEncoding="UTF-8-BOM") %>%
+    mutate(REG = substr(Index,1,2)) %>% 
+    filter(Type == 'Recruitment') %>%
+    select(Year, Value, REG) %>% 
+    melt(id = c('Year', 'REG')) %>% 
+
+    select(-variable) %>%
+    mutate(variable = REG) %>%
+
+    # group_by(REG) %>%
+    # summarise(stdRec = value/mean(value)) %>%
+    # ungroup() %>%
+    
+    # mutate(stdRec = value/mean(value)) %>%
+    # mutate(Year = yvec$Year) %>%
+    mutate(variable = REG) %>%
+    select(-REG) %>%
+    
+    mutate(SRC = 'Assessment') %>%
+    
+    filter(Year > 1959) %>%
+    select(Year, variable, value, SRC)
+  
+  R_ym <- data.frame(dat$R_ym)
+  names(R_ym) <- c('WC','BC','AK')
+  yvec <-   R_ym %>% data.frame() %>%
+    mutate(Year = 1960:2019) %>%
+    melt(id = 'Year') %>% select(Year)
+  R_ym %>% data.frame() %>%
+    mutate(Year = 1960:2019) %>%
+    melt(id = 'Year') %>%
+    # group_by(variable) %>%
+    # mutate(stdRec = value/mean(value)) %>%
+    # summarise(stdRec = value/mean(value)) %>%
+    # select(-value) %>%
+    # mutate(Year = yvec$Year) %>%
+    mutate(SRC = 'Operating Model') %>%
+    # mutate(variable = paste("OM_",variable)) %>%
+  rbind(., assRec) %>%
+    ggplot(., aes(x = Year, y = value, col = variable, linetype = SRC)) +
+    geom_line(lwd = 1) +
+    theme_sleek() +
+    scale_linetype_manual(values = c('dotted','solid'))+
+    scale_color_manual(values = rev(mgmtPal)) +
+    labs(x = 'Year', y = 'Raw Recruitment',
+         subtitle = 'Assessment values taken from Fenske et. al. 2018', 
+         color = '',linetype = '') +
+    facet_wrap(~variable+SRC, scale = 'free_y', ncol = 2)
+    
+  ggsave(last_plot(),
+         file = paste0(dumpfile,"/", Sys.Date(),'-R_ym.png'),
+         width = 10, height = 6, unit = 'in',
+         dpi = 420)
+ 
   ## plot SRR----
   dat$R_yk %>% 
     data.frame() %>%
@@ -651,7 +728,7 @@ writeOM <- function(justPlots = FALSE,
       } ## end fish fleet
     } ## end sex
     
-    png(paste0(dumpfile,'/fishey_selex.png'),
+    png(paste0(dumpfile,'/fishery_selex.png'),
         height = 8, width = 6, unit = 'in', res = 420)
     par(mfrow = c(4,2) )
     sexPal_temp = c('grey22','grey66')

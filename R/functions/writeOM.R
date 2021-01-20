@@ -253,6 +253,8 @@ writeOM <- function(justPlots = FALSE,
   ## blue for estimated points
   points(best[names(best) == 'b_y'][which(!is.na(mappy$b_y))], col = 'blue', pch = 19) 
   
+  save(best, file = paste0(dumprile,"/best.Rdata"))
+  
   ## grey for fixed points
   points(df$parms$b_y[which(is.na(mappy$b_y))], col = 'grey44', pch = 19) 
   legend('topright',

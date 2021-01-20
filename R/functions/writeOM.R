@@ -690,7 +690,7 @@ writeOM <- function(justPlots = FALSE,
   if( length(obj$par[grep('log_srv_slx_pars',names(obj$par))]) != 0 ){
     
     ## use map to match input pars which were actually used
-    inputSel <- array(exp(obj$par[grep('log_srv_slx_pars',names(obj$par))]),
+    inputSel <- array(exp(df$parms$log_srv_slx_pars),
                       dim = dim(df$parms$log_srv_slx_pars),
                       dimnames = dimnames(df$parms$log_srv_slx_pars))
 
@@ -700,6 +700,7 @@ writeOM <- function(justPlots = FALSE,
     ## replace non-fixed values with starting pars
     map_srvslx[!is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
     selP <- map_srvslx
+    
     srv_sel_afsb <- array(NA, dim =  c(df$nage,
                                       df$nfleets_surv+df$nfleets_acomp-4,
                                       2,
@@ -770,10 +771,13 @@ writeOM <- function(justPlots = FALSE,
       dev.off()
     } ## end blks
 
-  } else{
-    inputSel <- selP <- array(exp(best[grep('log_srv_slx_pars',names(best))]),
-                              dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+  } else{ ## all were fixed
+    inputSel <- selP <- array(exp(df$parms$log_srv_slx_pars), dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
                               dimnames = dimnames(df$parms$log_srv_slx_pars))
+    # array(exp(best[grep('log_srv_slx_pars',names(best))]),
+    #                         dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+    #                         dimnames = dimnames(df$parms$log_srv_slx_pars))
+    
     srv_sel_afs <- array(NA, dim =  c(df$nage,8,2),
                          dimnames = list(c(df$age),
                                          c(dimnames(df$parms$log_srv_slx_pars)[[1]]),

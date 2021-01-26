@@ -719,12 +719,12 @@ logistic <- function(age, a50, a75){
   return(selage)
 }
 
-matPar <- data.frame('region' = paste0('R',1:4),
+matPar <- data.frame('region' = paste('Stock',1:4),
                      'a50' = c(8.3,4.5,4.6,6.8),
                      'a75' = c(8.7,5.1,4.97,7.7))
 
 mat_ak <- matrix(NA, nrow = length(0:70), ncol = 4)
-colnames(mat_ak) =  paste0('R',1:4)
+colnames(mat_ak) =  matPar$region
 
 for(a in 1:nrow(mat_ak)){
   for(k in 1:nrow(matPar)){
@@ -740,9 +740,9 @@ mat_ak %>%
   filter(age < 20) %>%
   ggplot(., aes(x = age, y = value, color = variable)) +
   geom_line(lwd = 1.1) +
-  scale_color_manual(values = rev(demPal), labels =  paste0('R',1:4)) +
+  scale_color_manual(values = rev(demPal)) +
   theme_sleek() +theme(legend.position = c(0.7,0.7)) +
-  labs(x = 'Age', y = 'Proportion Mature', color = 'Stock')
+  labs(x = 'Age', y = 'Proportion Mature', color = '')
 
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','om_maturity.png'),

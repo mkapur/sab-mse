@@ -968,15 +968,20 @@ for(y in 1:nyear){
 
 save(OM_fish_selex_yafs, file = here('input','input_data',"OM_fish_selex_yafs.rdata"))
 save(OM_surv_selex_yafs, file = here('input','input_data',"OM_surv_selex_yafs.rdata"))
-#* plot input selex shapes ----
 
+#* plot input selex shapes ----
 selSurv <- data.frame(cbind( paste(as.character(df$fltnames_surv)),
        paste(fltnames$SELTYPE[fltnames$SURV]),
       df$selShape_surv[1:5]))
-names(selSurv) <- c('flt','selType','selShape')
+
+selFish <- data.frame(cbind( paste(as.character(df$fltnames_fish)),
+                             paste(fltnames$SELTYPE[fltnames$COMM]),
+                             df$selShape_fish))
+names(selSurv) <- names(selFish) <-c('flt','selType','selShape')
 
 selsh_LUT <- c("Logistic","Dome_Normal","Dome_Gamma")
 selSurv$selShape<-selsh_LUT[selSurv$selShape]
+selFish$selShape<-selsh_LUT[selFish$selShape]
 
 ggplot(selSurv, aes(x = flt, y = selShape, fill = flt, color = selType)) +
   theme_sleek( ) +
@@ -991,6 +996,22 @@ ggplot(selSurv, aes(x = flt, y = selShape, fill = flt, color = selType)) +
 
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','SurvB_Slx_ShapeType.png'),
+       height = 6, width = 8, unit = 'in', dpi = 420)
+
+
+ggplot(selFish, aes(x = flt, y = selShape, fill = flt, color = selType)) +
+  theme_sleek( ) +
+  # theme(legend.position="bottom", legend.box = "horizontal")+
+  geom_tile(size = 2) +
+  scale_fill_manual(values = fishfltPal)+
+  scale_color_manual(values = c('goldenrod','black'))+
+  coord_equal() +
+  guides(color=guide_legend(override.aes=list(fill=NA)))+
+  labs(x = 'Biomass Survey Fleet',y = 'Selectivity Shape',fill = 'Fleet',
+       color = 'Slx Type')
+
+ggsave(last_plot(),
+       file = here('input','input_data','input_figs','Fish_Slx_ShapeType.png'),
        height = 6, width = 8, unit = 'in', dpi = 420)
 
 #* plot input selex curves ----

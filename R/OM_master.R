@@ -123,7 +123,7 @@ writeOM(justPlots = FALSE,
                          cppname,
                          "_tildeR_yON",
                          "_BCVAST_AKVASTEest",
-                         "_Brampdisabled"))
+                         "_Bramp=1.0"))
 
 
 # system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

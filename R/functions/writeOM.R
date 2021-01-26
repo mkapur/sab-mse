@@ -276,6 +276,8 @@ writeOM <- function(justPlots = FALSE,
                     'fixed'))
   dev.off()
   ## plot tilde_ry ----
+  wc <- r4ss::SS_output(here("input","raw_data","2019 WC Stock Assessment"))
+  
   parameters <- wc$parameters
   recdev <- parameters[substring(parameters[["Label"]], 1, 12) %in% c("Main_RecrDev"), ]
 

@@ -40,7 +40,7 @@ nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
 ## format: year x fleet
 
 #* catches ----
-omcatch0 <- data.frame(Year = 1960:2020)
+omcatch0 <- data.frame(Year = 1960:2019)
 
 ## read files
 ## ak_comm_catch has sptlly aggregated data back to 1977
@@ -86,7 +86,8 @@ omcatch <- merge(omcatch0, akcatch,  by = "Year", all = TRUE) %>%
   merge(., wccatch, by = "Year", all = TRUE) 
 omcatch[6:13,'BC_TRAP'] <- NA
 
-write.csv(omcatch %>% select(Year,fltnames_fish) , 
+write.csv(omcatch %>% select(Year,fltnames_fish) %>%
+            filter(Year < 2020), 
           file = here("input","input_data","OM_catch.csv"), row.names = FALSE)
 
 omcatch <- read.csv(here("input","input_data","OM_catch.csv") )

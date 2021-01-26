@@ -975,7 +975,7 @@ selSurv <- data.frame(cbind( paste(as.character(df$fltnames_surv)),
       df$selShape_surv[1:5]))
 names(selSurv) <- c('flt','selType','selShape')
 
-selsh_LUT <- c("Logistic","Dome_Gamma" ,"Dome_Normal")
+selsh_LUT <- c("Logistic","Dome_Normal","Dome_Gamma")
 selSurv$selShape<-selsh_LUT[selSurv$selShape]
 
 ggplot(selSurv, aes(x = flt, y = selShape, fill = flt, color = selType)) +
@@ -1127,7 +1127,8 @@ names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,1,2,4,5)])
 write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices_BaseQ=WCGBTS.csv"),row.names = FALSE) ## save in special order
 #* survey plot ----
 surv_vals %>%
-  # mutate(BC_EARLY = BC_EARLY*1000) %>%
+  mutate(Year = 1960:2019,
+         BC_EARLY = 10*BC_EARLY) %>%
   melt(id = "Year") %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
   theme_sleek() + theme(legend.position = c(0.8,0.8)) +
@@ -1135,9 +1136,9 @@ surv_vals %>%
   scale_x_continuous(breaks = seq(1970,2020,10)) +
   geom_line(lwd = 1) +
   labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') +
-  labs(subtitle = "BC_EARLY has been multiplied by 1000 for comparison")
+  labs(subtitle = "BC_EARLY has been multiplied by 10 for comparison")
 ggsave(last_plot(),
-       file = here('input','input_data','input_figs','OM_indices-09-22-2020_BaseQ=GOA_Late.png'),
+       file = here('input','input_data','input_figs','OM_indices_BaseQ=WCGBTS.png'),
        height = 6, width = 6, unit = 'in', dpi = 420)
 
 #* survey + error plot ----

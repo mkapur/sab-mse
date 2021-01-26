@@ -1007,7 +1007,7 @@ ggplot(selFish, aes(x = flt, y = selShape, fill = flt, color = selType)) +
   scale_color_manual(values = c('goldenrod','black'))+
   coord_equal() +
   guides(color=guide_legend(override.aes=list(fill=NA)))+
-  labs(x = 'Biomass Survey Fleet',y = 'Selectivity Shape',fill = 'Fleet',
+  labs(x = 'Commercial Fishing Fleet',y = 'Selectivity Shape',fill = 'Fleet',
        color = 'Slx Type')
 
 ggsave(last_plot(),

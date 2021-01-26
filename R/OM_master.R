@@ -23,7 +23,12 @@ df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <- df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
-# df$parms$b_y <- rep(0,df$tEnd) ## no ramp right now.
+df$parms$b_y <- rep(1,df$tEnd) ## no ramp right now.
+
+array(exp(df$parms$log_srv_slx_pars), dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+      dimnames = dimnames(df$parms$log_srv_slx_pars))
+
+
 mappy <-
   buildMap(toFix =  c("omega_0ij",
                       "logh_k",
@@ -36,7 +41,7 @@ mappy <-
                       "log_srv_slx_pars",
                     "mort_k"),
            fixFlt = c("all_fsh",
-                    c( paste0(c(as.character(df$fltnames_surv),as.character(df$fltnames_acomp[c(2,4,5)])))[-1] )))
+                    c( paste0(c(as.character(df$fltnames_surv),as.character(df$fltnames_acomp[c(2,4,5)])))[-c(1,4)] )))
 # mappy$logh_k <- factor(c(NA,NA,2,3)) ##  fix WC regs
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
 # mappy$tildeR_yk <- factor(sort(rep(1:(length(mappy$tildeR_yk)/df$nstocks), each = df$nstocks))) ## make each area x year mirrored
@@ -64,6 +69,8 @@ rep1$Length_yais_beg[4,c(1,2,65:71),1,1]
 rep1$Length_yais_mid[4,c(1,2,65:71),1,1]
 rep1$Length_yais_end[4,c(1,2,65:71),1,1]
 
+rep1$surv_yf_pred
+
 bounds <- boundPars(obj,
                     r0_lower = 0, 
                     boundSlx = c(NA,'fsh','srv')[2:3])
@@ -73,6 +80,18 @@ bounds <- boundPars(obj,
 exp(bounds$srv_bnds_lwr)
 exp(bounds$srv_bnds_upr)
 
+# system.time(opt <- nlminb(
+#   obj$par,
+#   obj$fn,
+#   obj$gr,
+#   lower = bounds$lower,
+#   upper = bounds$upper,
+#   hessian = NULL,
+#   control = list(eval.max = 1e6, iter.max = 1e6, rel.tol = 1e-4)
+# )
+# )
+
+## TMBHELPER unavail for R >4.0
 system.time(opt <-
               TMBhelper::fit_tmb(
                 obj,
@@ -84,6 +103,8 @@ system.time(opt <-
                                iter.max = 1e6,
                                rel.tol = 1e-4)
               )$opt) ## estimate; can repeat for stability)
+
+
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 dat <- obj$report(par = best)
@@ -101,8 +122,8 @@ writeOM(justPlots = FALSE,
         runname = paste0("-",df$yRun,"y_",
                          cppname,
                          "_tildeR_yON",
-                         "_onlyAKVASTWest",
-                         "_B_y0_off"))
+                         "_BCVAST_AKVASTEest",
+                         "_Brampdisabled"))
 
 
 # system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars

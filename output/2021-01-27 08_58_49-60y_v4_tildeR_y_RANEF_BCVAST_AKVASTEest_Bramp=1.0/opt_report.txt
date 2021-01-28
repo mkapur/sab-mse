@@ -1,0 +1,54 @@
+$par
+         logR_0k          logR_0k          logR_0k          logR_0k           logq_f           logq_f 
+       16.041596        15.686827        15.049998        15.906036        -1.955384        -2.502789 
+          logq_f           logq_f           logq_f log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       -7.545501        -1.660828        -1.041193         3.688438         3.635827         3.812559 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+        4.045793         3.686527         3.679805         3.745599         4.053879 
+
+$objective
+[1] 167.6416
+
+$iterations
+[1] 62
+
+$evaluations
+function gradient 
+     191       62 
+
+$time_for_MLE
+Time difference of 2.30137 hours
+
+$max_gradient
+[1] 3628374
+
+$Convergence_check
+[1] "The model is likely not converged"
+
+$number_of_coefficients
+ Total  Fixed Random 
+    77     17     60 
+
+$AIC
+[1] 369.2833
+
+$diagnostics
+              Param starting_value      Lower       MLE     Upper final_gradient
+1           logR_0k     18.1975372   0.000000 16.041596 50.000000     1575933.06
+2           logR_0k     18.1975372   0.000000 15.686827 50.000000      399012.25
+3           logR_0k     18.1975372   0.000000 15.049998 50.000000      259919.69
+4           logR_0k     18.1975372   0.000000 15.906036 50.000000     -897663.10
+5            logq_f     -0.6931472 -15.000000 -1.955384 15.000000      103991.23
+6            logq_f     -0.6931472 -15.000000 -2.502789 15.000000     -138198.73
+7            logq_f     -0.6931472 -15.000000 -7.545501 15.000000    -2725832.04
+8            logq_f     -0.6931472 -15.000000 -1.660828 15.000000      389624.58
+9            logq_f     -0.6931472 -15.000000 -1.041193 15.000000     3628373.93
+10 log_srv_slx_pars      3.6888795   3.401197  3.688438  3.688879     -948230.52
+11 log_srv_slx_pars      3.6888795   3.401197  3.635827  3.688879     -661290.20
+12 log_srv_slx_pars      3.9754858   3.688879  3.812559  4.248495      423708.08
+13 log_srv_slx_pars      4.0073330   4.007333  4.045793  4.248495     -245205.49
+14 log_srv_slx_pars      3.6029509   3.401197  3.686527  3.688879     -316747.73
+15 log_srv_slx_pars      3.6888795   3.401197  3.679805  3.688879     -473850.21
+16 log_srv_slx_pars      3.8057065   3.688879  3.745599  4.248495       88898.07
+17 log_srv_slx_pars      4.0073330   4.007333  4.053879  4.248495      -27890.59
+

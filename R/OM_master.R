@@ -23,7 +23,10 @@ df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <- df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
-df$parms$b_y <- rep(1,df$tEnd) ## no ramp right now.
+df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))
+## if by is low, the likelihood is weighted more strongly, and the model is given less
+## flexibility in generating R_ys in the context of SDRs (aka do a better job of fitting
+# data during this period)
 
 array(exp(df$parms$log_srv_slx_pars), dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
       dimnames = dimnames(df$parms$log_srv_slx_pars))
@@ -55,7 +58,7 @@ array(mappy$log_srv_slx_pars, dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(d
 system.time(obj <- MakeADFun(df,
                  parameters = df$parms,
                  dll = dllUSE,
-                 # random = "tildeR_y",
+                 random = "tildeR_y",
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 
@@ -121,7 +124,7 @@ writeOM(justPlots = FALSE,
         mappy = mappy,
         runname = paste0("-",df$yRun,"y_",
                          cppname,
-                         "_tildeR_yON",
+                         "_tildeR_y_RANEF",
                          "_BCVAST_AKVASTEest",
                          "_Bramp=1.0"))
 

@@ -1,4 +1,6 @@
-## paste the text below into ~.R/4.0/Makevars and /Makevars.win
+## paste the text below into ~.R/4.0/Makevars and /Makevars.win\
+## help from https://github.com/kaskr/adcomp/issues/277
+
 ## With Rcpp 0.11.0 and later, we no longer need to set PKG_LIBS as there is
 ## no user-facing library. The include path to headers is already set by R.
 #PKG_LIBS = 

@@ -325,6 +325,10 @@ Type objective_function<Type>::operator() ()
               } // end ages
               break;
             } // end switch selShape
+            // fill nage:Lbins with ultimate value
+            for (int a= nage;a < LBins; a++) {
+              srv_slx_yafs(i,a,srv_flt,s) = srv_slx_yafs(i,nage-1,srv_flt,s);
+            } // end ages thru Lbins
           } // end sex
           break; // break age sel
         case 1: // enter length based sel

@@ -94,14 +94,18 @@ load_data_OM <- function(nspace = 6,
   load(here("input","input_data","OM_discard.csv")) ## loads as omdis
   
   ## Selex ----
-  load(here('input','input_data',"OM_fish_selex_yafs.rdata"))
-  load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
+  # load(here('input','input_data',"OM_fish_selex_yafs.rdata"))
+  # load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
   
-  selType_fish <- as.numeric(fltnames$SELTYPE[fltnames$COMM])-1
+  selType_fish <- ifelse(fltnames$SELTYPE[fltnames$COMM] == 'AGE',0,1)
+    
+    # as.numeric(fltnames$SELTYPE[fltnames$COMM])-1 ## caused problems with Rv 4.0
   ## note that the first two acomp fleets are already inside seltype fish
   ## only first ONE if AK fix not aggregated
-  selType_surv <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]))-1
-  selShape_fish <- c(0,2,2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selType_surv <-  ifelse(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]) == 'AGE',0,1)
+    
+    # as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]))-1
+  selShape_fish <-c(0,2,2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-4))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
   if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
@@ -528,16 +532,16 @@ load_data_OM <- function(nspace = 6,
     selType_surv = selType_surv,
 
     
-    fltnames_surv = (fltnames_surv),
-    fltnames_fish = (fltnames_fish),
-    fltnames_acomp = fltnames_acomp,
-    fltnames_lcomp = fltnames_lcomp,
+    # fltnames_surv = fltnames_surv,
+    # fltnames_fish = fltnames_fish,
+    # fltnames_acomp = fltnames_acomp,
+    # fltnames_lcomp = fltnames_lcomp,
     
-    ## for use with rv4.0
-    # fltnames_surv = list(fltnames_surv),
-    # fltnames_fish = list(fltnames_fish),
-    # fltnames_acomp = list(fltnames_acomp),
-    # fltnames_lcomp = list(fltnames_lcomp),
+    ## for use with rv4.0 upon "only numeric matrices..." error
+    fltnames_surv = list(fltnames_surv),
+    fltnames_fish = list(fltnames_fish),
+    fltnames_acomp = list(fltnames_acomp),
+    fltnames_lcomp = list(fltnames_lcomp),
     
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
@@ -578,8 +582,8 @@ load_data_OM <- function(nspace = 6,
     discard = omdis,
     
     #* SELEX ----
-    fish_selex_yafs = OM_fish_selex_yafs,
-    surv_selex_yafs = OM_surv_selex_yafs,
+    # fish_selex_yafs = OM_fish_selex_yafs,
+    # surv_selex_yafs = OM_surv_selex_yafs,
     fsh_blks = fsh_blks, 
     srv_blks = srv_blks,
     fsh_blks_size = fsh_blks_size,

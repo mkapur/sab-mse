@@ -405,7 +405,7 @@ writeOM <- function(justPlots = FALSE,
   
   ## catch pred by fleet ----
   catch_yf_pred_totalt <- data.frame(dat$catch_yf_pred_total)
-  names(catch_yf_pred_totalt) <- df$fltnames_fish
+  names(catch_yf_pred_totalt) <- unlist(df$fltnames_fish)
   catch_yf_pred_totalt <- catch_yf_pred_totalt %>%
     mutate(Year = years) %>%
     group_by(Year) %>%
@@ -479,7 +479,7 @@ writeOM <- function(justPlots = FALSE,
   ## survey preds ----
   
   survey_yf_predt <- data.frame(dat$surv_yf_pred)
-  names(survey_yf_predt) <- df$fltnames_surv
+  names(survey_yf_predt) <- unlist(df$fltnames_surv)
   survey_yf_predt <- survey_yf_predt %>%
     mutate(Year = years) %>%
     melt(id = 'Year') %>%

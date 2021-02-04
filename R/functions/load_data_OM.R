@@ -123,7 +123,16 @@ load_data_OM <- function(nspace = 6,
   
   survey <- read.csv(here("input","input_data",'OM_indices_BaseQ=WCGBTS.csv'))
   ## disable BC-VAST before 2003 - experimental
-  survey$BC_VAST[1:43] <- NA
+  # survey$BC_VAST[1:43] <- NA
+  
+  ## replace BC early & BC VAST with design-based indices (keep order)
+  bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
+    select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
+  survey <- survey %>% mutate(year = 1960:2019) %>%
+    merge(., bc_idx, by = 'year',all.x = TRUE) %>%
+    select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
+  survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
+  
   survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
   
   

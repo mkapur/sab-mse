@@ -644,7 +644,7 @@ writeOM <- function(justPlots = FALSE,
   
   # plot FISH selex ----
   ## bring estimates out and rearrange
-  nfishmod = df$nfleets_fish+(df$nfleets_acomp-4) ## bc we got selex for acomp flts too
+  nfishmod = df$nfleets_fish+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp) ## bc we got selex for acomp flts too
   Nas <- which(is.na(mappy[[grep("log_fsh_slx_pars", names(mappy))]]))
   nfixedfleets <- length(Nas)/4
   nfishmod <- nfishmod - nfixedfleets
@@ -779,7 +779,7 @@ writeOM <- function(justPlots = FALSE,
   
   # plot SURV selex ----
   ## bring estimates out and rearrange
-  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-4) ## bc we got selex for acomp flts too
+  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp) ## bc we got selex for acomp flts too
   Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
   nfixedfleets <- length(Nas)/4
   nsurvmod <- nsurvmod - nfixedfleets
@@ -793,14 +793,14 @@ writeOM <- function(justPlots = FALSE,
                       dimnames = dimnames(df$parms$log_srv_slx_pars))
 
     map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
-                        dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+                        dim = c(df$nfleets_surv+df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp),2,max(df$srv_blks_size),2),
                         dimnames = dimnames(df$parms$log_srv_slx_pars))
     ## replace non-fixed values with starting pars
     map_srvslx[!is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
     selP <- map_srvslx
     
     srv_sel_afsb <- array(NA, dim =  c(df$nage,
-                                      df$nfleets_surv+df$nfleets_acomp-4,
+                                      df$nfleets_surv+df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp),
                                       2,
                                       max(df$srv_blks_size)),
                          dimnames = list(c(df$age),
@@ -870,7 +870,8 @@ writeOM <- function(justPlots = FALSE,
     } ## end blks
 
   } else{ ## all were fixed
-    inputSel <- selP <- array(exp(df$parms$log_srv_slx_pars), dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+    inputSel <- selP <- array(exp(df$parms$log_srv_slx_pars), dim = c(df$nfleets_surv+df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp),2,
+                                                                      max(df$srv_blks_size),2),
                               dimnames = dimnames(df$parms$log_srv_slx_pars))
     # array(exp(best[grep('log_srv_slx_pars',names(best))]),
     #                         dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),

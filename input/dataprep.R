@@ -373,7 +373,8 @@ dimnames(ak_agecomps) <-  list(c(1960:2019),
 ## fix e, fixw, goasurv no sex so div by 2
 OM_agecomps_yafs[,2:31,1,1:2] <- 0.5*as.matrix(merge(data.frame('Year' = 1960:2019),
                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
-                                    by = 'Year',all.x = TRUE)%>% select(-Year))
+                                    by = 'Year',all.x = TRUE)
+                                    %>% select(-Year))
 OM_agecomps_yafs[,2:31,1,1:2] <- 0.5*as.matrix(merge(data.frame('Year' = 1960:2019),
                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_W_agecomp.csv")),
                                     by = 'Year',all.x = TRUE) %>% select(-Year))
@@ -442,21 +443,21 @@ bc_agecomps_female <- bc_agecomps_male <- array(NA, dim= c(length(1960:2019),
                                                            35,
                                                            3)) ## SS, commercial, strs
 
-bc_agecomps_female[,,1] <- OM_agecomps_yafs[,2:36,4,1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
+bc_agecomps_female[,,1] <- OM_agecomps_yafs[,2:36,'BC_TRAP',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                            read.csv(here("input","raw_data","comps",
                                                          "BC_om_FemaleCommercialTrapAgeProp.csv")),
                                            by = 'Year', all.x = TRUE))
-bc_agecomps_female[,,2] <- OM_agecomps_yafs[,2:36,5,1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
+bc_agecomps_female[,,2] <- OM_agecomps_yafs[,2:36,'BC_StRS',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                            read.csv(here("input","raw_data","comps",
                                                          "BC_om_FemaleStRSAgeProp.csv")),
                                            by = 'Year', all.x = TRUE))
 
-bc_agecomps_female[,,3] <-  OM_agecomps_yafs[,2:36,6,1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
+bc_agecomps_female[,,3] <-  OM_agecomps_yafs[,2:36,'BC_SS',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                             read.csv(here("input","raw_data","comps",
                                                           "BC_om_FemaleSSAgeProp.csv")),
                                             by = 'Year', all.x = TRUE))
 
-bc_agecomps_male[,,1] <-OM_agecomps_yafs[,2:36,4,2] <-  as.matrix(merge(data.frame('Year' = 1960:2019),
+bc_agecomps_male[,,1] <-OM_agecomps_yafs[,2:36,'BC_TRAP',2] <-  as.matrix(merge(data.frame('Year' = 1960:2019),
                                          read.csv(here("input","raw_data","comps",
                                                        "BC_om_MaleCommercialTrapAgeProp.csv")),
                                          by = 'Year', all.x = TRUE))
@@ -580,6 +581,19 @@ save(OM_agecomps_female, file = here('input','input_data',"OM_agecomps_female.rd
 save(OM_agecomps_male, file = here('input','input_data',"OM_agecomps_male.rdata"))
 save(OM_agecomps_yafs, file = here('input','input_data',"OM_agecomps_yafs.rdata"))
 
+
+## per fleet and sex, designate which bin acomps start/stop at for looping purposes
+acomp_dims_yfs <- array(NA, dim = c(60,2,8,2)) ## years, stary&stop, fleet, sex
+
+for(y in 1:60){
+  for(flt in 1:8){
+    for(s in 1:2){
+      acomp_dims_yfs[y,1,flt,s] <- first(which(is.na(OM_agecomps_yafs[y,,flt,s])))
+      acomp_dims_yfs[y,2,flt,s] <- last(which(is.na(OM_agecomps_yafs[y,,flt,s])))
+      
+    }
+  }
+}
 
 ## mortality ----
 ## keeping this simple, just one value for each R

@@ -18,6 +18,8 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
   DATA_INTEGER(nfleets_acomp); // number of age comp fleets
+  DATA_INTEGER(nfishflts_acomp); // number of fishery catch fleets which also have acomps
+  DATA_INTEGER(nsurvflts_acomp); // number of survey biomassfleets which also have acomps
   // DATA_INTEGER(nfleets_lcomp); //number of len comp fleets
   DATA_INTEGER(nmgmt_reg); // mgmt regions (3)
   
@@ -84,7 +86,7 @@ Type objective_function<Type>::operator() ()
   array<Type> N_avail_yf(tEnd, nfleets_fish);
   array<Type> N_weight_yfi(tEnd, nfleets_fish,nspace);
   array<Type> fsh_slx_yafs(nyear, LBins, nfleets_fish, nsex);           // Fishery selectivity-at-age by sex (on natural scale)
-  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-4),nsex);  // four acomp fleets are comm
+  array<Type> srv_slx_yafs(nyear, LBins, nfleets_surv+(nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp)),nsex);  // four acomp fleets are comm
   vector<Type>selG(nage);
   vector<Type>selGL(LBins);
   
@@ -121,8 +123,8 @@ Type objective_function<Type>::operator() ()
   array<Type> LengthAge_alyis_end(nage,LBins,tEnd+1,nspace,nsex); // placeholder for true age-length dist
   // age comps storage
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // placeholder multiplier for all acomp fleets
-  array<Type> comm_acomp_yafs_pred(tEnd, nage, 4, nsex); // predicted acomps from commercial fisheries
-  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-4, nsex); // predicted acomps from surveys (without biomass)
+  array<Type> comm_acomp_yafs_pred(tEnd, nage, nfishflts_acomp, nsex); // predicted acomps from commercial fisheries
+  array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp), nsex); // predicted acomps from surveys (without biomass)
   array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   
   // // PARAMETERS //
@@ -280,7 +282,7 @@ Type objective_function<Type>::operator() ()
     } // end alpha, beta
   } // end srv fleets
   // doing five of these to account for five surveys w acomp
-  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-4));srv_flt++){ // loop fleets
+  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp)));srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0 
     for (int h = 0; h < srv_blks_size(srv_flt); h++) { // unique no. timeblocks per fleet (min 1)
       do{

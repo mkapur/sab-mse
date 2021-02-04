@@ -644,7 +644,7 @@ writeOM <- function(justPlots = FALSE,
   
   # plot FISH selex ----
   ## bring estimates out and rearrange
-  nfishmod = df$nfleets_fish+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp) ## bc we got selex for acomp flts too
+  nfishmod = df$nfleets_fish+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp)) ## bc we got selex for acomp flts too
   Nas <- which(is.na(mappy[[grep("log_fsh_slx_pars", names(mappy))]]))
   nfixedfleets <- length(Nas)/4
   nfishmod <- nfishmod - nfixedfleets
@@ -779,7 +779,7 @@ writeOM <- function(justPlots = FALSE,
   
   # plot SURV selex ----
   ## bring estimates out and rearrange
-  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp) ## bc we got selex for acomp flts too
+  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp)) ## bc we got selex for acomp flts too
   Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
   nfixedfleets <- length(Nas)/4
   nsurvmod <- nsurvmod - nfixedfleets

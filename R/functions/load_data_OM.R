@@ -85,15 +85,14 @@ load_data_OM <- function(nspace = 6,
   }
   fltnames_fish <- fltnames$NAME[fltnames$COMM]
   fltnames_surv <- fltnames$NAME[fltnames$SURV]
-  
+  colnames(survfltPal) <- fltnames$NAME[fltnames$SURV]
+  fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
   fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
   
   nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
   nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
   nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
   nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
-  
-  
   
   # Catch ----
   catch <- round(read.csv(here("input","input_data","OM_catch.csv")),1)
@@ -104,25 +103,28 @@ load_data_OM <- function(nspace = 6,
   load(here("input","input_data","OM_discard.csv")) ## loads as omdis
   
   ## Selex ----
-  # load(here('input','input_data',"OM_fish_selex_yafs.rdata"))
-  # load(here('input','input_data',"OM_surv_selex_yafs.rdata"))
-  
   selType_fish <- ifelse(fltnames$SELTYPE[fltnames$COMM] == 'AGE',0,1)
-    
-    # as.numeric(fltnames$SELTYPE[fltnames$COMM])-1 ## caused problems with Rv 4.0
-  ## note that the first two acomp fleets are already inside seltype fish
-  ## only first ONE if AK fix not aggregated
-  selType_surv <-  ifelse(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]) == 'AGE',0,1)
-    
-    # as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]))-1
-  selShape_fish <-c(0,2,2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_fish <-c(0,2,2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma  
+
   
-  ##
-  
-  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-4))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
-  
-  
-  if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
+
+ ## everything not with biomass
+  selType_surv <-  ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
+                            fltnames$SELTYPE[fltnames$NAME %in% c(fltnames_acomp[!(fltnames_acomp %in% fltnames_surv)])] )
+                          == 'AGE',0,1)
+ 
+  ## do this smartly; check for overlap or use the design setup
+  nfishflts_acomp <- sum(fltnames_fish %in% fltnames_acomp)  
+  nsurvflts_acomp <- sum(fltnames_surv %in% fltnames_acomp)
+  ## truncate the length of selShape by the number of overlap fleets with survey
+  ## this ensures that we are estimating a single survey selectivity informed simulataneously
+  ## by biomass, and comps
+  ## generally, if we use
+  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-(nfishflts_acomp+nsurvflts_acomp)))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+
+  if(length(selType_surv) != length(selShape_surv)) {
+    stop("seltype surv length doesn't match selshape surv")
+  }
   # Survey ----
   # survey <- read.csv(here("input","input_data",'OM_indices.csv'))
   # survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
@@ -430,14 +432,14 @@ load_data_OM <- function(nspace = 6,
   
   # srv_blks_size is a 1 x nfleets_surv ivector which indicates the number of timeblocks applicable
   # to each fleet.
-  srv_blks_size <- matrix(1, nrow = 1, ncol = nfleets_surv+nfleets_acomp-4)
+  srv_blks_size <- matrix(1, nrow = 1, ncol = nfleets_surv+nfleets_acomp-(nfishflts_acomp+nsurvflts_acomp))
   colnames(srv_blks_size) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
   srv_blks_size[,'WC_VAST'] <- 3
   # srv_blks_size[,'AK_VAST_E'] <- 2
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
   srv_blks <- matrix(2019, nrow = max(srv_blks_size), 
-                     ncol = nfleets_surv+nfleets_acomp-4)
+                     ncol = nfleets_surv+nfleets_acomp-nfleets_acomp-(nfishflts_acomp+nsurvflts_acomp))
   colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
   srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,2019)
   # srv_blks[1:srv_blks_size[,'AK_VAST_E'],'AK_VAST_E' ] <- c(1995,2019) ## ak ass uses new wtatage, but we dont wanna change q
@@ -554,6 +556,8 @@ load_data_OM <- function(nspace = 6,
     nfleets_fish = nfleets_fish,
     nfleets_acomp = nfleets_acomp,
     nfleets_lcomp = nfleets_lcomp,
+    nfishflts_acomp = nfishflts_acomp,
+    nsurvflts_acomp = nsurvflts_acomp,
     selShape_fish = selShape_fish, ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
     selShape_surv = selShape_surv,
     selType_fish = selType_fish, ## 0 for age, 1 for length-based

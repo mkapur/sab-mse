@@ -73,9 +73,19 @@ load_data_OM <- function(nspace = 6,
   ## makes the master flag_fleets matrix
   ## and attendant indices for subsetting
   fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE) ## this is like flag_fleets
+
+  x <- readline("Are you using design-based indices for BC? (Y/N)") 
+
+  if(tolower(x) == 'n'){
+    ## turn off SURV for design-based
+    fltnames$SURV[fltnames$NAME%in%c('BC_OFFStd','BC_StRS')] <- FALSE
+  } else{
+    fltnames$SURV[fltnames$NAME%in%c('BC_EARLY','BC_VAST')] <- FALSE 
+    
+  }
   fltnames_fish <- fltnames$NAME[fltnames$COMM]
   fltnames_surv <- fltnames$NAME[fltnames$SURV]
-  fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
+  
   fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
   
   nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
@@ -106,7 +116,12 @@ load_data_OM <- function(nspace = 6,
     
     # as.numeric(c(fltnames$SELTYPE[fltnames$SURV],fltnames$SELTYPE[fltnames$ACOMP][c(2,4,5)]))-1
   selShape_fish <-c(0,2,2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  
+  ##
+  
   selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-4))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  
+  
   if(length(selType_surv) != length(selShape_surv)) stop("seltype surv length doesn't match selshape surv")
   # Survey ----
   # survey <- read.csv(here("input","input_data",'OM_indices.csv'))
@@ -124,15 +139,15 @@ load_data_OM <- function(nspace = 6,
   survey <- read.csv(here("input","input_data",'OM_indices_BaseQ=WCGBTS.csv'))
   ## disable BC-VAST before 2003 - experimental
   # survey$BC_VAST[1:43] <- NA
-  
-  ## replace BC early & BC VAST with design-based indices (keep order)
-  bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
-    select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
-  survey <- survey %>% mutate(year = 1960:2019) %>%
-    merge(., bc_idx, by = 'year',all.x = TRUE) %>%
-    select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
-  survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
-  
+  if(tolower(x) == 'n'){
+    ## replace BC early & BC VAST with design-based indices (keep order)
+    bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
+      select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
+    survey <- survey %>% mutate(year = 1960:2019) %>%
+      merge(., bc_idx, by = 'year',all.x = TRUE) %>%
+      select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
+    survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
+  }
   survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
   
   

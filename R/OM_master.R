@@ -4,6 +4,7 @@
 ## kapurm@uw.edu
 rm(list = ls())
 
+# devtools::install_github('kaskr/adcomp', subdir = 'TMB')
 library(TMB)
 library(dplyr)
 library(reshape2)
@@ -24,6 +25,7 @@ df$yRun <- df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))
+# df$selShape_surv[4] <- -1 # constant slx for bc vast
 ## if by is low, the likelihood is weighted more strongly, and the model is given less
 ## flexibility in generating R_ys in the context of SDRs (aka do a better job of fitting
 # data during this period)
@@ -44,7 +46,9 @@ mappy <-
                       "log_srv_slx_pars",
                     "mort_k"),
            fixFlt = c("all_fsh",
-                    c( paste0(c(as.character(df$fltnames_surv),as.character(df$fltnames_acomp[c(2,4,5)])))[-c(1,4)] )))
+                      "all_srv"))
+                    # c( paste0(c(as.character(unlist(df$fltnames_surv)),
+                    # as.character(unlist(df$fltnames_acomp)[c(2,4,5)])))[-c(1,4)] )))
 # mappy$logh_k <- factor(c(NA,NA,2,3)) ##  fix WC regs
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
 # mappy$tildeR_yk <- factor(sort(rep(1:(length(mappy$tildeR_yk)/df$nstocks), each = df$nstocks))) ## make each area x year mirrored
@@ -58,7 +62,7 @@ array(mappy$log_srv_slx_pars, dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(d
 system.time(obj <- MakeADFun(df,
                  parameters = df$parms,
                  dll = dllUSE,
-                 random = "tildeR_y",
+                 # random = "tildeR_y",
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 
@@ -94,18 +98,23 @@ exp(bounds$srv_bnds_upr)
 # )
 # )
 
-## TMBHELPER unavail for R >4.0
-system.time(opt <-
-              TMBhelper::fit_tmb(
-                obj,
-                lower = bounds$lower,
-                upper = bounds$upper,
-                dll = dllUSE,
-                getHessian = FALSE,
-                control = list(eval.max = 1e6,
-                               iter.max = 1e6,
-                               rel.tol = 1e-4)
-              )$opt) ## estimate; can repeat for stability)
+## tmbhelper is returning null OPTS
+system.time(opt <-nlminb(obj$par, obj$fn, obj$gr,
+              lower = bounds$lower,
+              upper = bounds$upper))
+# 
+# system.time(opt <-
+#               TMBhelper::fit_tmb(
+#                 obj,
+#                 lower = bounds$lower,
+#                 upper = bounds$upper,
+#                 # dll = dllUSE,
+#                 getHessian = FALSE,
+#                 getsd = FALSE,
+#                 control = list(eval.max = 1e6,
+#                                iter.max = 1e6,
+#                                rel.tol = 1e-4)
+#               )$opt) ## estimate; can repeat for stability)
 
 
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
@@ -117,15 +126,15 @@ dat$surv_yf_pred/df$surv_yf_obs
 cppname = substr(dllUSE,7,nchar(dllUSE))
 writeOM(justPlots = FALSE,
   dat=dat,
-        obj = obj, 
+  obj = obj, 
         opt = opt, 
         rep=rep, 
         cppname =cppname, 
         mappy = mappy,
         runname = paste0("-",df$yRun,"y_",
                          cppname,
-                         "_tildeR_y_RANEF",
-                         "_BCVAST_AKVASTEest",
+                         "",
+                         "_truncateestBC_VAST",
                          "_Bramp=1.0"))
 
 

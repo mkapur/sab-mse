@@ -106,16 +106,19 @@ load_data_OM <- function(nspace = 6,
   selType_fish <- ifelse(fltnames$SELTYPE[fltnames$COMM] == 'AGE',0,1)
   selShape_fish <-c(0,2,2,2,3,2,2) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma  
 
-  
-
- ## everything not with biomass
-  selType_surv <-  ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
-                            fltnames$SELTYPE[fltnames$NAME %in% c(fltnames_acomp[!(fltnames_acomp %in% fltnames_surv)])] )
-                          == 'AGE',0,1)
- 
   ## do this smartly; check for overlap or use the design setup
   nfishflts_acomp <- sum(fltnames_fish %in% fltnames_acomp)  
   nsurvflts_acomp <- sum(fltnames_surv %in% fltnames_acomp)
+  
+  ## take idx of acomp fleets which are already acctd for in fish or surv
+  Wnfishflts_acomp <- which(fltnames_acomp %in% fltnames_fish)  
+  Wnsurvflts_acomp <- which(fltnames_acomp %in% fltnames_surv)
+  
+  selType_surv <-  ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
+                            fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)])
+                          == 'AGE',0,1)
+ 
+
   ## truncate the length of selShape by the number of overlap fleets with survey
   ## this ensures that we are estimating a single survey selectivity informed simulataneously
   ## by biomass, and comps
@@ -176,7 +179,7 @@ load_data_OM <- function(nspace = 6,
   ## Phi objects ----
   ## setup phi (spatial matching matrix) depending on spatial setup
   ## MAKE A NSPACE == 3 AND 1 OPTION FOR COMBINING
-  spmat <- data.frame(subarea = c('A1',"A3","B3","B2","C2","C1"),
+  spmat <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
   if(nspace == 6){ ## OM
@@ -221,11 +224,13 @@ load_data_OM <- function(nspace = 6,
     phi_ff_acomp <- matrix(-1, nrow = nfleets_acomp, ncol = 5) 
     rownames(phi_ff_acomp) <- fltnames_acomp
     colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos',"nsamp_pos","commacomp_pos","survacomp_pos")
+    
     ## MANUAL UPDATE WITH COLNAMES [seltypes are in same order as fltnames]
     phi_ff_acomp[which(rownames(phi_ff_acomp) %in% paste(fltnames_fish)),1] <- 
       which(grepl(paste(rownames(phi_ff_acomp), collapse = "|"), paste(fltnames_fish)))-1
-    # phi_ff_acomp[,1] <- c(0,1,-1,5,-1,-1,7,8) ## position in fishery selex (-1 means not applicable)
-    phi_ff_acomp[,2] <- c(-1,5,-1,6,7,-1,-1) ## Pos in survey
+
+    phi_ff_acomp[Wnsurvflts_acomp,2] <-which(fltnames_surv %in% fltnames_acomp )## Pos in survey
+
     phi_ff_acomp[,3] <- c(5:11) ## ordering for nsamp
     phi_ff_acomp[which(rownames(phi_ff_acomp) %in% paste(fltnames_fish)),4] <- 0:3
     # phi_ff_acomp[,4] <- c(0,1,-1,2,-1,-1,3,4) ## ordering for comm comps

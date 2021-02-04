@@ -437,7 +437,10 @@ ak_agecomps[,2:21,3] <- OM_agecomps_yafs[,2:21,3,1:2] <- 0.5*as.matrix(merge(dat
 #   select(Year, everything()) %>%
 #   write.csv(here("input","raw_data","comps",
 #                  "BC_om_MaleSSAgeProp.csv"), row.names = FALSE) 
-
+## notes to self:
+# bcstrs == bc strat random survey (thru 2020)
+# bc ss == bc standardized survey aka bc offshort stdized, 1990-2009
+# the bc trap is a commercial cpue we aren't fitting to in the model but there are ages.
 
 bc_agecomps_female <- bc_agecomps_male <- array(NA, dim= c(length(1960:2019), 
                                                            35,

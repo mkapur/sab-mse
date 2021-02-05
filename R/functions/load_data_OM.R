@@ -153,7 +153,7 @@ load_data_OM <- function(nspace = 6,
       select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
     survey <- survey %>% mutate(year = 1960:2019) %>%
       merge(., bc_idx, by = 'year',all.x = TRUE) %>%
-      select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
+      select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRS = BC_VAST.y, WC_VAST)
     survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
     cat('overwrote BC survey fleets with design-based indices \n')
   }
@@ -165,7 +165,7 @@ load_data_OM <- function(nspace = 6,
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma_BaseQ=WCGBTS.csv'))
   if(tolower(x) == 'y'){
     names(survey_err) <- names(survey)
-    survey_err$BC_StRs[!is.na(survey_err$BC_StRs)] <- 0.317
+    survey_err$BC_StRS[!is.na(survey_err$BC_StRS)] <- 0.317
     cat('overwrote BC survey fleets err with 0.317 \n')
   }
   

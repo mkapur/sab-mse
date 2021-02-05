@@ -779,7 +779,7 @@ writeOM <- function(justPlots = FALSE,
   
   # plot SURV selex ----
   ## bring estimates out and rearrange
-  nsurvmod = df$nfleets_surv+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp)) ## bc we got selex for acomp flts too
+  nsurvmod = length(df$selType_surv) ## bc we got selex for acomp flts too
   Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
   nfixedfleets <- length(Nas)/4
   nsurvmod <- nsurvmod - nfixedfleets
@@ -793,14 +793,14 @@ writeOM <- function(justPlots = FALSE,
                       dimnames = dimnames(df$parms$log_srv_slx_pars))
 
     map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
-                        dim = c(df$nfleets_surv+df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp),2,max(df$srv_blks_size),2),
+                        dim = c(length(df$selType_surv),2,max(df$srv_blks_size),2),
                         dimnames = dimnames(df$parms$log_srv_slx_pars))
     ## replace non-fixed values with starting pars
     map_srvslx[!is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
     selP <- map_srvslx
     
     srv_sel_afsb <- array(NA, dim =  c(df$nage,
-                                      df$nfleets_surv+df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp),
+                                   length(df$selType_surv),
                                       2,
                                       max(df$srv_blks_size)),
                          dimnames = list(c(df$age),
@@ -808,7 +808,7 @@ writeOM <- function(justPlots = FALSE,
                                          c('Fem','Mal'),
                                          c(dimnames(df$parms$log_srv_slx_pars)[[3]])))
 
-    for(surv_flt in 1:8){
+    for(surv_flt in 1:length(df$selType_surv)){
       for(blk in 1:df$srv_blks_size[surv_flt]){
         for(s in 1:2){
           if(!is.na(map_srvslx[surv_flt,1,blk,s])){
@@ -834,7 +834,7 @@ writeOM <- function(justPlots = FALSE,
       png(paste0(dumpfile,'/survey_selex_blk',blk,".png"),
           height = 8, width = 6, unit = 'in', res = 420)
       par(mfrow = c(4,2) )
-      for(flt in 1:8){
+      for(flt in 1:length(df$selType_surv)){
         ## if not in this block, skip
         if(is.na(srv_sel_afsb[1,flt,1,blk])) next()
         ## if fixed overwrite colors
@@ -877,12 +877,12 @@ writeOM <- function(justPlots = FALSE,
     #                         dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
     #                         dimnames = dimnames(df$parms$log_srv_slx_pars))
     
-    srv_sel_afs <- array(NA, dim =  c(df$nage,8,2),
+    srv_sel_afs <- array(NA, dim =  c(df$nage,length(df$selType_surv),2),
                          dimnames = list(c(df$age),
                                          c(dimnames(df$parms$log_srv_slx_pars)[[1]]),
                                          c('Fem','Mal')))
     for(s in 1:2){
-      for(surv_flt in 1:8){
+      for(surv_flt in 1:length(df$selType_surv)){
         srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
                                               selP = selP,
                                               flt_idx = surv_flt,
@@ -897,7 +897,7 @@ writeOM <- function(justPlots = FALSE,
         height = 8, width = 6, unit = 'in', res = 420)
     par(mfrow = c(4,2) )
     sexPal_temp = c('grey22','grey66')
-    for(flt in 1:8){
+    for(flt in 1:length(df$selType_surv)){
       for(s in 1:2){
         tmp <- srv_sel_afs[,flt,s]
         if(s == 1) plot(tmp, 

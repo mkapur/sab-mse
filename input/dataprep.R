@@ -357,10 +357,6 @@ OM_agecomps_yafs <- array(NA, dim = c(length(1960:2019),
                                           c(0:70),
                                           c(fltnames$NAME[fltnames$ACOMP]),
                                           c('Fem','Mal')))
-
-
-
-
 #* ak agecomps ----
 ## fixed gear and GOA survey. note they are NOT sex specific.
 ak_agecomps  <- array(NA, dim = c(length(1960:2019),

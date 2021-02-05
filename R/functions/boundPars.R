@@ -124,7 +124,7 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
     ## first check if slx was fixed at all
     if(length(grep("log_srv_slx_pars", names(mappy)))  > 0){
       map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
-                          dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+                          dim = c(length(df$selShape_surv),2,max(df$srv_blks_size),2),
                           dimnames = dimnames(df$parms$log_srv_slx_pars))
       
       lwr.temp <- upr.temp <- map_srvslx ## now there are only values where we need to fill them
@@ -177,22 +177,11 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       }
       lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp[!is.na(lwr.temp)]
       upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp[!is.na(upr.temp)]
-      ## general bounds on p1 and p2 for all fleets
-      # seeddim <-  df$nfleets_surv+df$nfleets_acomp-4-nfixedfleets
-      # lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1 
-      # lower[names(lower) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(30) ## p2
-      # 
-      # upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(55) ## p1 3.91202301
-      # upper[names(upper) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(80) ## p2 3.91202301
-      
-      ## just rational bounds
-      # lower[names(lower) == 'log_srv_slx_pars'] <- 0
-      # upper[names(upper) == 'log_srv_slx_pars'] <- log(80)
-      
+
       
     } else if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
       
-      seeddim = df$nfleets_surv+df$nfleets_acomp-4
+      seeddim = length(df$selType_surv)
       lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
       lower[names(lower) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
       

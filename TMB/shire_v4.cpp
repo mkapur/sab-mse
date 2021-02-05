@@ -125,7 +125,7 @@ Type objective_function<Type>::operator() ()
   array<Type> acomp_yaf_temp(tEnd, nage, nfleets_acomp); // placeholder multiplier for all acomp fleets
   array<Type> comm_acomp_yafs_pred(tEnd, nage, nfishflts_acomp, nsex); // predicted acomps from commercial fisheries
   array<Type> surv_acomp_yafs_pred(tEnd, nage, nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp), nsex); // predicted acomps from surveys (without biomass)
-  array<Type> Nsamp_acomp_yf(tEnd, nfleets_surv+nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
+  array<Type> Nsamp_acomp_yf(tEnd, nfleets_acomp); // placeholder for number sampled by comp survey (pre dirichlet weighting)
   
   // // PARAMETERS //
   PARAMETER_VECTOR(epsilon_tau); // logn error around rec dist
@@ -841,8 +841,7 @@ Type objective_function<Type>::operator() ()
       } // end space
     } //end mgmt
     // std::cout << y << "\t" << "end R_ym" << "\n";
-    
-    
+
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
@@ -860,10 +859,11 @@ Type objective_function<Type>::operator() ()
                 
                 // this should only get filled if surv_flt is also an comp_flt
                 // then nsamp acomp only needs dims acomp_flt 
-                
-                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
-                  phi_if_surv(surv_flt,i)*
-                  N_yais_mid(y,a,i,s);
+                // should be done outside of loop for acomp fleets only (need switches)
+               
+                // Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
+                //   phi_if_surv(surv_flt,i)*
+                //   N_yais_mid(y,a,i,s);
               } // end ages
               break;
             case 1:
@@ -877,9 +877,9 @@ Type objective_function<Type>::operator() ()
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
-                Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y, mla_yais(y,a,i,s),surv_flt,s)*
-                  phi_if_surv(surv_flt,i)*
-                  N_yais_mid(y,a,i,s);
+                // Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y, mla_yais(y,a,i,s),surv_flt,s)*
+                //   phi_if_surv(surv_flt,i)*
+                //   N_yais_mid(y,a,i,s);
               }
               break;
             } // end selType_fish
@@ -889,6 +889,48 @@ Type objective_function<Type>::operator() ()
     } // end nspace
     // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
     
+    // generate nsamp estimates for acomp fleets using phi_ff and midyr NAA
+    // for(int i=0;i<(nspace);i++){
+    //   for(int s=0;s<nsex;s++){
+    //     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+    //       // also need to introduce jump for filtering correct ages
+    //       // if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
+    //       switch(selType_surv(phi_ff_acomp(acomp_flt,1))){
+    //       case 0: // age sel
+    //         for(int a=0;a<(nage);a++){
+    //           if(acomp_flt_type(acomp_flt) == 0){
+    //             Nsamp_acomp_yf(y,acomp_flt) +=  
+    //               fish_slx_yafs(y,a,phi_ff_acomp(acomp_flt,0),s)*
+    //               phi_if_surv(surv_flt,i)*
+    //               N_yais_mid(y,a,i,s);
+    //           } else{
+    //             Nsamp_acomp_yf(y,acomp_flt) +=  
+    //               srv_slx_yafs(y, a,phi_ff_acomp(acomp_flt,1),s)*
+    //               phi_if_surv(surv_flt,i)*
+    //               N_yais_mid(y,a,i,s);
+    //           } //  end if survey fleet
+    //         } // end ages
+    //         break;
+    //       case 1:
+    //         for(int a=0;a<(nage);a++){
+    //           if(acomp_flt_type(acomp_flt) == 0){
+    //           Nsamp_acomp_yf(y,acomp_flt) +=  
+    //             fish_slx_yafs(y, mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
+    //             phi_if_surv(surv_flt,i)*
+    //             N_yais_mid(y,a,i,s);
+    //           } else{
+    //             Nsamp_acomp_yf(y,acomp_flt) +=  
+    //               srv_slx_yafs(y, mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
+    //               phi_if_surv(surv_flt,i)*
+    //               N_yais_mid(y,a,i,s);
+    //           } //  end if survey fleet
+    //         } // end ages
+    //         break;
+    //       } // end selType_FLT
+    //       // } // end check that it's not an NA year
+    //     } // end survey fleets
+    //   } // end sexes
+    // } // end nspace
     
     // predicted age comps, given error
     // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){

@@ -126,7 +126,7 @@ load_data_OM <- function(nspace = 6,
   ## truncate the length of selShape by the number of overlap fleets with survey
   ## this ensures that we are estimating a single survey selectivity informed simulataneously
   ## by biomass, and comps
-  selShape_surv <- c(rep(0,length(selType_surv)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,length(selType_surv))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
 
   if(length(selType_surv) != length(selShape_surv)) {
     stop("seltype surv length doesn't match selshape surv")

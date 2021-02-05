@@ -117,7 +117,11 @@ load_data_OM <- function(nspace = 6,
   selType_surv <-  ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
                             fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)])
                           == 'AGE',0,1)
- 
+  
+  ## later this might need to include lcomps
+  fltnames_survcomp <-  unique(c(as.character(fltnames_surv),
+                                 as.character(fltnames_acomp[-Wnfishflts_acomp])))
+
   ## truncate the length of selShape by the number of overlap fleets with survey
   ## this ensures that we are estimating a single survey selectivity informed simulataneously
   ## by biomass, and comps
@@ -143,7 +147,7 @@ load_data_OM <- function(nspace = 6,
   survey <- read.csv(here("input","input_data",'OM_indices_BaseQ=WCGBTS.csv'))
   ## disable BC-VAST before 2003 - experimental
   # survey$BC_VAST[1:43] <- NA
-  if(tolower(x) == 'n'){
+  if(tolower(x) == 'y'){
     ## replace BC early & BC VAST with design-based indices (keep order)
     bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
       select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
@@ -216,8 +220,11 @@ load_data_OM <- function(nspace = 6,
       }
     }
     
-    # phi_if_acomp[1,6] <-  phi_if_acomp[2:3,5] <-  
-      # phi_if_acomp[4:6,3:4]<-  phi_if_acomp[7:8,1:2] <- 1
+    acomp_flt_type <- matrix(1, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
+    colnames(acomp_flt_type) <- fltnames_acomp
+    ## match colnames to fltnames which are commercial, assign those as 1
+    acomp_flt_type[which(fltnames$COMM[which(grepl(paste(colnames(acomp_flt_type), collapse = "|"),fltnames$NAME))])] <- 0
+    # acomp_flt_type[fltnames$NAME == rownames(acomp_flt_type) ] <- 1
     
     ## indicates the position of acomp fleet
     phi_ff_acomp <- matrix(-1, nrow = nfleets_acomp, ncol = 5) 
@@ -317,11 +324,7 @@ load_data_OM <- function(nspace = 6,
     # phi_fm_acomp[1:3,3] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,1]  <- 1
     phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are survey fleets
     
-    acomp_flt_type <- matrix(1, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
-    colnames(acomp_flt_type) <- fltnames_acomp
-    ## match colnames to fltnames which are commercial, assign those as 1
-    acomp_flt_type[which(fltnames$COMM[which(grepl(paste(colnames(acomp_flt_type), collapse = "|"),fltnames$NAME))])] <- 0
-    # acomp_flt_type[fltnames$NAME == rownames(acomp_flt_type) ] <- 1
+
 
     phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
     rownames(phi_lcomp_fm) = fltnames_lcomp
@@ -450,29 +453,22 @@ load_data_OM <- function(nspace = 6,
   # srv_blks_size is a 1 x nfleets_surv ivector which indicates the number of timeblocks applicable
   # to each fleet.
   srv_blks_size <- matrix(1, nrow = 1, ncol = length(selType_surv))
+  colnames(srv_blks_size) <- c(fltnames_survcomp)
   
-  ## this should have the names of all surveys which have slx estimated.
-  ## NEED TO SORT OUT SRV BLKS NAMES
-  # colnames(srv_blks_size) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
   srv_blks_size[,'WC_VAST'] <- 3
   # srv_blks_size[,'AK_VAST_E'] <- 2
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
   srv_blks <- matrix(2019, nrow = max(srv_blks_size),  ncol = length(selType_surv))
-
-  # rownames(phi_ff_acomp)[which(acomp_flt_type == 1)]
-  
-  # colnames(srv_blks) <- c( as.character(fltnames_surv), as.character(fltnames_acomp[c(2,4,5)]))
+  colnames(srv_blks) <- c( fltnames_survcomp)
   srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,2019)
-  # srv_blks[1:srv_blks_size[,'AK_VAST_E'],'AK_VAST_E' ] <- c(1995,2019) ## ak ass uses new wtatage, but we dont wanna change q
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta
   log_srv_slx_pars =  array(NA,
                             dim = c(length(selType_surv), 2, max(srv_blks_size), 2),
                             dimnames = 
-                              list(c(
-                              paste(fltnames_surv), paste(fltnames_acomp[c(2, 4, 5)])),
+                              list(c(fltnames_survcomp),
                             c("p1", "p2"),
                             c(paste0('block', 1:max(srv_blks_size))),
                             c('Fem', 'Mal')))
@@ -496,11 +492,11 @@ load_data_OM <- function(nspace = 6,
     log_srv_slx_pars['BC_SS','p2',1:srv_blks_size[,"BC_SS"],] <- 65
 
   } else{
-    log_srv_slx_pars['BC_OFFStd','p1',1:srv_blks_size[,"BC_EARLY"],] <- c(29.99999, 29.99999)
-    log_srv_slx_pars['BC_OFFStd','p2',1:srv_blks_size[,"BC_EARLY"],] <- c(54.99999, 70.00000)
+    log_srv_slx_pars['BC_OFFStd','p1',1:srv_blks_size[,"BC_OFFStd"],] <- c(29.99999, 29.99999)
+    log_srv_slx_pars['BC_OFFStd','p2',1:srv_blks_size[,"BC_OFFStd"],] <- c(54.99999, 70.00000)
     
-    log_srv_slx_pars['BC_StRS','p1',1:srv_blks_size[,"BC_VAST"],] <-  c(40.00000, 40.00000)
-    log_srv_slx_pars['BC_StRS','p2',1:srv_blks_size[,"BC_VAST"],] <- c(54.99999,54.99999)
+    log_srv_slx_pars['BC_StRS','p1',1:srv_blks_size[,"BC_StRS"],] <-  c(40.00000, 40.00000)
+    log_srv_slx_pars['BC_StRS','p2',1:srv_blks_size[,"BC_StRS"],] <- c(54.99999,54.99999)
   }
   
   log_srv_slx_pars['WC_VAST','p1',"block1",c('Fem','Mal')] <- c(46.13959,52.93459)
@@ -515,10 +511,7 @@ load_data_OM <- function(nspace = 6,
   ## comps
   log_srv_slx_pars['AK_GOA_SURV','p1',1:srv_blks_size[,"AK_GOA_SURV"],] <- 50
   log_srv_slx_pars['AK_GOA_SURV','p2',1:srv_blks_size[,"AK_GOA_SURV"],] <- 65
-  
 
-
-  
   log_srv_slx_pars = log(log_srv_slx_pars)
   
   mort_k <- c(0.2,0.15,0.05,0.1)

@@ -1,7 +1,5 @@
 getSelec2 <- function(sex, flt_idx, selP, selShape, selType,blk, fltType = 'fish'){
-
   age = df$age
-
   if(selType ==0){
     if(selShape == -1){
       selec = 1

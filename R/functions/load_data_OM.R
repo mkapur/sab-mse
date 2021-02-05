@@ -155,6 +155,7 @@ load_data_OM <- function(nspace = 6,
       merge(., bc_idx, by = 'year',all.x = TRUE) %>%
       select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
     survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
+    cat('overwrote BC survey fleets with design-based indices \n')
   }
   survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
   
@@ -162,7 +163,11 @@ load_data_OM <- function(nspace = 6,
   # survey[,"BC_EARLY"] <-  survey[,"BC_EARLY"] +0.0111 ## flag for numeric TMB checks
   # survey <- round(survey,  1)
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma_BaseQ=WCGBTS.csv'))
-  
+  if(tolower(x) == 'y'){
+    names(survey_err) <- names(survey)
+    survey_err$BC_StRs[!is.na(survey_err$BC_StRs)] <- 0.317
+    cat('overwrote BC survey fleets err with 0.317 \n')
+  }
   
   ## Comps ----
   #* Len comps [these are arrays by fleet]
@@ -230,12 +235,11 @@ load_data_OM <- function(nspace = 6,
     phi_ff_acomp <- matrix(-1, nrow = nfleets_acomp, ncol = 5) 
     rownames(phi_ff_acomp) <- fltnames_acomp
     colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos',"nsamp_pos","commacomp_pos","survacomp_pos")
-    
-    ## MANUAL UPDATE WITH COLNAMES [seltypes are in same order as fltnames]
+
     phi_ff_acomp[which(rownames(phi_ff_acomp) %in% paste(fltnames_fish)),1] <- 
       which(grepl(paste(rownames(phi_ff_acomp), collapse = "|"), paste(fltnames_fish)))-1
 
-    if(tolower(x) != 'n'){
+    if(tolower(x) == 'n'){
       phi_ff_acomp[Wnsurvflts_acomp,'srv_slx_pos'] <- 
         which(fltnames_surv %in% fltnames_acomp )-1## Pos in survey
 
@@ -245,6 +249,7 @@ load_data_OM <- function(nspace = 6,
       ## if a standalone survey, fill with last idx
       phi_ff_acomp[acomp_flt_type == 1,"srv_slx_pos"] <-  
         (nfleets_surv +1):(nfleets_surv + sum(acomp_flt_type==1))-1
+      
       phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] <-  
         (nfleets_surv +1):(nfleets_surv + sum(acomp_flt_type==1))-1
     }

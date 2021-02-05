@@ -13,9 +13,11 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4')[1]
-# compile(here("TMB",paste0(dllUSE,".cpp")))
+# compile(here("TMB",paste0(dllUSE,".cpp")),
+#         R_MAKEVARS_USER = here("suppressMakeVars.txt"))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
+# CPPFLAGS="-Wno-ignored-attributes"
 source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, 
                    move = TRUE,
@@ -46,9 +48,8 @@ mappy <-
                       "log_srv_slx_pars",
                     "mort_k"),
            fixFlt = c("all_fsh",
-                      "all_srv"))
-                    # c( paste0(c(as.character(unlist(df$fltnames_surv)),
-                    # as.character(unlist(df$fltnames_acomp)[c(2,4,5)])))[-c(1,4)] )))
+                      # "all_srv"))
+                      colnames(df$srv_blks)[6] ))
 # mappy$logh_k <- factor(c(NA,NA,2,3)) ##  fix WC regs
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
 # mappy$tildeR_yk <- factor(sort(rep(1:(length(mappy$tildeR_yk)/df$nstocks), each = df$nstocks))) ## make each area x year mirrored
@@ -56,7 +57,8 @@ mappy <-
 
 array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
       dimnames = dimnames(df$parms$log_fsh_slx_pars))
-array(mappy$log_srv_slx_pars, dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
+array(mappy$log_srv_slx_pars, 
+      dim = c(ncol(df$srv_blks),2,max(df$srv_blks_size),2),
       dimnames = dimnames(df$parms$log_srv_slx_pars))
 
 system.time(obj <- MakeADFun(df,
@@ -99,7 +101,9 @@ exp(bounds$srv_bnds_upr)
 # )
 
 ## tmbhelper is returning null OPTS
-system.time(opt <-nlminb(obj$par, obj$fn, obj$gr,
+system.time(opt <-nlminb(obj$par, 
+                         obj$fn, 
+                         obj$gr,
               lower = bounds$lower,
               upper = bounds$upper))
 # 

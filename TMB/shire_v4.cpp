@@ -858,6 +858,9 @@ Type objective_function<Type>::operator() ()
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
+                // this should only get filled if surv_flt is also an comp_flt
+                // then nsamp acomp only needs dims acomp_flt 
+                
                 Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
                   phi_if_surv(surv_flt,i)*
                   N_yais_mid(y,a,i,s);

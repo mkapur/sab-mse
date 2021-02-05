@@ -114,9 +114,10 @@ load_data_OM <- function(nspace = 6,
   Wnfishflts_acomp <- which(fltnames_acomp %in% fltnames_fish)  
   Wnsurvflts_acomp <- which(fltnames_acomp %in% fltnames_surv)
   
-  selType_surv <-  ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
-                            fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)])
-                          == 'AGE',0,1)
+  seltype_surv0 <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV], 
+                               fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)]
+  ))
+  selType_surv <- seltype_surv0-1
   
   ## later this might need to include lcomps
   fltnames_survcomp <-  unique(c(as.character(fltnames_surv),
@@ -125,8 +126,7 @@ load_data_OM <- function(nspace = 6,
   ## truncate the length of selShape by the number of overlap fleets with survey
   ## this ensures that we are estimating a single survey selectivity informed simulataneously
   ## by biomass, and comps
-  ## generally, if we use
-  selShape_surv <- c(rep(0,nfleets_surv+(nfleets_acomp-(nfishflts_acomp+nsurvflts_acomp)))) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
+  selShape_surv <- c(rep(0,length(selType_surv)) ## 0 and 1 logistic, 2 dome normal, 3 dome gamma
 
   if(length(selType_surv) != length(selShape_surv)) {
     stop("seltype surv length doesn't match selshape surv")

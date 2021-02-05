@@ -1,4 +1,4 @@
-getSelec2 <- function(sex, flt_idx, selP, selShape, selType, fltType = 'fish'){
+getSelec2 <- function(sex, flt_idx, selP, selShape, selType,blk, fltType = 'fish'){
 
   age = df$age
 
@@ -6,8 +6,8 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType, fltType = 'fish'){
     if(selShape == -1){
       selec = 1
     } else if(selShape==0){
-      selec = 1/ ( 1 + exp(-log(19) * (age -  selP[flt_idx,1,1,sex]) / ( selP[flt_idx,2,1,sex] -
-                                                                          selP[flt_idx,1,1,sex])))
+      selec = 1/ ( 1 + exp(-log(19) * (age -  selP[flt_idx,1,blk,sex]) / ( selP[flt_idx,2,blk,sex] -
+                                                                          selP[flt_idx,1,blk,sex])))
     } else if(selShape==1){
       cat('not ready for age sel shape == 1')
       # // Logistic with a50 and slope, where  selP(flt_idx,0,0,s) = a50 and  selP(flt_idx,1,0,s) = slope.
@@ -19,9 +19,9 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType, fltType = 'fish'){
       # break;
     } else if(selShape==2){
       # // Dome Normal with alpha (mean) and beta (sd)
-      selec  = exp(-(0.5 * (age -    selP[flt_idx,1,1,sex])/  selP[flt_idx,2,1,sex])^2);
+      selec  = exp(-(0.5 * (age -    selP[flt_idx,1,blk,sex])/  selP[flt_idx,2,blk,sex])^2);
     } else if(selShape==3){
-      selec0 =    age ^( selP[flt_idx,1,1,sex] - 1) * exp(-age/selP[flt_idx,2,1,sex])
+      selec0 =    age ^( selP[flt_idx,1,blk,sex] - 1) * exp(-age/selP[flt_idx,2,blk,sex])
       selec <- selec0/ max(selec0)
     } ## end selshape for age sel
   } else if(selType ==1){
@@ -37,8 +37,8 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType, fltType = 'fish'){
     if(selShape == -1){
       selec = 1
     } else if(selShape==0){
-      selec = 1/ ( 1 + exp(-log(19) * (len -  selP[flt_idx,1,1,sex]) / ( selP[flt_idx,2,1,sex] -
-                                                                           selP[flt_idx,1,1,sex])))
+      selec = 1/ ( 1 + exp(-log(19) * (len -  selP[flt_idx,1,blk,sex]) / ( selP[flt_idx,2,blk,sex] -
+                                                                           selP[flt_idx,1,blk,sex])))
     } else if(selShape==1){
       cat('not ready for len sel shape == 1')
       # // Logistic with a50 and slope, where  selP(flt_idx,0,0,s) = a50 and  selP(flt_idx,1,0,s) = slope.
@@ -50,11 +50,11 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType, fltType = 'fish'){
       # break;
     } else if(selShape==2){
       # // Dome Normal with alpha (mean) and beta (sd)
-      selec  = exp(-(0.5 * (len -    selP[flt_idx,1,1,sex])/  selP[flt_idx,2,1,sex])^2);
+      selec  = exp(-(0.5 * (len -    selP[flt_idx,1,blk,sex])/  selP[flt_idx,2,blk,sex])^2);
     } else if(selShape==3){
       ## k is first parm, theta is second (shape, scale)
       ## the mean is given by k*theta
-      selec0 =    len^(selP[flt_idx,1,1,sex] - 1) * exp(-len/selP[flt_idx,2,1,sex])
+      selec0 =    len^(selP[flt_idx,1,blk,sex] - 1) * exp(-len/selP[flt_idx,2,blk,sex])
       selec <- selec0/max(selec0)
     } ## end selshape for len sel
   } ## end leng or age sel

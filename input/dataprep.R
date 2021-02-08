@@ -361,7 +361,8 @@ OM_agecomps_yafs <- array(NA, dim = c(length(1960:2019),
 ## fixed gear and GOA survey. note they are NOT sex specific.
 ak_agecomps  <- array(NA, dim = c(length(1960:2019),
                                   length(0:70),
-                                  length(fltnames$NAME[fltnames$ACOMP & fltnames$M == 'AK'])))
+                                  length(fltnames$NAME[fltnames$ACOMP & 
+                                                         fltnames$M == 'AK'])))
 dimnames(ak_agecomps) <-  list(c(1960:2019),
                                c(0:70),
                                c(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$ACOMP])))
@@ -582,14 +583,18 @@ save(OM_agecomps_yafs, file = here('input','input_data',"OM_agecomps_yafs.rdata"
 
 
 ## per fleet and sex, designate which bin acomps start/stop at for looping purposes
-acomp_dims_yfs <- array(NA, dim = c(60,2,8,2)) ## years, stary&stop, fleet, sex
+acomp_dims_yfs <- array(NA, 
+                        dim = c(60,2,df$nfleets_acomp,2),
+                        dimnames = list(c(1960:2019),
+                                        c('abinlo','abinhi'),
+                                        c(as.character(unlist(df$fltnames_acomp))),
+                                        c('fem','mal'))) ## years, stary&stop, fleet, sex
 
-for(y in 1:60){
-  for(flt in 1:8){
+for(y in 1:df$nyear){
+  for(flt in 1:df$nfleets_acomp){
     for(s in 1:2){
-      acomp_dims_yfs[y,1,flt,s] <- first(which(is.na(OM_agecomps_yafs[y,,flt,s])))
-      acomp_dims_yfs[y,2,flt,s] <- last(which(is.na(OM_agecomps_yafs[y,,flt,s])))
-      
+      acomp_dims_yfs[y,1,flt,s] <- first(which(!is.na(OM_agecomps_yafs[y,,flt,s])))
+      acomp_dims_yfs[y,2,flt,s] <- last(which(!is.na(OM_agecomps_yafs[y,,flt,s])))
     }
   }
 }

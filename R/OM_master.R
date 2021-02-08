@@ -13,8 +13,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4')[1]
-# compile(here("TMB",paste0(dllUSE,".cpp")),
-#         R_MAKEVARS_USER = here("suppressMakeVars.txt"))
+# compile(here("TMB",paste0(dllUSE,".cpp")), R_MAKEVARS_USER = here("suppressMakeVars.txt"))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 # CPPFLAGS="-Wno-ignored-attributes"
@@ -22,7 +21,7 @@ source(here("R","functions",'load_files_OM.R'))
 df <- load_data_OM(nspace = 6, 
                    move = TRUE,
                    b_y_max = 0.109) ## data that works with OM
-df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
+# df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <- df$tEnd ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
@@ -32,15 +31,12 @@ df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy 
 ## flexibility in generating R_ys in the context of SDRs (aka do a better job of fitting
 # data during this period)
 
-array(exp(df$parms$log_srv_slx_pars), dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
-      dimnames = dimnames(df$parms$log_srv_slx_pars))
-
 
 mappy <-
   buildMap(toFix =  c("omega_0ij",
                       "logh_k",
                       "logSDR",
-                      # "tildeR_yk",
+                      # "tildeR_y",
                       "b_y",
                       "epsilon_tau",
                       "logpi_acomp",
@@ -101,8 +97,8 @@ exp(bounds$srv_bnds_upr)
 # )
 
 ## tmbhelper is returning null OPTS
-system.time(opt <-nlminb(obj$par, 
-                         obj$fn, 
+system.time(opt <-nlminb(obj$par,
+                         obj$fn,
                          obj$gr,
               lower = bounds$lower,
               upper = bounds$upper))
@@ -137,8 +133,8 @@ writeOM(justPlots = FALSE,
         mappy = mappy,
         runname = paste0("-",df$yRun,"y_",
                          cppname,
-                         "",
-                         "_truncateestBC_VAST",
+                         "_hfixed",
+                         "_BC_DesignBased",
                          "_Bramp=1.0"))
 
 

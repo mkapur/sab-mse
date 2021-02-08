@@ -276,12 +276,11 @@ writeOM <- function(justPlots = FALSE,
                     'fixed'))
   dev.off()
   ## plot tilde_ry ----
-  wc <- r4ss::SS_output(here("input","raw_data","2019 WC Stock Assessment"))
+  load( here('input','wcsummaryoutput.Rdata'))
   
   parameters <- wc$parameters
   recdev <- parameters[substring(parameters[["Label"]], 1, 12) %in% c("Main_RecrDev"), ]
 
-  
   wcrd <- recdev %>% select(Value,Label) %>% mutate(Year = substr(Label,14,17)) %>%
     select(Value,Year)
   
@@ -480,6 +479,7 @@ writeOM <- function(justPlots = FALSE,
   
   survey_yf_predt <- data.frame(dat$surv_yf_pred)
   names(survey_yf_predt) <- unlist(df$fltnames_surv)
+  # names(survey_yf_predt)[3:4] <- c('BC_OFFStd','BC_StRs')
   survey_yf_predt <- survey_yf_predt %>%
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
@@ -644,7 +644,7 @@ writeOM <- function(justPlots = FALSE,
   
   # plot FISH selex ----
   ## bring estimates out and rearrange
-  nfishmod = df$nfleets_fish+(df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp)) ## bc we got selex for acomp flts too
+  nfishmod = df$nfleets_fish ## bc we got selex for acomp flts too
   Nas <- which(is.na(mappy[[grep("log_fsh_slx_pars", names(mappy))]]))
   nfixedfleets <- length(Nas)/4
   nfishmod <- nfishmod - nfixedfleets
@@ -722,7 +722,14 @@ writeOM <- function(justPlots = FALSE,
                                         " ", df$fsh_blks[blk,flt]+1960),
                           xlim = c(0,75),
                           col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
-          box(which = 'plot', lty = 'solid', 
+          text(x=60, y = 0.2, cex = 1.1,label = 
+                 paste0(ifelse(df$selType_fish[flt] == 0,
+                               'A','L'),"50=", 
+                        round(selP[flt,1,blk,s],1),"\n",
+                        paste0(ifelse(df$selType_fish[flt] == 0,
+                                      'A','L'),"95=", 
+                               round(selP[flt,2,blk,s],2))))
+              box(which = 'plot', lty = 'solid', 
               col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
               lwd = 2)
           if(s == 2) lines(tmp, col = sexPal_temp[2], type = 'l', lty = 2, lwd = 2)
@@ -859,11 +866,21 @@ writeOM <- function(justPlots = FALSE,
                           main = paste0(dimnames(df$parms$log_srv_slx_pars)[[1]][flt],
                                        " ", df$srv_blks[blk,flt]+1960),
                           xlim = c(0,75),
-                          col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+                          col.main  = c(survfltPal,rep('black',1))[flt])
+                            # c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+          text(x=60, y = 0.2, cex = 1.1,label = 
+                 paste0(ifelse(df$selType_surv[flt] == 0,
+                               'A','L'),"50=", 
+                        round(selP[flt,1,blk,s],1),"\n",
+                        paste0(ifelse(df$selType_surv[flt] == 0,
+                                      'A','L'),"95=", 
+                               round(selP[flt,2,blk,s],2))))
           box(which = 'plot', lty = 'solid', 
-              col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
+              col = survfltPal[flt],
+              # col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
               lwd = 2)
-          if(s == 2) lines(tmp, col = sexPal_temp[2], type = 'l', lty = 2, lwd = 2)
+          if(s == 2) lines(tmp, col = sexPal_temp[2],
+                           type = 'l', lty = 2, lwd = 2)
           # seeddim = nestflts
           # lines(bounds$lower type = 'v', col = sexPal[2])
         }

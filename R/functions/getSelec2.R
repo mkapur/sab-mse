@@ -27,7 +27,10 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType,blk, fltType = 'fish
    if(fltType == 'fish') i = which(df$phi_if_fish[flt_idx,]==1)[1]
    
    if(fltType == 'surv') {
-     temp_phi_if_surv <- rbind(df$phi_if_surv,df$phi_if_acomp)
+     temp_phi_if_surv <- rbind(df$phi_if_surv,
+                               df$phi_if_acomp[df$acomp_flt_type ==1 & 
+                                                 !(rownames(df$phi_if_acomp) %in%rownames(df$phi_if_surv)) ,])
+     rownames(temp_phi_if_surv)[length(df$selType_surv)] <- rownames(df$phi_if_acomp)[df$acomp_flt_type ==1 & !(rownames(df$phi_if_acomp) %in%rownames(df$phi_if_surv))]
      rown <- which(rownames(temp_phi_if_surv) ==  dimnames(df$parms$log_srv_slx_pars)[[1]][flt_idx])
      i = which(temp_phi_if_surv[rown,]==1)[1]
    }

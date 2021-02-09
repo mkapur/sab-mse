@@ -78,7 +78,7 @@ load_data_OM <- function(nspace = 6,
 
   if(tolower(x) == 'n'){
     ## turn off SURV for design-based
-    fltnames$SURV[fltnames$NAME%in%c('BC_OFFStd','BC_StRS')] <- FALSE
+    fltnames$SURV[fltnames$NAME%in%c('BC_OFFStd','BC_StRs')] <- FALSE
   } else{
     fltnames$SURV[fltnames$NAME%in%c('BC_EARLY','BC_VAST')] <- FALSE 
     
@@ -150,22 +150,24 @@ load_data_OM <- function(nspace = 6,
   if(tolower(x) == 'y'){
     ## replace BC early & BC VAST with design-based indices (keep order)
     bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
-      select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
+      select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRs.survey, -nominal.Trap.CPUE)
     survey <- survey %>% mutate(year = 1960:2019) %>%
       merge(., bc_idx, by = 'year',all.x = TRUE) %>%
-      select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRS = BC_VAST.y, WC_VAST)
+      select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
     survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
     cat('overwrote BC survey fleets with design-based indices \n')
   }
   survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
   
   
-  # survey[,"BC_EARLY"] <-  survey[,"BC_EARLY"] +0.0111 ## flag for numeric TMB checks
-  # survey <- round(survey,  1)
+
   survey_err <- read.csv(here("input","input_data",'OM_indices_sigma_BaseQ=WCGBTS.csv'))
   if(tolower(x) == 'y'){
+    # lognormal SE of 0.29 for the offshore standardized survey,
+    # 0.21 for the StRs and 0.12 for the commercial CPUE index
     names(survey_err) <- names(survey)
-    survey_err$BC_StRS[!is.na(survey_err$BC_StRS)] <- 0.317
+    survey_err$BC_OFFStd[!is.na(survey_err$BC_OFFStd)] <- 0.21
+    survey_err$BC_StRs[!is.na(survey_err$BC_StRs)] <- 0.21
     cat('overwrote BC survey fleets err with 0.317 \n')
   }
   
@@ -490,8 +492,8 @@ load_data_OM <- function(nspace = 6,
     log_srv_slx_pars['BC_VAST','p1',1:srv_blks_size[,"BC_VAST"],] <-  c(40.00000, 40.00000)
     log_srv_slx_pars['BC_VAST','p2',1:srv_blks_size[,"BC_VAST"],] <- c(54.99999,54.99999)
     
-    log_srv_slx_pars['BC_StRS','p1',1:srv_blks_size[,"BC_StRS"],] <- 64.2127 - 12.9197
-    log_srv_slx_pars['BC_StRS','p2',1:srv_blks_size[,"BC_StRS"],] <- 70
+    log_srv_slx_pars['BC_StRs','p1',1:srv_blks_size[,"BC_StRs"],] <- 64.2127 - 12.9197
+    log_srv_slx_pars['BC_StRs','p2',1:srv_blks_size[,"BC_StRs"],] <- 70
     
     log_srv_slx_pars['BC_SS','p1',1:srv_blks_size[,"BC_SS"],] <- 54.1045-4.55724
     log_srv_slx_pars['BC_SS','p2',1:srv_blks_size[,"BC_SS"],] <- 65
@@ -500,8 +502,8 @@ load_data_OM <- function(nspace = 6,
     log_srv_slx_pars['BC_OFFStd','p1',1:srv_blks_size[,"BC_OFFStd"],] <- c(29.99999, 29.99999)
     log_srv_slx_pars['BC_OFFStd','p2',1:srv_blks_size[,"BC_OFFStd"],] <- c(54.99999, 70.00000)
     
-    log_srv_slx_pars['BC_StRS','p1',1:srv_blks_size[,"BC_StRS"],] <-  c(40.00000, 40.00000)
-    log_srv_slx_pars['BC_StRS','p2',1:srv_blks_size[,"BC_StRS"],] <- c(54.99999,54.99999)
+    log_srv_slx_pars['BC_StRs','p1',1:srv_blks_size[,"BC_StRs"],] <-  c(40.00000, 40.00000)
+    log_srv_slx_pars['BC_StRs','p2',1:srv_blks_size[,"BC_StRs"],] <- c(54.99999,54.99999)
   }
   
   log_srv_slx_pars['WC_VAST','p1',"block1",c('Fem','Mal')] <- c(46.13959,52.93459)

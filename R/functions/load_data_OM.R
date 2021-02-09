@@ -114,10 +114,9 @@ load_data_OM <- function(nspace = 6,
   Wnfishflts_acomp <- which(fltnames_acomp %in% fltnames_fish)  
   Wnsurvflts_acomp <- which(fltnames_acomp %in% fltnames_surv)
   
-  seltype_surv0 <- as.numeric(c(fltnames$SELTYPE[fltnames$SURV], 
-                               fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)]
-  ))
-  selType_surv <- seltype_surv0-1
+  selType_surv <- ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
+                               fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)])=='AGE',0,1)
+  # selType_surv <- seltype_surv0-1
   
   ## later this might need to include lcomps
   fltnames_survcomp <-  unique(c(as.character(fltnames_surv),
@@ -150,7 +149,7 @@ load_data_OM <- function(nspace = 6,
   if(tolower(x) == 'y'){
     ## replace BC early & BC VAST with design-based indices (keep order)
     bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
-      select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRs.survey, -nominal.Trap.CPUE)
+      select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
     survey <- survey %>% mutate(year = 1960:2019) %>%
       merge(., bc_idx, by = 'year',all.x = TRUE) %>%
       select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
@@ -166,9 +165,9 @@ load_data_OM <- function(nspace = 6,
     # lognormal SE of 0.29 for the offshore standardized survey,
     # 0.21 for the StRs and 0.12 for the commercial CPUE index
     names(survey_err) <- names(survey)
-    survey_err$BC_OFFStd[!is.na(survey_err$BC_OFFStd)] <- 0.21
+    survey_err$BC_OFFStd[!is.na(survey_err$BC_OFFStd)] <- 0.29
     survey_err$BC_StRs[!is.na(survey_err$BC_StRs)] <- 0.21
-    cat('overwrote BC survey fleets err with 0.317 \n')
+    cat('overwrote BC survey fleets err with 0.29, 0.21 \n')
   }
   
   ## Comps ----

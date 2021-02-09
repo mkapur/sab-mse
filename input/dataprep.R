@@ -566,6 +566,7 @@ for(y in 1:60){
     }
   }
 }
+save(acomp_dims_yfs, file = here('input','input_data',"acomp_dims_yfs.rdata"))
 
 ## mortality ----
 ## keeping this simple, just one value for each R

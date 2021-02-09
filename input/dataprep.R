@@ -357,28 +357,21 @@ OM_agecomps_yafs <- array(NA, dim = c(length(1960:2019),
                                           c(0:70),
                                           c(fltnames$NAME[fltnames$ACOMP]),
                                           c('Fem','Mal')))
+
 #* ak agecomps ----
-## fixed gear and GOA survey. note they are NOT sex specific.
-ak_agecomps  <- array(NA, dim = c(length(1960:2019),
-                                  length(0:70),
-                                  length(fltnames$NAME[fltnames$ACOMP & 
-                                                         fltnames$M == 'AK'])))
-dimnames(ak_agecomps) <-  list(c(1960:2019),
-                               c(0:70),
-                               c(paste(fltnames$NAME[fltnames$M == 'AK' & fltnames$ACOMP])))
+## fixed gear and GOA survey. note they are NOT sex specific, so div by two.
+akfixe <-  0.5*as.matrix(merge(data.frame('Year' = 1960:2019),
+                               read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
+                               by = 'Year',all.x = TRUE)
+                         %>% select(-Year))
 
-## fix e, fixw, goasurv no sex so div by 2
-OM_agecomps_yafs[,2:31,1,1:2] <- 0.5*as.matrix(merge(data.frame('Year' = 1960:2019),
-                                    read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
-                                    by = 'Year',all.x = TRUE)
-                                    %>% select(-Year))
-OM_agecomps_yafs[,2:31,1,1:2] <- 0.5*as.matrix(merge(data.frame('Year' = 1960:2019),
-                                    read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_W_agecomp.csv")),
-                                    by = 'Year',all.x = TRUE) %>% select(-Year))
+akfixw <- 0.5*as.matrix(merge(data.frame('Year' = 1960:2019),
+                              read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_W_agecomp.csv")),
+                              by = 'Year',all.x = TRUE) %>% select(-Year))
+# akfix <- (akfixw + akfixe)/2
 
-# ak_agecomps[,,3] <- as.matrix(merge(data.frame('Year' = 1960:2019),
-#                                     read.csv(here("input","raw_data","comps","AK_fishery_fixedgear_E_agecomp.csv")),
-#                                     by = 'Year',all.x = TRUE))
+OM_agecomps_yafs[,2:31,'AK_FIX',] <- (akfixw + akfixe)/2
+
 #Age.pop is the estimate of numbers of fish after running through the age length key. 
 # -9 is a catch all for unassigned fish to round out the estimated abundance in that year. So your age comps
 # Age, Sex, Age.Pop/sum(Age.Pop) for that sex and year combination. 
@@ -399,22 +392,11 @@ actemp <- merge(read.csv(here("input","raw_data","comps","GOA Age Composition To
   dplyr::relocate(`19`,.before= `20`) %>%
   dplyr::relocate(`18`,.before = `19`)
 
-ak_agecomps[,2:21,3] <- OM_agecomps_yafs[,2:21,3,1:2] <- 0.5*as.matrix(merge(data.frame('Year' = 1960:2019),actemp,
-                                        by = 'Year', all = TRUE) %>% select(-Year))
-                                        
+# ak_agecomps[,2:21,3] <- OM_agecomps_yafs[,2:21,3,1:2] <- as.matrix(merge(data.frame('Year' = 1960:2019),actemp,
+#                                         by = 'Year', all = TRUE) %>% select(-Year))
 
-  
-
-# read.csv(here("input","raw_data","comps","GOA Age Composition Totals.csv")) %>% View()
-# select(Survey, Year,Sex, Age..years.) %>%
-#   group_by(Survey, Year, Sex, Age..years.) %>%
-#   dplyr::summarise(n = n()) %>%
-#   merge(.,goa_agecomps_Nsamp, by = c('Survey','Year','Sex') ) %>%
-#   mutate(freq = n/yearN) %>% 
-#   tail()
-# ungroup() %>%
-# group_by(Survey, Year, Sex) %>%
-# dplyr::summarise(yearN = n()) 
+OM_agecomps_yafs[,2:21,'AK_GOA_SURV',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),actemp,
+                                                           by = 'Year', all = TRUE) %>% select(-Year))
 
 #* bc agecomps ----
 ## bc has comps from two surveys but they aren't otherwise used

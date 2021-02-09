@@ -1,3 +1,2 @@
 ## per Ben Bolker, just this: https://github.com/kaskr/adcomp/issues/277
-
 CXXFLAGS = -Wno-ignored-attributes 

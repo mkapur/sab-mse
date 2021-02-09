@@ -192,6 +192,7 @@ load_data_OM <- function(nspace = 6,
   spmat <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                       stock = c("R4","R3","R3","R2","R2","R1"),
                       mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
+  
   if(nspace == 6){ ## OM
     
     ## phi_survy
@@ -636,6 +637,7 @@ load_data_OM <- function(nspace = 6,
     
     #* DATA ----
     acomp_yafs_obs = OM_agecomps_yafs,
+    acomp_dims_yfs = acomp_dims_yfs,
     surv_yf_obs = as.matrix(survey), # Make sure the survey has the same length as the catch time series
     surv_yf_err = as.matrix(survey_err), 
     age_error = as.matrix(ageerr_ExpAge[,2:ncol(ageerr_ExpAge)]),

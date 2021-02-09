@@ -546,7 +546,7 @@ OM_agecomps_yafs[,1:51,"WC_TWL",2] <- as.matrix(merge(data.frame('Year' = 1960:2
 
 # save(wc_agecomps_female, file = here('input','raw_data',"comps","wc_agecomps_female_BINDME.rdata"))
 # save(wc_agecomps_male, file  = here('input','raw_data',"comps","wc_agecomps_male_BINDME.rdata"))
-
+OM_agecomps_yafs[is.na(OM_agecomps_yafs)] <- -1
 save(OM_agecomps_yafs, file = here('input','input_data',"OM_agecomps_yafs.rdata"))
 
 

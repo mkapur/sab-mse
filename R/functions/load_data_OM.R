@@ -178,9 +178,9 @@ load_data_OM <- function(nspace = 6,
   
   ## Age comps. Note that AK is not sex-specific
   ## need to make these -1 for NA years
-  # load(here("input","input_data",'OM_agecomps_female.rdata'))
-  # load(here("input","input_data",'OM_agecomps_male.rdata'))
   load(here("input","input_data",'OM_agecomps_yafs.rdata'))
+  load(here('input','input_data',"acomp_dims_yfs.rdata"))
+  
   ## Aging Error ----
   ## M X age
   load(here("input","input_data",'ageerr_ExpAge.rdata'))

@@ -568,6 +568,75 @@ load_data_OM <- function(nspace = 6,
   load(here('input','input_data','unfished_ALK.rdata'))
   load(here('input','input_data','mla_yais.rdata')) ## from prelim runs, for ssb0
   
+  ## future data
+  
+  
+  
+  
+  # Catch.country <- read.csv('inst/extdata/catch_per_country.csv')
+  # 
+  # if(nspace != 2){
+  #   warning('Make sure input catches are distributed correctly in space - distributing equally')
+  #   if(nspace == 1){df$Catch.country <- as.numeric(rowSums(df$Catch.country))
+  #   }else{
+  #     
+  #   }
+  #   
+  #   
+  # }else{
+  #   df$Catch.country <- as.matrix(Catch.country[,2:3])[,c(2,1)]
+  #   
+  # }
+  # 
+  # 
+  # df$Catch <- rowSums(df$Catch.country)
+  # 
+  # if(nyear > length(df$Catch)){
+  #   
+  #   if(is.na(catch.future)){
+  #     df$Catch <- c(df$Catch,rep(mean(df$Catch), nyear-length(df$Catch)))
+  #   }else{
+  #     df$Catch <- c(df$Catch,rep(catch.future, yr_future))
+  #   }
+  #   
+  # }
+  # 
+  # if(nyear >nrow(df$Catch.country)){
+  #   
+  #   if(is.na(catch.future)){
+  #     df$Catch.country <- rbind(df$Catch.country,t(replicate(nyear-nrow(Catch.country),colMeans(df$Catch.country))))
+  #   }else{
+  #     df$Catch.country <- rbind(df$Catch.country,
+  #                               t(replicate(yr_future,rep(catch.future, nspace))))
+  #   }
+  # }
+  # 
+  # if(yr_future > 0){
+  #   
+  #   idx.future <- length(1966:myear)+seq(2,yr_future, by = df$nsurvey) # Years where survey occurs
+  #   
+  #   df$survey_x <- c(df$survey_x,rep(-2, yr_future))
+  #   df$survey_x[idx.future] <- 2
+  #   
+  #   df$survey_err <- c(df$survey_err,rep(1, yr_future))
+  #   df$survey_err[idx.future] <- mean(df$survey_err[df$survey_err != 1])
+  #   
+  #   df$ss_survey <- c(df$ss_survey, rep(0,  yr_future))
+  #   df$ss_survey[idx.future] <- mean(df$ss_survey[df$ss_survey != -1])
+  #   df$flag_survey <- c(df$flag_survey, rep(-1,yr_future))
+  #   df$flag_survey[idx.future] <- 1
+  #   df$flag_catch[years > 2018] <- 1
+  #   
+  #   Rdevs <- rnorm(n = yr_future,mean = 0, sd = exp(df$logSDR))
+  #   #Rdevs <- rep(0, yr_future)
+  #   df$parms$Rin <- c(df$parms$Rin,Rdevs)
+  #   
+  #   # Bias adjustment
+  #   df$b <- c(df$b,rep(df$bfuture, yr_future))
+  # }
+  
+  
+  
   ## Return df ----
   df <-list(    
     #* MODEL STRUCTURE ----

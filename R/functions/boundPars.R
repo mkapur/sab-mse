@@ -180,12 +180,12 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
           upr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.24849524
         }
       } else{
-        if(all(!is.na(map_srvslx['BC_StRS',,1,]))){
-          lwr.temp['BC_StRS',"p1",1:df$srv_blks_size[,'BC_StRS'],] <- log(25); 
-          upr.temp['BC_StRS',"p1",1:df$srv_blks_size[,'BC_StRS'],] <- log(55)
+        if(all(!is.na(map_srvslx['BC_StRs',,1,]))){
+          lwr.temp['BC_StRs',"p1",1:df$srv_blks_size[,'BC_StRs'],] <- log(25); 
+          upr.temp['BC_StRs',"p1",1:df$srv_blks_size[,'BC_StRs'],] <- log(55)
           
-          lwr.temp['BC_StRS',"p2",1:df$srv_blks_size[,'BC_StRS'],] <- log(25); 
-          upr.temp['BC_StRS',"p2",1:df$srv_blks_size[,'BC_StRS'],] <- log(70)
+          lwr.temp['BC_StRs',"p2",1:df$srv_blks_size[,'BC_StRs'],] <- log(25); 
+          upr.temp['BC_StRs',"p2",1:df$srv_blks_size[,'BC_StRs'],] <- log(70)
         }
       }
       if(all(!is.na(map_srvslx['WC_VAST',,1,]))){

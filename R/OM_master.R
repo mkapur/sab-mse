@@ -14,8 +14,8 @@ library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
 compile(here("TMB",paste0(dllUSE,".cpp")),
-        CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
-# R_MAKEVARS_USER = here("suppressMakeVars.txt"))
+        R_MAKEVARS_USER = here("suppressMakeVars.txt"))
+        # CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 
@@ -28,7 +28,7 @@ df <- load_data_OM(nspace = 6,
 # df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <-  df$tEnd-yr_future ## number of years to run model
 # df$yLike <-## max year to calc likelihood
-df$yFut <- yr_future
+df$yFut <- df$tEnd+yr_future
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))
@@ -180,7 +180,7 @@ sim <- replicate(5, {
 })
 head(dat$SSB_ym)
 head(simdata$SSB_ym)
-head(simdata0$SSB_ym)
+tail(simdata0$surv_yf_obs)
 simdata0$SSB_ym == simdata$SSB_ym
 
 sim['SSB_ym',2] %>% data.frame() %>% head()

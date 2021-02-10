@@ -1047,16 +1047,15 @@ Type objective_function<Type>::operator() ()
   } // end surv_flt
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
     for(int y=yRun;y<tEnd;y++){
-      // for all years, overwrite survey obs
+      // for all years, overwrite survey obs using error and forecast data
+      // this wont change because error and inputs are fixed, just helps with automating forecast
       SIMULATE{
-        surv_yf_obs(y,surv_flt) = rnorm(surv_yf_pred(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
+        surv_yf_obs(y,surv_flt) = rnorm(surv_yf_obs(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
       }
     } // end y
   } // end surv_flt
   
   SIMULATE {
-    // REPORT(logF);
-    // REPORT(logN);
     REPORT(surv_yf_obs);
   }
   // Likelihood: catches

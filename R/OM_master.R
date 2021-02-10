@@ -1,7 +1,8 @@
 ## OM_Master.R
-## M S Kapur 
-## Inspiration & code guidance from J Sullivan, N Jacobsen Summer 2020
-## kapurm@uw.edu
+## Code to condition & forecast 6-area Operating model for Transboundary Sablefish MSE
+## M S Kapur kapurm@uw.edu
+## Inspiration & code guidance from J Sullivan, N Jacobsen Summer 2020++
+
 rm(list = ls())
 
 # devtools::install_github('kaskr/adcomp', subdir = 'TMB')
@@ -13,8 +14,8 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
-compile(here("TMB",paste0(dllUSE,".cpp")),
-        R_MAKEVARS_USER = here("suppressMakeVars.txt"))
+# compile(here("TMB",paste0(dllUSE,".cpp")),
+#         R_MAKEVARS_USER = here("suppressMakeVars.txt"))
         # CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
 dyn.load(dynlib(here("TMB",dllUSE)))
 
@@ -27,8 +28,6 @@ df <- load_data_OM(nspace = 6,
                    b_y_max = 0.109) ## data that works with OM
 # df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <-  df$tEnd-yr_future ## number of years to run model
-# df$yLike <-## max year to calc likelihood
-# df$yFut <- df$tEnd
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))

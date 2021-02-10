@@ -12,6 +12,53 @@ save(opt, file = here("TMB",paste0('opt_',Sys.Date(),".rdata")))
 save(reps, file = here("TMB",paste0('reps_',Sys.Date(),".rdata")))
 
 
+array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
+      dimnames = dimnames(df$parms$log_fsh_slx_pars))
+array(mappy$log_srv_slx_pars, 
+      dim = c(ncol(df$srv_blks),2,max(df$srv_blks_size),2),
+      dimnames = dimnames(df$parms$log_srv_slx_pars))
+# dat = rep1;attach(dat)
+# system.time(opt <- nlminb(
+#   obj$par,
+#   obj$fn,
+#   obj$gr,
+#   lower = bounds$lower,
+#   upper = bounds$upper,
+#   hessian = NULL,
+#   control = list(eval.max = 1e6, iter.max = 1e6, rel.tol = 1e-4)
+# )
+# )
+
+
+# system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
+array(exp(best[names(best)== "log_fsh_slx_pars"]), dim = c(2,2,1,2))
+array(exp(best[names(best)== "log_srv_slx_pars"]), dim = c(5,2,3,2))
+steep <- exp(best[names(best) == 'logh_k']); names(steep) <- paste0("h","_R",1:4);steep
+logR_0 <- best[names(best) == 'logR_0k'];names(logR_0) <- paste0("logR_0","_R",1:4);logR_0
+epstau <- exp(best[names(best) == 'epsilon_tau']); names(epstau) <- paste0("epstau_",
+                                                                           c('C1','C2','B2','B3','A3','A4'));epstau
+by <- round(best[names(best) == 'b_y'],3); 
+names(by) <- paste0("b_y",1:length((best[names(best) == 'b_y'])));by 
+
+likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
+likes
+
+## Simulate datasets ----
+# https://kaskr.github.io/adcomp/_book/Simulation.html
+
+set.seed(1) ## optional - Note: same y as previous
+obj$simulate(complete=TRUE)
+
+rep1$N_yais_beg[,c(1,2,65:71),1,1]
+# rep1$N_yais_mid[,c(1,2,65:71),1,1]
+# rep1$N_yais_end[,c(1,2,65:71),1,1]
+rep1$Length_yais_beg[4,c(1,2,65:71),1,1]
+rep1$Length_yais_mid[4,c(1,2,65:71),1,1]
+rep1$Length_yais_end[4,c(1,2,65:71),1,1]
+
+rep1$surv_yf_pred
+
 
 array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), 
       dim = c(7,2,2))

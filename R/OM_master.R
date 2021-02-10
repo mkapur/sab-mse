@@ -12,17 +12,22 @@ library(ggplot2)
 library(r4ss)
 library(here)
 library(ggsidekick)
-dllUSE = c('shire_v4')[1]
-# compile(here("TMB",paste0(dllUSE,".cpp")), R_MAKEVARS_USER = here("suppressMakeVars.txt"))
+dllUSE = c('shire_v4_1')[1]
+compile(here("TMB",paste0(dllUSE,".cpp")),
+        CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
+# R_MAKEVARS_USER = here("suppressMakeVars.txt"))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
-# CPPFLAGS="-Wno-ignored-attributes"
+
 source(here("R","functions",'load_files_OM.R'))
+yr_future <- 20
 df <- load_data_OM(nspace = 6, 
                    move = TRUE,
+                   yr_future  = yr_future,
                    b_y_max = 0.109) ## data that works with OM
 # df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <- df$tEnd ## number of years to run model
+df$yLike <- df$tEnd-yr_future ## max year to calc likelihood
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))
@@ -151,3 +156,31 @@ names(by) <- paste0("b_y",1:length((best[names(best) == 'b_y'])));by
 likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
+
+## Simulate datasets ----
+# https://kaskr.github.io/adcomp/_book/Simulation.html
+
+set.seed(1) ## optional - Note: same y as previous
+obj$simulate(complete=TRUE)
+
+## this repeats the entire estimation (conditioning) step for a number of replicates
+## each replicate is simulated from your first conditioned OM. 
+## teh technique is more applicable to checking stability. really we just need
+## multiple reps (seeds) of OM simulations.
+sim <- replicate(5, {
+  set.seed(runif(1,1,5)) ## randomize the seed for nrep
+  simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
+  simdata0 <- obj$simulate(par=obj$par, complete=TRUE) ## input, would be same as rep
+  # simdata <- obj$simulate(par=obj$par, complete=TRUE) ## simulate from last obj,
+  ## The default parameter values used for the simulation is obj$env$last.par
+  # obj2 <- MakeADFun(simdata, df$parms, DLL=dllUSE, silent=TRUE) ## prep new mod with new data and og parms
+  ## obj would need to be inclusive of fyears
+  # nlminb(obj2$par, obj2$fn, obj2$gr)$par
+})
+head(dat$SSB_ym)
+head(simdata$SSB_ym)
+head(simdata0$SSB_ym)
+simdata0$SSB_ym == simdata$SSB_ym
+
+sim['SSB_ym',2] %>% data.frame() %>% head()
+sim['SSB_ym',3] %>% data.frame() %>% head()

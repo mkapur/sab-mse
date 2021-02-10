@@ -14,7 +14,7 @@ Type objective_function<Type>::operator() ()
   int nyear = years.size();
   int nsex = 2;
   DATA_INTEGER(yRun); //how many years to run; max tEnd
-  DATA_INTEGER(yLike); //max year to include in likelihood non-forecast years
+  DATA_INTEGER(yFut); //number of forecast years
   
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
@@ -1035,7 +1035,7 @@ Type objective_function<Type>::operator() ()
   // as a part of the kriging and extrapolation procedures within VAST"
   Type ans_survey=0.0;
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-    for(int y=0;y<yLike;y++){ // Survey Surveyobs
+    for(int y=0;y<yRun;y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
         // std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
         // std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
@@ -1046,10 +1046,23 @@ Type objective_function<Type>::operator() ()
       } // end flag for neg 1
     } // end y
   } // end surv_flt
-  
+  for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
+    // for(int y=tEnd;y<yFut;y++){
+    //   // for all years, overwrite survey obs
+    //   SIMULATE{
+    //     surv_yf_obs(y,surv_flt) = rnorm(surv_yf_pred(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
+    //   }
+    // } // end y
+  } // end surv_flt
+  //https://kaskr.github.io/adcomp/sam_8cpp-example.html
+  SIMULATE {
+    // REPORT(logF);
+    // REPORT(logN);
+    REPORT(surv_yf_obs);
+  }
   // Likelihood: catches
   Type ans_catch = 0.0;
-  for(int y=0;y<yLike;y++){
+  for(int y=0;y<yRun;y++){
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       catch_yf_pred_total(y,fish_flt) = catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1);
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
@@ -1071,7 +1084,7 @@ Type objective_function<Type>::operator() ()
   sum1.setZero();
   sum2.setZero();
   for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    for(int y=0;y<yLike;y++){ // Loop over available years
+    for(int y=0;y<yRun;y++){ // Loop over available years
       for(int s=0;s<nsex;s++){
         for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if there was a measurement that year
@@ -1125,7 +1138,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: SD Recruitment (hyperprior)
   Type ans_SDR = 0.0;
   for(int k=0;k<(nstocks);k++){
-    for(int y=0;y<yLike;y++){ // Start y loop
+    for(int y=0;y<yRun;y++){ // Start y loop
       ans_SDR += Type(0.5)*(tildeR_y(y)*tildeR_y(y))/(SDR*SDR)+b_y(y)*log(SDR*SDR);
     }
   }

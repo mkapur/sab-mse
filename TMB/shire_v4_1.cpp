@@ -1070,11 +1070,11 @@ Type objective_function<Type>::operator() ()
   sum1.setZero();
   sum2.setZero();
   for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    for(int y=1;y<yRun;y++){ // Loop over available years
+    for(int y=0;y<yRun;y++){ // Loop over available years
       for(int s=0;s<nsex;s++){
         for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if there was a measurement that year
-            // sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
+            sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
             // // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
             // if(acomp_flt_type(acomp_flt) == 0){
             //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*

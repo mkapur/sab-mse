@@ -28,7 +28,7 @@ df <- load_data_OM(nspace = 6,
 # df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
 df$yRun <-  df$tEnd-yr_future ## number of years to run model
 # df$yLike <-## max year to calc likelihood
-df$yFut <- df$tEnd+yr_future
+# df$yFut <- df$tEnd
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))
@@ -56,13 +56,6 @@ mappy <-
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
 # mappy$tildeR_yk <- factor(sort(rep(1:(length(mappy$tildeR_yk)/df$nstocks), each = df$nstocks))) ## make each area x year mirrored
 
-
-array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
-      dimnames = dimnames(df$parms$log_fsh_slx_pars))
-array(mappy$log_srv_slx_pars, 
-      dim = c(ncol(df$srv_blks),2,max(df$srv_blks_size),2),
-      dimnames = dimnames(df$parms$log_srv_slx_pars))
-
 system.time(obj <- MakeADFun(df,
                  parameters = df$parms,
                  dll = dllUSE,
@@ -71,16 +64,7 @@ system.time(obj <- MakeADFun(df,
                  checkParameterOrder = TRUE)) 
 
 system.time(rep1 <- obj$report()) ## one off caclulation using start pars
-# dat = rep1;attach(dat)
 
-rep1$N_yais_beg[,c(1,2,65:71),1,1]
-# rep1$N_yais_mid[,c(1,2,65:71),1,1]
-# rep1$N_yais_end[,c(1,2,65:71),1,1]
-rep1$Length_yais_beg[4,c(1,2,65:71),1,1]
-rep1$Length_yais_mid[4,c(1,2,65:71),1,1]
-rep1$Length_yais_end[4,c(1,2,65:71),1,1]
-
-rep1$surv_yf_pred
 
 bounds <- boundPars(obj,
                     r0_lower = 0, 
@@ -90,17 +74,6 @@ bounds <- boundPars(obj,
 ## inspect survey bounds in proper format
 exp(bounds$srv_bnds_lwr)
 exp(bounds$srv_bnds_upr)
-
-# system.time(opt <- nlminb(
-#   obj$par,
-#   obj$fn,
-#   obj$gr,
-#   lower = bounds$lower,
-#   upper = bounds$upper,
-#   hessian = NULL,
-#   control = list(eval.max = 1e6, iter.max = 1e6, rel.tol = 1e-4)
-# )
-# )
 
 ## tmbhelper is returning null OPTS
 system.time(opt <-nlminb(obj$par,
@@ -142,27 +115,6 @@ writeOM(justPlots = FALSE,
                          "_hfixed",
                          "_BC_DesignBased",
                          "_Bramp=1.0"))
-
-
-# system.time(rep <- sdreport(obj, par = best)) ## re-run & return values at best pars
-array(exp(best[names(best)== "log_fsh_slx_pars"]), dim = c(2,2,1,2))
-array(exp(best[names(best)== "log_srv_slx_pars"]), dim = c(5,2,3,2))
-steep <- exp(best[names(best) == 'logh_k']); names(steep) <- paste0("h","_R",1:4);steep
-logR_0 <- best[names(best) == 'logR_0k'];names(logR_0) <- paste0("logR_0","_R",1:4);logR_0
-epstau <- exp(best[names(best) == 'epsilon_tau']); names(epstau) <- paste0("epstau_",
-                                                                      c('C1','C2','B2','B3','A3','A4'));epstau
-by <- round(best[names(best) == 'b_y'],3); 
-names(by) <- paste0("b_y",1:length((best[names(best) == 'b_y'])));by 
-
-likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
-names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
-likes
-
-## Simulate datasets ----
-# https://kaskr.github.io/adcomp/_book/Simulation.html
-
-set.seed(1) ## optional - Note: same y as previous
-obj$simulate(complete=TRUE)
 
 ## this repeats the entire estimation (conditioning) step for a number of replicates
 ## each replicate is simulated from your first conditioned OM. 

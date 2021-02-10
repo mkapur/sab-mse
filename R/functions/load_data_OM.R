@@ -6,6 +6,7 @@ load_data_OM <- function(seed = 731,
                          LBins = 81,
                          logSDR = 1.4, 
                          bfuture = 0.5,
+                         catch.future = NA,## optional provide vector
                          yr_future  = 0,
                          b_y_max = 0.87
 ){
@@ -574,21 +575,19 @@ load_data_OM <- function(seed = 731,
   ## simulate future data ---- 
   ## years already includes future
   set.seed(seed)
-
-  if(nyear > nrow(catch)){
-  ## make empty rows with NAs
-   catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
-   if(is.na(catch.future)){
-     ## fill with fleetwise mean
-     catch[years > myear,2:ncol(catch)] <- matrix(rep(apply(catch[years <= myear,2:ncol(catch)],
-                                                            2, mean), yr_future),
-                                                  ncol = nfleets_fish, byrow = TRUE)
-   }else{
-     ## fill with input values (placeholder)
-     # catch[years > myear,]<- c(df$Catch,rep(catch.future, yr_future))
-   }
-
    if(yr_future > 0){
+ 
+     if(is.na(catch.future)){
+       catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
+       ## fill with fleetwise mean
+       catch[years > myear,2:ncol(catch)] <- matrix(rep(apply(catch[years <= myear,2:ncol(catch)],
+                                                              2, mean), yr_future),
+                                                    ncol = nfleets_fish, byrow = TRUE)
+     }else{
+       catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
+       ## fill with input values (placeholder)
+       # catch[years > myear,]<- c(df$Catch,rep(catch.future, yr_future))
+     }
      ## sim survey (every year assuming VAST stdization)
      ## use mean of last five years
      survey <- merge(data.frame('Year' = years),
@@ -601,14 +600,14 @@ load_data_OM <- function(seed = 731,
                         cbind(survey_err, 'Year' = years[1:(nyear-yr_future)] ), 
                         by = 'Year',all.x = TRUE) %>% select(-Year)
      survey_err[years > myear,1:nfleets_surv] <- survey_err[years == myear,]
- 
+     
      Rdevs <- rnorm(n = yr_future,mean = 0, sd = exp(logSDR)) ## assuming 1.4 for logSDR
-  #   #Rdevs <- rep(0, yr_future)
-  # parms$Rin <- c(df$parms$Rin,Rdevs)
-  #   
-  #   # Bias adjustment
-    b <- c(b,rep(bfuture, yr_future))
-  # }
+     #   #Rdevs <- rep(0, yr_future)
+     # parms$Rin <- c(df$parms$Rin,Rdevs)
+     #   
+     #   # Bias adjustment
+     b_y <- c(b_y,rep(bfuture, yr_future))
+   }
   
   
   

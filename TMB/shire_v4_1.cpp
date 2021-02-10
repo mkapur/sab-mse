@@ -13,7 +13,8 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(years); // number of years modeled; max tEnd-1
   int nyear = years.size();
   int nsex = 2;
-  DATA_INTEGER(yRun); //how many years to run; max tEnd-1
+  DATA_INTEGER(yRun); //how many years to run; max tEnd
+  DATA_INTEGER(yLike); //max year to include in likelihood non-forecast years
   
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
@@ -1024,7 +1025,7 @@ Type objective_function<Type>::operator() ()
     //     } // end space
     //   } // end age
     // } // end acomp fleets
-  } // END YEARS; END MODEL RUN
+  } // END yRUN YEARS; END MODEL RUN
   
   
   // // LIKELIHOODS //
@@ -1034,7 +1035,7 @@ Type objective_function<Type>::operator() ()
   // as a part of the kriging and extrapolation procedures within VAST"
   Type ans_survey=0.0;
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-    for(int y=0;y<yRun;y++){ // Survey Surveyobs
+    for(int y=0;y<yLike;y++){ // Survey Surveyobs
       if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
         // std::cout << y << "\t" << surv_flt << "\t obs surv \t" <<  surv_yf_obs(y,surv_flt)   << "\n";
         // std::cout << y << "\t" << surv_flt << "\t pred surv \t" <<  surv_yf_pred(y,surv_flt) << "\n";
@@ -1048,7 +1049,7 @@ Type objective_function<Type>::operator() ()
   
   // Likelihood: catches
   Type ans_catch = 0.0;
-  for(int y=0;y<yRun;y++){
+  for(int y=0;y<yLike;y++){
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       catch_yf_pred_total(y,fish_flt) = catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1);
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
@@ -1070,13 +1071,13 @@ Type objective_function<Type>::operator() ()
   sum1.setZero();
   sum2.setZero();
   for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    for(int y=0;y<yRun;y++){ // Loop over available years
+    for(int y=0;y<yLike;y++){ // Loop over available years
       for(int s=0;s<nsex;s++){
         for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
           if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if there was a measurement that year
             sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
             // // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
-            // if(acomp_flt_type(acomp_flt) == 0){
+            if(acomp_flt_type(acomp_flt) == 0){
             //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
             //     acomp_yafs_obs(y,a,acomp_flt,s) +
             //     pi_acomp(acomp_flt)*
@@ -1112,7 +1113,7 @@ Type objective_function<Type>::operator() ()
             //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
             //     sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-            // } // end switch for comm or surv type
+            } // end switch for comm or surv type
           } // end acomp flag
         } // end age
       } // end sex
@@ -1124,7 +1125,7 @@ Type objective_function<Type>::operator() ()
   // Likelihood: SD Recruitment (hyperprior)
   Type ans_SDR = 0.0;
   for(int k=0;k<(nstocks);k++){
-    for(int y=0;y<yRun;y++){ // Start y loop
+    for(int y=0;y<yLike;y++){ // Start y loop
       ans_SDR += Type(0.5)*(tildeR_y(y)*tildeR_y(y))/(SDR*SDR)+b_y(y)*log(SDR*SDR);
     }
   }

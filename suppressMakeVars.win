@@ -1,0 +1,38 @@
+## per Ben Bolker, just this: https://github.com/kaskr/adcomp/issues/277
+#PKG_LIBS = 
+CXXFLAGS = -Wno-ignored-attributes 
+## With R 3.1.0 or later, you can uncomment the following line to tell R to 
+## enable compilation with C++11 (or even C++14) where available
+#CXX_STD = CXX11
+#PEDANTIC=-pedantic -Werror -DBOOST_NO_AUTO_PTR
+#PEDANTIC=-pedantic -DBOOST_NO_AUTO_PTR -Wno-ignored-attributes
+#PEDANTIC=-pedantic -DBOOST_NO_AUTO_PTR
+#PEDANTIC= -DBOOST_NO_AUTO_PTR -Wno-sign-compare -Wno-parentheses -Wno-maybe-uninitialized
+#PEDANTIC=-pedantic
+#PEDANTIC=-DBOOST_NO_AUTO_PTR
+
+#XTRAFLAGS=-Wno-misleading-indentation -Wno-unused -Wno-ignored-attributes -Wno-class-memaccess
+#XTRAFLAGS=-Wno-misleading-indentation -Wno-unused -Wno-ignored-attributes -Wno-parentheses -Wno-address-of-packed-member
+#XTRAFLAGS=-Wno-misleading-indentation -Wno-unused -Wno-ignored-attributes
+#XTRAFLAGS=-Wno-misleading-indentation -Wno-unused -march=native
+#XTRAFLAGS=-Wno-misleading-indentation -Wno-ignored-attributes
+#XTRAFLAGS=-Wno-deprecated-declarations -Wno-parentheses
+#XTRAFLAGS=-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common
+#XTRAFLAGS=-Wno-deprecated-declarations -Wno-parentheses
+#XTRAFLAGS=-Wno-parentheses
+#XTRAFLAGS=-mshstk
+#XTRAFLAGS=-Wno-ignored-attributes
+##XTRAFLAGS=
+##CFLAGS=               -g -O3 -Wall -pipe $(PEDANTIC) $(XTRAFLAGS) -std=gnu99
+#CFLAGS= -O -mtune=native
+#CXXFLAGS= -O2 -mtune=native -march=native -pthread -fopenmp $(BLAS_LIBS) $(LAPACK_LIBS)
+#FFLAGS=-g -O -mtune=native
+#FCFLAGS=-g -O -mtune=native
+## for C++ and C++11 code
+#CXXFLAGS=            	-g -O3 -Wall -pipe $(PEDANTIC) $(XTRAFLAGS)
+#CXX1XFLAGS=		-g -O3 -Wall -pipe $(PEDANTIC) $(XTRAFLAGS)
+#CXX11FLAGS=		-g -O3 -Wall -pipe $(PEDANTIC) $(XTRAFLAGS)
+#CXX14FLAGS=		-g -O3 -Wall -pipe $(PEDANTIC) $(XTRAFLAGS)
+#CXX17FLAGS=		-g -O3 -Wall -pipe $(PEDANTIC) $(XTRAFLAGS)
+
+#FLAGS=-Wall -O3 -g -pipe $(PEDANTIC) $(XTRAFLAGS)

@@ -26,9 +26,9 @@ df <- load_data_OM(nspace = 6,
                    yr_future  = yr_future,
                    b_y_max = 0.109) ## data that works with OM
 # df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
-df$yRun <- df$tEnd ## number of years to run model
-# df$yLike <- df$tEnd-yr_future ## max year to calc likelihood
-df$yFut <- df$tEnd+yr_future
+df$yRun <-  df$tEnd-yr_future ## number of years to run model
+# df$yLike <-## max year to calc likelihood
+df$yFut <- yr_future
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))

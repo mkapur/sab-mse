@@ -1047,12 +1047,12 @@ Type objective_function<Type>::operator() ()
     } // end y
   } // end surv_flt
   for(int surv_flt = 0;surv_flt<(nfleets_surv);surv_flt++){
-    // for(int y=tEnd;y<yFut;y++){
-    //   // for all years, overwrite survey obs
-    //   SIMULATE{
-    //     surv_yf_obs(y,surv_flt) = rnorm(surv_yf_pred(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
-    //   }
-    // } // end y
+    for(int y=tEnd;y<yFut;y++){
+      // for all years, overwrite survey obs
+      SIMULATE{
+        surv_yf_obs(y,surv_flt) = rnorm(surv_yf_pred(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
+      }
+    } // end y
   } // end surv_flt
   //https://kaskr.github.io/adcomp/sam_8cpp-example.html
   SIMULATE {

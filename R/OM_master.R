@@ -95,7 +95,7 @@ system.time(opt <-nlminb(obj$par,
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 
 best <- obj$env$last.par.best ## update object with the best parameters
 dat <- obj$report(par = best)
-dat$surv_yf_pred/df$surv_yf_obs
+# dat$surv_yf_pred/df$surv_yf_obs
 # dat$catch_yf_pred_total/df$catch_yf_obs[,2:ncol(df$catch_yf_obs)]
 ## save everything and plot
 cppname = substr(dllUSE,7,nchar(dllUSE))
@@ -118,7 +118,7 @@ writeOM(justPlots = FALSE,
 ## multiple reps (seeds) of OM simulations.
 sim <- replicate(5, {
   set.seed(runif(1,1,5)) ## randomize the seed for nrep
-  # simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
+  simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
   simdata0 <- obj$simulate(par=obj$par, complete=TRUE) ## input, would be same as rep
   # simdata <- obj$simulate(par=obj$par, complete=TRUE) ## simulate from last obj,
   ## The default parameter values used for the simulation is obj$env$last.par

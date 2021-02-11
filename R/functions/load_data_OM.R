@@ -579,10 +579,16 @@ load_data_OM <- function(seed = 731,
  
      if(is.na(catch.future)){
        catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
+       catch_yf_error <- merge(data.frame('Year' = years), 
+                               cbind('Year' = years[1:(nyear-yr_future)],catch_yf_error), 
+                               by = 'Year',all.x = TRUE)
+       
        ## fill with fleetwise mean
        catch[years > myear,2:ncol(catch)] <- matrix(rep(apply(catch[years <= myear,2:ncol(catch)],
                                                               2, mean), yr_future),
                                                     ncol = nfleets_fish, byrow = TRUE)
+       catch_yf_error[years > myear,2:ncol(catch_yf_error)] <- 0.1
+       catch_yf_error <- catch_yf_error[,2:ncol(catch_yf_error)] ## drop year col
      }else{
        catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
        ## fill with input values (placeholder)

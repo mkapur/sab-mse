@@ -1074,7 +1074,7 @@ Type objective_function<Type>::operator() ()
   for(int fish_flt = 0;fish_flt<(nfleets_fish);fish_flt++){
     for(int y=yRun;y<tEnd;y++){
       SIMULATE{
-        catch_yf_obs(y,fish_flt) = rnorm(catch_yf_obs(y,fish_flt),  exp(catch_yf_error(y,fish_flt)));
+        catch_yf_obs(y,fish_flt+1) = rnorm(catch_yf_obs(y,fish_flt),  exp(catch_yf_error(y,fish_flt)));
       }
     } // end y
   } // end surv_flt

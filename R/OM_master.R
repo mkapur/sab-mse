@@ -14,11 +14,10 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
-# compile(here("TMB",paste0(dllUSE,".cpp")),
-#         R_MAKEVARS_USER = here("suppressMakeVars.txt"))
+compile(here("TMB",paste0(dllUSE,".cpp")),
+        R_MAKEVARS_USER = here("suppressMakeVars.txt"))
         # CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
 dyn.load(dynlib(here("TMB",dllUSE)))
-
 
 source(here("R","functions",'load_files_OM.R'))
 yr_future <- 20
@@ -64,15 +63,13 @@ system.time(obj <- MakeADFun(df,
 
 system.time(rep1 <- obj$report()) ## one off caclulation using start pars
 
-
 bounds <- boundPars(obj,
                     r0_lower = 0, 
                     boundSlx = c(NA,'fsh','srv')[2:3])
 
-
 ## inspect survey bounds in proper format
-exp(bounds$srv_bnds_lwr)
-exp(bounds$srv_bnds_upr)
+# exp(bounds$srv_bnds_lwr)
+# exp(bounds$srv_bnds_upr)
 
 ## tmbhelper is returning null OPTS
 system.time(opt <-nlminb(obj$par,
@@ -121,7 +118,7 @@ writeOM(justPlots = FALSE,
 ## multiple reps (seeds) of OM simulations.
 sim <- replicate(5, {
   set.seed(runif(1,1,5)) ## randomize the seed for nrep
-  simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
+  # simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
   simdata0 <- obj$simulate(par=obj$par, complete=TRUE) ## input, would be same as rep
   # simdata <- obj$simulate(par=obj$par, complete=TRUE) ## simulate from last obj,
   ## The default parameter values used for the simulation is obj$env$last.par
@@ -131,8 +128,10 @@ sim <- replicate(5, {
 })
 head(dat$SSB_ym)
 head(simdata$SSB_ym)
-tail(simdata0$surv_yf_obs)
+tail(simdata0$surv_yf_obs, yr_future)
 simdata0$SSB_ym == simdata$SSB_ym
 
-sim['SSB_ym',2] %>% data.frame() %>% head()
-sim['SSB_ym',3] %>% data.frame() %>% head()
+sim['surv_yf_obs',1] %>% data.frame() %>% tail()
+sim['surv_yf_obs',4] %>% data.frame() %>% tail()
+sim['surv_yf_obs',2] %>% data.frame() %>% tail()
+sim['surv_yf_obs',3] %>% data.frame() %>% tail()

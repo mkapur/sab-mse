@@ -1054,10 +1054,7 @@ Type objective_function<Type>::operator() ()
       }
     } // end y
   } // end surv_flt
-  
-  SIMULATE {
-    REPORT(surv_yf_obs);
-  }
+
   // Likelihood: catches
   Type ans_catch = 0.0;
   for(int y=0;y<yRun;y++){
@@ -1074,6 +1071,15 @@ Type objective_function<Type>::operator() ()
     } // end y
   } // end fish_flt
   
+  for(int fish_flt = 0;fish_flt<(nfleets_fish);fish_flt++){
+    for(int y=yRun;y<tEnd;y++){
+      SIMULATE{
+        catch_yf_obs(y,fish_flt) = rnorm(catch_yf_obs(y,fish_flt),  exp(catch_yf_error(y,fish_flt)));
+      }
+    } // end y
+  } // end surv_flt
+  
+
   // Likelihood: age comps in surveys & catches
   Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
@@ -1240,5 +1246,12 @@ Type objective_function<Type>::operator() ()
     REPORT(tildeR_y);
     REPORT(tildeR_initk);
     REPORT(ans_tot);
+    
+    // simulated data, of same dims as input:
+    SIMULATE {
+      REPORT(surv_yf_obs);
+      REPORT(catch_yf_obs);
+    }
+    
     return ans;
 }

@@ -630,6 +630,8 @@ Linf_yk[51,3,1] != Linf_yk[50,3,1] ## female r2 should change
 Linf_yk[1,phi_ik2[1],1] ## 60 ish
 Linf_yk[1,phi_ik2[6],1] ## 80 ish
 
+
+
 growthPars <- list("Linf_yk"=Linf_yk, "L1_yk"=L1_yk,
              "kappa_yk"=kappa_yk, "sigmaG_yk"=sigmaG_yk)
 save(growthPars, 

@@ -14,7 +14,7 @@ Type objective_function<Type>::operator() ()
   int nyear = years.size();
   int nsex = 2;
   DATA_INTEGER(yRun); // maxyr for data and likelihoods
-
+  
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
   DATA_INTEGER(nfleets_acomp); // number of age comp fleets
@@ -64,7 +64,7 @@ Type objective_function<Type>::operator() ()
   DATA_IMATRIX(srv_blks);       // max(h) x nfleets_surv; endyr of time block for slx
   DATA_IMATRIX(fsh_blks_size);        // 1 x nfleets_fish; how many time blocks per fleet
   DATA_IMATRIX(srv_blks_size);       //  1 x nfleets_surv; how many time blocks per fleet
-
+  
   // Survey Biomass
   DATA_ARRAY(surv_yf_obs);
   DATA_ARRAY(surv_yf_err);
@@ -77,7 +77,6 @@ Type objective_function<Type>::operator() ()
   DATA_ARRAY(acomp_yafs_obs);
   
   // Catches
-  DATA_ARRAY(F_yf_HCR); // input vector of Fs by fleet (for proj period only)
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   DATA_ARRAY(catch_yf_error); // right now just 0.1 for all fleets and all years
   
@@ -153,7 +152,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> pi_acomp = exp(logpi_acomp);
   // array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
-
+  
   // Fishery selectivity
   // Number of parameters in the chosen selectivity type:
   int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
@@ -199,7 +198,7 @@ Type objective_function<Type>::operator() ()
               for (int a= 0; a < nage; a++){
                 fsh_slx_yafs(i,a,fish_flt,s) = Type(1.0) / ( Type(1.0) + exp(-log(Type(19))*
                   (a -  fsh_slx_pars(fish_flt,0,h,s)) / ( fsh_slx_pars(fish_flt,1,h,s) -
-                   fsh_slx_pars(fish_flt,0,h,s))));
+                  fsh_slx_pars(fish_flt,0,h,s))));
               } // end ages
               break;
             case 1: // Logistic with a50 and slope, where  fsh_slx_pars(fish_flt,0,0,s) = a50 and  fsh_slx_pars(fish_flt,1,0,s) = slope.
@@ -309,10 +308,10 @@ Type objective_function<Type>::operator() ()
             case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,h,s) = a50 and  srv_slx_pars(srv_flt,1,h,s) = slope.
               //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
               for (int a= 0; a < nage; a++){
-              srv_slx_yafs(i,a,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
-                srv_slx_pars(srv_flt,1,h,s) * (a -  srv_slx_pars(srv_flt,0,h,s)) ) );
-            } // end ages
-            break;
+                srv_slx_yafs(i,a,srv_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
+                  srv_slx_pars(srv_flt,1,h,s) * (a -  srv_slx_pars(srv_flt,0,h,s)) ) );
+              } // end ages
+              break;
             case 2: // Dome Normal with alpha (mean) and beta (sd)
               for (int a= 0; a < nage; a++){
                 srv_slx_yafs(i,a,srv_flt,s)  = exp(-(0.5 * (a -    srv_slx_pars(srv_flt,0,h,s))/
@@ -444,7 +443,7 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
   
   // std::cout << " Here" << "\n";
-  for(int y=0;y<tEnd;y++){ // Start y loop
+  for(int y=0;y<yRun;y++){ // Start y loop
     
     // define year zero numbers at age
     if (y == 0){
@@ -469,7 +468,7 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
-
+    
     // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
@@ -603,7 +602,7 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end sexes
     // std::cout << y << "\t" << Length_yais_mid(y,5,1,1) << " LAA_mid_a=5i=1s=1" << "\n";
-  
+    
     // F denom at second half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
@@ -668,29 +667,11 @@ Type objective_function<Type>::operator() ()
                   // Length_yais_mid(y,a,i,s)*
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                
-                // if (y > yRun){
-                //   SIMULATE{
-                //     catch_yaf_pred(y,a,fish_flt,1) +=
-                //       phi_if_fish(fish_flt,i)*
-                //       0.5*F_yf_HCR(y,fish_flt)*
-                //       // instF_yafs(y,a,fish_flt,s,1)*
-                //       N_yais_mid(y,a,i,s)*
-                //       // mla_yais(y,a,i,s)*
-                //       // Length_yais_mid(y,a,i,s)*
-                //       wtatlen_kab(phi_ik2(i),0)*
-                //       pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));                  }
-                // }
-                
                 break;
               } // end selType_fish
             } // end sex
           } // end space
           catch_yf_pred(y,fish_flt,1) += catch_yaf_pred(y,a,fish_flt,1);
-          // if (y > yRun){
-          //   SIMULATE{
-          //     catch_yf_pred(y,fish_flt,1) += catch_yaf_pred(y,a,fish_flt,1);
-          //   }
         } // end age
       } // end -1 NA trap
     } // end nfleets_fish
@@ -861,7 +842,7 @@ Type objective_function<Type>::operator() ()
       } // end space
     } //end mgmt
     // std::cout << y << "\t" << "end R_ym" << "\n";
-
+    
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
@@ -880,7 +861,7 @@ Type objective_function<Type>::operator() ()
                 // this should only get filled if surv_flt is also an comp_flt
                 // then nsamp acomp only needs dims acomp_flt 
                 // should be done outside of loop for acomp fleets only (need switches)
-               
+                
                 // Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
                 //   phi_if_surv(surv_flt,i)*
                 //   N_yais_mid(y,a,i,s);
@@ -1068,12 +1049,15 @@ Type objective_function<Type>::operator() ()
     for(int y=yRun;y<tEnd;y++){
       // for all years, overwrite survey obs using error and forecast data
       // this wont change because error and inputs are fixed, just helps with automating forecast
-      // SIMULATE{
-      //   surv_yf_obs(y,surv_flt) = rnorm(surv_yf_obs(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
-      // }
+      SIMULATE{
+        surv_yf_obs(y,surv_flt) = rnorm(surv_yf_obs(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
+      }
     } // end y
   } // end surv_flt
-
+  
+  SIMULATE {
+    REPORT(surv_yf_obs);
+  }
   // Likelihood: catches
   Type ans_catch = 0.0;
   for(int y=0;y<yRun;y++){
@@ -1090,15 +1074,6 @@ Type objective_function<Type>::operator() ()
     } // end y
   } // end fish_flt
   
-  // for(int fish_flt = 0;fish_flt<(nfleets_fish);fish_flt++){
-  //   for(int y=yRun;y<tEnd;y++){
-  //     SIMULATE{
-  //       catch_yf_obs(y,fish_flt+1) = rnorm(catch_yf_obs(y,fish_flt+1),  exp(catch_yf_error(y,fish_flt)));
-  //     }
-  //   } // end y
-  // } // end surv_flt
-  
-
   // Likelihood: age comps in surveys & catches
   Type ans_survcomp = 0.0;
   Type ans_catchcomp = 0.0;
@@ -1114,40 +1089,40 @@ Type objective_function<Type>::operator() ()
             sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
             // // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
             if(acomp_flt_type(acomp_flt) == 0){
-            //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-            //     acomp_yafs_obs(y,a,acomp_flt,s) +
-            //     pi_acomp(acomp_flt)*
-            //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-            //     comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
-            //     - lgamma(pi_acomp(acomp_flt)*
-            //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-            //     comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
-            // 
-            //   ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-            //     sum1(y)+
-            //     lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-            //     lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-            //     pi_acomp(acomp_flt)*
-            //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-            //     sum2(y);
-            //   // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
-            // } else{
-            //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-            //     acomp_yafs_obs(y,a,acomp_flt,s) +
-            //     pi_acomp(acomp_flt)*
-            //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-            //     surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
-            //     lgamma(pi_acomp(acomp_flt)*
-            //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-            //     surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
-            // 
-            //   ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-            //     sum1(y)+
-            //     lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-            //     lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-            //     pi_acomp(acomp_flt)*
-            //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-            //     sum2(y);
+              //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+              //     acomp_yafs_obs(y,a,acomp_flt,s) +
+              //     pi_acomp(acomp_flt)*
+              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+              //     comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s)) -
+              //     - lgamma(pi_acomp(acomp_flt)*
+              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+              //     comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
+              // 
+              //   ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+              //     sum1(y)+
+              //     lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+              //     lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+              //     pi_acomp(acomp_flt)*
+              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+              //     sum2(y);
+              //   // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+              // } else{
+              //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+              //     acomp_yafs_obs(y,a,acomp_flt,s) +
+              //     pi_acomp(acomp_flt)*
+              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+              //     surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
+              //     lgamma(pi_acomp(acomp_flt)*
+              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+              //     surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
+              // 
+              //   ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+              //     sum1(y)+
+              //     lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+              //     lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+              //     pi_acomp(acomp_flt)*
+              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+              //     sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
             } // end switch for comm or surv type
           } // end acomp flag
@@ -1250,7 +1225,7 @@ Type objective_function<Type>::operator() ()
     REPORT(instF_yais);
     REPORT(F_ym);
     REPORT(F_yf);
-
+    
     REPORT(fsh_slx_yafs);
     REPORT(srv_slx_yafs);
     // REPORT(R_0i_vect);
@@ -1265,12 +1240,5 @@ Type objective_function<Type>::operator() ()
     REPORT(tildeR_y);
     REPORT(tildeR_initk);
     REPORT(ans_tot);
-    
-    // simulated data ends up in PREDICTED
-    // SIMULATE {
-    //   REPORT(surv_yf_obs);
-    //   REPORT(catch_yf_pred);
-    // }
-    
     return ans;
 }

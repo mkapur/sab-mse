@@ -76,7 +76,7 @@ load_data_OM <- function(seed = 731,
   ## and attendant indices for subsetting
   fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE) ## this is like flag_fleets
 
-  x <- readline("Are you using design-based indices for BC? (Y/N)") 
+  x <<- readline("Are you using design-based indices for BC? (Y/N)") 
 
   if(tolower(x) == 'n'){
     ## turn off SURV for design-based
@@ -85,19 +85,19 @@ load_data_OM <- function(seed = 731,
     fltnames$SURV[fltnames$NAME%in%c('BC_EARLY','BC_VAST')] <- FALSE 
     
   }
-  fltnames_fish <- fltnames$NAME[fltnames$COMM]
-  fltnames_surv <- fltnames$NAME[fltnames$SURV]
-  colnames(survfltPal) <- fltnames$NAME[fltnames$SURV]
-  fltnames_acomp <- fltnames$NAME[fltnames$ACOMP]
-  fltnames_lcomp <- fltnames$NAME[fltnames$LCOMP]
+  fltnames_fish <<- fltnames$NAME[fltnames$COMM]
+  fltnames_surv <<- fltnames$NAME[fltnames$SURV]
+  colnames(survfltPal) <<- fltnames$NAME[fltnames$SURV]
+  fltnames_acomp <<- fltnames$NAME[fltnames$ACOMP]
+  fltnames_lcomp <<- fltnames$NAME[fltnames$LCOMP]
   
-  nfleets_fish <- length(fltnames$NAME[fltnames$COMM])
-  nfleets_surv <- length(fltnames$NAME[fltnames$SURV])
-  nfleets_acomp <- length(fltnames$NAME[fltnames$ACOMP])
-  nfleets_lcomp <- length(fltnames$NAME[fltnames$LCOMP])
+  nfleets_fish <<- length(fltnames$NAME[fltnames$COMM])
+  nfleets_surv <<- length(fltnames$NAME[fltnames$SURV])
+  nfleets_acomp <<- length(fltnames$NAME[fltnames$ACOMP])
+  nfleets_lcomp <<- length(fltnames$NAME[fltnames$LCOMP])
   
   # Catch ----
-  catch <- round(read.csv(here("input","input_data","OM_catch.csv")),1)
+  catch <<- round(read.csv(here("input","input_data","OM_catch.csv")),1)
   catch[is.na(catch)] <- -1.0
   catch_yf_error = array(0.1, dim = dim(catch))
   
@@ -189,6 +189,10 @@ load_data_OM <- function(seed = 731,
   load(here("input","input_data",'ageerr_ExpAge.rdata'))
   load(here("input","input_data",'ageerr_SD.rdata'))
   
+  acomp_flt_type <- matrix(1, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
+  colnames(acomp_flt_type) <- fltnames_acomp
+  acomp_flt_type[which(fltnames$COMM[which(grepl(paste(colnames(acomp_flt_type), collapse = "|"),
+                                                 fltnames$NAME))])] <- 0
   ## Phi objects ----
   ## setup phi (spatial matching matrix) depending on spatial setup
   ## MAKE A NSPACE == 3 AND 1 OPTION FOR COMBINING
@@ -197,8 +201,9 @@ load_data_OM <- function(seed = 731,
   #                     mgmt = c("AK","AK", rep("BC",2), rep("CC",2)))
   
   
-  ## returns objects clobally
-  list2env(format_phi(no_strata = nspace) , envir = .GlobalEnv)
+  ## returns objects globally
+  list2env(format_phi(no_strata = 4, x=x, survey = survey,catch=catch,
+                      acomp_flt_type), envir = .GlobalEnv)
 
   
   ## build b_y ramp ----
@@ -250,7 +255,7 @@ load_data_OM <- function(seed = 731,
   # fsh_blks_size[,'AK_FIX'] <- 2
   # fsh_blks is an h x nfleets_fish imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
-  fsh_blks <- matrix(2019, nrow = max(fsh_blks_size), 
+  fsh_blks <- matrix(1960+nyear, nrow = max(fsh_blks_size), 
                      ncol = nfleets_fish)
   colnames(fsh_blks) <- c( as.character(fltnames_fish))
   # fsh_blks[1:fsh_blks_size[,'WC_FIX'],'WC_FIX' ] <- c(1997,2003,2010,2019)
@@ -294,9 +299,9 @@ load_data_OM <- function(seed = 731,
   # srv_blks_size[,'AK_VAST_E'] <- 2
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
-  srv_blks <- matrix(2019, nrow = max(srv_blks_size),  ncol = length(selType_surv))
+  srv_blks <- matrix(1960+nyear, nrow = max(srv_blks_size),  ncol = length(selType_surv))
   colnames(srv_blks) <- c( fltnames_survcomp)
-  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,2019)
+  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,1960+nyear)
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta
@@ -357,14 +362,15 @@ load_data_OM <- function(seed = 731,
   parms <- list(
     logh_k = log(c(0.7,0.88,0.7,0.7)),
     # tildeR_yk = matrix(log(0.5),nrow =  nyear,ncol = nstocks),
-    tildeR_y = rep(log(0.5),nyear),
+    tildeR_y = rep(log(0.5),nyear), ## already for rFuture
     logR_0k = rep(log(8*10e6),4), #c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
     b_y = b_y, ## setup in if loop above  
     logpi_acomp = rep(log(50),nfleets_acomp),
     logSDR = 1.4,
-    ## structure is fleet x alpha, beta x time block (1 for now)x sex 
+    ## structure is fleet x alpha, beta x time block (1 for now)x sex
+    ## blks will need to include future
     log_fsh_slx_pars = log_fsh_slx_pars,
     log_srv_slx_pars = log_srv_slx_pars,
     epsilon_tau = rep(log(5),nspace),
@@ -396,10 +402,28 @@ load_data_OM <- function(seed = 731,
   load(here('input','input_data','unfished_ALK.rdata'))
   load(here('input','input_data','mla_yais.rdata')) ## from prelim runs, for ssb0
   
-  ## simulate future data ---- 
+  ## simulate and modify  future data ---- 
   ## years already includes future
   set.seed(seed)
    if(yr_future > 0){
+
+     
+     ngp = list(array(NA, dim = c(nyear, nstocks, nsex)))
+     ngp[[2]] <-ngp[[3]] <- ngp[[4]] <-  ngp[[1]]
+     
+     for(l in 1:length(growthPars)){
+       for(i in 1:dim(growthPars[[l]])[[3]]){
+         ngp[[l]][,,i] <- rbind(growthPars[[l]][,,i],
+                                            matrix(rep(growthPars[[l]][(tEnd-yr_future),,i] ,yr_future  ),  
+                                                   byrow = TRUE, ncol = 4))
+         colnames( ngp[[l]][,,i] ) <- colnames(growthPars[[l]])
+         rownames( ngp[[l]][,,i] ) <- years
+    
+       }
+       names(ngp)[l] <- names(growthPars)[l]
+     }
+     growthPars <- ngp ## overwrite
+
  
      if(is.na(catch.future)){
        catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)

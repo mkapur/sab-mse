@@ -521,7 +521,9 @@ Type objective_function<Type>::operator() ()
                   instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
                     instF_yf(y, fish_flt,0);
                 } else{
-                  instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*0.5*F_yf_HCR(y,fish_flt);
+                  SIMULATE{
+                    instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*0.5*F_yf_HCR(y,fish_flt);
+                  }
                 }
                 catch_yaf_pred(y,a,fish_flt,0) +=
                   phi_if_fish(fish_flt,i)*

@@ -4,6 +4,7 @@
 # source('R/functions/Check_Identifiable_vs2.R')
 #source('R/functions/getParms_noAge.R')
 source('R/functions/load_data_OM.R')
+source('R/functions/formatPhi.R')
 source('R/functions/buildMap.R')
 source('R/functions/buildNeqn.R')
 source('R/functions/boundPars.R')

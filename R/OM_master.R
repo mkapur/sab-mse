@@ -34,12 +34,6 @@ df$F_yf_HCR <- array(0, dim = c(ifelse(yr_future == 0,1,yr_future), df$nfleets_f
 ## if by is low, the likelihood is weighted more strongly, and the model is given less
 ## flexibility in generating R_ys in the context of SDRs (aka do a better job of fitting
 # data during this period)
-for(i in 1:length(df)){
-  if(any(df[[i]] != dfworks[[i]])) cat(names(df)[i],"\n")
-  
-}
-mapply(function(x, y) {x==y}, dfworks, df)
-
 mappy <-
   buildMap(toFix =  c("omega_0ij",
                       "logh_k",

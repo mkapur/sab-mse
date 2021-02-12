@@ -13,7 +13,7 @@ format_phi <- function(df = NULL, no_strata = 3){
                         stock = c("R4","R3","R3","R2","R2","R1"),
                         mgmt = c("AK","AK", rep("BC",2), rep("WC",2)))
     
-    spmat4 <- data.frame(subarea = c('S4',"S3","S3","S2","S2","C1"),
+    spmat4 <- data.frame(subarea = c('S4',"S3","S3","S2","S2","S1"),
                          stock = c("R4","R3","R3","R2","R2","R1"),
                          mgmt = c("AK","AK", rep("BC",2), rep("WC",2)))
     
@@ -96,8 +96,10 @@ format_phi <- function(df = NULL, no_strata = 3){
     phi_im <- matrix(0, ncol = 3, nrow = no_strata)
     colnames(phi_im) <- rev(unique(spmat$mgmt))
     rownames(phi_im) <- unique(rev(spmat$subarea))
+    if(no_strata == 6){
     phi_im[1:2,1] <- phi_im[3:4,2] <- phi_im[5:6,3] <- 1
-    
+    } else if(no_strata == 3){ diag(phi_im) <- 1
+    }else{phi_im <- NA}
     ## phi_ki
     phi_ki <-  matrix(0, ncol = no_strata, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     rownames(phi_ki) <- rev(unique(spmat$stock))
@@ -114,7 +116,7 @@ format_phi <- function(df = NULL, no_strata = 3){
     ## phi_ij [eq 6]
     phi_ij <-  matrix(1, ncol = no_strata, nrow = no_strata) ## 0 indicates subareas comprise THE SAME stock
     rownames(phi_ij) = colnames(phi_ij) = unique(rev(spmat$subarea))
-    if(no_strata == 4) phi_ij <- 1 ## not convinced what to do for n = 3
+    if(no_strata == 3) phi_ij[upper.tri(phi_ij)] <- phi_ij[lower.tri(phi_ij)] <- 0  ## not convinced what to do for n = 3
     if(no_strata == 4) diag(phi_ij) <- 0 
     if(no_strata == 6) diag(phi_ij) <- phi_ij[2:3,2:3] <- phi_ij[4:5,4:5] <- 0
 
@@ -181,9 +183,23 @@ format_phi <- function(df = NULL, no_strata = 3){
       tau_ki[2,2:3] <-  tau_ki[3,5:4] <-  c(0.75,0.25) ## A2 and C1 are larger
     }
    
-    return(list(phi_if_surv,phi_if_fish,phi_if_acomp,phi_ff_acomp,
-                phi_ki,phi_im,phi_ik2,phi_ij,phi_fm,tau_ki,phi_fm_acomp,
-                phi_fm_acomp2,phi_lcomp_fm))
+    return(
+      list(
+        "phi_if_surv" = phi_if_surv,
+        "phi_if_fish"=phi_if_fish,
+        'phi_if_acomp'=phi_if_acomp,
+        'phi_ff_acomp'=phi_ff_acomp,
+        'phi_ki'=phi_ki,
+        'phi_im'=phi_im,
+        'phi_ik2'=phi_ik2,
+        'phi_ij'=phi_ij,
+        'phi_fm'=phi_fm,
+        'tau_ki'=tau_ki,
+        'phi_fm_acomp'=phi_fm_acomp,
+        'phi_fm_acomp2'=phi_fm_acomp2,
+        'phi_lcomp_fm'=phi_lcomp_fm
+      )
+    )
 } ## end func
 
 

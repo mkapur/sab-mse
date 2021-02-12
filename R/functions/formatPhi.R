@@ -6,8 +6,11 @@
 ## at this stratification
 ## options for new_strata are 6 (return at OM dims), 4 (stock dims), 3 (mgmt dims) or 1 (panmictic)
 ## this only changes the colors for plotting, not the actual input data, which is fleet-specific anyway
-format_phi <- function(df = NULL, no_strata = 3){
-
+format_phi <- function(df = NULL, 
+                       x,
+                       no_strata = 3,
+                       survey, catch,acomp_flt_type){
+nstocks = 4
     ## get idx of all dfs with phi
     spmat6 <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                         stock = c("R4","R3","R3","R2","R2","R1"),
@@ -48,10 +51,7 @@ format_phi <- function(df = NULL, no_strata = 3){
       phi_if_acomp[i,which(colnames(phi_if_acomp)  %in% SA)] <- 1
     }
     
-    acomp_flt_type <- matrix(1, ncol = nfleets_acomp) ## 0 is commercial, 1 is survey
-    colnames(acomp_flt_type) <- fltnames_acomp
-    acomp_flt_type[which(fltnames$COMM[which(grepl(paste(colnames(acomp_flt_type), collapse = "|"),
-                                                   fltnames$NAME))])] <- 0
+
     
     ## indicates the position of acomp fleet (shouldn't change with subareas)
     phi_ff_acomp <- matrix(-1, nrow = nfleets_acomp, ncol = 5) 
@@ -92,14 +92,40 @@ format_phi <- function(df = NULL, no_strata = 3){
       phi_if_fish[i,which(colnames(phi_if_fish)  %in% SA)] <- 1
     }
 
+    ## tau_ki
+    tau_ki <-  matrix(0, ncol = no_strata, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
+    rownames(tau_ki) <- rev(unique(spmat$stock))
+    colnames(tau_ki) <- unique(rev(spmat$subarea))
+    if(no_strata == 4){
+      diag(tau_ki) <- 1 ## all self-seeding
+    }
+    if(no_strata == 3){
+      tau_ki['R1','M1'] <- 1## all s 36 in a1
+      tau_ki['R2','M2'] <-  0.75; tau_ki['R3','M2'] <- 0.25 ## most of R2 from CC
+      tau_ki['R2','M2'] <-  0.75; tau_ki['R3','M2'] <- 0.25 ## most of R2 from CC
+      tau_ki['R3','M3'] <- 0.25 ; tau_ki['R4','M3'] <- 0.75 ## most of R4 from AK
+    }
+    if(no_strata == 6){
+      tau_ki[1,1] <-   tau_ki[4,6]  <- 1 ## 100% of recruitment in stock
+      tau_ki[2,2:3] <-  tau_ki[3,5:4] <-  c(0.75,0.25) ## A2 and C1 are larger
+    }
+    
+    
     ## phi_im
     phi_im <- matrix(0, ncol = 3, nrow = no_strata)
     colnames(phi_im) <- rev(unique(spmat$mgmt))
     rownames(phi_im) <- unique(rev(spmat$subarea))
-    if(no_strata == 6){
-    phi_im[1:2,1] <- phi_im[3:4,2] <- phi_im[5:6,3] <- 1
-    } else if(no_strata == 3){ diag(phi_im) <- 1
-    }else{phi_im <- NA}
+    if (no_strata == 6) {
+      phi_im[1:2, 1] <- phi_im[3:4, 2] <- phi_im[5:6, 3] <- 1
+    } else if (no_strata == 3) {
+      diag(phi_im) <- 1
+    } else{
+      phi_im['S1','WC'] <- 1; phi_im['S2','WC'] <- 0.25## all s 36 in a1
+      phi_im['S2','BC'] <-  0.75; phi_im['S3','BC'] <- 0.25 ## most of S2 fSom CC
+      phi_im['S3','BC'] <- 0.25 ## most of S2 fSom CC
+      phi_im['S3','AK'] <- 0.75 ; phi_im['S4','AK'] <- 1 ## most of S4 fSom AK## use the same upscaling as SecSuitment to allocate eveSything else ???
+      ## might break because cpp expecting IMATRIX...
+    }
     ## phi_ki
     phi_ki <-  matrix(0, ncol = no_strata, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
     rownames(phi_ki) <- rev(unique(spmat$stock))
@@ -164,23 +190,6 @@ format_phi <- function(df = NULL, no_strata = 3){
       }else{
         phi_lcomp_fm[i,1] <- 1
       }
-    }
-    ## tau_ki
-    tau_ki <-  matrix(0, ncol = no_strata, nrow = nstocks) ## nesting of subareas within stocks, for recruitment purposes
-    rownames(tau_ki) <- rev(unique(spmat$stock))
-    colnames(tau_ki) <- unique(rev(spmat$subarea))
-    if(no_strata == 4){
-      diag(tau_ki) <- 1 ## all self-seeding
-    }
-    if(no_strata == 3){
-     tau_ki['R1','M1'] <- 1## all s 36 in a1
-     tau_ki['R2','M2'] <-  0.75; tau_ki['R3','M2'] <- 0.25 ## most of R2 from CC
-     tau_ki['R2','M2'] <-  0.75; tau_ki['R3','M2'] <- 0.25 ## most of R2 from CC
-     tau_ki['R3','M3'] <- 0.25 ; tau_ki['R4','M3'] <- 0.75 ## most of R4 from AK
-    }
-    if(no_strata == 6){
-      tau_ki[1,1] <-   tau_ki[4,6]  <- 1 ## 100% of recruitment in stock
-      tau_ki[2,2:3] <-  tau_ki[3,5:4] <-  c(0.75,0.25) ## A2 and C1 are larger
     }
    
     return(

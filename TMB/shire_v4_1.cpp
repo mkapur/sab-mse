@@ -437,7 +437,7 @@ Type objective_function<Type>::operator() ()
 
   
   // std::cout << " Here" << "\n";
-  for(int y=0;y<yRun;y++){ // Start y loop
+  for(int y=0;y<tEnd;y++){ // Start y loop
     // std::cout << y << " \t" << std::endl;
     
     // define year zero numbers at age
@@ -466,7 +466,7 @@ Type objective_function<Type>::operator() ()
     
     // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0) | y > yRun){
         Type denom = 0; // exploitable biomass
         for(int s=0;s<nsex;s++){
           for(int i=0;i<(nspace);i++){
@@ -492,13 +492,19 @@ Type objective_function<Type>::operator() ()
             } // end age
           } // end space
         } // end sex
-        instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
+        if(y < yRun){
+          instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
+        } else{
+          SIMULATE{
+            instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y,fish_flt);
+          } // end simulate
+        } // end if forecast years
       } // end -1 NA trap
     } // end nfleets_fish
     
     // predicted catches first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0) | y > yRun){
         for(int a=0;a<(nage);a++){
           for(int i=0;i<(nspace);i++){
             for(int s=0;s<nsex;s++){
@@ -516,15 +522,10 @@ Type objective_function<Type>::operator() ()
                   pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 break;
               case 1: // length sel
-                // instantaneous version
-                if(y < yRun){
-                  instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-                    instF_yf(y, fish_flt,0);
-                } else{
-                  SIMULATE{
-                    instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*0.5*F_yf_HCR(y,fish_flt);
-                  }
-                }
+                
+                instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                  instF_yf(y, fish_flt,0);
+                
                 catch_yaf_pred(y,a,fish_flt,0) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,0)*
@@ -605,7 +606,7 @@ Type objective_function<Type>::operator() ()
     
     // F denom at second half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0) | y > yRun){
         Type denom = 0; // exploitable biomass
         for(int s=0;s<nsex;s++){
           for(int i=0;i<(nspace);i++){
@@ -637,7 +638,7 @@ Type objective_function<Type>::operator() ()
     
     // predicted catches second half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0)){
+      if(catch_yf_obs(y,fish_flt+1) != Type(-1.0) | y > yRun){
         for(int a=0;a<(nage);a++){
           for(int i=0;i<(nspace);i++){
             for(int s=0;s<nsex;s++){
@@ -847,7 +848,7 @@ Type objective_function<Type>::operator() ()
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-          if(surv_yf_obs(y,surv_flt) != Type(-1.0)){
+          if(surv_yf_obs(y,surv_flt) != Type(-1.0) | y > yRun){
             switch(selType_surv(surv_flt)){
             case 0: // age sel
               for(int a=0;a<nage;a++){
@@ -1064,20 +1065,20 @@ Type objective_function<Type>::operator() ()
   } // end fish_flt
   
   // Likelihood: age comps in surveys & catches
-  Type ans_survcomp = 0.0;
-  Type ans_catchcomp = 0.0;
-  vector<Type>sum1(tEnd); // survey comp likelihood
-  vector<Type>sum2(tEnd); // fishery comp likelihood
-  sum1.setZero();
-  sum2.setZero();
-  for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    for(int y=0;y<yRun;y++){ // Loop over available years
-      for(int s=0;s<nsex;s++){
-        for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
-          if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if there was a measurement that year
-            sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
-            // // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
-            if(acomp_flt_type(acomp_flt) == 0){
+  // Type ans_survcomp = 0.0;
+  // Type ans_catchcomp = 0.0;
+  // vector<Type>sum1(tEnd); // survey comp likelihood
+  // vector<Type>sum2(tEnd); // fishery comp likelihood
+  // sum1.setZero();
+  // sum2.setZero();
+  // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+  //   for(int y=0;y<yRun;y++){ // Loop over available years
+  //     for(int s=0;s<nsex;s++){
+  //       for(int a=0;a<nage;a++){ // Loop over other ages (first one is empty for survey)
+  //         if(acomp_yafs_obs(y,a,acomp_flt,s) != Type(-1.0)){ // Flag if there was a measurement that year
+  //           sum1(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*acomp_yafs_obs(y,a,acomp_flt,s)+1);
+  //           // // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
+  //           if(acomp_flt_type(acomp_flt) == 0){
               //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
               //     acomp_yafs_obs(y,a,acomp_flt,s) +
               //     pi_acomp(acomp_flt)*
@@ -1113,14 +1114,14 @@ Type objective_function<Type>::operator() ()
               //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
               //     sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-            } // end switch for comm or surv type
-          } // end acomp flag
-        } // end age
-      } // end sex
-      // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
-      // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-    } // end y
-  } // end acomp fleets
+  //           } // end switch for comm or surv type
+  //         } // end acomp flag
+  //       } // end age
+  //     } // end sex
+  //     // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+  //     // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+  //   } // end y
+  // } // end acomp fleets
   
   // Likelihood: SD Recruitment (hyperprior)
   Type ans_SDR = 0.0;

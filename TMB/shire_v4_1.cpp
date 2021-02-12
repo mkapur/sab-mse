@@ -444,7 +444,7 @@ Type objective_function<Type>::operator() ()
   // std::cout << "Done" << std::endl;
   
   // std::cout << " Here" << "\n";
-  for(int y=0;y<yRun;y++){ // Start y loop
+  for(int y=0;y<tEnd;y++){ // Start y loop
     
     // define year zero numbers at age
     if (y == 0){
@@ -669,28 +669,28 @@ Type objective_function<Type>::operator() ()
                   wtatlen_kab(phi_ik2(i),0)*
                   pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
                 
-                if (y > yRun){
-                  SIMULATE{
-                    catch_yaf_pred(y,a,fish_flt,1) +=
-                      phi_if_fish(fish_flt,i)*
-                      0.5*F_yf_HCR(y,fish_flt)*
-                      // instF_yafs(y,a,fish_flt,s,1)*
-                      N_yais_mid(y,a,i,s)*
-                      // mla_yais(y,a,i,s)*
-                      // Length_yais_mid(y,a,i,s)*
-                      wtatlen_kab(phi_ik2(i),0)*
-                      pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));                  }
-                }
+                // if (y > yRun){
+                //   SIMULATE{
+                //     catch_yaf_pred(y,a,fish_flt,1) +=
+                //       phi_if_fish(fish_flt,i)*
+                //       0.5*F_yf_HCR(y,fish_flt)*
+                //       // instF_yafs(y,a,fish_flt,s,1)*
+                //       N_yais_mid(y,a,i,s)*
+                //       // mla_yais(y,a,i,s)*
+                //       // Length_yais_mid(y,a,i,s)*
+                //       wtatlen_kab(phi_ik2(i),0)*
+                //       pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));                  }
+                // }
                 
                 break;
               } // end selType_fish
             } // end sex
           } // end space
           catch_yf_pred(y,fish_flt,1) += catch_yaf_pred(y,a,fish_flt,1);
-          if (y > yRun){
-            SIMULATE{
-              catch_yf_pred(y,fish_flt,1) += catch_yaf_pred(y,a,fish_flt,1);
-            }
+          // if (y > yRun){
+          //   SIMULATE{
+          //     catch_yf_pred(y,fish_flt,1) += catch_yaf_pred(y,a,fish_flt,1);
+          //   }
         } // end age
       } // end -1 NA trap
     } // end nfleets_fish
@@ -1068,9 +1068,9 @@ Type objective_function<Type>::operator() ()
     for(int y=yRun;y<tEnd;y++){
       // for all years, overwrite survey obs using error and forecast data
       // this wont change because error and inputs are fixed, just helps with automating forecast
-      SIMULATE{
-        surv_yf_obs(y,surv_flt) = rnorm(surv_yf_obs(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
-      }
+      // SIMULATE{
+      //   surv_yf_obs(y,surv_flt) = rnorm(surv_yf_obs(y,surv_flt),  exp(0.2+surv_yf_err(y,surv_flt)));
+      // }
     } // end y
   } // end surv_flt
 
@@ -1267,10 +1267,10 @@ Type objective_function<Type>::operator() ()
     REPORT(ans_tot);
     
     // simulated data ends up in PREDICTED
-    SIMULATE {
-      REPORT(surv_yf_obs);
-      REPORT(catch_yf_pred);
-    }
+    // SIMULATE {
+    //   REPORT(surv_yf_obs);
+    //   REPORT(catch_yf_pred);
+    // }
     
     return ans;
 }

@@ -424,36 +424,37 @@ load_data_OM <- function(seed = 731,
      }
      growthPars <- ngp ## overwrite
      
-     ## i'm not clear if we will be handing it catches or Fs. assuming Fs.
-     # if(is.na(catch.future)){
-     #   catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
-     #   catch_yf_error <- merge(data.frame('Year' = years), 
-     #                           cbind('Year' = years[1:(nyear-yr_future)],catch_yf_error), 
-     #                           by = 'Year',all.x = TRUE)
-     #   
-     #   ## fill with fleetwise mean
-     #   catch[years > myear,2:ncol(catch)] <- matrix(rep(apply(catch[years <= myear,2:ncol(catch)],
-     #                                                          2, mean), yr_future),
-     #                                                ncol = nfleets_fish, byrow = TRUE)
-     #   catch_yf_error[years > myear,2:ncol(catch_yf_error)] <- 0.1
-     #   catch_yf_error <- catch_yf_error[,2:ncol(catch_yf_error)] ## drop year col
-     # }else{
-       # catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
-       ## fill with input values (placeholder)
-       # catch[years > myear,]<- c(df$Catch,rep(catch.future, yr_future))
-     # }
+     ## We wont be handling fake catches (Fs instead) but for the code
+     ## it needs to read a value in forecast years obs to enter loop. Fill with Zero
+     if(is.na(catch.future)){
+       catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
+       catch_yf_error <- merge(data.frame('Year' = years),
+                               cbind('Year' = years[1:(nyear-yr_future)],catch_yf_error),
+                               by = 'Year',all.x = TRUE)
+
+       ## fill with fleetwise mean
+       catch[years > myear,2:ncol(catch)] <- 0# matrix(rep(apply(catch[years <= myear,2:ncol(catch)],
+                                                              # 2, mean), yr_future),
+                                                    # ncol = nfleets_fish, byrow = TRUE)
+       catch_yf_error[years > myear,2:ncol(catch_yf_error)] <- 0.1
+       catch_yf_error <- catch_yf_error[,2:ncol(catch_yf_error)] ## drop year col
+     }else{
+     catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
+     # fill with input values (placeholder)
+     catch[years > myear,]<- c(df$Catch,rep(catch.future, yr_future))
+     }
      ## sim survey (every year assuming VAST stdization)
      ## use mean of last five years
-     # survey <- merge(data.frame('Year' = years),
-     #                 cbind(survey, 'Year' = years[1:(nyear-yr_future)] ), 
-     #                 by = 'Year',all.x = TRUE) %>% select(-Year)
-     # survey[years > myear,1:nfleets_surv] <- t(survmeansL5)
+     survey <- merge(data.frame('Year' = years),
+                     cbind(survey, 'Year' = years[1:(nyear-yr_future)] ),
+                     by = 'Year',all.x = TRUE) %>% select(-Year)
+     survey[years > myear,1:nfleets_surv] <- 0 #t(survmeansL5)
      # 
      # ## use last year error
-     # survey_err<- merge(data.frame('Year' = years),
-     #                    cbind(survey_err, 'Year' = years[1:(nyear-yr_future)] ), 
-     #                    by = 'Year',all.x = TRUE) %>% select(-Year)
-     # survey_err[years > myear,1:nfleets_surv] <- survey_err[years == myear,]
+     survey_err<- merge(data.frame('Year' = years),
+                        cbind(survey_err, 'Year' = years[1:(nyear-yr_future)] ),
+                        by = 'Year',all.x = TRUE) %>% select(-Year)
+     survey_err[years > myear,1:nfleets_surv] <- 0 # survey_err[years == myear,]
      ## do this in TMB
      # Rdevs <- rnorm(n = yr_future,mean = 0, sd = exp(logSDR)) ## assuming 1.4 for logSDR
      #   #Rdevs <- rep(0, yr_future)

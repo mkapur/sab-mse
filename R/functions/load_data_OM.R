@@ -86,6 +86,7 @@ load_data_OM <- function(seed = 731,
     fltnames$SURV[fltnames$NAME%in%c('BC_EARLY','BC_VAST')] <- FALSE 
     
   }
+  
   fltnames_fish <<- fltnames$NAME[fltnames$COMM]
   fltnames_surv <<- fltnames$NAME[fltnames$SURV]
   colnames(survfltPal) <<- fltnames$NAME[fltnames$SURV]
@@ -159,8 +160,6 @@ load_data_OM <- function(seed = 731,
     survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
     cat('overwrote BC survey fleets with design-based indices \n')
   }
-  survmeans <- c(lapply(survey, mean, na.rm = TRUE)) ## for forecasting if needed
-  survmeansL5 <- c(lapply(survey[(nyear-yr_future-5):nyear-yr_future,], mean, na.rm = TRUE)) ## for forecasting if needed
   survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
   
   
@@ -256,7 +255,7 @@ load_data_OM <- function(seed = 731,
   # fsh_blks_size[,'AK_FIX'] <- 2
   # fsh_blks is an h x nfleets_fish imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
-  fsh_blks <- matrix(1960+nyear, nrow = max(fsh_blks_size), 
+  fsh_blks <- matrix(1959+nyear, nrow = max(fsh_blks_size), 
                      ncol = nfleets_fish)
   colnames(fsh_blks) <- c( as.character(fltnames_fish))
   # fsh_blks[1:fsh_blks_size[,'WC_FIX'],'WC_FIX' ] <- c(1997,2003,2010,2019)
@@ -300,7 +299,7 @@ load_data_OM <- function(seed = 731,
   # srv_blks_size[,'AK_VAST_E'] <- 2
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
-  srv_blks <- matrix(1960+nyear, nrow = max(srv_blks_size),  ncol = length(selType_surv))
+  srv_blks <- matrix(1959+nyear, nrow = max(srv_blks_size),  ncol = length(selType_surv))
   colnames(srv_blks) <- c( fltnames_survcomp)
   srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,1960+nyear)
   srv_blks <- srv_blks-1960 ## zero index!
@@ -534,7 +533,7 @@ load_data_OM <- function(seed = 731,
     
     #* DATA ----
     acomp_yafs_obs = OM_agecomps_yafs,
-    acomp_dims_yfs = acomp_dims_yfs,
+    # acomp_dims_yfs = acomp_dims_yfs,
     surv_yf_obs = as.matrix(survey), # Make sure the survey has the same length as the catch time series
     surv_yf_err = as.matrix(survey_err), 
     age_error = as.matrix(ageerr_ExpAge[,2:ncol(ageerr_ExpAge)]),

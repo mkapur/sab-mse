@@ -301,7 +301,7 @@ load_data_OM <- function(seed = 731,
   # it will be a ragged array bc some fleets have fewer blocks.
   srv_blks <- matrix(1959+nyear, nrow = max(srv_blks_size),  ncol = length(selType_surv))
   colnames(srv_blks) <- c( fltnames_survcomp)
-  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,1960+nyear)
+  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,1959+nyear)
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta
@@ -533,7 +533,7 @@ load_data_OM <- function(seed = 731,
     
     #* DATA ----
     acomp_yafs_obs = OM_agecomps_yafs,
-    # acomp_dims_yfs = acomp_dims_yfs,
+    acomp_dims_yfs = acomp_dims_yfs,
     surv_yf_obs = as.matrix(survey), # Make sure the survey has the same length as the catch time series
     surv_yf_err = as.matrix(survey_err), 
     age_error = as.matrix(ageerr_ExpAge[,2:ncol(ageerr_ExpAge)]),

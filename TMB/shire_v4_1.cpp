@@ -152,6 +152,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> pi_acomp = exp(logpi_acomp);
   // array<Type> tildeR_yk(tEnd,nstocks); // recdevs
   vector<Type> tildeR_initk(nstocks); // recdevs for init
+  std::cout << "READ DATA \t" << std::endl;
   
   // Fishery selectivity
   // Number of parameters in the chosen selectivity type:
@@ -441,9 +442,11 @@ Type objective_function<Type>::operator() ()
     } // end space
   } // end sex
   // std::cout << "Done" << std::endl;
+  std::cout << "STARTING Y LOOP \t" << std::endl;
   
   // std::cout << " Here" << "\n";
   for(int y=0;y<yRun;y++){ // Start y loop
+    std::cout << y << " \t" << std::endl;
     
     // define year zero numbers at age
     if (y == 0){

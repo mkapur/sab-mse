@@ -14,13 +14,12 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
-compile(here("TMB",paste0(dllUSE,".cpp")),
-        R_MAKEVARS_USER = here("suppressMakeVars.txt"))
-        # CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
+# compile(here("TMB",paste0(dllUSE,".cpp")),R_MAKEVARS_USER = here("suppressMakeVars.txt"))
+# CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
-yr_future <- 20
+yr_future <- 0
 df <- load_data_OM(nspace = 6, 
                    move = TRUE,
                    yr_future  = yr_future,
@@ -30,11 +29,16 @@ df$yRun <-  df$tEnd-yr_future ## number of years to run model
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))
+df$F_yf_HCR <- array(0, dim = c(ifelse(yr_future == 0,1,yr_future), df$nfleets_fish))
 # df$selShape_surv[4] <- -1 # constant slx for bc vast
 ## if by is low, the likelihood is weighted more strongly, and the model is given less
 ## flexibility in generating R_ys in the context of SDRs (aka do a better job of fitting
 # data during this period)
-
+for(i in 1:length(df)){
+  if(any(df[[i]] != dfworks[[i]])) cat(names(df)[i],"\n")
+  
+}
+mapply(function(x, y) {x==y}, dfworks, df)
 
 mappy <-
   buildMap(toFix =  c("omega_0ij",
@@ -117,8 +121,8 @@ writeOM(justPlots = FALSE,
 ## teh technique is more applicable to checking stability. really we just need
 ## multiple reps (seeds) of OM simulations.
 sim <- replicate(5, {
-  set.seed(runif(1,1,5)) ## randomize the seed for nrep
-  simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
+  set.seed(runif(1,1,1000)) ## randomize the seed for nrep
+  # simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
   simdata0 <- obj$simulate(par=obj$par, complete=TRUE) ## input, would be same as rep
   # simdata <- obj$simulate(par=obj$par, complete=TRUE) ## simulate from last obj,
   ## The default parameter values used for the simulation is obj$env$last.par

@@ -203,7 +203,7 @@ load_data_OM <- function(seed = 731,
   
   
   ## returns objects globally
-  list2env(format_phi(no_strata = 4, x=x, survey = survey,catch=catch,
+  list2env(format_phi(no_strata = nspace, x=x, survey = survey,catch=catch,
                       acomp_flt_type=acomp_flt_type), envir = .GlobalEnv)
 
   

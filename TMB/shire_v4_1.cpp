@@ -79,7 +79,7 @@ Type objective_function<Type>::operator() ()
   // Catches
   DATA_ARRAY(catch_yf_obs); // obs catch by year and fleet
   DATA_ARRAY(catch_yf_error); // right now just 0.1 for all fleets and all years
-  
+  DATA_ARRAY(F_yf_HCR); // Total annual F per fleet in forecast years
   array<Type> catch_yaf_pred(tEnd, nage, nfleets_fish,2);  catch_yaf_pred.setZero();  // estimated catches at age by fleet
   array<Type> catch_yf_pred(tEnd,nfleets_fish,2);  catch_yf_pred.setZero();  
   array<Type> catch_yf_pred_total(tEnd,nfleets_fish);  catch_yf_pred_total.setZero();   
@@ -380,14 +380,6 @@ Type objective_function<Type>::operator() ()
   } // end srv
   
   //  END DATA & PARS, BEGIN MODEL //
-  // recdevs placeholder
-  // for(int k=0;k<(nstocks);k++){
-  //   for(int y=0;y<yRun;y++){
-  //     tildeR_yk(y,k) =0;
-  //   }
-  //   tildeR_initk(k) =0;
-  // }
-  // tildeR_yk.setZero();
   tildeR_initk.setZero();
   
   // Equilibrium Unfished numbers-at-age, subarea (outside of y loop)
@@ -525,9 +517,12 @@ Type objective_function<Type>::operator() ()
                 break;
               case 1: // length sel
                 // instantaneous version
-                instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-                  instF_yf(y, fish_flt,0);
-                
+                if(y < yRun){
+                  instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                    instF_yf(y, fish_flt,0);
+                } else{
+                  instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*0.5*F_yf_HCR(y,fish_flt);
+                }
                 catch_yaf_pred(y,a,fish_flt,0) +=
                   phi_if_fish(fish_flt,i)*
                   instF_yafs(y,a,fish_flt,s,0)*

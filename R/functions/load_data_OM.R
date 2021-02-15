@@ -118,8 +118,10 @@ load_data_OM <- function(seed = 731,
   Wnfishflts_acomp <- which(fltnames_acomp %in% fltnames_fish)  
   Wnsurvflts_acomp <- which(fltnames_acomp %in% fltnames_surv)
   
-  selType_surv <- ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
-                               fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)])=='AGE',0,1)
+  selType_surv <- c(fltnames$SELTYPE[fltnames$SURV], 
+                    fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)]) -1 
+  # ifelse(c(fltnames$SELTYPE[fltnames$SURV], 
+                               # fltnames$SELTYPE[fltnames$ACOMP][-c(Wnfishflts_acomp,Wnsurvflts_acomp)])=='AGE',0,1)
   # selType_surv <- seltype_surv0-1
   
   ## later this might need to include lcomps

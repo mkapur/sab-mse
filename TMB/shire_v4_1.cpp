@@ -139,7 +139,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(b_y); // bias adjustment factor by year
   PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
   // PARAMETER_MATRIX(tildeR_yk); //random; recdev by stock and year
-  PARAMETER_VECTOR(tildeR_y); //random; recdev by  year
+  PARAMETER_VECTOR(tildeR_y); //random; recdev by year
   
   PARAMETER(logSDR);
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
@@ -817,9 +817,18 @@ Type objective_function<Type>::operator() ()
     // R_yi, R_yk
     for(int k=0;k<(nstocks);k++){
       // SSB_yk already has summation
+      if(y < nyear){
       R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
         (SSB_0k(k)*(1-h_k(k))+
           SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));
+      } else {
+        SIMULATE{
+          tildeR_y(y) = rlnorm(1,0, logSDR);
+          R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
+            (SSB_0k(k)*(1-h_k(k))+
+              SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));
+        }
+      } // end forecast years
     }  // end stocks
     // // std::cout << y << "\t" << "end R_yk" << "\n";
     for(int i=0;i<(nspace);i++){

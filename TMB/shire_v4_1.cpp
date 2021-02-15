@@ -468,30 +468,30 @@ Type objective_function<Type>::operator() ()
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if((y < nyear) & (catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
         Type denom = 0; // exploitable biomass
-  //       for(int s=0;s<nsex;s++){
-  //         for(int i=0;i<(nspace);i++){
-  //           for(int a=0;a<(nage);a++){
-  //             switch(selType_fish(fish_flt)){
-  //             case 0: // age sel
-  //               denom += phi_if_fish(fish_flt,i)*
-  //                 fsh_slx_yafs(y,a,fish_flt,s)*
-  //                 N_yais_beg(y,a,i,s)*
-  //                 wtatlen_kab(phi_ik2(i),0)*
-  //                 pow( Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-  //               break;
-  //             case 1: // length sel
-  //               denom += phi_if_fish(fish_flt,i)*
-  //                 fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
-  //                 N_yais_beg(y,a,i,s)*
-  //                 // mla_yais(y,a,i,s)*
-  //                 // Length_yais_beg(y,a,i,s)*
-  //                 wtatlen_kab(phi_ik2(i),0)*
-  //                 pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-  //               break;
-  //             } // end selType_fish
-  //           } // end age
-  //         } // end space
-  //       } // end sex
+        for(int s=0;s<nsex;s++){
+          for(int i=0;i<(nspace);i++){
+            for(int a=0;a<(nage);a++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_beg(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              case 1: // length sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+                  N_yais_beg(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
+                  // Length_yais_beg(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              } // end selType_fish
+            } // end age
+          } // end space
+        } // end sex
           instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
       } else if(y >= nyear){
           SIMULATE{

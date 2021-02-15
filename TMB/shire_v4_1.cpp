@@ -501,82 +501,82 @@ Type objective_function<Type>::operator() ()
           } // end simulate
         } // end if forecast years
     } // end nfleets_fish
-     // predicted catches first half of year
-     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-       if((catch_yf_obs(y,fish_flt+1) != Type(-1.0))  | (y > nyear) ){
-         for(int a=0;a<(nage);a++){
-           for(int i=0;i<(nspace);i++){
-             for(int s=0;s<nsex;s++){
-               switch(selType_fish(fish_flt)){
-               case 0: // age sel
-                 // instantaneous F x Slx for each fleet
-                 instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
-                   instF_yf(y, fish_flt,0);
-                 
-                 catch_yaf_pred(y,a,fish_flt,0) +=
-                   phi_if_fish(fish_flt,i)*
-                   instF_yafs(y,a,fish_flt,s,0) *
-                   N_yais_beg(y,a,i,s)*
-                   wtatlen_kab(phi_ik2(i),0)*
-                   pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                 break;
-               case 1: // length sel
-                 instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-                   instF_yf(y, fish_flt,0);
-                 
-                 catch_yaf_pred(y,a,fish_flt,0) +=
-                   phi_if_fish(fish_flt,i)*
-                   instF_yafs(y,a,fish_flt,s,0)*
-                   N_yais_beg(y,a,i,s)*
-                   // mla_yais(y,a,i,s)*
-                   // Length_yais_beg(y,a,i,s)*
-                   wtatlen_kab(phi_ik2(i),0)*
-                   pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-                 break;
-               } // end selType_fish
-             } // end sex
-           } // end space
-           catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
-           } // end age
-       } // end if obs != -1
-     } // end nfleets_fish
-    // 
-    // // sum instF_yafs over fleets to get F in i  
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //     for(int a=1;a<(nage);a++){
-    //       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //         instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0);
-    //       } // end fish fleets
-    //     } // end sex
-    //   } // end ages
-    // } // end subarea i
-    // 
-    // // build N_yais_mid
-    // // N- and Nominal Length - at-age for the middle of this year 
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //     N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
-    //     for(int a=1;a<(nage);a++){
-    //       Type pLeave = 0.0; Type NCome = 0.0;
-    //       for(int j=0;j<(nspace);j++){
-    //         if(i != j){
-    //           pLeave += X_ijas(i,j,a,s);
-    //           NCome += X_ijas(j,i,a,s)*
-    //             N_yais_beg(y,a,j,s)*
-    //             (1-instF_yais(y,a,j,s,0))*
-    //             exp(-mort_k(phi_ik2(j))/2);
-    //         } // end i != j
-    //       } // end subareas j
-    //       N_yais_mid(y,a,i,s) = ((1-pLeave)*
-    //         (1-instF_yais(y,a,i,s,0))*
-    //         N_yais_beg(y,a,i,s)*
-    //         exp(-mort_k(phi_ik2(i))/2) +
-    //         NCome);
-    //     } // end ages for N
-    //     // std::cout << y << "\t" << i << "\t" << s << "\t" << N_yais_mid(y,1,i,s) << " NAA_MIDa=1" << "\n";
-    //   } // end subareas i
-    // } // end sexes
+    // predicted catches first half of year
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if((catch_yf_obs(y,fish_flt+1) != Type(-1.0))  | (y > nyear) ){
+        for(int a=0;a<(nage);a++){
+          for(int i=0;i<(nspace);i++){
+            for(int s=0;s<nsex;s++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                // instantaneous F x Slx for each fleet
+                instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
+                  instF_yf(y, fish_flt,0);
+                
+                catch_yaf_pred(y,a,fish_flt,0) +=
+                  phi_if_fish(fish_flt,i)*
+                  instF_yafs(y,a,fish_flt,s,0) *
+                  N_yais_beg(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              case 1: // length sel
+                instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                  instF_yf(y, fish_flt,0);
+                
+                catch_yaf_pred(y,a,fish_flt,0) +=
+                  phi_if_fish(fish_flt,i)*
+                  instF_yafs(y,a,fish_flt,s,0)*
+                  N_yais_beg(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
+                  // Length_yais_beg(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              } // end selType_fish
+            } // end sex
+          } // end space
+          catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
+        } // end age
+      } // end if obs != -1
+    } // end nfleets_fish
+
+   sum instF_yafs over fleets to get F in i
+   for(int i=0;i<(nspace);i++){
+     for(int s=0;s<nsex;s++){
+       for(int a=1;a<(nage);a++){
+         for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+           instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0);
+         } // end fish fleets
+       } // end sex
+     } // end ages
+   } // end subarea i
+
+    // build N_yais_mid
+    // N- and Nominal Length - at-age for the middle of this year 
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        N_yais_mid(y,0,i,s) = N_yais_beg(y,0,i,s)*exp(-mort_k(phi_ik2(i))/2);
+        for(int a=1;a<(nage);a++){
+          Type pLeave = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              pLeave += X_ijas(i,j,a,s);
+              NCome += X_ijas(j,i,a,s)*
+                N_yais_beg(y,a,j,s)*
+                (1-instF_yais(y,a,j,s,0))*
+                exp(-mort_k(phi_ik2(j))/2);
+            } // end i != j
+          } // end subareas j
+          N_yais_mid(y,a,i,s) = ((1-pLeave)*
+            (1-instF_yais(y,a,i,s,0))*
+            N_yais_beg(y,a,i,s)*
+            exp(-mort_k(phi_ik2(i))/2) +
+            NCome);
+        } // end ages for N
+        // std::cout << y << "\t" << i << "\t" << s << "\t" << N_yais_mid(y,1,i,s) << " NAA_MIDa=1" << "\n";
+      } // end subareas i
+    } // end sexes
     // 
     // // Calc midyear LAA with half growth and reweighting due to movement
     // // note that we use the N and L_begs since we wanna know what numbers/lengths

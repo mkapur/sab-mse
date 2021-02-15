@@ -862,7 +862,7 @@ Type objective_function<Type>::operator() ()
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
         for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-          if(surv_yf_obs(y,surv_flt) != Type(-1.0) | y > nyear){
+          if((surv_yf_obs(y,surv_flt) != Type(-1.0))  | (y > nyear) ){
             switch(selType_surv(surv_flt)){
             case 0: // age sel
               for(int a=0;a<nage;a++){

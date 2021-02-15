@@ -658,7 +658,7 @@ save(growthPars,
 # save(mla_late_ais, file = here('input','input_data','mla_late_ais.rdata'))
 ## most likely length at age using deterministic growth curve
 phi_ik2 <- df$phi_ik2+1 ## pull it out of here and add 1 for R
-mla_yais = array(NA, dim = c(nyear,nage,nspace,2),  
+mla_yais = array(NA, dim = c(100,nage,nspace,2),  
                  dimnames = list(years, age, inames, c('Fem','Mal')))
 for(y in 1:dim(mla_yais)[1]){
   for(a in 1:dim(mla_yais)[2]){

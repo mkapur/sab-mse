@@ -438,37 +438,36 @@ Type objective_function<Type>::operator() ()
 
   
   // std::cout << " Here" << "\n";
-  // for(int y=0;y<tEnd;y++){ // Start y loop
+  for(int y=0;y<tEnd;y++){ // Start y loop
   //   // std::cout << y << " \t" << std::endl;
-  //   
   //   // define year zero numbers at age
-  //   if (y == 0){
-  //     for(int i=0;i<(nspace);i++){
-  //       for(int s=0;s<nsex;s++){
-  //         for(int a=0;a<(nage);a++){ 
-  //           N_yais_beg(0,a,i,s) = Ninit_ais(a,i,s);
-  //         } // end ages
-  //         Length_yais_beg(0,0,i,s) = 0;
-  //         Type lenslope = 0.0;
-  //         lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
-  //         for(int a=0;a<3;a++){
-  //           Length_yais_beg(y,a,i,s) = lenslope*a;
-  //         } // end linear age
-  //         // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
-  //         for(int a=3;a<(nage);a++){
-  //           Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
-  //             exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
-  //         }// end ages
-  //         
-  //       } // end sexes
-  //     } // end subareas i
-  //   } // end y == 0
-  //   // std::cout << y << " did year zero" << "\n";
+    if (y == 0){
+      for(int i=0;i<(nspace);i++){
+        for(int s=0;s<nsex;s++){
+          for(int a=0;a<(nage);a++){
+            N_yais_beg(0,a,i,s) = Ninit_ais(a,i,s);
+          } // end ages
+          Length_yais_beg(0,0,i,s) = 0;
+          Type lenslope = 0.0;
+          lenslope = L1_yk(y,phi_ik2(i),s)/ 3;
+          for(int a=0;a<3;a++){
+            Length_yais_beg(y,a,i,s) = lenslope*a;
+          } // end linear age
+          // beginning year LAA for other ages (incl plus group; no reweighting needed for beg)
+          for(int a=3;a<(nage);a++){
+            Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
+              exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
+          }// end ages
+
+        } // end sexes
+      } // end subareas i
+    } // end y == 0
+    // std::cout << y << " did year zero" << "\n";
   //   
   //   // F denom at first half of year
-  //   for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-  //     if((catch_yf_obs(y,fish_flt+1) != Type(-1.0)) | (y > nyear)){
-  //       Type denom = 0; // exploitable biomass
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if((y < nyear) & (catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
+        Type denom = 0; // exploitable biomass
   //       for(int s=0;s<nsex;s++){
   //         for(int i=0;i<(nspace);i++){
   //           for(int a=0;a<(nage);a++){
@@ -493,15 +492,14 @@ Type objective_function<Type>::operator() ()
   //           } // end age
   //         } // end space
   //       } // end sex
-  //       if(y < nyear){
-  //         instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
-  //       } else{
-  //         SIMULATE{
-  //           instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y,fish_flt);
-  //         } // end simulate
-  //       } // end if forecast years
-  //     } // end -1 NA trap
-  //   } // end nfleets_fish
+          instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
+      } else if(y > nyear){
+          SIMULATE{
+            instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y,fish_flt);
+          } // end simulate
+        } // end if forecast years
+      // } // end -1 NA trap
+    } // end nfleets_fish
     // 
     // // predicted catches first half of year
     // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -1026,7 +1024,7 @@ Type objective_function<Type>::operator() ()
     // //     } // end space
     // //   } // end age
     // // } // end acomp fleets
-  // } // END yRUN YEARS; END MODEL RUN
+  } // END tEnd; END MODEL RUN
   
   
   // // LIKELIHOODS //

@@ -1059,22 +1059,22 @@ Type objective_function<Type>::operator() ()
                 sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
             } else{
-              //   sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-              //     acomp_yafs_obs(y,a,acomp_flt,s) +
-              //     pi_acomp(acomp_flt)*
-              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-              //     surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
-              //     lgamma(pi_acomp(acomp_flt)*
-              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-              //     surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
-              // 
-              //   ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-              //     sum1(y)+
-              //     lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-              //     lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-              //     pi_acomp(acomp_flt)*
-              //     Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-              //     sum2(y);
+                sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                  acomp_yafs_obs(y,a,acomp_flt,s) +
+                  pi_acomp(acomp_flt)*
+                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                  surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
+                  lgamma(pi_acomp(acomp_flt)*
+                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                  surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
+
+                ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+                  sum1(y)+
+                  lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+                  lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+                  pi_acomp(acomp_flt)*
+                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+                  sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
             } // end switch for comm or surv type
           } // end acomp flag

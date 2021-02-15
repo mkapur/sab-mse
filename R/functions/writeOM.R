@@ -54,7 +54,7 @@ writeOM <- function(justPlots = FALSE,
   
   years <- 1960:2019
   nyear <- length(years)
-  tEnd <- length(years)
+  tEnd <- df$tEnd
   age <- 0:70 
   nage <- length(age)
   
@@ -101,23 +101,23 @@ writeOM <- function(justPlots = FALSE,
   par(mfrow = c(2,3))
   for(i in 1:6){
     ylt = 20*max(sum(dat$N_yais_end[2,,i,][!is.na(dat$N_yais_end[2,,i,])]),
-                 sum(dat$N_yais_end[df$yRun,,i,][!is.na(dat$N_yais_end[df$yRun,,i,])]))
-    ylt = 1.3*max(rowSums(dat$N_yais_beg[1:(df$yRun),,i,]))
-    plot(rowSums(dat$N_yais_beg[1:(df$yRun),,i,]),
+                 sum(dat$N_yais_end[nyear,,i,][!is.na(dat$N_yais_end[nyear,,i,])]))
+    ylt = 1.3*max(rowSums(dat$N_yais_beg[1:(nyear),,i,]))
+    plot(rowSums(dat$N_yais_beg[1:(nyear),,i,]),
          type = 'l',
          lwd = 2, 
          col = scales::alpha(subareaPal[i],0.2),
          main = inames[i], 
          col.main =subareaPal[i], 
          ylim = c(0,ylt),
-         xlim = c(0,df$yRun-1),xaxt='n',
+         xlim = c(0,nyear-1),xaxt='n',
          xlab = "Model Year", 
          ylab = 'Numbers (M+F)')
-    lines(rowSums(dat$N_yais_mid[1:(df$yRun),,i,]),
+    lines(rowSums(dat$N_yais_mid[1:(nyear),,i,]),
           type = 'l',
           lwd = 3,
           col = scales::alpha(subareaPal[i],0.4))
-    lines(rowSums(dat$N_yais_end[1:(df$yRun),,i,]),
+    lines(rowSums(dat$N_yais_end[1:(nyear),,i,]),
           type = 'l',
           lwd = 3,
           col = scales::alpha(subareaPal[i],0.8))
@@ -127,7 +127,7 @@ writeOM <- function(justPlots = FALSE,
            legend = c("beg",
                       "mid (move + 1/2 fishing + 1/2 M)",
                       "end (1/2 fishing + 1/2 M)"), lty =1, lwd = 5)
-    axis(1, at = seq(1,df$yRun,5), labels = years[seq(1,df$yRun,5)])
+    axis(1, at = seq(1,nyear,5), labels = years[seq(1,nyear,5)])
   }
   if(!justPlots) dev.off()
   
@@ -141,7 +141,7 @@ writeOM <- function(justPlots = FALSE,
     scale_color_manual(values = rev(demPal)) +
     geom_line(lwd = 2) + 
     labs(x = 'Modeled Year',y = 'SSB', color = '') +
-    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
+    scale_x_continuous(limits = c(1960,1959+nyear)) +
     ggsidekick::theme_sleek(base_size = 18) +
     theme(legend.position = c(0.8,0.8))
     # theme(legend.position = c(0.8,0.8),
@@ -215,7 +215,7 @@ writeOM <- function(justPlots = FALSE,
     scale_color_manual(values = mgmtPal)+
     geom_point()+ 
     ggsidekick::theme_sleek() +
-    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
+    scale_x_continuous(limits = c(1960,1959+nyear)) +
     labs(x = 'Modeled Year',y = 'log SSB (units vary)', color = 'Mgmt Region') +
     facet_wrap(~REG+variable,scales = 'free_y', ncol = 2)
   # facet_wrap(~REG,scales = 'free_y')
@@ -239,7 +239,7 @@ writeOM <- function(justPlots = FALSE,
     scale_color_manual(values = mgmtPal) +
     geom_point()+ 
     ggsidekick::theme_sleek() +
-    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
+    scale_x_continuous(limits = c(1960,1959+nyear)) +
     labs(x = 'Modeled Year',y = ' SSB (units vary)', color = 'Mgmt Region') +
     facet_wrap(~REG+variable,scales = 'free_y', ncol = 2)
   # facet_wrap(~REG,scales = 'free_y')
@@ -403,7 +403,7 @@ writeOM <- function(justPlots = FALSE,
     facet_wrap(~ variable, scales = 'free')
   
   ## catch pred by fleet ----
-  catch_yf_pred_totalt <- data.frame(dat$catch_yf_pred_total)
+  catch_yf_pred_totalt <- data.frame(dat$catch_yf_pred_total)[1:nyear,]
   names(catch_yf_pred_totalt) <- unlist(df$fltnames_fish)
   catch_yf_pred_totalt <- catch_yf_pred_totalt %>%
     mutate(Year = years) %>%
@@ -413,7 +413,7 @@ writeOM <- function(justPlots = FALSE,
     mutate(REG = substr(variable,0,2)) %>% 
     filter(value != 0  | variable == 'AK_FIX')
   
-  catch_yf_obst <- df$catch_yf_obs %>%  data.frame() %>%select(-Year) 
+  catch_yf_obst <- df$catch_yf_obs[1:nyear,] %>%  data.frame() %>%select(-Year) 
   
   catch_yf_obst <- catch_yf_obst %>%
     mutate(Year = years) %>%
@@ -433,7 +433,7 @@ writeOM <- function(justPlots = FALSE,
          aes(x = Year, y = value, color = variable)) +
     geom_line(data = catch_yf_pred_totalt, lwd = 0.75) +
     scale_color_manual(values = fishfltPal) +
-    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
+    scale_x_continuous(limits = c(1960,1959+nyear)) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black',width=0) +
     theme_sleek() + 
@@ -463,7 +463,7 @@ writeOM <- function(justPlots = FALSE,
          aes(x = Year, y = totC, color = REG)) +
     geom_line(data = catch_yf_pred_totalm, lwd = 1.1) +
     scale_color_manual(values = mgmtPal) +
-    scale_x_continuous(limits = c(1960,1959+df$yRun)) +
+    scale_x_continuous(limits = c(1960,1959+nyear)) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black',width=0) +
     theme_sleek() + 
@@ -477,7 +477,7 @@ writeOM <- function(justPlots = FALSE,
   
   ## survey preds ----
   
-  survey_yf_predt <- data.frame(dat$surv_yf_pred)
+  survey_yf_predt <- data.frame(dat$surv_yf_pred)[1:nyear,]
   names(survey_yf_predt) <- unlist(df$fltnames_surv)
   # names(survey_yf_predt)[3:4] <- c('BC_OFFStd','BC_StRs')
   survey_yf_predt <- survey_yf_predt %>%
@@ -487,13 +487,13 @@ writeOM <- function(justPlots = FALSE,
     mutate(REG = substr(variable,0,2)) %>% 
     filter(value > 0)
   
-  survey_yf_errt <- data.frame(df$surv_yf_err) %>%    
+  survey_yf_errt <- data.frame(df$surv_yf_err)[1:nyear,] %>%    
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
     filter(!is.na(value)) 
   
   
-  survey_yf_obst <- data.frame( df$surv_yf_obs)  %>%
+  survey_yf_obst <- data.frame( df$surv_yf_obs)[1:nyear,]   %>%
     mutate(Year = years) %>%
     melt(id = 'Year') %>%
     filter(value > 0) %>%
@@ -523,9 +523,9 @@ writeOM <- function(justPlots = FALSE,
     scale_color_manual(values = survfltPal) +
     geom_point(pch = 1, fill = NA, col = 'black') +
     geom_errorbar(aes(ymin = lci, ymax = uci), col = 'black',width=0) +
-    scale_x_continuous(limits = c(1980,ifelse(df$yRun == 59,2021,1959+df$yRun)), 
-                       breaks = seq(1980,1960+df$yRun,10),
-                       labels = seq(1980,1960+df$yRun,10)) +
+    scale_x_continuous(limits = c(1980,1960+nyear), 
+                       breaks = seq(1980,1960+nyear,10),
+                       labels = seq(1980,1960+nyear,10)) +
     theme_sleek() + 
     theme(legend.position = 'none')+
     labs(y = 'survey', color = 'Fishing Fleet')+
@@ -540,7 +540,7 @@ writeOM <- function(justPlots = FALSE,
   
   templyais <-  templyais_beg <-templyais_mid <-templyais_end <- NULL
   for(i in 1:6){
-    for(y in 1:df$yRun){
+    for(y in 1:nyear){
       templyais_beg <- bind_rows(templyais_beg,
                                  dat$Length_yais_beg[y,,i,] %>%
                                    melt() %>% 

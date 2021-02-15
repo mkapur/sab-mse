@@ -1054,109 +1054,96 @@ dev.off()
 spmat <- data.frame(subarea = c('A4',"A3","B3","B2","C2","C1"),
                     stock = c("R4","R3","R3","R2","R2","R1"),
                     mgmt = c("AI","AK", rep("BC",2), rep("CC",2)))
-bcnom <- read.csv(here("input","raw_data","survey","BC_early_index.csv")) %>%
-  mutate(CPUE =  nominal.Trap.CPUE,
-    SE = 0.317,#, BC email said "in log space" so leave that, adj for plotting only
-         lci = (CPUE-1.96*exp(SE))*1e3,
-         uci = (CPUE+1.96*exp(SE))*1e3, 
-    Fleet = "BC_EARLY") %>%
-  select(YEAR, CPUE, SE, Fleet)
-bcnom[bcnom < 0 ] <- NA ## -1, -1000
-names(bcnom) <- c('Year','value', 'sigma', 'fleet')
+
+bcoffstd <- read.csv(here("input","raw_data","survey","bcom_indexseries.csv")) %>%
+  filter(YEAR < 2020) %>%
+  select("value" = std..survey,   "Year" = YEAR) %>%
+  mutate(sigma = 0.29, fleet = "BC_OFFStd") %>%
+  select(Year, value, sigma, fleet)
+bcstrs<- read.csv(here("input","raw_data","survey","bcom_indexseries.csv")) %>%
+  filter(YEAR < 2020) %>%
+  select("value" = StRS.survey,   "Year" = YEAR) %>%
+  mutate(sigma = 0.21,fleet = "BC_StRs") %>%
+  select(Year, value, sigma, fleet) 
+
 #* survey error ----
 ## reformat this and save      
-survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=WCGBTS.csv"))  %>% ## VAST stdization
-# survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization
-# survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-# survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
-  distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
-  filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
-  # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
+survsig <- read.csv(here("input","raw_data","survey","Indices_SS3_2021-02-15AK_WC_VAST.csv"))  %>% 
   mutate(value = Estimate_metric_tons,
+         fleet = Fleet,
          sigma = SD_log,
-         # sigma = log(SD_mt),
-         fleet = Fleet, 
-         mgmt = fleet, 
          type = 'survey') %>%
   select(Year, value, sigma, fleet) %>%
-  bind_rows(bcnom) %>%
+  bind_rows(bcoffstd, bcstrs) %>%
   select(-value) %>%
   pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
   merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
-  select(-Year) 
+  select(-Year, "AK_VAST_W" = AI, "AK_VAST_E" = AK, "WC_VAST" = CC) %>%
+  mutate("BC_OFFStd" = 0.29, "BC_StRs" = 0.21)  %>%
+  select("AK_VAST_W","AK_VAST_E","BC_OFFStd","BC_StRs","WC_VAST")
 
-survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=WCGBTS.csv"))  %>% ## VAST stdization
-  # survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_LATE.csv"))  %>% ## VAST stdization
-  # survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-  # survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3.csv"))  %>% ## VAST stdization
-  distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
-  filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
-  # merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
+survsigMT <- read.csv(here("input","raw_data","survey","Indices_SS3_2021-02-15AK_WC_VAST.csv"))  %>% ## VAST stdization
   mutate(value = Estimate_metric_tons,
          sigma = SD_mt, 
          fleet = Fleet, 
-         mgmt = fleet, 
          type = 'survey') %>%
   select(Year, value, sigma, fleet) %>%
-  bind_rows(bcnom) %>%
+  bind_rows(bcoffstd, bcstrs) %>%  
   select(-value) %>%
   pivot_wider(., id_cols = Year, names_from = fleet, values_from = sigma) %>%
   merge(., data.frame('Year' = 1960:2019), all = TRUE) %>%
-  select(-Year) 
+  select(-Year, "AK_VAST_W" = AI, "AK_VAST_E" = AK, "WC_VAST" = CC) %>%
+  select("AK_VAST_W","AK_VAST_E","BC_OFFStd","BC_StRs","WC_VAST")
 
-names(survsig) <-names(survsigMT) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,2,1,3)])
-write.csv(survsig %>% select(fltnames_surv),here("input","input_data","OM_indices_sigma_BaseQ=WCGBTS.csv"),row.names = FALSE)
-write.csv(survsigMT %>% select(fltnames_surv),
-          here("input","input_data","OM_indices_sigmaMT_BaseQ=WCGBTS.csv"),row.names = FALSE)
+# names(survsig) <-names(survsigMT) <- paste(fltnames$NAME[fltnames$SURV][c(5,4,2,1,3)])
+write.csv(survsig,here("input","input_data","OM_indices_sigma_STITCH.csv"),row.names = FALSE)
+write.csv(survsigMT, here("input","input_data","OM_indices_sigmaMT_STITCH.csv"),row.names = FALSE)
 
-## make columns as fleets, include extra  bc surv
-names(bcnom) <- c('Year','value', 'sigma', 'Fleet')
 #* survey biomass ----
 # vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-01-23v3.csv"))  %>% ## VAST stdization
-vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2020-09-22v3_BaseQ=GOA_Late.csv"))  %>% ## VAST stdization 
-  filter(Fleet != "AllAreas" & Fleet != "Eastern_Bering_Sea") %>%
-  merge(.,spmat, by.x = "Fleet", by.y = "mgmt", all.y = FALSE) %>%
-  distinct(Fleet, Year, Estimate_metric_tons, .keep_all = TRUE) %>% ## remove any dupes
+vast0 <- read.csv(here("input","raw_data","survey","Indices_SS3_2021-02-15AK_WC_VAST.csv"))  %>% ## VAST stdization 
   mutate(value = Estimate_metric_tons,
-         # sigma = SD_log, 
          sigma =SD_mt,
-         Fleet = Fleet, 
-         mgmt = Fleet, 
-         type = 'survey') %>%
-  select(Year, Fleet, type, value, sigma) %>%
-  arrange(.,Year,Fleet) 
+         fleet = Fleet) %>%
+  select(Year, fleet,  value, sigma) %>%
+  arrange(.,Year,fleet) 
 surv_vals <- vast0 %>%
-  select(Year, Fleet, value) %>%
-  rbind(., bcnom[,c(1,4,2)]) %>%
-  arrange(.,Year,Fleet) %>%
-  tidyr::pivot_wider(names_from= Fleet, values_from = value) %>%
-  filter(Year > 1964 & Year < 2020) %>%
-merge(., data.frame('Year' = 1960:2019), all = TRUE) 
+  select(Year, fleet, value) %>%
+  rbind(., bcoffstd[,c('Year','fleet','value')], bcstrs[,c('Year','fleet','value')]) %>%
+  arrange(.,Year,fleet) %>%
+  tidyr::pivot_wider(names_from= fleet, values_from = value) %>%
+  merge(., data.frame('Year' = 1960:2019), all.y = TRUE) %>%
+  select(-Year, "AK_VAST_W" = AI, "AK_VAST_E" = AK, "WC_VAST" = CC) %>%
+  select("AK_VAST_W","AK_VAST_E","BC_OFFStd","BC_StRs","WC_VAST")
 
-names(surv_vals)[2:6] <- paste(fltnames$NAME[fltnames$SURV][c(3,1,2,4,5)]) 
+surv_vals[is.na(surv_vals)] <- -1
 
-write.csv(surv_vals %>% select(fltnames_surv), here("input","input_data","OM_indices_BaseQ=WCGBTS.csv"),row.names = FALSE) ## save in special order
+write.csv(surv_vals, here("input","input_data","OM_indices_STITCH.csv"),row.names = FALSE) ## save in special order
 #* survey plot ----
 surv_vals %>%
-  mutate(Year = 1960:2019,
-         BC_EARLY = 10*BC_EARLY) %>%
+  mutate(Year = 1960:2019) %>%
   melt(id = "Year") %>%
+  filter(value > 0) %>%
   ggplot(., aes(x = Year, y = value, color = variable)) +
-  theme_sleek() + theme(legend.position = c(0.8,0.8)) +
+  theme_sleek(base_size = 16) + 
+  theme(legend.position = c(0.8,0.2)) +
   scale_color_manual(values = survfltPal)+
   scale_x_continuous(breaks = seq(1970,2020,10)) +
   geom_line(lwd = 1) +
-  labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') +
-  labs(subtitle = "BC_EARLY has been multiplied by 10 for comparison")
+  labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey fleet') +
+  facet_wrap(~variable, scales = 'free_y')
+
 ggsave(last_plot(),
-       file = here('input','input_data','input_figs','OM_indices_BaseQ=WCGBTS.png'),
-       height = 6, width = 6, unit = 'in', dpi = 420)
+       file = here('input','input_data','input_figs',
+                   'OM_indices_STITCH.png'),
+       height = 8, width = 10, unit = 'in', dpi = 420)
 
 #* survey + error plot ----
 surv_vals %>%
   # mutate(BC_EARLY = BC_EARLY*1000) %>%
   mutate(Year = 1960:2019) %>%  
-  melt(., id = c('Year')) %>% 
+  melt(., id = c('Year')) %>%  
+  filter(value > 0) %>%
   merge(., 
         survsigMT %>%
           # mutate(BC_EARLY = BC_EARLY*1000) %>%
@@ -1166,18 +1153,19 @@ surv_vals %>%
   mutate(lci = value.x-value.y, uci = value.x + value.y) %>%
   # filter(variable == 'BC_VAST') %>%
   ggplot(., aes(x = Year, y = value.x, color = variable)) +
-  theme_sleek() + theme(legend.position = c(0.8,0.8)) +
+  theme_sleek(base_size = 16) + theme(legend.position = c(0.8,0.2)) +
   scale_color_manual(values = survfltPal) +
   scale_fill_manual(values = survfltPal, guide = FALSE)+
   scale_x_continuous(limits =  c(1980,2020), breaks = seq(1980,2020,10)) +
   geom_line(lwd = 1) +
   geom_ribbon(aes(ymin =  lci, ymax = uci, color = variable, fill = variable), alpha = 0.2) +
-  labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey Fleet') #+
-  labs(subtitle = "BC_EARLY has been multiplied by 1000 for comparison")
+  labs(x = 'Year', y = 'Index of Relative Abundance', color = 'Survey fleet')+
+    facet_wrap(~variable, scales = 'free_y')
 
 ggsave(last_plot(),
-       file = here('input','input_data','input_figs','OM_indices-sigma-09-22-2020.png'),
-       height = 6, width = 6, unit = 'in', dpi = 420)
+       file = here('input','input_data','input_figs',
+                   'OM_indices-sigma-STITCH.png'),
+       height = 8, width = 10, unit = 'in', dpi = 420)
 ## Aging error ----
 ## from MH on google drive; just use the "first" for each mgmt region
 ## array of age and sd x ages

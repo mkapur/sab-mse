@@ -511,7 +511,7 @@ load_data_OM <- function(seed = 731,
     fltnames_fish = list(fltnames_fish),
     fltnames_acomp = list(fltnames_acomp),
     fltnames_lcomp = list(fltnames_lcomp),
-    
+
     phi_if_surv = phi_if_surv,
     phi_if_fish = phi_if_fish,
     phi_if_acomp = phi_if_acomp,

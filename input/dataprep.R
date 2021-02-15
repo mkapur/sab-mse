@@ -587,9 +587,9 @@ growPar$Sex <- substrRight(as.character(growPar$Sex), 1)## overwrite for loops
 ## note that in ch1, R4 and R5 correspond to our R3 and R4; also R4 still means the same
 ## thing (alaska) but is in the first column per phi_ik2
 Linf_yk <- L1_yk <- kappa_yk <- sigmaG_yk <- t0_yk <- array(NA, 
-                                                   dim = c(length(1960:2100),
+                                                   dim = c(length(1960:2039),
                                                            length(unique(growPar$Region)),2),
-                                                   dimnames = list(c(1960:2100),
+                                                   dimnames = list(c(1960:2039),
                                                                    c(paste0("R",1:4)),
                                                                    c('Fem','Mal')))
 
@@ -658,8 +658,8 @@ save(growthPars,
 # save(mla_late_ais, file = here('input','input_data','mla_late_ais.rdata'))
 ## most likely length at age using deterministic growth curve
 phi_ik2 <- df$phi_ik2+1 ## pull it out of here and add 1 for R
-mla_yais = array(NA, dim = c(nrow(Linf_yk),nage,nspace,2),  
-                 dimnames = list(years, age, inames, c('Fem','Mal')))
+mla_yais = array(NA, dim = c(nrow(Linf_yk),nage,nspace,2))#,  
+                 # dimnames = list(years, age, inames, c('Fem','Mal')))
 for(y in 1:dim(mla_yais)[1]){
   for(a in 1:dim(mla_yais)[2]){
     for(i in 1:dim(mla_yais)[3]){

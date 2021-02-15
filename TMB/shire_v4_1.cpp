@@ -967,22 +967,21 @@ Type objective_function<Type>::operator() ()
                 break;
               } //end selType switch for comms
             }else{
-              // if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
-              //   surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
-              //     acomp_yaf_temp(y,a,acomp_flt)*
-              //     srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
-              //     phi_if_acomp(acomp_flt,i)*
-              //     N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-              // }else{
-              //   for(int l=1;l<(LBins);l++){
-              //     surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
-              //       acomp_yaf_temp(y,a,acomp_flt)*
-              //       srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
-              //       phi_if_acomp(acomp_flt,i)*
-              //       mla_yais(y,a,i,s)*
-              //       N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-              //   } // end lbins
-              // } // end seltype surv ifelse
+              if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
+                  acomp_yaf_temp(y,a,acomp_flt)*
+                  srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
+                  phi_if_acomp(acomp_flt,i)*
+                  N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+              }else{
+                for(int l=1;l<(LBins);l++){
+                  surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
+                    acomp_yaf_temp(y,a,acomp_flt)*
+                    srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
+                    phi_if_acomp(acomp_flt,i)*
+                    N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+                } // end lbins
+              } // end seltype surv ifelse
             } // end acomp fleet type
           } // end sex
         } // end space

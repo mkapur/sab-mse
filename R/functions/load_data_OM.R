@@ -319,20 +319,20 @@ load_data_OM <- function(seed = 731,
   
   log_srv_slx_pars['AK_VAST_E','p1',1:srv_blks_size[,"AK_VAST_E"],] <- c(29.99999,40.00000)
   log_srv_slx_pars['AK_VAST_E','p2',1:srv_blks_size[,"AK_VAST_E"],] <- c(70.00000,54.99999)
-  if(tolower(x) == 'n'){
-    log_srv_slx_pars['BC_EARLY','p1',1:srv_blks_size[,"BC_EARLY"],] <- c(29.99999, 29.99999)
-    log_srv_slx_pars['BC_EARLY','p2',1:srv_blks_size[,"BC_EARLY"],] <- c(54.99999, 70.00000)
-    
-    log_srv_slx_pars['BC_VAST','p1',1:srv_blks_size[,"BC_VAST"],] <-  c(40.00000, 40.00000)
-    log_srv_slx_pars['BC_VAST','p2',1:srv_blks_size[,"BC_VAST"],] <- c(54.99999,54.99999)
-    
-    log_srv_slx_pars['BC_StRs','p1',1:srv_blks_size[,"BC_StRs"],] <- 64.2127 - 12.9197
-    log_srv_slx_pars['BC_StRs','p2',1:srv_blks_size[,"BC_StRs"],] <- 70
-    
-    log_srv_slx_pars['BC_SS','p1',1:srv_blks_size[,"BC_SS"],] <- 54.1045-4.55724
-    log_srv_slx_pars['BC_SS','p2',1:srv_blks_size[,"BC_SS"],] <- 65
-
-  } else{
+  # if(tolower(x) == 'n'){
+  #   log_srv_slx_pars['BC_EARLY','p1',1:srv_blks_size[,"BC_EARLY"],] <- c(29.99999, 29.99999)
+  #   log_srv_slx_pars['BC_EARLY','p2',1:srv_blks_size[,"BC_EARLY"],] <- c(54.99999, 70.00000)
+  #   
+  #   log_srv_slx_pars['BC_VAST','p1',1:srv_blks_size[,"BC_VAST"],] <-  c(40.00000, 40.00000)
+  #   log_srv_slx_pars['BC_VAST','p2',1:srv_blks_size[,"BC_VAST"],] <- c(54.99999,54.99999)
+  #   
+  #   log_srv_slx_pars['BC_StRs','p1',1:srv_blks_size[,"BC_StRs"],] <- 64.2127 - 12.9197
+  #   log_srv_slx_pars['BC_StRs','p2',1:srv_blks_size[,"BC_StRs"],] <- 70
+  #   
+  #   log_srv_slx_pars['BC_SS','p1',1:srv_blks_size[,"BC_SS"],] <- 54.1045-4.55724
+  #   log_srv_slx_pars['BC_SS','p2',1:srv_blks_size[,"BC_SS"],] <- 65
+  # 
+  # } else{
     log_srv_slx_pars['BC_OFFStd','p1',1:srv_blks_size[,"BC_OFFStd"],] <- c(29.99999, 29.99999)
     log_srv_slx_pars['BC_OFFStd','p2',1:srv_blks_size[,"BC_OFFStd"],] <- c(54.99999, 70.00000)
     

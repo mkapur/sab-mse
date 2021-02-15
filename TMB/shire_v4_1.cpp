@@ -463,7 +463,7 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
-  //   
+
   //   // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if((y < nyear) & (catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
@@ -498,49 +498,45 @@ Type objective_function<Type>::operator() ()
             instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y-nyear,fish_flt);
           } // end simulate
         } // end if forecast years
-      // } // end -1 NA trap
     } // end nfleets_fish
-    // 
-    // // predicted catches first half of year
-    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //   if(catch_yf_obs(y,fish_flt+1) != Type(-1.0) | y > nyear){
-    //     for(int a=0;a<(nage);a++){
-    //       for(int i=0;i<(nspace);i++){
-    //         for(int s=0;s<nsex;s++){
-    //           switch(selType_fish(fish_flt)){
-    //           case 0: // age sel
-    //             // instantaneous F x Slx for each fleet
-    //             instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
-    //               instF_yf(y, fish_flt,0);
-    //             
-    //             catch_yaf_pred(y,a,fish_flt,0) +=
-    //               phi_if_fish(fish_flt,i)*
-    //               instF_yafs(y,a,fish_flt,s,0) *
-    //               N_yais_beg(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             break;
-    //           case 1: // length sel
-    //             
-    //             instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-    //               instF_yf(y, fish_flt,0);
-    //             
-    //             catch_yaf_pred(y,a,fish_flt,0) +=
-    //               phi_if_fish(fish_flt,i)*
-    //               instF_yafs(y,a,fish_flt,s,0)*
-    //               N_yais_beg(y,a,i,s)*
-    //               // mla_yais(y,a,i,s)*
-    //               // Length_yais_beg(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             break;
-    //           } // end selType_fish
-    //         } // end sex
-    //       } // end space
-    //       catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
-    //     } // end age
-    //   } // end -1 NA trap
-    // } // end nfleets_fish
+     // predicted catches first half of year
+     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+       if((catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
+         for(int a=0;a<(nage);a++){
+           for(int i=0;i<(nspace);i++){
+             for(int s=0;s<nsex;s++){
+               switch(selType_fish(fish_flt)){
+               case 0: // age sel
+                 // instantaneous F x Slx for each fleet
+                 instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
+                   instF_yf(y, fish_flt,0);
+                 
+                 catch_yaf_pred(y,a,fish_flt,0) +=
+                   phi_if_fish(fish_flt,i)*
+                   instF_yafs(y,a,fish_flt,s,0) *
+                   N_yais_beg(y,a,i,s)*
+                   wtatlen_kab(phi_ik2(i),0)*
+                   pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                 break;
+               case 1: // length sel
+                 instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                   instF_yf(y, fish_flt,0);
+                 
+                 catch_yaf_pred(y,a,fish_flt,0) +=
+                   phi_if_fish(fish_flt,i)*
+                   instF_yafs(y,a,fish_flt,s,0)*
+                   N_yais_beg(y,a,i,s)*
+                   // mla_yais(y,a,i,s)*
+                   // Length_yais_beg(y,a,i,s)*
+                   wtatlen_kab(phi_ik2(i),0)*
+                   pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                 break;
+               } // end selType_fish
+             } // end sex
+           } // end space
+           catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
+         } // end age
+       } // end if forecast years    } // end nfleets_fish
     // 
     // // sum instF_yafs over fleets to get F in i  
     // for(int i=0;i<(nspace);i++){

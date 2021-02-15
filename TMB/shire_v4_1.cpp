@@ -464,7 +464,7 @@ Type objective_function<Type>::operator() ()
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
 
-  //   // F denom at first half of year
+  // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if((y < nyear) & (catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
         Type denom = 0; // exploitable biomass
@@ -541,7 +541,7 @@ Type objective_function<Type>::operator() ()
       } // end if obs != -1
     } // end nfleets_fish
 
-   sum instF_yafs over fleets to get F in i
+   // sum instF_yafs over fleets to get F in i
    for(int i=0;i<(nspace);i++){
      for(int s=0;s<nsex;s++){
        for(int a=1;a<(nage);a++){
@@ -581,58 +581,62 @@ Type objective_function<Type>::operator() ()
     // // Calc midyear LAA with half growth and reweighting due to movement
     // // note that we use the N and L_begs since we wanna know what numbers/lengths
     // // were present in other areas BEFORE movement (whereas Nmid records movement)
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=0;a<(nage);a++){
-    //       Type LCome = 0.0; Type NCome = 0.0;
-    //       for(int j=0;j<(nspace);j++){
-    //         if(i != j){
-    //           LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
-    //           NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
-    //         }
-    //       } // end subareas j
-    //       // concurrently calculate the expected midyear LAA given VB growth
-    //       // and reweight given the lengths and numbers of fish which came in
-    //       Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
-    //         (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
-    //         (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
-    //           (N_yais_mid(y,a,i,s)+NCome);
-    //     } // end ages
-    //   } // end subareas i
-    // } // end sexes
-    // // std::cout << y << "\t" << Length_yais_mid(y,5,1,1) << " LAA_mid_a=5i=1s=1" << "\n";
-    // 
-    // // F denom at second half of year
-    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //   if(catch_yf_obs(y,fish_flt+1) != Type(-1.0) | y > nyear){
-    //     Type denom = 0; // exploitable biomass
-    //     for(int s=0;s<nsex;s++){
-    //       for(int i=0;i<(nspace);i++){
-    //         for(int a=0;a<(nage);a++){
-    //           switch(selType_fish(fish_flt)){
-    //           case 0: // age sel
-    //             denom += phi_if_fish(fish_flt,i)*
-    //               fsh_slx_yafs(y,a,fish_flt,s)*
-    //               N_yais_mid(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow( Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             break;
-    //           case 1: // length sel
-    //             denom += phi_if_fish(fish_flt,i)*
-    //               fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
-    //               N_yais_mid(y,a,i,s)*
-    //               // mla_yais(y,a,i,s)*
-    //               // Length_yais_mid(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow( Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             break;
-    //           } // end selType_fish
-    //         } // end age
-    //       } // end space
-    //     } // end sex
-    //     instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
-    //   } // end -1 NA trap
-    // } // end nfleets_fish
+    for(int s=0;s<nsex;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage);a++){
+          Type LCome = 0.0; Type NCome = 0.0;
+          for(int j=0;j<(nspace);j++){
+            if(i != j){
+              LCome = phi_ij(i,j)*(LCome + (N_yais_beg(y,a,j,s)*Length_yais_beg(y,a,j,s))); // for numerator
+              NCome = phi_ij(i,j)*(NCome + N_yais_beg(y,a,j,s)); // for denom, incoming no. from elsewhere
+            }
+          } // end subareas j
+          // concurrently calculate the expected midyear LAA given VB growth
+          // and reweight given the lengths and numbers of fish which came in
+          Length_yais_mid(y,a,i,s) =(N_yais_mid(y,a,i,s)*(Length_yais_beg(y,a,i,s) +
+            (Linf_yk(y,phi_ik2(i),s)-Length_yais_beg(y,a,i,s))*
+            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))) + LCome)/
+              (N_yais_mid(y,a,i,s)+NCome);
+        } // end ages
+      } // end subareas i
+    } // end sexes
+    // std::cout << y << "\t" << Length_yais_mid(y,5,1,1) << " LAA_mid_a=5i=1s=1" << "\n";
+
+    // F denom at second half of year
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      if((y < nyear) & (catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
+        Type denom = 0; // exploitable biomass
+        for(int s=0;s<nsex;s++){
+          for(int i=0;i<(nspace);i++){
+            for(int a=0;a<(nage);a++){
+              switch(selType_fish(fish_flt)){
+              case 0: // age sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y,a,fish_flt,s)*
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              case 1: // length sel
+                denom += phi_if_fish(fish_flt,i)*
+                  fsh_slx_yafs(y, mla_yais(y,a,i,s),fish_flt,s)*
+                  N_yais_mid(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
+                  // Length_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow( Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+                break;
+              } // end selType_fish
+            } // end age
+          } // end space
+        } // end sex
+        instF_yf(y,fish_flt,1) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
+      } else if(y >= nyear){
+        SIMULATE{
+          instF_yf(y,fish_flt,1) = 0.5*F_yf_HCR(y-nyear,fish_flt);
+        } // end simulate
+      } // end if forecast years
+    } // end nfleets_fish
     // 
     // // predicted catches second half of year
     // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){

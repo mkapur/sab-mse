@@ -91,7 +91,8 @@ nstocks = 4
     # }
       ## position in all comm fisheries (for indexing preds...)
     phi_ff_acomp[acomp_flt_type == 0,"commacomp_pos"] <- 
-      which(fltnames_fish %in% fltnames_acomp[acomp_flt_type == 0])-1
+      1:length( which(acomp_flt_type == 0))-1
+      # which(fltnames_fish %in% fltnames_acomp[acomp_flt_type == 0])-1
     
     phi_ff_acomp[,"nsamp_pos"] <- 0:(nrow(phi_ff_acomp)-1)
     

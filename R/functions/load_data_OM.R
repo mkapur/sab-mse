@@ -25,8 +25,8 @@ load_data_OM <- function(seed = 731,
   if(nspace == 1 & move) stop("can't have movement with fully pooled model")
 
   years <- 1960:(myear+yr_future)
-  nyear <- length(years)
-  tEnd <- length(years)
+  nyear <- length(1960:myear) ## only years with obs data
+  tEnd <- length(years) ## full monty
   age <- 0:70 
   nage <- length(age)
   
@@ -208,7 +208,7 @@ load_data_OM <- function(seed = 731,
 
   
   ## build b_y ramp ----
-  b_y <- matrix(NA, nyear)
+  b_y <- matrix(NA, tEnd)
   Yr <- 1960:max(years)
   # Parameters
   yb_1 <- 1960 #_last_early_yr_nobias_adj_in_MPD

@@ -536,7 +536,7 @@ Type objective_function<Type>::operator() ()
            } // end space
            catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
          } // end age
-       } // end if forecast years    } // end nfleets_fish
+       } // end nfleets_fish
     // 
     // // sum instF_yafs over fleets to get F in i  
     // for(int i=0;i<(nspace);i++){

@@ -704,8 +704,7 @@ Type objective_function<Type>::operator() ()
         // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
       } // end subareas i
     } // end sexes
-    // 
-    // // use mean exploitable biomass to calculate total Fs by fleet and mgmt area
+    // use mean exploitable biomass to calculate total Fs by fleet and mgmt area
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
@@ -745,32 +744,32 @@ Type objective_function<Type>::operator() ()
           (catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1))/meanBio_f(fish_flt);
       } // end mgmt regions
     } // end fish fleets
-    // 
-    // // std::cout << y << " N yais end" << "\n";
-    // // LAA End (second half of growth) and reweight plus group eq 3 for next year
-    // for(int s=0;s<nsex;s++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int a=0;a<(nage);a++){
-    //       Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s)+
-    //         (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
-    //         (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
-    //     } // end ages for LAA_END
-    //     for(int a=1;a<(nage-1);a++){
-    //       Length_yais_beg(y+1,a+1,i,s) =  Length_yais_end(y,a,i,s);
-    //     } // end ages for LAA_BEG_Y+1
-    //     // overwrite plus group via reweighting [eq 3]
-    //     // use mid in growth since you dont want to count growth a third time
-    //     Length_yais_beg(y+1,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
-    //       (Length_yais_mid(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-    //       Length_yais_mid(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
-    //       N_yais_mid(y,nage-1,i,s)*
-    //       (Length_yais_mid(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
-    //       Length_yais_mid(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
-    //         (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
-    //     // fill age-0 size
-    //     Length_yais_beg(y+1,0,i,s) = 0;
-    //   } // mid subareas i
-    // } // end sexes
+
+    // std::cout << y << " N yais end" << "\n";
+    // LAA End (second half of growth) and reweight plus group eq 3 for next year
+    for(int s=0;s<nsex;s++){
+      for(int i=0;i<(nspace);i++){
+        for(int a=0;a<(nage);a++){
+          Length_yais_end(y,a,i,s) =  Length_yais_mid(y,a,i,s)+
+            (Linf_yk(y,phi_ik2(i),s)-Length_yais_mid(y,a,i,s))*
+            (1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)));
+        } // end ages for LAA_END
+        for(int a=1;a<(nage-1);a++){
+          Length_yais_beg(y+1,a+1,i,s) =  Length_yais_end(y,a,i,s);
+        } // end ages for LAA_BEG_Y+1
+        // overwrite plus group via reweighting [eq 3]
+        // use mid in growth since you dont want to count growth a third time
+        Length_yais_beg(y+1,nage-1,i,s) = (N_yais_mid(y,nage-2,i,s)*
+          (Length_yais_mid(y,nage-2,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+          Length_yais_mid(y,nage-2,i,s)*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s))))) +
+          N_yais_mid(y,nage-1,i,s)*
+          (Length_yais_mid(y,nage-1,i,s)+(Linf_yk(y,phi_ik2(i),s)-
+          Length_yais_mid(y,nage-1,i,s))*(1-exp(-0.5*kappa_yk(y,phi_ik2(i),s)))))/
+            (N_yais_mid(y,nage-2,i,s) + N_yais_mid(y,nage-1,i,s));
+        // fill age-0 size
+        Length_yais_beg(y+1,0,i,s) = 0;
+      } // mid subareas i
+    } // end sexes
     // 
     // // std::cout << y << " before prob LAA" << "\n";
     // // prob of length-at-age
@@ -793,58 +792,58 @@ Type objective_function<Type>::operator() ()
     // // std::cout << y << " after LengthAge_alyis_mid" << "\n";
     // 
     // // std::cout << y << " reweight length-at-age given movement" << "\n";
-    // // // SSB_yi, SSB_yk
-    // for(int i=0;i<(nspace);i++){
-    //   for(int a=0;a<(nage);a++){
-    //     SSB_yi(y,i) += N_yais_end(y,a,i,0)*
-    //       wtatlen_kab(phi_ik2(i),0)*
-    //       pow(Length_yais_end(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
-    //       mat_ak(a,phi_ik2(i));
-    //   } // end ages
-    // } // end space
-    // // std::cout << y << "\t" << "end SSB_yi" << "\n";
-    // for(int k=0;k<(nstocks);k++){
-    //   for(int i=0;i<(nspace);i++){
-    //     SSB_yk(y,k) +=  phi_ki(k,i)*SSB_yi(y,i);
-    //   } // end stocks
-    // } // end space
-    // // std::cout << y << "\t" << "end SSB_yk" << "\n";
-    // for(int m=0;m<(nmgmt_reg);m++){
-    //   for(int i=0;i<(nspace);i++){
-    //     SSB_ym(y,m) += phi_im(i,m)*SSB_yi(y,i);
-    //   } // end space
-    // } //end mgmt
-    // // std::cout << y << "\t" << "end SSB_ym" << "\n";
-    // // R_yi, R_yk
-    // for(int k=0;k<(nstocks);k++){
-    //   // SSB_yk already has summation
-    //   R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
-    //     (SSB_0k(k)*(1-h_k(k))+
-    //       SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));
-    // }  // end stocks
+    // // SSB_yi, SSB_yk
+    for(int i=0;i<(nspace);i++){
+      for(int a=0;a<(nage);a++){
+        SSB_yi(y,i) += N_yais_end(y,a,i,0)*
+          wtatlen_kab(phi_ik2(i),0)*
+          pow(Length_yais_end(y,a,i,0),wtatlen_kab(phi_ik2(i),1))*
+          mat_ak(a,phi_ik2(i));
+      } // end ages
+    } // end space
+    // std::cout << y << "\t" << "end SSB_yi" << "\n";
+    for(int k=0;k<(nstocks);k++){
+      for(int i=0;i<(nspace);i++){
+        SSB_yk(y,k) +=  phi_ki(k,i)*SSB_yi(y,i);
+      } // end stocks
+    } // end space
+    // std::cout << y << "\t" << "end SSB_yk" << "\n";
+    for(int m=0;m<(nmgmt_reg);m++){
+      for(int i=0;i<(nspace);i++){
+        SSB_ym(y,m) += phi_im(i,m)*SSB_yi(y,i);
+      } // end space
+    } //end mgmt
+    // std::cout << y << "\t" << "end SSB_ym" << "\n";
+    // R_yi, R_yk
+    for(int k=0;k<(nstocks);k++){
+      // SSB_yk already has summation
+      R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
+        (SSB_0k(k)*(1-h_k(k))+
+          SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));
+    }  // end stocks
     // // std::cout << y << "\t" << "end R_yk" << "\n";
-    // for(int i=0;i<(nspace);i++){
-    //   //   Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
-    //   //   for(int j=0;j<(nspace);j++){
-    //   //     if(i != j){
-    //   //       pLeave += omega_0ij(i,j); // will do 1-this for proportion which stay
-    //   //       // NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*omega_0ij(j,i);// actual numbers incoming
-    //   //       NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*exp(epsilon_tau);// actual numbers incoming
-    //   //       
-    //   //     } // end i != j
-    //   //   } // end subareas j
-    //   // R_yi(y,i) = (1-pLeave)*R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i) + NCome;//; /// downscale to subarea including age-0 movement
-    //   R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i)); /// downscale to subarea including age-0 movement
-    //   N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
-    //   N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
-    // } /// end space
-    // // std::cout << y << "\t" << "end R_yi" << "\n";
-    // for(int m=0;m<(nmgmt_reg);m++){
-    //   for(int i=0;i<(nspace);i++){
-    //     R_ym(y,m) += phi_im(i,m)*R_yi(y,i);
-    //   } // end space
-    // } //end mgmt
-    // // std::cout << y << "\t" << "end R_ym" << "\n";
+    for(int i=0;i<(nspace);i++){
+      //   Type pLeave = 0.0; Type NCome = 0.0; // reset for new age
+      //   for(int j=0;j<(nspace);j++){
+      //     if(i != j){
+      //       pLeave += omega_0ij(i,j); // will do 1-this for proportion which stay
+      //       // NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*omega_0ij(j,i);// actual numbers incoming
+      //       NCome += R_yk(y,phi_ik2(j))*tau_ki(phi_ik2(j),j)*exp(epsilon_tau);// actual numbers incoming
+      //
+      //     } // end i != j
+      //   } // end subareas j
+      // R_yi(y,i) = (1-pLeave)*R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i) + NCome;//; /// downscale to subarea including age-0 movement
+      R_yi(y,i) = R_yk(y,phi_ik2(i))*tau_ki(phi_ik2(i),i)*exp(epsilon_tau(i)); /// downscale to subarea including age-0 movement
+      N_yais_beg(y+1,0,i,0) = 0.5*R_yi(y,i);
+      N_yais_beg(y+1,0,i,1) = 0.5*R_yi(y,i);
+    } /// end space
+    // std::cout << y << "\t" << "end R_yi" << "\n";
+    for(int m=0;m<(nmgmt_reg);m++){
+      for(int i=0;i<(nspace);i++){
+        R_ym(y,m) += phi_im(i,m)*R_yi(y,i);
+      } // end space
+    } //end mgmt
+    // std::cout << y << "\t" << "end R_ym" << "\n";
     // 
     // // Estimate survey biomass at midyear
     // for(int i=0;i<(nspace);i++){

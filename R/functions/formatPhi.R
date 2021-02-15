@@ -53,10 +53,12 @@ nstocks = 4
 
     
     ## indicates the position of acomp fleet (shouldn't change with subareas)
+    ## in various places
     phi_ff_acomp <- matrix(-1, nrow = nfleets_acomp, ncol = 5) 
     rownames(phi_ff_acomp) <- fltnames_acomp
     colnames(phi_ff_acomp) <- c('fsh_slx_pos','srv_slx_pos',"nsamp_pos","commacomp_pos","survacomp_pos")
     
+    ## where is it in fishery slx order?
     phi_ff_acomp[which(rownames(phi_ff_acomp) %in% paste(fltnames_fish)),1] <- 
       which(grepl(paste(rownames(phi_ff_acomp), collapse = "|"), paste(fltnames_fish)))-1
     
@@ -67,14 +69,27 @@ nstocks = 4
     #   phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] <- 
     #     which(fltnames_surv %in% fltnames_acomp[acomp_flt_type == 1])-1
     # } else{
-      ## if a standalone survey, fill with last idx
-      phi_ff_acomp[acomp_flt_type == 1,"srv_slx_pos"] <-  
+      ## where is it in survey selex order?
+    for(i in which(acomp_flt_type == 1)){
+      phi_ff_acomp[i,'srv_slx_pos'] <- which( fltnames_survcomp == rownames(phi_ff_acomp)[i])-1
+
+    }
+    phi_ff_acomp[which(acomp_flt_type == 1),'survacomp_pos'] <-
+      1:length( which(acomp_flt_type == 1))-1
+      # phi_ff_acomp[acomp_flt_type == 1,"srv_slx_pos"] <-  
+        # fltnames_survcomp ==fltnames_acomp[acomp_flt_type == 1]
+        
+        which(fltnames_survcomp %in% fltnames_acomp )-1
         (nfleets_surv +1):(nfleets_surv + sum(acomp_flt_type==1))-1
+      ## position in all surveys (for indexing preds...)
+      # phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] <-  
+        # which(names(phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] )%in% fltnames_acomp )-1
       
-      phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] <-  
-        (nfleets_surv +1):(nfleets_surv + sum(acomp_flt_type==1))-1
+      # which(fltnames_acomp[which(acomp_flt_type == 1)] ==fltnames_survcomp)
+      
+      # which(fltnames_acomp==names(phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] ))
     # }
-    
+      ## position in all comm fisheries (for indexing preds...)
     phi_ff_acomp[acomp_flt_type == 0,"commacomp_pos"] <- 
       which(fltnames_fish %in% fltnames_acomp[acomp_flt_type == 0])-1
     

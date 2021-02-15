@@ -679,72 +679,72 @@ Type objective_function<Type>::operator() ()
       } // end -1 NA trap
     } // end nfleets_fish
     // // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
-    // 
+
     // // N_yais_end ----
-    // //fill EOY and beginning of next year using Ztuned
-    // //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
-    // //of the mortality and the tuned F extraction.
+    //fill EOY and beginning of next year using Ztuned
+    //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
+    //of the mortality and the tuned F extraction.
     // 
-    // // apply second half of F rates to get NAA_end
-    // // // no need to do summation separately because no more movement
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //     for(int a=0;a<(nage);a++){
-    //       // sum over fleets targeting this area
-    //       for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //         instF_yais(y,a,i,s,1) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,1); // note instF is Sa
-    //       }
-    //       N_yais_end(y,a,i,s) = (1- instF_yais(y,a,i,s,1))*N_yais_mid(y,a,i,s)*exp(-(mort_k(phi_ik2(i)))/2);
-    //     } // end ages
-    //     for(int a=1;a<(nage-1);a++){
-    //       N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
-    //       //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
-    //     }
-    //     N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
-    //     // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
-    //   } // end subareas i
-    // } // end sexes
+    // apply second half of F rates to get NAA_end
+    // no need to do summation separately because no more movement
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        for(int a=0;a<(nage);a++){
+          // sum over fleets targeting this area
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            instF_yais(y,a,i,s,1) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,1); // note instF is Sa
+          }
+          N_yais_end(y,a,i,s) = (1- instF_yais(y,a,i,s,1))*N_yais_mid(y,a,i,s)*exp(-(mort_k(phi_ik2(i)))/2);
+        } // end ages
+        for(int a=1;a<(nage-1);a++){
+          N_yais_beg(y+1,a,i,s) = N_yais_end(y,a-1,i,s);
+          //   std::cout << "filling N for year " << y+1 << "\t space" << i << "\t age" <<  a <<  N_yais_beg(y+1,a,i,s)  << "\n";
+        }
+        N_yais_beg(y+1,(nage-1),i,s)= N_yais_end(y,nage-1,i,s) + N_yais_end(y,nage-2,i,s);
+        // std::cout << "filling N for year " << y+1 << "\t space" << i << "\t" << "\n";
+      } // end subareas i
+    } // end sexes
     // 
     // // use mean exploitable biomass to calculate total Fs by fleet and mgmt area
-    // for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-    //   for(int i=0;i<(nspace);i++){
-    //     for(int s=0;s<nsex;s++){
-    //       for(int a=0;a<(nage);a++){
-    //         switch(selType_fish(fish_flt)){
-    //         case 0: // age sel
-    //           // get mean exploitable biomass summed over areas, sexes, ages
-    //           meanBio_f(fish_flt) +=
-    //             (phi_if_fish(fish_flt,i)*
-    //             fsh_slx_yafs(y,a,fish_flt,s)*
-    //             (N_yais_beg(y,a,i,s)+
-    //             N_yais_mid(y,a,i,s)+
-    //             N_yais_end(y,a,i,s))/3*
-    //             wtatlen_kab(phi_ik2(i),0)*
-    //             pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
-    //           break;
-    //         case 1: // length sel
-    //           // get mean exploitable biomass summed over areas, sexes, ages
-    //           // // likely expand this to use length at season
-    //           meanBio_f(fish_flt) +=
-    //             (phi_if_fish(fish_flt,i)*
-    //             fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-    //             (N_yais_beg(y,a,i,s)+
-    //             N_yais_mid(y,a,i,s)+
-    //             N_yais_end(y,a,i,s))/3*
-    //             wtatlen_kab(phi_ik2(i),0)*
-    //             pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
-    //           break;
-    //         } // end seltype switch
-    //       } // end ages
-    //     } // end sexes
-    //   } // end areas
-    //   // divide by catches of this fleet this year
-    //   F_yf(y,fish_flt) =  (catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1))/meanBio_f(fish_flt);
-    //   for(int m=0;m<(nmgmt_reg);m++){
-    //     F_ym(y,m) +=  phi_fm(fish_flt, m)*
-    //       (catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1))/meanBio_f(fish_flt);
-    //   } // end mgmt regions
-    // } // end fish fleets
+    for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+      for(int i=0;i<(nspace);i++){
+        for(int s=0;s<nsex;s++){
+          for(int a=0;a<(nage);a++){
+            switch(selType_fish(fish_flt)){
+            case 0: // age sel
+              // get mean exploitable biomass summed over areas, sexes, ages
+              meanBio_f(fish_flt) +=
+                (phi_if_fish(fish_flt,i)*
+                fsh_slx_yafs(y,a,fish_flt,s)*
+                (N_yais_beg(y,a,i,s)+
+                N_yais_mid(y,a,i,s)+
+                N_yais_end(y,a,i,s))/3*
+                wtatlen_kab(phi_ik2(i),0)*
+                pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
+              break;
+            case 1: // length sel
+              // get mean exploitable biomass summed over areas, sexes, ages
+              // // likely expand this to use length at season
+              meanBio_f(fish_flt) +=
+                (phi_if_fish(fish_flt,i)*
+                fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+                (N_yais_beg(y,a,i,s)+
+                N_yais_mid(y,a,i,s)+
+                N_yais_end(y,a,i,s))/3*
+                wtatlen_kab(phi_ik2(i),0)*
+                pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1)));
+              break;
+            } // end seltype switch
+          } // end ages
+        } // end sexes
+      } // end areas
+      // divide by catches of this fleet this year
+      F_yf(y,fish_flt) =  (catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1))/meanBio_f(fish_flt);
+      for(int m=0;m<(nmgmt_reg);m++){
+        F_ym(y,m) +=  phi_fm(fish_flt, m)*
+          (catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1))/meanBio_f(fish_flt);
+      } // end mgmt regions
+    } // end fish fleets
     // 
     // // std::cout << y << " N yais end" << "\n";
     // // LAA End (second half of growth) and reweight plus group eq 3 for next year

@@ -155,7 +155,9 @@ Type objective_function<Type>::operator() ()
   // array<Type> tildeR_yk(tEnd,nstocks); // recdevs
    // recdevs for init
   // std::cout << "READ DATA \t" << std::endl;
-  vector<Type> tildeR_y_future(tEnd-nyear);; // random; recdev by year in future
+  vector<Type> tildeR_initk(nstocks);; //random; recdev by year
+  vector<Type> tildeR_y_future(tEnd-nyear);; //random; recdev by year
+
   // Fishery selectivity
   // Number of parameters in the chosen selectivity type:
   int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
@@ -828,7 +830,7 @@ Type objective_function<Type>::operator() ()
           tildeR_y_future(y-nyear) = rnorm(Rmu,logSDR); //mu, sd
           R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
             (SSB_0k(k)*(1-h_k(k))+
-              SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+  tildeR_y_future(y-nyear));
+              SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y_future(y-nyear));
         }
       } // end forecast years
     }  // end stocks

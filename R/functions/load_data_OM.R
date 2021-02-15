@@ -147,32 +147,33 @@ load_data_OM <- function(seed = 731,
   # survey <- round(survey,  1)
   # survey_err <- read.csv(here("input","input_data",'OM_indices_sigma_BaseQ=GOA_Late.csv'))
   
-  survey <- read.csv(here("input","input_data",'OM_indices_BaseQ=WCGBTS.csv'))
-  ## disable BC-VAST before 2003 - experimental
-  # survey$BC_VAST[1:43] <- NA
-  if(tolower(x) == 'y'){
-    ## replace BC early & BC VAST with design-based indices (keep order)
-    bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
-      select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
-    survey <- survey %>% mutate(year = 1960:2019) %>%
-      merge(., bc_idx, by = 'year',all.x = TRUE) %>%
-      select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
-    survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
-    cat('overwrote BC survey fleets with design-based indices \n')
-  }
+  survey <- read.csv(here("input","input_data",'OM_indices_STITCH.csv'))
+  # ## disable BC-VAST before 2003 - experimental
+  # # survey$BC_VAST[1:43] <- NA
+  # if(tolower(x) == 'y'){
+  #   ## replace BC early & BC VAST with design-based indices (keep order)
+  #   bc_idx <- read.csv(here('input','raw_data','survey',"bcom_indexSeries.csv")) %>% 
+  #     select(year = YEAR,BC_EARLY = std..survey, BC_VAST = StRS.survey, -nominal.Trap.CPUE)
+  #   survey <- survey %>% mutate(year = 1960:2019) %>%
+  #     merge(., bc_idx, by = 'year',all.x = TRUE) %>%
+  #     select(AK_VAST_W, AK_VAST_E,BC_OFFStd = BC_EARLY.y, BC_StRs = BC_VAST.y, WC_VAST)
+  #   survey$BC_OFFStd[51] <- NA ## disable 'dubious' yr 2010
+  #   cat('overwrote BC survey fleets with design-based indices \n')
+  # }
   survey[is.na(survey)] <- -1.0## flag for numeric TMB checks
   
   
 
-  survey_err <- read.csv(here("input","input_data",'OM_indices_sigma_BaseQ=WCGBTS.csv'))
-  if(tolower(x) == 'y'){
-    # lognormal SE of 0.29 for the offshore standardized survey,
-    # 0.21 for the StRs and 0.12 for the commercial CPUE index
-    names(survey_err) <- names(survey)
-    survey_err$BC_OFFStd[!is.na(survey_err$BC_OFFStd)] <- 0.29
-    survey_err$BC_StRs[!is.na(survey_err$BC_StRs)] <- 0.21
-    cat('overwrote BC survey fleets err with 0.29, 0.21 \n')
-  }
+  survey_err <- read.csv(here("input","input_data",
+                              'OM_indices_sigma_STITCH.csv'))
+  # if(tolower(x) == 'y'){
+  #   # lognormal SE of 0.29 for the offshore standardized survey,
+  #   # 0.21 for the StRs and 0.12 for the commercial CPUE index
+  #   names(survey_err) <- names(survey)
+  #   survey_err$BC_OFFStd[!is.na(survey_err$BC_OFFStd)] <- 0.29
+  #   survey_err$BC_StRs[!is.na(survey_err$BC_StRs)] <- 0.21
+  #   cat('overwrote BC survey fleets err with 0.29, 0.21 \n')
+  # }
   
   ## Comps ----
   #* Len comps [these are arrays by fleet]

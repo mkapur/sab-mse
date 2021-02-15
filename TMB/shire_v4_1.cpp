@@ -495,7 +495,7 @@ Type objective_function<Type>::operator() ()
           instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
       } else if(y > nyear){
           SIMULATE{
-            instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y,fish_flt);
+            instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y-nyear,fish_flt);
           } // end simulate
         } // end if forecast years
       // } // end -1 NA trap

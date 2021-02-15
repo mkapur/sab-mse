@@ -536,6 +536,8 @@ Type objective_function<Type>::operator() ()
                } // end selType_fish
              } // end sex
            } // end space
+           catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
+           
            SIMULATE{
              catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
            } // end simulate

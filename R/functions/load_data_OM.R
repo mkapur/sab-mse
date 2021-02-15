@@ -363,7 +363,7 @@ load_data_OM <- function(seed = 731,
   parms <- list(
     logh_k = log(c(0.7,0.88,0.7,0.7)),
     # tildeR_yk = matrix(log(0.5),nrow =  nyear,ncol = nstocks),
-    tildeR_y = rep(log(0.5),tEnd), ## already for rFuture
+    tildeR_y = rep(log(0.5),nyear), ## already for rFuture
     logR_0k = rep(log(8*10e6),4), #c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),

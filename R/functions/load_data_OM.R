@@ -123,7 +123,7 @@ load_data_OM <- function(seed = 731,
   # selType_surv <- seltype_surv0-1
   
   ## later this might need to include lcomps
-  fltnames_survcomp <-  unique(c(as.character(fltnames_surv),
+  fltnames_survcomp <<-  unique(c(as.character(fltnames_surv),
                                  as.character(fltnames_acomp[-Wnfishflts_acomp])))
 
   ## truncate the length of selShape by the number of overlap fleets with survey
@@ -447,13 +447,13 @@ load_data_OM <- function(seed = 731,
      ## sim survey (every year assuming VAST stdization)
      ## use mean of last five years
      survey <- merge(data.frame('Year' = years),
-                     cbind(survey, 'Year' = years[1:(nyear-yr_future)] ),
+                     cbind(survey, 'Year' = years[1:nyear] ),
                      by = 'Year',all.x = TRUE) %>% select(-Year)
      survey[years > myear,1:nfleets_surv] <- 0 #t(survmeansL5)
      # 
      # ## use last year error
      survey_err<- merge(data.frame('Year' = years),
-                        cbind(survey_err, 'Year' = years[1:(nyear-yr_future)] ),
+                        cbind(survey_err, 'Year' = years[1:nyear] ),
                         by = 'Year',all.x = TRUE) %>% select(-Year)
      survey_err[years > myear,1:nfleets_surv] <- 0 # survey_err[years == myear,]
      ## do this in TMB
@@ -473,7 +473,7 @@ load_data_OM <- function(seed = 731,
     nage = nage,
     age = age,
     nyear = nyear,
-    tEnd = tEnd, # The extra year is to initialize 
+    tEnd = tEnd, 
     years = years,
     nstocks = nstocks,
     nspace = nspace,

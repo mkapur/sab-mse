@@ -338,7 +338,7 @@ load_data_OM <- function(seed = 731,
     
     log_srv_slx_pars['BC_StRs','p1',1:srv_blks_size[,"BC_StRs"],] <-  c(40.00000, 40.00000)
     log_srv_slx_pars['BC_StRs','p2',1:srv_blks_size[,"BC_StRs"],] <- c(54.99999,54.99999)
-  }
+  # }
   
   log_srv_slx_pars['WC_VAST','p1',"block1",c('Fem','Mal')] <- c(46.13959,52.93459)
   log_srv_slx_pars['WC_VAST','p2',"block1",c('Fem','Mal')] <- c(70,53.03959)

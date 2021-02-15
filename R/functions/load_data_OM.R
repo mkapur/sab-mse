@@ -256,7 +256,7 @@ load_data_OM <- function(seed = 731,
   # fsh_blks_size[,'AK_FIX'] <- 2
   # fsh_blks is an h x nfleets_fish imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
-  fsh_blks <- matrix(1959+nyear, nrow = max(fsh_blks_size), 
+  fsh_blks <- matrix(1959+tEnd, nrow = max(fsh_blks_size), 
                      ncol = nfleets_fish)
   colnames(fsh_blks) <- c( as.character(fltnames_fish))
   # fsh_blks[1:fsh_blks_size[,'WC_FIX'],'WC_FIX' ] <- c(1997,2003,2010,2019)
@@ -300,9 +300,9 @@ load_data_OM <- function(seed = 731,
   # srv_blks_size[,'AK_VAST_E'] <- 2
   # srv_blks is an h x nfleets_surv imatrix with the MAX year of a given timeblock.
   # it will be a ragged array bc some fleets have fewer blocks.
-  srv_blks <- matrix(1959+nyear, nrow = max(srv_blks_size),  ncol = length(selType_surv))
+  srv_blks <- matrix(1959+tEnd, nrow = max(srv_blks_size),  ncol = length(selType_surv))
   colnames(srv_blks) <- c( fltnames_survcomp)
-  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,1959+nyear)
+  srv_blks[1:srv_blks_size[,'WC_VAST'],'WC_VAST' ] <- c(1995,2003,1959+tEnd)
   srv_blks <- srv_blks-1960 ## zero index!
 
   ## all of these are currently logistic with l/a50, and a delta
@@ -363,7 +363,7 @@ load_data_OM <- function(seed = 731,
   parms <- list(
     logh_k = log(c(0.7,0.88,0.7,0.7)),
     # tildeR_yk = matrix(log(0.5),nrow =  nyear,ncol = nstocks),
-    tildeR_y = rep(log(0.5),nyear), ## already for rFuture
+    tildeR_y = rep(log(0.5),tEnd), ## already for rFuture
     logR_0k = rep(log(8*10e6),4), #c(log(8*10e6),log(8*10e6),10,10), ## sum wc = 12
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
@@ -409,7 +409,7 @@ load_data_OM <- function(seed = 731,
    if(yr_future > 0){
 
      
-     ngp = list(array(NA, dim = c(nyear, nstocks, nsex)))
+     ngp = list(array(NA, dim = c(tEnd, nstocks, nsex)))
      ngp[[2]] <-ngp[[3]] <- ngp[[4]] <-  ngp[[1]]
      
      for(l in 1:length(growthPars)){
@@ -430,7 +430,7 @@ load_data_OM <- function(seed = 731,
      if(is.na(catch.future)){
        catch <- merge(data.frame('Year' = years), catch, by = 'Year',all.x = TRUE)
        catch_yf_error <- merge(data.frame('Year' = years),
-                               cbind('Year' = years[1:(nyear-yr_future)],catch_yf_error),
+                               cbind('Year' = years[1:nyear],catch_yf_error),
                                by = 'Year',all.x = TRUE)
 
        ## fill with fleetwise mean

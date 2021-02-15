@@ -823,7 +823,8 @@ Type objective_function<Type>::operator() ()
           SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));
       } else {
         SIMULATE{
-          tildeR_y(y) = rlnorm(1,0, logSDR);
+          Type Rmu = 0;
+          tildeR_y(y) = rnorm(Rmu,logSDR); //mu, sd
           R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
             (SSB_0k(k)*(1-h_k(k))+
               SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));

@@ -503,7 +503,7 @@ Type objective_function<Type>::operator() ()
     } // end nfleets_fish
      // predicted catches first half of year
      for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-       if((catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
+       if((catch_yf_obs(y,fish_flt+1) != Type(-1.0))  | (y > nyear) ){
          for(int a=0;a<(nage);a++){
            for(int i=0;i<(nspace);i++){
              for(int s=0;s<nsex;s++){
@@ -580,7 +580,7 @@ Type objective_function<Type>::operator() ()
        //       catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
        //     } // end age
        //   } // end SIMULATE
-       // } // end if forecast years
+       } // end if obs != -1
      } // end nfleets_fish
     // 
     // // sum instF_yafs over fleets to get F in i  

@@ -7,7 +7,6 @@
 ## options for new_strata are 6 (return at OM dims), 4 (stock dims), 3 (mgmt dims) or 1 (panmictic)
 ## this only changes the colors for plotting, not the actual input data, which is fleet-specific anyway
 format_phi <- function(df = NULL, 
-                       x,
                        no_strata = 3,
                        survey, catch,acomp_flt_type){
 nstocks = 4
@@ -61,20 +60,20 @@ nstocks = 4
     phi_ff_acomp[which(rownames(phi_ff_acomp) %in% paste(fltnames_fish)),1] <- 
       which(grepl(paste(rownames(phi_ff_acomp), collapse = "|"), paste(fltnames_fish)))-1
     
-    if(tolower(x) == 'n'){
-      phi_ff_acomp[Wnsurvflts_acomp,'srv_slx_pos'] <- 
-        which(fltnames_surv %in% fltnames_acomp )-1## Pos in survey
-      
-      phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] <- 
-        which(fltnames_surv %in% fltnames_acomp[acomp_flt_type == 1])-1
-    } else{
+    # if(tolower(x) == 'n'){
+    #   phi_ff_acomp[Wnsurvflts_acomp,'srv_slx_pos'] <- 
+    #     which(fltnames_surv %in% fltnames_acomp )-1## Pos in survey
+    #   
+    #   phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] <- 
+    #     which(fltnames_surv %in% fltnames_acomp[acomp_flt_type == 1])-1
+    # } else{
       ## if a standalone survey, fill with last idx
       phi_ff_acomp[acomp_flt_type == 1,"srv_slx_pos"] <-  
         (nfleets_surv +1):(nfleets_surv + sum(acomp_flt_type==1))-1
       
       phi_ff_acomp[acomp_flt_type == 1,"survacomp_pos"] <-  
         (nfleets_surv +1):(nfleets_surv + sum(acomp_flt_type==1))-1
-    }
+    # }
     
     phi_ff_acomp[acomp_flt_type == 0,"commacomp_pos"] <- 
       which(fltnames_fish %in% fltnames_acomp[acomp_flt_type == 0])-1

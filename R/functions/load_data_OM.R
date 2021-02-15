@@ -408,22 +408,22 @@ load_data_OM <- function(seed = 731,
   set.seed(seed)
    if(yr_future > 0){
 
-     
-     ngp = list(array(NA, dim = c(tEnd, nstocks, nsex)))
-     ngp[[2]] <-ngp[[3]] <- ngp[[4]] <-  ngp[[1]]
-     
-     for(l in 1:length(growthPars)){
-       for(i in 1:dim(growthPars[[l]])[[3]]){
-         ngp[[l]][,,i] <- rbind(growthPars[[l]][,,i],
-                                            matrix(rep(growthPars[[l]][(tEnd-yr_future),,i] ,yr_future  ),  
-                                                   byrow = TRUE, ncol = 4))
-         colnames( ngp[[l]][,,i] ) <- colnames(growthPars[[l]])
-         rownames( ngp[[l]][,,i] ) <- years
-    
-       }
-       names(ngp)[l] <- names(growthPars)[l]
-     }
-     growthPars <- ngp ## overwrite
+     # 
+     # ngp = list(array(NA, dim = c(tEnd, nstocks, nsex)))
+     # ngp[[2]] <-ngp[[3]] <- ngp[[4]] <-  ngp[[1]]
+     # 
+     # for(l in 1:length(growthPars)){
+     #   for(i in 1:dim(growthPars[[l]])[[3]]){
+     #     ngp[[l]][,,i] <- rbind(growthPars[[l]][,,i],
+     #                                        matrix(rep(growthPars[[l]][(tEnd-yr_future),,i] ,yr_future  ),  
+     #                                               byrow = TRUE, ncol = 4))
+     #     colnames( ngp[[l]][,,i] ) <- colnames(growthPars[[l]])
+     #     rownames( ngp[[l]][,,i] ) <- years
+     # 
+     #   }
+     #   names(ngp)[l] <- names(growthPars)[l]
+     # }
+     # growthPars <- ngp ## overwrite
      
      ## We wont be handling fake catches (Fs instead) but for the code
      ## it needs to read a value in forecast years obs to enter loop. Fill with Zero

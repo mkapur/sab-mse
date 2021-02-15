@@ -538,49 +538,8 @@ Type objective_function<Type>::operator() ()
              } // end sex
            } // end space
            catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
-           
-        
-             catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
-           } // end simulate
-         } // end age
-       // } else if(y >= nyear){
-       //   // do the whole thing using the future instFs created above
-       //   SIMULATE{
-       //     for(int a=0;a<(nage);a++){
-       //       for(int i=0;i<(nspace);i++){
-       //         for(int s=0;s<nsex;s++){
-       //           switch(selType_fish(fish_flt)){
-       //           case 0: // age sel
-       //             // instantaneous F x Slx for each fleet
-       //             instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
-       //               instF_yf(y, fish_flt,0);
-       //             
-       //             catch_yaf_pred(y,a,fish_flt,0) +=
-       //               phi_if_fish(fish_flt,i)*
-       //               instF_yafs(y,a,fish_flt,s,0) *
-       //               N_yais_beg(y,a,i,s)*
-       //               wtatlen_kab(phi_ik2(i),0)*
-       //               pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-       //             break;
-       //           case 1: // length sel
-       //             instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
-       //               instF_yf(y, fish_flt,0);
-       //             
-       //             catch_yaf_pred(y,a,fish_flt,0) +=
-       //               phi_if_fish(fish_flt,i)*
-       //               instF_yafs(y,a,fish_flt,s,0)*
-       //               N_yais_beg(y,a,i,s)*
-       //               // mla_yais(y,a,i,s)*
-       //               // Length_yais_beg(y,a,i,s)*
-       //               wtatlen_kab(phi_ik2(i),0)*
-       //               pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-       //             break;
-       //           } // end selType_fish
-       //         } // end sex
-       //       } // end space
-       //       catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
-       //     } // end age
-       //   } // end SIMULATE
+           } // end age
+         } // end simulate
        } // end if obs != -1
      } // end nfleets_fish
     // 

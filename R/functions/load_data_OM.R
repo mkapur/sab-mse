@@ -77,15 +77,15 @@ load_data_OM <- function(seed = 731,
   ## and attendant indices for subsetting
   fltnames <- read.table(here("input","input_data","OM_fleetnames.txt"), header = TRUE) ## this is like flag_fleets
 
-  x <<- readline("Are you using design-based indices for BC? (Y/N)") 
+  # x <<- readline("Are you using design-based indices for BC? (Y/N)") 
 
-  if(tolower(x) == 'n'){
+  # if(tolower(x) == 'n'){
     ## turn off SURV for design-based
-    fltnames$SURV[fltnames$NAME%in%c('BC_OFFStd','BC_StRs')] <- FALSE
-  } else{
-    fltnames$SURV[fltnames$NAME%in%c('BC_EARLY','BC_VAST')] <- FALSE 
-    
-  }
+  #   fltnames$SURV[fltnames$NAME%in%c('BC_OFFStd','BC_StRs')] <- FALSE
+  # } else{
+  #   fltnames$SURV[fltnames$NAME%in%c('BC_EARLY','BC_VAST')] <- FALSE 
+  #   
+  # }
   
   fltnames_fish <<- fltnames$NAME[fltnames$COMM]
   fltnames_surv <<- fltnames$NAME[fltnames$SURV]

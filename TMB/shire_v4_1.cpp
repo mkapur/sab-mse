@@ -858,52 +858,52 @@ Type objective_function<Type>::operator() ()
     } //end mgmt
     // std::cout << y << "\t" << "end R_ym" << "\n";
     // 
-    // // Estimate survey biomass at midyear
-    // for(int i=0;i<(nspace);i++){
-    //   for(int s=0;s<nsex;s++){
-    //     for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
-    //       if(surv_yf_obs(y,surv_flt) != Type(-1.0) | y > nyear){
-    //         switch(selType_surv(surv_flt)){
-    //         case 0: // age sel
-    //           for(int a=0;a<nage;a++){
-    //             surv_yf_pred(y,surv_flt) += q_f(surv_flt)*
-    //               srv_slx_yafs(y,a,surv_flt,s)*
-    //               phi_if_surv(surv_flt,i)*
-    //               N_yais_mid(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             
-    //             // this should only get filled if surv_flt is also an comp_flt
-    //             // then nsamp acomp only needs dims acomp_flt 
-    //             // should be done outside of loop for acomp fleets only (need switches)
-    //             
-    //             // Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
-    //             //   phi_if_surv(surv_flt,i)*
-    //             //   N_yais_mid(y,a,i,s);
-    //           } // end ages
-    //           break;
-    //         case 1:
-    //           for(int a=0;a<(nage);a++){
-    //             surv_yf_pred(y,surv_flt) +=  q_f(surv_flt)*
-    //               srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
-    //               phi_if_surv(surv_flt,i)*
-    //               N_yais_mid(y,a,i,s)*
-    //               // mla_yais(y,a,i,s)*
-    //               // Length_yais_mid(y,a,i,s)*
-    //               wtatlen_kab(phi_ik2(i),0)*
-    //               pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
-    //             
-    //             // Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y, mla_yais(y,a,i,s),surv_flt,s)*
-    //             //   phi_if_surv(surv_flt,i)*
-    //             //   N_yais_mid(y,a,i,s);
-    //           }
-    //           break;
-    //         } // end selType_fish
-    //       } // end check that it's not an NA year
-    //     } // end survey fleets
-    //   } // end sexes
-    // } // end nspace
-    // // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
+    // Estimate survey biomass at midyear
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        for(int surv_flt =0;surv_flt<(nfleets_surv);surv_flt++){
+          if(surv_yf_obs(y,surv_flt) != Type(-1.0) | y > nyear){
+            switch(selType_surv(surv_flt)){
+            case 0: // age sel
+              for(int a=0;a<nage;a++){
+                surv_yf_pred(y,surv_flt) += q_f(surv_flt)*
+                  srv_slx_yafs(y,a,surv_flt,s)*
+                  phi_if_surv(surv_flt,i)*
+                  N_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+
+                // this should only get filled if surv_flt is also an comp_flt
+                // then nsamp acomp only needs dims acomp_flt
+                // should be done outside of loop for acomp fleets only (need switches)
+
+                // Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y,a,surv_flt,s)*
+                //   phi_if_surv(surv_flt,i)*
+                //   N_yais_mid(y,a,i,s);
+              } // end ages
+              break;
+            case 1:
+              for(int a=0;a<(nage);a++){
+                surv_yf_pred(y,surv_flt) +=  q_f(surv_flt)*
+                  srv_slx_yafs(y,mla_yais(y,a,i,s),surv_flt,s)*
+                  phi_if_surv(surv_flt,i)*
+                  N_yais_mid(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
+                  // Length_yais_mid(y,a,i,s)*
+                  wtatlen_kab(phi_ik2(i),0)*
+                  pow(Length_yais_mid(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+
+                // Nsamp_acomp_yf(y,surv_flt) +=  srv_slx_yafs(y, mla_yais(y,a,i,s),surv_flt,s)*
+                //   phi_if_surv(surv_flt,i)*
+                //   N_yais_mid(y,a,i,s);
+              }
+              break;
+            } // end selType_fish
+          } // end check that it's not an NA year
+        } // end survey fleets
+      } // end sexes
+    } // end nspace
+    // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
     // 
     // // generate nsamp estimates for acomp fleets using phi_ff and midyr NAA
     // // for(int i=0;i<(nspace);i++){
@@ -1242,6 +1242,7 @@ Type objective_function<Type>::operator() ()
     
     REPORT(b_y);
     REPORT(tildeR_y);
+    REPORT(tildeR_y_future);
     REPORT(tildeR_initk);
     REPORT(ans_tot);
     return ans;

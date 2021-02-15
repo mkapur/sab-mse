@@ -857,7 +857,7 @@ Type objective_function<Type>::operator() ()
       } // end space
     } //end mgmt
     // std::cout << y << "\t" << "end R_ym" << "\n";
-    // 
+
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
@@ -904,141 +904,102 @@ Type objective_function<Type>::operator() ()
       } // end sexes
     } // end nspace
     // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
-    // 
-    // // generate nsamp estimates for acomp fleets using phi_ff and midyr NAA
-    // // for(int i=0;i<(nspace);i++){
-    // //   for(int s=0;s<nsex;s++){
-    // //     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    // //       switch(selType_surv(phi_ff_acomp(acomp_flt,1))){
-    // //       case 0: // age sel
-    // //         for(int a=0;a<(nage);a++){
-    // //           if(acomp_flt_type(acomp_flt) == 0){
-    // //             Nsamp_acomp_yf(y,acomp_flt) +=  
-    // //               fish_slx_yafs(y,a,phi_ff_acomp(acomp_flt,0),s)*
-    // //               phi_if_surv(surv_flt,i)*
-    // //               N_yais_mid(y,a,i,s);
-    // //           } else{
-    // //             Nsamp_acomp_yf(y,acomp_flt) +=  
-    // //               srv_slx_yafs(y, a,phi_ff_acomp(acomp_flt,1),s)*
-    // //               phi_if_surv(surv_flt,i)*
-    // //               N_yais_mid(y,a,i,s);
-    // //           } //  end if survey fleet
-    // //         } // end ages
-    // //         break;
-    // //       case 1:
-    // //         for(int a=0;a<(nage);a++){
-    // //           if(acomp_flt_type(acomp_flt) == 0){
-    // //           Nsamp_acomp_yf(y,acomp_flt) +=  
-    // //             fish_slx_yafs(y, mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
-    // //             phi_if_surv(surv_flt,i)*
-    // //             N_yais_mid(y,a,i,s);
-    // //           } else{
-    // //             Nsamp_acomp_yf(y,acomp_flt) +=  
-    // //               srv_slx_yafs(y, mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
-    // //               phi_if_surv(surv_flt,i)*
-    // //               N_yais_mid(y,a,i,s);
-    // //           } //  end if survey fleet
-    // //         } // end ages
-    // //         break;
-    // //       } // end selType_FLT
-    // //     } // end survey fleets
-    // //   } // end sexes
-    // // } // end nspace
-    // 
-    // // predicted age comps, given error
-    // // for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
-    // //   // age 0
-    // //   acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
-    // //   // Loop over ages
-    // //   for(int a=0;a<(nage-1);a++){
-    // 
-    // //     acomp_yaf_temp(y,a,acomp_flt) =
-    // //       pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
-    // //       pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
-    // //   } // end ages
-    // //   acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
-    // //                  age_error(phi_fm_acomp2(acomp_flt),nage-1),
-    // //                  age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
-    // //   
-    // //   // calculate nsamp within this loop
-    // //   for(int i=0;i< nspace;i++){
-    // //     for(int s=0;s<nsex;s++){
-    // //       for(int a=0;a<(nage-1);a++){
-    // //         if(acomp_flt_type(acomp_flt) == 0){
-    // //           switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
-    // //           case 0: // age sel fish fleet
-    // //             Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-    // //               fsh_slx_yafs(y,a,phi_ff_acomp(acomp_flt,0),s)*
-    // //               phi_if_acomp(acomp_flt,i)*
-    // //               N_yais_mid(y,a,i,s);
-    // //             break;
-    // //           case 1: // len sel fish fleet
-    // //             Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-    // //               fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
-    // //               phi_if_acomp(acomp_flt,i)*
-    // //               mla_yais(y,a,i,s)*
-    // //               N_yais_mid(y,a,i,s);
-    // //             break;
-    // //           } //end selType switch for comms
-    // //         }else{
-    // //           if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
-    // //             Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-    // //               srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
-    // //               phi_if_acomp(acomp_flt,i)*
-    // //               N_yais_mid(y,a,i,s);
-    // //           }else{
-    // //             Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
-    // //               srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
-    // //               phi_if_acomp(acomp_flt,i)*
-    // //               N_yais_mid(y,a,i,s);
-    // //           } // end selType switch for survs
-    // //         } // end fltType switch
-    // //       } // end ages for nsamp
-    // //     } // end sex loop for nsamp
-    // //   } // end nspace for nsamp
-    // //   for(int a=0;a<(nage);a++){
-    // //     for(int i=0;i<(nspace);i++){
-    // //       for(int s=0;s<nsex;s++){
-    // //         if(acomp_flt_type(acomp_flt) == 0){
-    // //           switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
-    // //           case 0: // age sel fish fleet
-    // //             comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
-    // //               acomp_yaf_temp(y,a,acomp_flt)*
-    // //               fsh_slx_yafs(y,a,acomp_flt,s)*
-    // //               phi_if_acomp(acomp_flt,i)*
-    // //               N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-    // //             break;
-    // //           case 1: // len sel fish fleet
-    // //             comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
-    // //               acomp_yaf_temp(y,a,acomp_flt)*
-    // //               fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
-    // //               phi_if_acomp(acomp_flt,i)*
-    // //               mla_yais(y,a,i,s)*
-    // //               N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-    // //             break;
-    // //           } //end selType switch for comms
-    // //         }else{
-    // //           if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
-    // //             surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
-    // //               acomp_yaf_temp(y,a,acomp_flt)*
-    // //               srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
-    // //               phi_if_acomp(acomp_flt,i)*
-    // //               N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-    // //           }else{
-    // //             for(int l=1;l<(LBins);l++){
-    // //               surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
-    // //                 acomp_yaf_temp(y,a,acomp_flt)*
-    // //                 srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
-    // //                 phi_if_acomp(acomp_flt,i)*
-    // //                 mla_yais(y,a,i,s)*
-    // //                 N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
-    // //             } // end lbins
-    // //           } // end seltype surv ifelse
-    // //         } // end acomp fleet type
-    // //       } // end sex
-    // //     } // end space
-    // //   } // end age
-    // // } // end acomp fleets
+
+    // predicted age comps, given error
+    // KIM that in likelihoods we will use the acomp dims objected to only compare proper bins
+    for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+      // age 0
+      acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
+      // Loop over ages
+      for(int a=0;a<(nage-1);a++){
+        acomp_yaf_temp(y,a,acomp_flt) =
+          pnorm(Type(a+1),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a)) -
+          pnorm(age(a),   age_error(phi_fm_acomp2(acomp_flt),a),  age_error_SD(phi_fm_acomp2(acomp_flt),a));
+      } // end ages
+      acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
+                     age_error(phi_fm_acomp2(acomp_flt),nage-1),
+                     age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
+
+      // calculate nsamp within this loop
+      for(int i=0;i< nspace;i++){
+        for(int s=0;s<nsex;s++){
+          for(int a=0;a<(nage-1);a++){
+            if(acomp_flt_type(acomp_flt) == 0){
+              switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
+              case 0: // age sel fish fleet
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+                  fsh_slx_yafs(y,a,phi_ff_acomp(acomp_flt,0),s)*
+                  phi_if_acomp(acomp_flt,i)*
+                  N_yais_mid(y,a,i,s);
+                break;
+              case 1: // len sel fish fleet
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+                  fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
+                  phi_if_acomp(acomp_flt,i)*
+                  mla_yais(y,a,i,s)*
+                  N_yais_mid(y,a,i,s);
+                break;
+              } //end selType switch for comms
+            }else{
+              if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+                  srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
+                  phi_if_acomp(acomp_flt,i)*
+                  N_yais_mid(y,a,i,s);
+              }else{
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
+                  srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
+                  phi_if_acomp(acomp_flt,i)*
+                  N_yais_mid(y,a,i,s);
+              } // end selType switch for survs
+            } // end fltType switch
+          } // end ages for nsamp
+        } // end sex loop for nsamp
+      } // end nspace for nsamp
+      // now return predicted comps
+      // for(int a=0;a<(nage);a++){
+      //   for(int i=0;i<(nspace);i++){
+      //     for(int s=0;s<nsex;s++){
+      //       if(acomp_flt_type(acomp_flt) == 0){
+      //         switch(selType_fish(phi_ff_acomp(acomp_flt,0))){
+      //         case 0: // age sel fish fleet
+      //           comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
+      //             acomp_yaf_temp(y,a,acomp_flt)*
+      //             fsh_slx_yafs(y,a,acomp_flt,s)*
+      //             phi_if_acomp(acomp_flt,i)*
+      //             N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+      //           break;
+      //         case 1: // len sel fish fleet
+      //           comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s) +=
+      //             acomp_yaf_temp(y,a,acomp_flt)*
+      //             fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
+      //             phi_if_acomp(acomp_flt,i)*
+      //             mla_yais(y,a,i,s)*
+      //             N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+      //           break;
+      //         } //end selType switch for comms
+      //       }else{
+      //         if(selType_surv(phi_ff_acomp(acomp_flt,1)) == 0){
+      //           surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
+      //             acomp_yaf_temp(y,a,acomp_flt)*
+      //             srv_slx_yafs(y,a,phi_ff_acomp(acomp_flt,1),s)*
+      //             phi_if_acomp(acomp_flt,i)*
+      //             N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+      //         }else{
+      //           for(int l=1;l<(LBins);l++){
+      //             surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s) +=
+      //               acomp_yaf_temp(y,a,acomp_flt)*
+      //               srv_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
+      //               phi_if_acomp(acomp_flt,i)*
+      //               mla_yais(y,a,i,s)*
+      //               N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
+      //           } // end lbins
+      //         } // end seltype surv ifelse
+      //       } // end acomp fleet type
+      //     } // end sex
+      //   } // end space
+      // } // end age
+    } // end acomp fleets
   } // END tEnd; END MODEL RUN
   
   

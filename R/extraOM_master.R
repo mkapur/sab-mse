@@ -76,7 +76,45 @@ rep1$fsh_slx_yafs[1,,4,1]; rep1$fsh_slx_yafs[1,,5,1]
 #   geom_line(lwd = 1.1) +
 #   scale_color_manual(values = rev(subareaPal),labels =  dimnames(df$X_ijas)[[1]]) +
 #   facet_wrap(~variable, scales = 'free_y' )
-
+// // generate nsamp estimates for acomp fleets using phi_ff and midyr NAA
+// // for(int i=0;i<(nspace);i++){
+  // //   for(int s=0;s<nsex;s++){
+    // //     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
+      // //       switch(selType_surv(phi_ff_acomp(acomp_flt,1))){
+        // //       case 0: // age sel
+        // //         for(int a=0;a<(nage);a++){
+          // //           if(acomp_flt_type(acomp_flt) == 0){
+            // //             Nsamp_acomp_yf(y,acomp_flt) +=  
+              // //               fish_slx_yafs(y,a,phi_ff_acomp(acomp_flt,0),s)*
+              // //               phi_if_surv(surv_flt,i)*
+              // //               N_yais_mid(y,a,i,s);
+            // //           } else{
+              // //             Nsamp_acomp_yf(y,acomp_flt) +=  
+                // //               srv_slx_yafs(y, a,phi_ff_acomp(acomp_flt,1),s)*
+                // //               phi_if_surv(surv_flt,i)*
+                // //               N_yais_mid(y,a,i,s);
+              // //           } //  end if survey fleet
+          // //         } // end ages
+        // //         break;
+        // //       case 1:
+          // //         for(int a=0;a<(nage);a++){
+            // //           if(acomp_flt_type(acomp_flt) == 0){
+              // //           Nsamp_acomp_yf(y,acomp_flt) +=  
+                // //             fish_slx_yafs(y, mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
+                // //             phi_if_surv(surv_flt,i)*
+                // //             N_yais_mid(y,a,i,s);
+              // //           } else{
+                // //             Nsamp_acomp_yf(y,acomp_flt) +=  
+                  // //               srv_slx_yafs(y, mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,1),s)*
+                  // //               phi_if_surv(surv_flt,i)*
+                  // //               N_yais_mid(y,a,i,s);
+                // //           } //  end if survey fleet
+            // //         } // end ages
+        // //         break;
+        // //       } // end selType_FLT
+      // //     } // end survey fleets
+    // //   } // end sexes
+  // // } // end nspace
 
 head(round(rep1$catch_yf_pred,2)/round(df$catch_yf_obs[,2:(1+df$nfleets_fish)],2),df$yRun)
 data.frame('NEQN_m' =colSums(neqnm) , 

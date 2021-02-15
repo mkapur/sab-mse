@@ -69,7 +69,7 @@ Type objective_function<Type>::operator() ()
   // Survey Biomass
   DATA_ARRAY(surv_yf_obs);
   DATA_ARRAY(surv_yf_err);
-  array<Type> surv_yf_pred(nyear, nfleets_surv); surv_yf_pred.setZero();
+  array<Type> surv_yf_pred(tEnd, nfleets_surv); surv_yf_pred.setZero();
   
   // Age Comps
   DATA_MATRIX(age_error); // nmgmt_reg x 100 ages
@@ -494,6 +494,8 @@ Type objective_function<Type>::operator() ()
         } // end sex
           instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
       } else if(y >= nyear){
+        // this means the HCR vals only get invoked if you call SIMULATE
+        // and also means that the future years will remain empty for these values unless you call simulate
           SIMULATE{
             instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y-nyear,fish_flt);
           } // end simulate
@@ -534,9 +536,49 @@ Type objective_function<Type>::operator() ()
                } // end selType_fish
              } // end sex
            } // end space
-           catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
+           SIMULATE{
+             catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
+           } // end simulate
          } // end age
-       } //end type == -1 trap
+       // } else if(y >= nyear){
+       //   // do the whole thing using the future instFs created above
+       //   SIMULATE{
+       //     for(int a=0;a<(nage);a++){
+       //       for(int i=0;i<(nspace);i++){
+       //         for(int s=0;s<nsex;s++){
+       //           switch(selType_fish(fish_flt)){
+       //           case 0: // age sel
+       //             // instantaneous F x Slx for each fleet
+       //             instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,a,fish_flt,s)*
+       //               instF_yf(y, fish_flt,0);
+       //             
+       //             catch_yaf_pred(y,a,fish_flt,0) +=
+       //               phi_if_fish(fish_flt,i)*
+       //               instF_yafs(y,a,fish_flt,s,0) *
+       //               N_yais_beg(y,a,i,s)*
+       //               wtatlen_kab(phi_ik2(i),0)*
+       //               pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+       //             break;
+       //           case 1: // length sel
+       //             instF_yafs(y,a,fish_flt,s,0) = fsh_slx_yafs(y,mla_yais(y,a,i,s),fish_flt,s)*
+       //               instF_yf(y, fish_flt,0);
+       //             
+       //             catch_yaf_pred(y,a,fish_flt,0) +=
+       //               phi_if_fish(fish_flt,i)*
+       //               instF_yafs(y,a,fish_flt,s,0)*
+       //               N_yais_beg(y,a,i,s)*
+       //               // mla_yais(y,a,i,s)*
+       //               // Length_yais_beg(y,a,i,s)*
+       //               wtatlen_kab(phi_ik2(i),0)*
+       //               pow(Length_yais_beg(y,a,i,s),wtatlen_kab(phi_ik2(i),1));
+       //             break;
+       //           } // end selType_fish
+       //         } // end sex
+       //       } // end space
+       //       catch_yf_pred(y,fish_flt,0) += catch_yaf_pred(y,a,fish_flt,0);
+       //     } // end age
+       //   } // end SIMULATE
+       // } // end if forecast years
      } // end nfleets_fish
     // 
     // // sum instF_yafs over fleets to get F in i  

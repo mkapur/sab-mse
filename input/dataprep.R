@@ -1169,18 +1169,22 @@ ggsave(last_plot(),
 ## Aging error ----
 ## from MH on google drive; just use the "first" for each mgmt region
 ## array of age and sd x ages
-ageerr_SD <- list.files(here("input","raw_data","survey"), pattern = "*SS_format*", full.names = TRUE) %>%
+ageerr_SD <- list.files(here("input","raw_data","survey"), 
+                        pattern = "*SS_format*", full.names = TRUE) %>%
   lapply(read.csv) %>%
   bind_rows() %>% 
   filter(X == 'SD')
 
-ageerr_ExpAge <- list.files(here("input","raw_data","survey"), pattern = "*SS_format*", full.names = TRUE) %>%
+ageerr_ExpAge <- list.files(here("input","raw_data","survey"),
+                            pattern = "*SS_format*", full.names = TRUE) %>%
   lapply(read.csv) %>%
   bind_rows() %>% 
   filter(X == 'Expected_age')
 
 rownames(ageerr_SD) <- rownames(ageerr_ExpAge) <- c('AK','BC','WC')
-
+ageerr_SD <- ageerr_SD[c(3,2,1),]
+ageerr_ExpAge <- ageerr_ExpAge[c(3,2,1),]
+## change order upon save so phi_fm_acomp is correct
 save(ageerr_SD, file = here("input","input_data","ageerr_SD.rdata"))
 save(ageerr_ExpAge, file = here("input","input_data","ageerr_ExpAge.rdata"))
 

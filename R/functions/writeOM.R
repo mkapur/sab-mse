@@ -424,32 +424,61 @@ writeOM <- function(justPlots = FALSE,
                src = 'OBS'))
       if(df$acomp_flt_type[flt] == 0){
         predacomp <- rbind(predacomp,melt(comm_acomp_yafs_pred[,,predpos,s]) %>% 
-          select("year" = Var1, "age" = Var2, "freq" = value) %>%
+                             mutate(year = Var1+1959) %>%
+          select(year, "age" = Var2, "freq" = value) %>%
           mutate(fleet = fltnames_acomp[flt], 
                  sex = c('Fem','Mal')[s],
                  src = 'PRED'))
       } else{
-        predacomp <- rbind(predacomp,melt(surv_acomp_yafs_pred[,,predpos,s]) %>% 
-          select("year" = Var1, "age" = Var2, "freq" = value) %>%
+        predacomp <- rbind(predacomp,
+                           melt(surv_acomp_yafs_pred[,,predpos,s]) %>% 
+                             mutate(year = Var1+1959) %>%
+          select(year, "age" = Var2, "freq" = value) %>%
           mutate(fleet = fltnames_acomp[flt], 
                  sex = c('Fem','Mal')[s],
                  src = 'PRED'))
       } ## end else
     } ## end sexes
-      plotacomp[[flt]] <- rbind(obsacomp,predacomp) %>% filter(year > 2015 & freq >0)
+      plotacomp[[flt]] <- rbind(obsacomp,predacomp) 
   } ## end fleets
   
-  
-  ggplot(plotacomp[[1]], aes(x = age, y = freq, fill = src, color = sex)) +
-    theme_sleek() +
-    geom_ribbon(data = subset(plotacomp[[1]], sex == 'Fem'),
-                lwd = 1.05,   aes(x=age,ymax=freq),ymin=0,alpha=0.3) +
-    geom_ribbon(data = subset(plotacomp[[1]], sex == 'Mal'),  lwd = 1.05,
-                aes(x=age,ymax=-freq),ymin=0,alpha=0.3) +
-    scale_fill_manual(values = 'grey22') +
-    scale_color_manual(values = c('red','blue')) +
-    facet_wrap(~year)
+  for(flt in 1:nfleets_acomp){
+    plotacomp[[flt]] <-    plotacomp[[flt]] %>%
+      filter(year < 2019 & freq >0)
+    xmax = with(subset(plotacomp[[flt]], src == 'OBS'), max(age))
+    yrmin = with(subset(plotacomp[[flt]], src == 'OBS'), min(year))
+    plotacomp[[flt]] <-    plotacomp[[flt]] %>%
+      filter(year %in% seq(yrmin, 2020, 5))
 
+  # xmax = max( df$acomp_dims_yfs[,2,flt,][!is.na( df$acomp_dims_yfs[,2,flt,])])
+
+  ggplot(    plotacomp[[flt]] , aes(x = age, y = freq, fill = src, color = sex)) +
+    theme_sleek() +
+    geom_ribbon(data = subset(    plotacomp[[flt]] , sex == 'Fem'), color = 'white',
+                  aes(x=age,ymax=freq),ymin=0,alpha=0.3) +
+    geom_ribbon(data = subset(    plotacomp[[flt]] , sex == 'Mal'), color = 'white',
+                aes(x=age,ymax=-freq),ymin=0,alpha=0.3) +
+    
+    # geom_line(lwd = 1.05, data = subset(plotacomp[[flt]] , sex == 'Fem'),
+    #           alpha = 0.5, color = 'grey22') +
+    # geom_line(lwd = 1.05,data = subset(plotacomp[[flt]] , sex == 'Mal'),
+    #           aes(y = -freq), alpha = 0.5, color = 'grey22') +
+    
+    geom_point(lwd = 1.05, data = subset(    plotacomp[[flt]] , sex == 'Fem' & src == 'PRED'), alpha = 0.5) +
+    geom_point(lwd = 1.05,data = subset(    plotacomp[[flt]] , sex == 'Mal' & src == 'PRED'),
+               aes(y = -freq), alpha = 0.5) +
+ 
+    scale_fill_manual(values = c('grey22','white'), labels = c('Observed','Predicted')) +
+    scale_color_manual(values = c('red','blue'), labels = c('Fem','Mal')) +
+    scale_x_continuous(limits = c(0, xmax)) +
+    labs(color = 'Sex', fill = '')+
+    facet_wrap(~year)
+  ggsave(last_plot(),
+         file = paste0(dumpfile,"/", Sys.Date(),'-',fltnames_acomp[flt],'-acomps.png'),
+         width = 10, height = 6, unit = 'in',
+         dpi = 420 )
+  
+  }
 
 
   

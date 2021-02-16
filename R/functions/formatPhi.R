@@ -190,7 +190,8 @@ nstocks = 4
       }
     }
     # phi_fm_acomp[1:3,3] <- phi_fm_acomp[4:6,2]  <- phi_fm_acomp[7:8,1]  <- 1
-    phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) ## a vector for par subsetting, the columns are survey fleets
+    phi_fm_acomp2 <- matrix(apply(phi_fm_acomp,1, function(x)which(x == 1))-1) 
+    ## a vector for par subsetting, the columns are survey fleets
 
     phi_lcomp_fm <- matrix(0, nrow = nfleets_lcomp, ncol = 3)
     rownames(phi_lcomp_fm) = fltnames_lcomp

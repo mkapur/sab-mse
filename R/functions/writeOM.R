@@ -348,7 +348,7 @@ writeOM <- function(justPlots = FALSE,
     filter(Year > 1959) %>%
     select(Year, variable, value, SRC)
   
-  R_ym <- data.frame(dat$R_ym)
+  R_ym <- data.frame(dat$R_ym)[1:nyear,]
   names(R_ym) <- c('WC','BC','AK')
   yvec <-   R_ym %>% data.frame() %>%
     mutate(Year = 1960:2019) %>%
@@ -401,6 +401,58 @@ writeOM <- function(justPlots = FALSE,
     # scale_x_continuous(limits = c(0,400000)) +
     ggsidekick::theme_sleek() +
     facet_wrap(~ variable, scales = 'free')
+  
+  ## plot acomps by fleet----
+  ## recall that the om inputs are set up in same order as fleetnames_acomp
+  acomp_yafs_obs <- df$acomp_yafs_obs
+  dimnames(acomp_yafs_obs) <- list(c(1960:(df$nyear+1959)),
+                              c(0:70),
+                              as.character(paste(unlist(fltnames_acomp))),
+                              c('Fem','Mal'))
+  plotacomp <- list()
+  for(flt in 1:nfleets_acomp){
+    obsacomp <- predacomp <- NULL
+    for(s in 1:2){
+      ## get position in predictions
+      predpos <- ifelse(phi_ff_acomp[flt, "commacomp_pos"] != -1,
+                       phi_ff_acomp[flt, "commacomp_pos"] + 1,
+                       phi_ff_acomp[flt, "survacomp_pos"] + 1)
+      obsacomp <- rbind(obsacomp,melt(acomp_yafs_obs[,,flt,s]) %>% 
+        select("year" = Var1, "age" = Var2, "freq" = value) %>%
+        mutate(fleet = fltnames_acomp[flt], 
+               sex = c('Fem','Mal')[s],
+               src = 'OBS'))
+      if(df$acomp_flt_type[flt] == 0){
+        predacomp <- rbind(predacomp,melt(comm_acomp_yafs_pred[,,predpos,s]) %>% 
+          select("year" = Var1, "age" = Var2, "freq" = value) %>%
+          mutate(fleet = fltnames_acomp[flt], 
+                 sex = c('Fem','Mal')[s],
+                 src = 'PRED'))
+      } else{
+        predacomp <- rbind(predacomp,melt(surv_acomp_yafs_pred[,,predpos,s]) %>% 
+          select("year" = Var1, "age" = Var2, "freq" = value) %>%
+          mutate(fleet = fltnames_acomp[flt], 
+                 sex = c('Fem','Mal')[s],
+                 src = 'PRED'))
+      } ## end else
+    } ## end sexes
+      plotacomp[[flt]] <- rbind(obsacomp,predacomp) %>% filter(year > 2015 & freq >0)
+  } ## end fleets
+  
+  
+  ggplot(plotacomp[[1]], aes(x = age, y = freq, fill = src, color = sex)) +
+    theme_sleek() +
+    geom_ribbon(data = subset(plotacomp[[1]], sex == 'Fem'),
+                lwd = 1.05,   aes(x=age,ymax=freq),ymin=0,alpha=0.3) +
+    geom_ribbon(data = subset(plotacomp[[1]], sex == 'Mal'),  lwd = 1.05,
+                aes(x=age,ymax=-freq),ymin=0,alpha=0.3) +
+    scale_fill_manual(values = 'grey22') +
+    scale_color_manual(values = c('red','blue')) +
+    facet_wrap(~year)
+
+
+
+  
   
   ## catch pred by fleet ----
   catch_yf_pred_totalt <- data.frame(dat$catch_yf_pred_total)[1:nyear,]

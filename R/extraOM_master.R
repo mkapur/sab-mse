@@ -40,7 +40,7 @@ epstau <- exp(best[names(best) == 'epsilon_tau']); names(epstau) <- paste0("epst
 by <- round(best[names(best) == 'b_y'],3); 
 names(by) <- paste0("b_y",1:length((best[names(best) == 'b_y'])));by 
 
-likes <- dat$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
+likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
 
@@ -58,6 +58,8 @@ rep1$Length_yais_mid[4,c(1,2,65:71),1,1]
 rep1$Length_yais_end[4,c(1,2,65:71),1,1]
 
 rep1$surv_yf_pred
+sum(is.na(rep1$comm_acomp_yafs_pred))
+
 
 
 array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), 

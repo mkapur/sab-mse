@@ -14,7 +14,7 @@ Type objective_function<Type>::operator() ()
   // DATA_VECTOR(years); // number of years modeled; max tEnd-1
   // int nyear = years.size();
   int nsex = 2;
-
+  
   
   DATA_INTEGER(nfleets_surv); // number of survey fleets
   DATA_INTEGER(nfleets_fish); //number of fishery fleets
@@ -140,7 +140,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(logpi_acomp); // dirichlet scalar for acomp sampling
   // PARAMETER_MATRIX(tildeR_yk); //random; recdev by stock and year
   PARAMETER_VECTOR(tildeR_y); //random; recdev by year thru Nyear
-
+  
   
   PARAMETER(logSDR);
   PARAMETER_ARRAY(log_fsh_slx_pars);       // Fishery selectivity (selShape controls parameterization)
@@ -153,11 +153,11 @@ Type objective_function<Type>::operator() ()
   vector<Type> q_f = exp(logq_f);
   vector<Type> pi_acomp = exp(logpi_acomp);
   // array<Type> tildeR_yk(tEnd,nstocks); // recdevs
-   // recdevs for init
+  // recdevs for init
   // std::cout << "READ DATA \t" << std::endl;
   vector<Type> tildeR_initk(nstocks);; //random; recdev by year
   vector<Type> tildeR_y_future(tEnd-nyear);; //random; recdev by year
-
+  
   // Fishery selectivity
   // Number of parameters in the chosen selectivity type:
   int npar_slx = log_fsh_slx_pars.dim(1); // dim = array dimensions; 1 = # columns in array = # params in slx_type
@@ -438,12 +438,12 @@ Type objective_function<Type>::operator() ()
     } // end space
   } // end sex
   // std::cout << "Done" << std::endl;
-
+  
   
   // std::cout << " Here" << "\n";
   for(int y=0;y<tEnd;y++){ // Start y loop
-  //   // std::cout << y << " \t" << std::endl;
-  //   // define year zero numbers at age
+    //   // std::cout << y << " \t" << std::endl;
+    //   // define year zero numbers at age
     if (y == 0){
       for(int i=0;i<(nspace);i++){
         for(int s=0;s<nsex;s++){
@@ -461,13 +461,13 @@ Type objective_function<Type>::operator() ()
             Length_yais_beg(y,a,i,s) =  Linf_yk(y,phi_ik2(i),s)+(L1_yk(y,phi_ik2(i),s)-Linf_yk(y,phi_ik2(i),s))*
               exp(-0.5*kappa_yk(y,phi_ik2(i),s)*a);
           }// end ages
-
+          
         } // end sexes
       } // end subareas i
     } // end y == 0
     // std::cout << y << " did year zero" << "\n";
-
-  // F denom at first half of year
+    
+    // F denom at first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if((y < nyear) & (catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
         Type denom = 0; // exploitable biomass
@@ -495,14 +495,14 @@ Type objective_function<Type>::operator() ()
             } // end age
           } // end space
         } // end sex
-          instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
+        instF_yf(y,fish_flt,0) = (catch_yf_obs(y, fish_flt+1)/2)/(denom + catch_yf_obs(y,fish_flt+1)/2);
       } else if(y >= nyear){
         // this means the HCR vals only get invoked if you call SIMULATE
         // and also means that the future years will remain empty for these values unless you call simulate
-          SIMULATE{
-            instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y-nyear,fish_flt);
-          } // end simulate
-        } // end if forecast years
+        SIMULATE{
+          instF_yf(y,fish_flt,0) = 0.5*F_yf_HCR(y-nyear,fish_flt);
+        } // end simulate
+      } // end if forecast years
     } // end nfleets_fish
     // predicted catches first half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
@@ -543,18 +543,18 @@ Type objective_function<Type>::operator() ()
         } // end age
       } // end if obs != -1
     } // end nfleets_fish
-
-   // sum instF_yafs over fleets to get F in i
-   for(int i=0;i<(nspace);i++){
-     for(int s=0;s<nsex;s++){
-       for(int a=1;a<(nage);a++){
-         for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
-           instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0);
-         } // end fish fleets
-       } // end sex
-     } // end ages
-   } // end subarea i
-
+    
+    // sum instF_yafs over fleets to get F in i
+    for(int i=0;i<(nspace);i++){
+      for(int s=0;s<nsex;s++){
+        for(int a=1;a<(nage);a++){
+          for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
+            instF_yais(y,a,i,s,0) += phi_if_fish(fish_flt,i)*instF_yafs(y,a,fish_flt,s,0);
+          } // end fish fleets
+        } // end sex
+      } // end ages
+    } // end subarea i
+    
     // build N_yais_mid
     // N- and Nominal Length - at-age for the middle of this year 
     for(int i=0;i<(nspace);i++){
@@ -604,7 +604,7 @@ Type objective_function<Type>::operator() ()
       } // end subareas i
     } // end sexes
     // std::cout << y << "\t" << Length_yais_mid(y,5,1,1) << " LAA_mid_a=5i=1s=1" << "\n";
-
+    
     // F denom at second half of year
     for(int fish_flt =0;fish_flt<(nfleets_fish);fish_flt++){
       if((y < nyear) & (catch_yf_obs(y,fish_flt+1) != Type(-1.0)) ){
@@ -682,7 +682,7 @@ Type objective_function<Type>::operator() ()
       } // end -1 NA trap
     } // end nfleets_fish
     // // std::cout << y << "END OF NFLEETS FISH F TUNING" << "\n";
-
+    
     // // N_yais_end ----
     //fill EOY and beginning of next year using Ztuned
     //this will populate ages 2:nage using the end-of year biomass, which accounts for the remaineder
@@ -747,7 +747,7 @@ Type objective_function<Type>::operator() ()
           (catch_yf_pred(y,fish_flt,0)+catch_yf_pred(y,fish_flt,1))/meanBio_f(fish_flt);
       } // end mgmt regions
     } // end fish fleets
-
+    
     // std::cout << y << " N yais end" << "\n";
     // LAA End (second half of growth) and reweight plus group eq 3 for next year
     for(int s=0;s<nsex;s++){
@@ -821,9 +821,9 @@ Type objective_function<Type>::operator() ()
     for(int k=0;k<(nstocks);k++){
       // SSB_yk already has summation
       if(y < nyear){
-      R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
-        (SSB_0k(k)*(1-h_k(k))+
-          SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));
+        R_yk(y,k) = (4*h_k(k)*R_0k(k)*SSB_yk(y,k))/
+          (SSB_0k(k)*(1-h_k(k))+
+            SSB_yk(y,k)*(5*h_k(k)-1))*exp(-0.5*b_y(y)*logSDR*logSDR+tildeR_y(y));
       } else {
         SIMULATE{
           Type Rmu = 0;
@@ -857,7 +857,7 @@ Type objective_function<Type>::operator() ()
       } // end space
     } //end mgmt
     // std::cout << y << "\t" << "end R_ym" << "\n";
-
+    
     // Estimate survey biomass at midyear
     for(int i=0;i<(nspace);i++){
       for(int s=0;s<nsex;s++){
@@ -892,7 +892,7 @@ Type objective_function<Type>::operator() ()
       } // end sexes
     } // end nspace
     // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
-
+    
     // predicted age comps, given error
     // KIM that in likelihoods we will use the acomp dims objected to only compare proper bins
     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
@@ -907,7 +907,7 @@ Type objective_function<Type>::operator() ()
       acomp_yaf_temp(y,nage-1,acomp_flt) = Type(1.0) - pnorm(Type(nage-1),
                      age_error(phi_fm_acomp2(acomp_flt),nage-1),
                      age_error_SD(phi_fm_acomp2(acomp_flt),nage-1));
-
+      
       // calculate nsamp within this loop
       for(int i=0;i< nspace;i++){
         for(int s=0;s<nsex;s++){
@@ -1008,8 +1008,8 @@ Type objective_function<Type>::operator() ()
       } // end flag for neg 1
     } // end y
   } // end surv_flt
-
-
+  
+  
   // Likelihood: catches
   Type ans_catch = 0.0;
   for(int y=0;y<nyear;y++){
@@ -1059,22 +1059,22 @@ Type objective_function<Type>::operator() ()
                 sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
             } else{
-                sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                  acomp_yafs_obs(y,a,acomp_flt,s) +
-                  pi_acomp(acomp_flt)*
-                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                  surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
-                  lgamma(pi_acomp(acomp_flt)*
-                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
-                  surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
-
-                ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-                  sum1(y)+
-                  lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-                  lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-                  pi_acomp(acomp_flt)*
-                  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-                  sum2(y);
+              sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                acomp_yafs_obs(y,a,acomp_flt,s) +
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s))-
+                lgamma(pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
+                surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
+              
+              ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+                sum1(y)+
+                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+                pi_acomp(acomp_flt)*
+                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+                sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
             } // end switch for comm or surv type
           } // end acomp flag

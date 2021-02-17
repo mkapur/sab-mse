@@ -202,7 +202,7 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       
     } else if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
       #* if all estimated ----
-      map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
+      map_srvslx <- array(as.numeric(df$parms$log_srv_slx_pars), 
                           dim = c(length(df$selShape_surv),2,max(df$srv_blks_size),2),
                           dimnames = dimnames(df$parms$log_srv_slx_pars))
       

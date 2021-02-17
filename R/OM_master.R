@@ -14,7 +14,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
-compile(here("TMB",paste0(dllUSE,".cpp")))
+TMB::compile(here("TMB",paste0(dllUSE,".cpp")), flags = "-Wno-ignored-attributes")
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -41,10 +41,10 @@ mappy <-
                       "b_y",
                       "epsilon_tau",
                       "logpi_acomp",
-                      # "log_fsh_slx_pars",
+                      "log_fsh_slx_pars",
                       # "log_srv_slx_pars",
-                    "mort_k"))#,
-           # fixFlt = c("all_fsh",
+                    "mort_k"),
+           fixFlt = c("all_fsh")) #,
                       # "all_srv"))
                       # colnames(df$srv_blks)[6] ))
 # mappy$logh_k <- factor(c(NA,NA,2,3)) ##  fix WC regs

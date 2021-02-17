@@ -14,22 +14,21 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
-# compile(here("TMB",paste0(dllUSE,".cpp")),R_MAKEVARS_USER = here("suppressMakeVars.txt"))
-# CPPFLAGS="-Wno-ignored-attributes -Wno-deprecated-declarations -fno-common")#,
+compile(here("TMB",paste0(dllUSE,".cpp")))
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
-yr_future <- 0
+yr_future <- 20
 df <- load_data_OM(nspace = 6, 
                    move = TRUE,
                    yr_future  = yr_future,
                    b_y_max = 0.109) ## data that works with OM
 # df$surv_yf_obs[df$surv_yf_obs >0] <-  df$surv_yf_obs[df$surv_yf_obs >0]*1000
-df$yRun <-  df$tEnd-yr_future ## number of years to run model
+
 df$parms$mort_k <- c(0.2,0.2,0.2,0.2)
 df$Neqn <- buildNeqn(df)
 df$parms$b_y <- rep(1,df$tEnd) ## 1 is no ramp (exp(-0.5*B) in recruits; b*lnRy in like))
-df$F_yf_HCR <- array(0, dim = c(ifelse(yr_future == 0,1,yr_future), df$nfleets_fish))
+df$F_yf_HCR <- array(0.2, dim = c(ifelse(yr_future == 0,1,yr_future), df$nfleets_fish))
 # df$selShape_surv[4] <- -1 # constant slx for bc vast
 ## if by is low, the likelihood is weighted more strongly, and the model is given less
 ## flexibility in generating R_ys in the context of SDRs (aka do a better job of fitting
@@ -42,12 +41,12 @@ mappy <-
                       "b_y",
                       "epsilon_tau",
                       "logpi_acomp",
-                      "log_fsh_slx_pars",
-                      "log_srv_slx_pars",
-                    "mort_k"),
-           fixFlt = c("all_fsh",
+                      # "log_fsh_slx_pars",
+                      # "log_srv_slx_pars",
+                    "mort_k"))#,
+           # fixFlt = c("all_fsh",
                       # "all_srv"))
-                      colnames(df$srv_blks)[6] ))
+                      # colnames(df$srv_blks)[6] ))
 # mappy$logh_k <- factor(c(NA,NA,2,3)) ##  fix WC regs
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
 # mappy$tildeR_yk <- factor(sort(rep(1:(length(mappy$tildeR_yk)/df$nstocks), each = df$nstocks))) ## make each area x year mirrored
@@ -59,7 +58,9 @@ system.time(obj <- MakeADFun(df,
                  map = mappy, ## fix everything for testing eigen fails
                  checkParameterOrder = TRUE)) 
 
-system.time(rep1 <- obj$report()) ## one off caclulation using start pars
+system.time(rep1 <- obj$report());## one off caclulation using start pars
+# sim <- obj$simulate(par=obj$par, complete=TRUE) ; 
+# sim$comm_acomp_yafs_pred[77,20,1,1]
 
 bounds <- boundPars(obj,
                     r0_lower = 0, 
@@ -106,7 +107,7 @@ writeOM(justPlots = FALSE,
         mappy = mappy,
         runname = paste0("-",df$yRun,"y_",
                          cppname,
-                         "_hfixed",
+                         "_",
                          "_BC_DesignBased",
                          "_Bramp=1.0"))
 
@@ -116,8 +117,9 @@ writeOM(justPlots = FALSE,
 ## multiple reps (seeds) of OM simulations.
 sim <- replicate(5, {
   set.seed(runif(1,1,1000)) ## randomize the seed for nrep
-  # simdata <- obj$simulate(par=best, complete=TRUE) ## simulate from last obj,
-  simdata0 <- obj$simulate(par=obj$par, complete=TRUE) ## input, would be same as rep
+  obj$simulate(par=best, complete=TRUE) ## simulate from last obj, using best pars
+  ## seed will vary recdevs.
+  # simdata0 <- ## input, would be same as rep
   # simdata <- obj$simulate(par=obj$par, complete=TRUE) ## simulate from last obj,
   ## The default parameter values used for the simulation is obj$env$last.par
   # obj2 <- MakeADFun(simdata, df$parms, DLL=dllUSE, silent=TRUE) ## prep new mod with new data and og parms

@@ -1125,7 +1125,7 @@ Type objective_function<Type>::operator() ()
     ans_SDR+
     ans_catch
     +ans_survey
-    // -ans_survcomp
+    -ans_survcomp
     // -ans_catchcomp
     +ans_priors;//
     // Type ans = 0.0;

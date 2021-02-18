@@ -117,11 +117,11 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   # nsurvsel = dim(df$parms$log_srv_slx_pars)[1]
   # array(1:length(  lower[names(lower) == 'log_srv_slx_pars']),
   # dim= c(dim(df$parms$log_srv_slx_pars)[1],2,2))
-  ## bounds on srv slx ----
+  #* bounds on srv slx ----
   if("srv" %in% boundSlx){
     
     
-    ## first check if slx was fixed at all
+    ## if survslx mapped ----
     if(length(grep("log_srv_slx_pars", names(mappy)))  > 0){
       map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
                           dim = c(length(df$selShape_surv),2,max(df$srv_blks_size),2),
@@ -201,34 +201,98 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       
       
     } else if(length(grep("log_srv_slx_pars", names(mappy)))  == 0){
+      #* if all estimated ----
+      map_srvslx <- array(as.numeric(df$parms$log_srv_slx_pars), 
+                          dim = c(length(df$selShape_surv),2,max(df$srv_blks_size),2),
+                          dimnames = dimnames(df$parms$log_srv_slx_pars))
       
-      seeddim = length(df$selType_surv)
-      lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
-      lower[names(lower) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
+      lwr.temp <- upr.temp <- map_srvslx ## now there are only values where we need to fill them
+      ## identify which fleets were fixed by just looking at first block
+      # mappy_srvslx <- mappy[[grep("log_srv_slx_pars", names(mappy))]]
+      # Nas <- which(is.na(mappy_srvslx)[1:16])
+      #   
+      #   # which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]][1:32]))
+      # nfixedfleets <- length(Nas)/2
+      # keptflts <- dimnames(df$parms$log_srv_slx_pars)[[1]][-Nas] ## return non-fixed fltnames
+      # 
+      # lwr.temp <- upr.temp <- array(1:length(obj$par[names(obj$par) == "log_srv_slx_pars"]), 
+      #       dim = c(8-nfixedfleets,2,max(df$srv_blks_size),2),
+      #       dimnames = list(keptflts,c('p1','p2'),
+      #                       c('block',1:max(df$srv_blks_size)),c('Fem','Mal')))
       
-      upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
-      upper[names(upper) == 'log_srv_slx_pars'][c(all(seeddim+1):(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
+      lwr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(35); 
+      upr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(55); 
+      
+      lwr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(35); 
+      upr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(55)
+      
+      lwr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(35);
+      upr.temp['AK_VAST_E',"p1",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(45)
+      
+      lwr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(50); 
+      upr.temp['AK_VAST_E',"p2",1:df$srv_blks_size[,'AK_VAST_E'],] <- log(70)
+      
+      # lwr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- log(20); 
+      # upr.temp['BC_EARLY',"p1",1:df$srv_blks_size[,'BC_EARLY'],] <- log(40)
+      # lwr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- log(45); 
+      # upr.temp['BC_EARLY',"p2",1:df$srv_blks_size[,'BC_EARLY'],] <- log(80)
+      
+      lwr.temp['BC_OFFStd',"p1",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(15); 
+      upr.temp['BC_OFFStd',"p1",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(80)
+      
+      lwr.temp['BC_OFFStd',"p2",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(15); 
+      upr.temp['BC_OFFStd',"p2",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(80)
       
       
+      # lwr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <- 3.401197; 
+      # upr.temp['BC_VAST',"p1",1:df$srv_blks_size[,'BC_VAST'],] <-3.68887945
+      # lwr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.007333; 
+      # upr.temp['BC_VAST',"p2",1:df$srv_blks_size[,'BC_VAST'],] <- 4.24849524
       
-      ## custom bounds
-      # upper[names(upper) == 'log_srv_slx_pars'][c(3,19)] <- log(75) ## BCEARLY P1
-      # upper[names(upper) == 'log_srv_slx_pars'][c(11,27)] <- log(75) ## BCEARLY P2
-      # lower[names(lower) == 'log_srv_slx_pars'][c(11,27)] <- log(10) ## BCEARLY P2
+      lwr.temp['BC_StRs',"p1",1:df$srv_blks_size[,'BC_StRs'],] <- log(25); 
+      upr.temp['BC_StRs',"p1",1:df$srv_blks_size[,'BC_StRs'],] <- log(55)
       
-      # upper[names(upper) == 'log_srv_slx_pars'][c(2,18)] <- log(80) ## AKVASTE P1
-      # upper[names(upper) == 'log_srv_slx_pars'][c(3,19)] <- log(80) ## BCEARLY P1
+      lwr.temp['BC_StRs',"p2",1:df$srv_blks_size[,'BC_StRs'],] <- log(25); 
+      upr.temp['BC_StRs',"p2",1:df$srv_blks_size[,'BC_StRs'],] <- log(70)
       
-      # upper[names(upper) == 'log_srv_slx_pars'][10] <- log(85) ## AKVASTE P2 fem only
-      # upper[names(upper) == 'log_srv_slx_pars'][20] <- log(80) ## BCVAST P1 MALE only
-      # upper[names(upper) == 'log_srv_slx_pars'][c(11,27)] <- log(85) ## BCEARLY P2
+      lwr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(30);
+      upr.temp['WC_VAST',"p1",1:df$srv_blks_size[,'WC_VAST'],] <- log(70)
       
-      # upper[names(upper) == 'log_srv_slx_pars'][c(11,27)] <- log(85) ## BCEARLY P2
+      lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Mal'] <- log(40);  
+      lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Fem'] <- log(40);
+      upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(70)
       
-      # lower[names(lower) == 'log_srv_slx_pars'] <- 0
-      # upper[names(upper) == 'log_srv_slx_pars']<- log(80)
-      
-    }
+      lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp
+      upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp
+    } ## end if all est
+    
+    # seeddim = length(df$selType_surv)
+    # lower[names(lower) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
+    # lower[names(lower) == 'log_srv_slx_pars'][c(seeddim+1:(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
+    # 
+    # upper[names(upper) == 'log_srv_slx_pars'][c(1:seeddim,(2*seeddim+1):(3*seeddim))] <- log(30) ## p1
+    # upper[names(upper) == 'log_srv_slx_pars'][c(seeddim+1:(2*seeddim),(3*seeddim+1):(4*seeddim))] <- log(70) ## p2
+    
+    
+    
+    ## custom bounds
+    # upper[names(upper) == 'log_srv_slx_pars'][c(3,19)] <- log(75) ## BCEARLY P1
+    # upper[names(upper) == 'log_srv_slx_pars'][c(11,27)] <- log(75) ## BCEARLY P2
+    # lower[names(lower) == 'log_srv_slx_pars'][c(11,27)] <- log(10) ## BCEARLY P2
+    
+    # upper[names(upper) == 'log_srv_slx_pars'][c(2,18)] <- log(80) ## AKVASTE P1
+    # upper[names(upper) == 'log_srv_slx_pars'][c(3,19)] <- log(80) ## BCEARLY P1
+    
+    # upper[names(upper) == 'log_srv_slx_pars'][10] <- log(85) ## AKVASTE P2 fem only
+    # upper[names(upper) == 'log_srv_slx_pars'][20] <- log(80) ## BCVAST P1 MALE only
+    # upper[names(upper) == 'log_srv_slx_pars'][c(11,27)] <- log(85) ## BCEARLY P2
+    
+    # upper[names(upper) == 'log_srv_slx_pars'][c(11,27)] <- log(85) ## BCEARLY P2
+    
+    # lower[names(lower) == 'log_srv_slx_pars'] <- 0
+    # upper[names(upper) == 'log_srv_slx_pars']<- log(80)
+    
+    
     
   } ## end srv in boundslx
   

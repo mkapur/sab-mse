@@ -164,6 +164,7 @@ Type objective_function<Type>::operator() ()
   // Preliminary calcs to bring parameters out of log space
   vector<int> a1_dim =log_fsh_slx_pars.dim;
   array<Type> fsh_slx_pars(a1_dim);
+  
   fsh_slx_pars.setZero();
   for (int fish_flt = 0; fish_flt < nfleets_fish; fish_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
@@ -278,8 +279,9 @@ Type objective_function<Type>::operator() ()
   
   vector<int> a2_dim = log_srv_slx_pars.dim;
   array<Type> srv_slx_pars(a2_dim);
+  std::cout <<  a2_dim(0) << std::endl; 
   srv_slx_pars.setZero();
-  for (int srv_flt = 0; srv_flt < (nfleets_surv+(nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp))); srv_flt++) {
+  for (int srv_flt = 0; srv_flt < a2_dim(0); srv_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
       for (int h = 0; h < srv_blks_size(srv_flt); h++) { // loop time blocks
         for (int s = 0; s < nsex; s++) { // loop sexes
@@ -289,13 +291,13 @@ Type objective_function<Type>::operator() ()
     } // end alpha, beta
   } // end srv fleets
   
-  std::cout <<"WCVAST BLK1MAL \t" <<srv_slx_pars(4,0,1,1) << std::endl; // print goa surv p1
+  // std::cout << "WCVAST BLK1MAL \t" <<srv_slx_pars(4,0,1,1) << std::endl; // print goa surv p1
   // std::cout << s << "\t" << h << "\t" << srv_slx_pars(4,1,h,s) << std::endl; // print goa surv p2
-  std::cout <<   "AK GOA SURV BLK1MAL \t" << srv_slx_pars(5,0,1,1) << std::endl; // print goa surv p1
+  // std::cout <<   "AK GOA SURV BLK1MAL \t" << srv_slx_pars(5,0,1,1) << std::endl; // print goa surv p1
   // std::cout << s << "\t" << h <<"\t" << srv_slx_pars(5,1,h,s) << std::endl; // print goa surv p2
   
   // doing five of these to account for five surveys w acomp
-  for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp)));srv_flt++){ // loop fleets
+  for(int srv_flt =0;srv_flt<a2_dim(0);srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0 
     for (int h = 0; h < srv_blks_size(srv_flt); h++) { // unique no. timeblocks per fleet (min 1)
       do{
@@ -317,9 +319,7 @@ Type objective_function<Type>::operator() ()
                   (a -  srv_slx_pars(srv_flt,0,h,s)) / ( srv_slx_pars(srv_flt,1,h,s) -
                   srv_slx_pars(srv_flt,0,h,s))));
               } // end ages
-             
-   
-              // std::cout << srv_slx_yafs(i,0,5,1) << std::endl; // print goa surv age0 slx
+             // std::cout << srv_slx_yafs(i,0,5,1) << std::endl; // print goa surv age0 slx
               break;
             case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,h,s) = a50 and  srv_slx_pars(srv_flt,1,h,s) = slope.
               //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
@@ -1137,7 +1137,7 @@ Type objective_function<Type>::operator() ()
     ans_catch
     +ans_survey
     // -ans_survcomp
-    -ans_catchcomp
+    // -ans_catchcomp
     +ans_priors;//
     // Type ans = 0.0;
     // Report calculations

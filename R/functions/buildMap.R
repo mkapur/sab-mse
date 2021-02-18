@@ -5,7 +5,6 @@ buildMap <- function(toFix = c("omega_0ij","epsilon_tau", "mort_k", "logh_k"),
   
   # for(i in 1:length(df$parms)){
   for(i in seq_along(toFix)){
-    # cat(i,"\n")
     parloc <- which(names(df$parms) == toFix[i])
     if(toFix[i] != 'log_fsh_slx_pars'  & toFix[i] != 'log_srv_slx_pars'){
       mappy[[idx]] <- factor(rep(NA, length(df$parms[[parloc]])))

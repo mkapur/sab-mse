@@ -924,7 +924,7 @@ Type objective_function<Type>::operator() ()
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)) +=
                   fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
                   phi_if_acomp(acomp_flt,i)*
-                  mla_yais(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
                   N_yais_mid(y,a,i,s);
                 break;
               } //end selType switch for comms
@@ -1057,7 +1057,7 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
-              // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+              std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
             } else{
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                 acomp_yafs_obs(y,a,acomp_flt,s) +
@@ -1075,7 +1075,7 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
-              // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+              std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
             } // end switch for comm or surv type
           } // end acomp flag
         } // end ages within dims
@@ -1116,8 +1116,8 @@ Type objective_function<Type>::operator() ()
   ans_tot(0) = ans_SDR;
   ans_tot(1) = ans_catch;
   ans_tot(2) = ans_survey;
-  // ans_tot(3) = ans_survcomp;
-  // ans_tot(4) = ans_catchcomp;
+  ans_tot(3) = ans_survcomp;
+  ans_tot(4) = ans_catchcomp;
   ans_tot(5) = ans_priors;
   // 
   // // Likelihood: TOTAL
@@ -1125,8 +1125,8 @@ Type objective_function<Type>::operator() ()
     ans_SDR+
     ans_catch
     +ans_survey
-    -ans_survcomp
-    // -ans_catchcomp
+    // -ans_survcomp
+    -ans_catchcomp
     +ans_priors;//
     // Type ans = 0.0;
     // Report calculations

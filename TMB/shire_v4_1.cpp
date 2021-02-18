@@ -211,6 +211,7 @@ Type objective_function<Type>::operator() ()
               for (int a= 0; a < nage; a++){
                 fsh_slx_yafs(i,a,fish_flt,s)  = Type(1.0) / ( Type(1.0) + exp( Type(-1.0) *
                   fsh_slx_pars(fish_flt,1,0,s) * (a -  fsh_slx_pars(fish_flt,0,0,s)) ) );
+                
               } // end ages
               break;
             case 2: // Dome Normal with alpha (mean) and beta (sd)
@@ -278,7 +279,7 @@ Type objective_function<Type>::operator() ()
   vector<int> a2_dim = log_srv_slx_pars.dim;
   array<Type> srv_slx_pars(a2_dim);
   srv_slx_pars.setZero();
-  for (int srv_flt = 0; srv_flt < nfleets_surv; srv_flt++) {
+  for (int srv_flt = 0; srv_flt < (nfleets_surv+(nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp))); srv_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
       for (int h = 0; h < srv_blks_size(srv_flt); h++) { // loop time blocks
         for (int s = 0; s < nsex; s++) { // loop sexes
@@ -287,6 +288,12 @@ Type objective_function<Type>::operator() ()
       } // end blocks
     } // end alpha, beta
   } // end srv fleets
+  
+  std::cout <<"WCVAST BLK1MAL \t" <<srv_slx_pars(4,0,1,1) << std::endl; // print goa surv p1
+  // std::cout << s << "\t" << h << "\t" << srv_slx_pars(4,1,h,s) << std::endl; // print goa surv p2
+  std::cout <<   "AK GOA SURV BLK1MAL \t" << srv_slx_pars(5,0,1,1) << std::endl; // print goa surv p1
+  // std::cout << s << "\t" << h <<"\t" << srv_slx_pars(5,1,h,s) << std::endl; // print goa surv p2
+  
   // doing five of these to account for five surveys w acomp
   for(int srv_flt =0;srv_flt<(nfleets_surv+(nfleets_acomp-(nsurvflts_acomp+nfishflts_acomp)));srv_flt++){ // loop fleets
     int i = 0; // re-set i to 0 
@@ -296,6 +303,7 @@ Type objective_function<Type>::operator() ()
         switch (selType_surv(srv_flt)) { // 0 is age, 1 is leng
         case 0: // enter age based sel
           for (int s = 0; s < nsex; s++) { // loop sexes
+     
             // Selectivity switch (case 0 or 1 references the value of slx_type)
             switch (selShape_surv(srv_flt)) { // age sel
             case -1:
@@ -309,6 +317,9 @@ Type objective_function<Type>::operator() ()
                   (a -  srv_slx_pars(srv_flt,0,h,s)) / ( srv_slx_pars(srv_flt,1,h,s) -
                   srv_slx_pars(srv_flt,0,h,s))));
               } // end ages
+             
+   
+              // std::cout << srv_slx_yafs(i,0,5,1) << std::endl; // print goa surv age0 slx
               break;
             case 1: // Logistic with a50 and slope, where  srv_slx_pars(srv_flt,0,h,s) = a50 and  srv_slx_pars(srv_flt,1,h,s) = slope.
               //  *This is the preferred logistic parameterization b/c it reduces parameter correlation*
@@ -1057,7 +1068,7 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
-              std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+              // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
             } else{
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                 acomp_yafs_obs(y,a,acomp_flt,s) +
@@ -1075,7 +1086,7 @@ Type objective_function<Type>::operator() ()
                 pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
-              std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+              // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
             } // end switch for comm or surv type
           } // end acomp flag
         } // end ages within dims

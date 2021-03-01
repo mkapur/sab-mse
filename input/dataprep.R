@@ -422,32 +422,33 @@ OM_agecomps_yafs[,2:21,'AK_GOA_SURV',1] <- as.matrix(merge(data.frame('Year' = 1
 # the bc trap is a commercial cpue we aren't fitting to in the model but there are ages.
 
 
-OM_agecomps_yafs[,2:36,'BC_TRAP',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
+OM_agecomps_yafs[,2:35,'BC_TRAP',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                            read.csv(here("input","raw_data","comps",
                                                          "BC_om_FemaleCommercialTrapAgeProp.csv")),
-                                           by = 'Year', all.x = TRUE))
- OM_agecomps_yafs[,2:36,'BC_StRS',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
+                                           by = 'Year', all.x = TRUE) %>% select(-Year))
+ OM_agecomps_yafs[,2:35,'BC_StRs',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                            read.csv(here("input","raw_data","comps",
                                                          "BC_om_FemaleStRSAgeProp.csv")),
-                                           by = 'Year', all.x = TRUE))
+                                           by = 'Year', all.x = TRUE) %>% select(-Year))
 ##recall that BC SS is the same as BC OFF STD or "standardized survey
 OM_agecomps_yafs[,2:35,'BC_OFFStd',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                             read.csv(here("input","raw_data","comps",
                                                           "BC_om_FemaleSSAgeProp.csv")),
-                                            by = 'Year', all.x = TRUE)) 
+                                            by = 'Year', all.x = TRUE) %>% select(-Year)) 
 
-OM_agecomps_yafs[,2:36,'BC_TRAP',2] <-  as.matrix(merge(data.frame('Year' = 1960:2019),
+OM_agecomps_yafs[,2:35,'BC_TRAP',2] <-  as.matrix(merge(data.frame('Year' = 1960:2019),
                                          read.csv(here("input","raw_data","comps",
                                                        "BC_om_MaleCommercialTrapAgeProp.csv")),
-                                         by = 'Year', all.x = TRUE))
-OM_agecomps_yafs[,2:36,"BC_StRS",2] <-as.matrix(merge(data.frame('Year' = 1960:2019),
+                                         by = 'Year', all.x = TRUE)%>% select(-Year))
+OM_agecomps_yafs[,2:35,"BC_StRs",2] <-as.matrix(merge(data.frame('Year' = 1960:2019),
                                          read.csv(here("input","raw_data","comps",
                                                        "BC_om_MaleStRSAgeProp.csv")),
-                                         by = 'Year', all.x = TRUE))
-OM_agecomps_yafs[,2:36,'BC_OFFStd',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
+                                         by = 'Year', all.x = TRUE)%>% select(-Year))
+
+OM_agecomps_yafs[,2:35,'BC_OFFStd',1] <- as.matrix(merge(data.frame('Year' = 1960:2019),
                                           read.csv(here("input","raw_data","comps",
                                                         "BC_om_MaleSSAgeProp.csv")),
-                                          by = 'Year', all.x = TRUE))
+                                          by = 'Year', all.x = TRUE)%>% select(-Year))
 
 #* wc agecomps ----
 wcdat <- SS_readdat(here('input',"raw_data","2019 WC Stock Assessment","data.ss"))
@@ -546,9 +547,6 @@ OM_agecomps_yafs[,1:51,"WC_TWL",2] <- as.matrix(merge(data.frame('Year' = 1960:2
 
 # save(wc_agecomps_female, file = here('input','raw_data',"comps","wc_agecomps_female_BINDME.rdata"))
 # save(wc_agecomps_male, file  = here('input','raw_data',"comps","wc_agecomps_male_BINDME.rdata"))
-OM_agecomps_yafs[is.na(OM_agecomps_yafs)] <- -1
-save(OM_agecomps_yafs, file = here('input','input_data',"OM_agecomps_yafs.rdata"))
-
 
 ## per fleet and sex, designate which bin acomps start/stop at for looping purposes
 acomp_dims_yfs <- array(NA, 
@@ -567,6 +565,12 @@ for(y in 1:60){
   }
 }
 save(acomp_dims_yfs, file = here('input','input_data',"acomp_dims_yfs.rdata"))
+
+OM_agecomps_yafs[is.na(OM_agecomps_yafs)] <- -1
+save(OM_agecomps_yafs, file = here('input','input_data',"OM_agecomps_yafs.rdata"))
+
+
+
 
 ## mortality ----
 ## keeping this simple, just one value for each R

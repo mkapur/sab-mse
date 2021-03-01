@@ -14,7 +14,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
-# TMB::compile(here("TMB",paste0(dllUSE,".cpp")), flags = "-Wno-ignored-attributes")
+TMB::compile(here("TMB",paste0(dllUSE,".cpp")))#, flags = "-Wno-ignored-attributes")
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -42,11 +42,12 @@ mappy <-
                       "epsilon_tau",
                       "logpi_acomp",
                       "log_fsh_slx_pars",
-                      "log_srv_slx_pars",
-                    "mort_k"),
-           fixFlt = c("all_fsh",
-                      "all_srv"))
+                      # "log_srv_slx_pars",
+                      "mort_k"),
+           fixFlt = c("all_fsh"))#,
+                      # "all_srv"))
                       # colnames(df$srv_blks)[6] ))
+
 # mappy$logh_k <- factor(c(NA,NA,2,3)) ##  fix WC regs
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
 # mappy$tildeR_yk <- factor(sort(rep(1:(length(mappy$tildeR_yk)/df$nstocks), each = df$nstocks))) ## make each area x year mirrored
@@ -78,18 +79,18 @@ system.time(opt <-nlminb(obj$par,
               lower = bounds$lower,
               upper = bounds$upper))
 # 
-# system.time(opt <-
-#               TMBhelper::fit_tmb(
-#                 obj,
-#                 lower = bounds$lower,
-#                 upper = bounds$upper,
-#                 # dll = dllUSE,
-#                 getHessian = FALSE,
-#                 getsd = FALSE,
-#                 control = list(eval.max = 1e6,
-#                                iter.max = 1e6,
-#                                rel.tol = 1e-4)
-#               )$opt) ## estimate; can repeat for stability)
+system.time(opt <-
+              TMBhelper::fit_tmb(
+                obj,
+                # lower = bounds$lower,
+                # upper = bounds$upper,
+                # dll = dllUSE,
+                getHessian = FALSE,
+                getsd = FALSE,
+                control = list(eval.max = 1e6,
+                               iter.max = 1e6,
+                               rel.tol = 1e-4)
+              )$opt) ## estimate; can repeat for stability)
 
 
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 

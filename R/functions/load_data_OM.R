@@ -375,7 +375,7 @@ load_data_OM <- function(seed = 731,
     omega_0ij = omega_0ij,
     logq_f = rep(log(0.5), 5),
     b_y = b_y, ## setup in if loop above  
-    logpi_acomp = rep(log(50),nfleets_acomp),
+    logpi_acomp = rep(log(2),nfleets_acomp),
     logSDR = 1.4,
     ## structure is fleet x alpha, beta x time block (1 for now)x sex
     ## blks will need to include future

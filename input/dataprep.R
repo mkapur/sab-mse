@@ -1214,7 +1214,7 @@ ggsave(last_plot(),
 
 #* surv x year x fleet ----
 survey %>%
-  mutate(Year = df$years) %>%
+  mutate(Year = 1960:2019) %>%
   reshape2::melt(., id = c('Year')) %>% 
   filter(!is.na(value) & value >0 ) %>%
   ggplot(.,aes(x = Year, y = variable, color = variable)) +
@@ -1222,14 +1222,14 @@ survey %>%
   theme(legend.position = 'none', 
         axis.text = element_text(size = 15),
         axis.title  = element_text(size = 20))+
-  scale_x_continuous(limits = c(1979,2021)) +
+  scale_x_continuous(limits = c(1959,2021)) +
   scale_color_manual(values = survfltPal) +
 
   geom_point(size = 5) +
   labs(y = 'Indices')
 ggsave(last_plot(),
        file = here('input','input_data','input_figs','datplot_survey.png'),
-       width = 4.5, height = 6, unit = 'in', dpi = 420)
+       width = 4, height = 6, unit = 'in', dpi = 420)
 
 
 #* acomp x year x fleet ----
@@ -1249,7 +1249,7 @@ df$acomp_yafs_obs[,6,,1] %>%
   data.frame(.) %>%
   mutate(Year = df$years) %>%
   reshape2::melt(., id = c('Year')) %>% 
-  filter(!is.na(value)) %>%
+  filter(!is.na(value) & value > -1) %>%
   ggplot(.,aes(x = Year, y = variable, color = variable)) +
   theme_sleek() +
   theme(legend.position = 'none', 
@@ -1280,8 +1280,9 @@ df$acomp_yafs_obs[,6,,1] %>%
 fltnames[fltnames==FALSE] <- NA
 
 fltsub <- fltnames %>%
-  select(-SELTYPE) %>%
-  reshape2::melt(., id = c('M','NAME')) 
+  select(-SELTYPE, -MINYR, -MAXYR, -NYEARS) %>%
+  reshape2::melt(., id = c('M','NAME')) %>%
+  filter(!(NAME %in% c('BC_EARLY','BC_VAST','AK_LLSURV_W','AK_LLSURV_E')))
 
 
 ggplot(fltsub,aes(x = NAME, y = variable, fill = NAME )) +

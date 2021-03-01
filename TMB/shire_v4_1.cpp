@@ -279,7 +279,7 @@ Type objective_function<Type>::operator() ()
   
   vector<int> a2_dim = log_srv_slx_pars.dim;
   array<Type> srv_slx_pars(a2_dim);
-  std::cout <<  a2_dim(0) << std::endl; 
+  // std::cout <<  a2_dim(0) << std::endl; 
   srv_slx_pars.setZero();
   for (int srv_flt = 0; srv_flt < a2_dim(0); srv_flt++) {
     for (int n = 0; n < npar_slx; n++) { // loop over alpha and beta
@@ -784,28 +784,27 @@ Type objective_function<Type>::operator() ()
         Length_yais_beg(y+1,0,i,s) = 0;
       } // mid subareas i
     } // end sexes
-    // 
-    // // std::cout << y << " before prob LAA" << "\n";
-    // // prob of length-at-age
-    // // for(int s=0;s<nsex;s++){
-    // //   for(int i=0;i<(nspace);i++){
-    // //     for(int a=0;a<(nage);a++){
-    // //       LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    // //       LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    // //       for(int l=1;l<(LBins-1);l++){
-    // //         LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-    // //           pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    // //         LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
-    // //           pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    // //       } // end LBins
-    // //       LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    // //       LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
-    // //     } // end ages
-    // //   } // end nspace
-    // // } // end sex
-    // // std::cout << y << " after LengthAge_alyis_mid" << "\n";
-    // 
-    // // std::cout << y << " reweight length-at-age given movement" << "\n";
+
+    // std::cout << y << " before prob LAA" << "\n";
+    // prob of length-at-age
+    // for(int s=0;s<nsex;s++){
+    //   for(int i=0;i<(nspace);i++){
+    //     for(int a=0;a<(nage);a++){
+    //       LengthAge_alyis_beg(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,0,y,i,s) = pnorm(Type(1.0),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       for(int l=1;l<(LBins-1);l++){
+    //         LengthAge_alyis_beg(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //         LengthAge_alyis_mid(a,l,y,i,s) = pnorm(Type(l+1),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s)) -
+    //           pnorm(Type(l),  Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       } // end LBins
+    //       LengthAge_alyis_beg(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_beg(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //       LengthAge_alyis_mid(a,LBins-1,y,i,s) = 1-pnorm(Type(LBins-1), Length_yais_mid(y,a,i,s), sigmaG_yk(y,phi_ik2(i),s));
+    //     } // end ages
+    //   } // end nspace
+    // } // end sex
+    // std::cout << y << " after LengthAge_alyis_mid" << "\n";
+    // std::cout << y << " reweight length-at-age given movement" << "\n";
     // // SSB_yi, SSB_yk
     for(int i=0;i<(nspace);i++){
       for(int a=0;a<(nage);a++){
@@ -1091,8 +1090,8 @@ Type objective_function<Type>::operator() ()
           } // end acomp flag
         } // end ages within dims
       } // end sex
-      //     // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
-      //     // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
+          std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+          std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
     } // end y in nyear
   } // end acomp fleets
   

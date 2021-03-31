@@ -14,9 +14,14 @@ save(reps, file = here("TMB",paste0('reps_',Sys.Date(),".rdata")))
 
 array(mappy$log_fsh_slx_pars, dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
       dimnames = dimnames(df$parms$log_fsh_slx_pars))
+
 array(mappy$log_srv_slx_pars, 
       dim = c(ncol(df$srv_blks),2,max(df$srv_blks_size),2),
       dimnames = dimnames(df$parms$log_srv_slx_pars))
+
+exp(array(obj$par[names(obj$par) == 'log_srv_slx_pars'], 
+      dim = c(ncol(df$srv_blks),2,max(df$srv_blks_size),2),
+      dimnames = dimnames(df$parms$log_srv_slx_pars)))
 # dat = rep1;attach(dat)
 # system.time(opt <- nlminb(
 #   obj$par,
@@ -59,8 +64,8 @@ rep1$Length_yais_end[4,c(1,2,65:71),1,1]
 
 rep1$surv_yf_pred
 sum(is.na(rep1$comm_acomp_yafs_pred))
-
-
+sum(is.na(rep1$srv_slx_yafs))
+sum(is.na(rep1$fsh_slx_yafs))
 
 array(exp(obj$par[names(obj$par)=='log_fsh_slx_pars']), 
       dim = c(7,2,2))
@@ -185,6 +190,7 @@ opt$AIC
 likes <- rep1$ans_tot %>% matrix(., ncol = length(.)) %>% data.frame()
 names(likes) = c("SDR","CATCH","SURVEY","SURVCOMP","CATCHCOMP","PRIORS")
 likes
+
 neqnm <- matrix(rep1$NeqnR, ncol = 6, nrow = length(0:70)) %>%
   data.frame(.) 
 

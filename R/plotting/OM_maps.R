@@ -53,19 +53,20 @@ ggplot(data = regions) +
   
   ## show demography from growth paper
   ##R3
-geom_sf(data =   st_union(x=clips[[2]],y=clips[[3]])  ,
-fill = NA, lwd = 1.1,color = 'white', linetype = 'dotted') +
-##r2
-geom_sf(data =   st_union(x=clips[[4]],y=clips[[5]])  ,
-fill = NA, lwd = 1.1,  color = 'white', linetype = 'dotted') +
+# geom_sf(data =   st_union(x=clips[[2]],y=clips[[3]])  ,
+# fill = NA, lwd = 1.1,color = 'white', linetype = 'dotted') +
+# ##r2
+# geom_sf(data =   st_union(x=clips[[4]],y=clips[[5]])  ,
+# fill = NA, lwd = 1.1,  color = 'white', linetype = 'dotted') +
 
 ## panmictic fill
-# geom_sf(data = clips[[1]], fill = 'grey44', alpha = 0.9, color = NA) +
-#   geom_sf(data =  clips[[2]], fill = 'grey44', alpha = 0.9, color = NA) +
-#   geom_sf(data = clips[[3]], fill = 'grey44', alpha = 0.9, color = NA) +
-#   geom_sf(data = clips[[4]], fill = 'grey44', alpha = 0.9, color = NA ) +
-#   geom_sf(data = clips[[5]], fill = 'grey44', alpha = 0.9, color = NA) +
-#   geom_sf(data = clips[[6]], fill = 'grey44', alpha = 0.9,color = NA) +
+geom_sf(data = clips[[1]], fill = 'grey22', alpha = 0.9, color = NA) +
+  geom_sf(data =  clips[[2]], fill = 'grey22', alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[3]], fill = 'grey22', alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[4]], fill = 'grey22', alpha = 0.9, color = NA ) +
+  geom_sf(data = clips[[5]], fill = 'grey22', alpha = 0.9, color = NA) +
+  geom_sf(data = clips[[6]], fill = 'grey22', alpha = 0.9,color = NA) +
+  
   ## subarea fills
   # geom_sf(data = clips[[1]], fill = subareaPal[1], alpha = 0.9, color = NA) +
   # geom_sf(data =  clips[[2]], fill = subareaPal[2], alpha = 0.9, color = NA) +
@@ -75,16 +76,16 @@ fill = NA, lwd = 1.1,  color = 'white', linetype = 'dotted') +
   # geom_sf(data = clips[[6]], fill = subareaPal[6], alpha = 0.9,color = NA) +
   
   ## stock fills
-  geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
-  geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[3]], fill = demPal[2], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[4]], fill = demPal[3], alpha = 0.9, color = NA ) +
-  geom_sf(data = clips[[5]], fill = demPal[3], alpha = 0.9, color = NA) +
-  geom_sf(data = clips[[6]], fill = demPal[4], alpha = 0.9,color = NA) +
+  # geom_sf(data = clips[[1]], fill = demPal[1], alpha = 0.9, color = NA) +
+  # geom_sf(data =  clips[[2]], fill = demPal[2], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[3]], fill = demPal[2], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[4]], fill = demPal[3], alpha = 0.9, color = NA ) +
+  # geom_sf(data = clips[[5]], fill = demPal[3], alpha = 0.9, color = NA) +
+  # geom_sf(data = clips[[6]], fill = demPal[4], alpha = 0.9,color = NA) +
   
 
   ## EEZ
-  geom_sf(lwd = 1, col = '#173028', fill = 'grey88',alpha = 0.2) +
+  geom_sf(lwd = 1, col = 'white', fill = 'black',alpha = 0.2) +
 
   
   ## show major currents
@@ -112,23 +113,23 @@ fill = NA, lwd = 1.1,  color = 'white', linetype = 'dotted') +
   #   color = rev(subareaPal)) +
   
   ## OM Stock labels
-  geom_label(data = data.frame(), aes( x = c(238, 233, 224,  200),
-                                       y = c(33, 48,  54, 53)),
-             size = 6,
-             label = list(c(1:4),
-                          c(paste0('Stock ',c(1:4))),
-                        c("R1", "R2", "R3","R4"))[[2]] ,
-             fill = 'white',
-             color = rev(demPal)) +
+  # geom_label(data = data.frame(), aes( x = c(238, 233, 224,  200),
+  #                                      y = c(33, 48,  54, 53)),
+  #            size = 6,
+  #            label = list(c(1:4),
+  #                         c(paste0('Stock ',c(1:4))),
+  #                       c("R1", "R2", "R3","R4"))[[2]] ,
+  #            fill = 'white',
+  #            color = rev(demPal)) +
   coord_sf(xlim = c(165, 245), ylim = c(26, 65)) +
   labs(x ="",y="")
 
 # Save
-ggsave(here::here("figs", "map-EEZ_stock_lab1.png"), 
+ggsave(here::here("figs", "map-EEZ_mgmt.png"), 
        width = 10, height = 8)
 
 ggsave(subalab | stocklab,  
-       file = here::here("figs", "map-EEZ_strata_stock.png"),
+       file = here("figs", "map-EEZ_strata_stock.png"),
        width = 22, height = 10)
 
 

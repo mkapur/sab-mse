@@ -52,6 +52,7 @@ mappy <-
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
 # mappy$tildeR_yk <- factor(sort(rep(1:(length(mappy$tildeR_yk)/df$nstocks), each = df$nstocks))) ## make each area x year mirrored
 
+
 system.time(obj <- MakeADFun(df,
                  parameters = df$parms,
                  dll = dllUSE,

@@ -805,7 +805,7 @@ writeOM <- function(justPlots = FALSE,
                                         " ", df$fsh_blks[blk,flt]+1960),
                           xlim = c(0,75),
                           col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
-          text(x=60, y = 0.2, cex = 1.1,label = 
+          text(x=60, y = 0.4, cex = 1.1,label = 
                  paste0(ifelse(df$selType_fish[flt] == 0,
                                'A','L'),"50=", 
                         round(selP[flt,1,blk,s],1),"\n",
@@ -852,21 +852,7 @@ writeOM <- function(justPlots = FALSE,
         }  ## end sex
       } ## end blk
     }## end fish fleet
-    # fsh_sel_afs <- array(NA, dim =  c(df$nage,df$nfleets_fish,2),
-    #                      dimnames = list(c(df$age),
-    #                                      c(dimnames(df$parms$log_fsh_slx_pars)[[1]]),
-    #                                      c('Fem','Mal')))
-    # for(s in 1:2){
-    #   for(fish_flt in 1:df$nfleets_fish){
-    #     fsh_sel_afs[,fish_flt,s] <- getSelec2(sex = s,
-    #                                           selP = selP,
-    #                                           flt_idx = fish_flt,
-    #                                           selType = df$selType_fish[fish_flt], 
-    #                                           selShape = df$selShape_fish[fish_flt],
-    #                                           fltType = 'fish')
-    #     
-    #   } ## end fish fleet
-    # } ## end sex
+  
     
     png(paste0(dumpfile,'/fishery_selex.png'),
         height = 8, width = 6, unit = 'in', res = 420)
@@ -874,7 +860,8 @@ writeOM <- function(justPlots = FALSE,
     sexPal_temp = c('grey22','grey66')
     for(flt in 1:df$nfleets_fish){
       for(s in 1:2){
-        tmp <- fsh_sel_afs[,flt,s]
+        tmp <- fsh_sel_afsb[,flt,s,blk]
+        
         if(s == 1) plot(tmp, 
                         col = sexPal_temp[1], 
                         type = 'l', 
@@ -890,10 +877,9 @@ writeOM <- function(justPlots = FALSE,
             col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
             lwd = 2)
         if(s == 2) lines(tmp, col = sexPal_temp[2], type = 'l', lty = 2, lwd = 2)
-      }
-    }
+      } ## end sex
+    } ## end flt
     dev.off()
-    
   } ## end if all fixed
   
   # plot SURV selex ----

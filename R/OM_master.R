@@ -42,7 +42,7 @@ mappy <-
                       "epsilon_tau",
                       "logpi_acomp",
                       "log_fsh_slx_pars",
-                      # "log_srv_slx_pars",
+                      "log_srv_slx_pars",
                       "mort_k"),
            fixFlt = c("all_fsh",
                       "all_srv"))
@@ -78,14 +78,15 @@ system.time(opt <-nlminb(obj$par,
                          obj$fn,
                          obj$gr,
               lower = bounds$lower,
-              upper = bounds$upper))
+              upper = bounds$upper
+              ))
 # 
 system.time(opt <-
               TMBhelper::fit_tmb(
                 obj,
-                # lower = bounds$lower,
-                # upper = bounds$upper,
-                # dll = dllUSE,
+                lower = bounds$lower,
+                upper = bounds$upper,
+                dll = dllUSE,
                 getHessian = FALSE,
                 getsd = FALSE,
                 control = list(eval.max = 1e6,

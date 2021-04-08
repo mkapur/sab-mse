@@ -423,7 +423,7 @@ writeOM <- function(justPlots = FALSE,
                sex = c('Fem','Mal')[s],
                src = 'OBS'))
       if(df$acomp_flt_type[flt] == 0){
-        predacomp <- rbind(predacomp,melt(comm_acomp_yafs_pred[,,predpos,s]) %>% 
+        predacomp <- rbind(predacomp,melt(dat$comm_acomp_yafs_pred[,,predpos,s]) %>% 
                              mutate(year = Var1+1959) %>%
           select(year, "age" = Var2, "freq" = value) %>%
           mutate(fleet = fltnames_acomp[flt], 
@@ -431,7 +431,7 @@ writeOM <- function(justPlots = FALSE,
                  src = 'PRED'))
       } else{
         predacomp <- rbind(predacomp,
-                           melt(surv_acomp_yafs_pred[,,predpos,s]) %>% 
+                           melt(dat$surv_acomp_yafs_pred[,,predpos,s]) %>% 
                              mutate(year = Var1+1959) %>%
           select(year, "age" = Var2, "freq" = value) %>%
           mutate(fleet = fltnames_acomp[flt], 
@@ -758,6 +758,7 @@ writeOM <- function(justPlots = FALSE,
         for(s in 1:2){
           if(!is.na(map_fshslx[fish_flt,1,blk,s])){
             fsh_sel_afsb[,fish_flt,s,blk] <- getSelec2(sex = s,
+                                                       blk= blk,
                                                        selP = selP,
                                                        flt_idx = fish_flt,
                                                        selType = df$selType_fish[fish_flt], 
@@ -765,6 +766,7 @@ writeOM <- function(justPlots = FALSE,
                                                        fltType = 'fish')
           } else if(is.na(map_fshslx[fish_flt,1,blk,s])){
             fsh_sel_afsb[,fish_flt,s,blk] <- getSelec2(sex = s,
+                                                       blk= blk,
                                                        selP = inputSel,
                                                        flt_idx = fish_flt,
                                                        selType = df$selType_fish[fish_flt], 
@@ -818,24 +820,53 @@ writeOM <- function(justPlots = FALSE,
       }
       dev.off()
     } ## end blks
-    
+    ## end if some fish slx was not fixed
   } else{
+    map_fshslx <- array(as.numeric(mappy$log_fsh_slx_pars), 
+                        dim = c(df$nfleets_fish,2,max(df$fsh_blks_size),2),
+                        dimnames = dimnames(df$parms$log_fsh_slx_pars))
+    ## replace non-fixed values with starting pars
+    map_fshslx[!is.na(map_fshslx)] <-  array(as.numeric(exp(best[grep('log_fsh_slx_pars',names(best))])))
+    selP <- map_fshslx
     inputSel <- selP <- exp(df$parms$log_fsh_slx_pars)
-    fsh_sel_afs <- array(NA, dim =  c(df$nage,df$nfleets_fish,2),
-                         dimnames = list(c(df$age),
-                                         c(dimnames(df$parms$log_fsh_slx_pars)[[1]]),
-                                         c('Fem','Mal')))
-    for(s in 1:2){
-      for(fish_flt in 1:df$nfleets_fish){
-        fsh_sel_afs[,fish_flt,s] <- getSelec2(sex = s,
-                                              selP = selP,
-                                              flt_idx = fish_flt,
-                                              selType = df$selType_fish[fish_flt], 
-                                              selShape = df$selShape_fish[fish_flt],
-                                              fltType = 'fish')
-        
-      } ## end fish fleet
-    } ## end sex
+    fsh_sel_afsb <- array(NA, dim =  c(df$nage,
+                                       df$nfleets_fish,
+                                       2,
+                                       max(df$fsh_blks_size)),
+                          dimnames = list(c(df$age),
+                                          c(dimnames(df$parms$log_fsh_slx_pars)[[1]]),
+                                          c('Fem','Mal'),
+                                          c(dimnames(df$parms$log_fsh_slx_pars)[[3]])))
+    
+    for(fish_flt in 1:df$nfleets_fish){
+      for(blk in 1:df$fsh_blks_size[fish_flt]){
+        for(s in 1:2){
+          
+            fsh_sel_afsb[,fish_flt,s,blk] <- getSelec2(sex = s,
+                                                       blk= blk,
+                                                       selP = inputSel,
+                                                       flt_idx = fish_flt,
+                                                       selType = df$selType_fish[fish_flt], 
+                                                       selShape = df$selShape_fish[fish_flt],
+                                                       fltType = 'fish')
+        }  ## end sex
+      } ## end blk
+    }## end fish fleet
+    # fsh_sel_afs <- array(NA, dim =  c(df$nage,df$nfleets_fish,2),
+    #                      dimnames = list(c(df$age),
+    #                                      c(dimnames(df$parms$log_fsh_slx_pars)[[1]]),
+    #                                      c('Fem','Mal')))
+    # for(s in 1:2){
+    #   for(fish_flt in 1:df$nfleets_fish){
+    #     fsh_sel_afs[,fish_flt,s] <- getSelec2(sex = s,
+    #                                           selP = selP,
+    #                                           flt_idx = fish_flt,
+    #                                           selType = df$selType_fish[fish_flt], 
+    #                                           selShape = df$selShape_fish[fish_flt],
+    #                                           fltType = 'fish')
+    #     
+    #   } ## end fish fleet
+    # } ## end sex
     
     png(paste0(dumpfile,'/fishery_selex.png'),
         height = 8, width = 6, unit = 'in', res = 420)

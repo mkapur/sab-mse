@@ -340,8 +340,8 @@ load_data_OM <- function(seed = 731,
   #   log_srv_slx_pars['BC_SS','p2',1:srv_blks_size[,"BC_SS"],] <- 65
   # 
   # } else{
-    log_srv_slx_pars['BC_OFFStd','p1',1:srv_blks_size[,"BC_OFFStd"],] <- c(29.99999, 29.99999)
-    log_srv_slx_pars['BC_OFFStd','p2',1:srv_blks_size[,"BC_OFFStd"],] <- c(54.99999, 70.00000)
+    log_srv_slx_pars['BC_OFFStd','p1',1:srv_blks_size[,"BC_OFFStd"],] <- c(58.54851, 79.89886)
+    log_srv_slx_pars['BC_OFFStd','p2',1:srv_blks_size[,"BC_OFFStd"],] <- c(58.53849, 79.90166)
     
     log_srv_slx_pars['BC_StRs','p1',1:srv_blks_size[,"BC_StRs"],] <-  c(40.00000, 40.00000)
     log_srv_slx_pars['BC_StRs','p2',1:srv_blks_size[,"BC_StRs"],] <- c(54.99999,54.99999)

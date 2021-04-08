@@ -454,9 +454,9 @@ writeOM <- function(justPlots = FALSE,
 
   ggplot(    plotacomp[[flt]] , aes(x = age, y = freq, fill = src, color = sex)) +
     theme_sleek() +
-    geom_ribbon(data = subset(    plotacomp[[flt]] , sex == 'Fem'), color = 'white',
+    geom_ribbon(data = subset(    plotacomp[[flt]] , sex == 'Fem' & src == 'OBS'), color = 'white',
                   aes(x=age,ymax=freq),ymin=0,alpha=0.3) +
-    geom_ribbon(data = subset(    plotacomp[[flt]] , sex == 'Mal'), color = 'white',
+    geom_ribbon(data = subset(    plotacomp[[flt]] , sex == 'Mal'& src == 'OBS'), color = 'white',
                 aes(x=age,ymax=-freq),ymin=0,alpha=0.3) +
     
     # geom_line(lwd = 1.05, data = subset(plotacomp[[flt]] , sex == 'Fem'),
@@ -464,25 +464,23 @@ writeOM <- function(justPlots = FALSE,
     # geom_line(lwd = 1.05,data = subset(plotacomp[[flt]] , sex == 'Mal'),
     #           aes(y = -freq), alpha = 0.5, color = 'grey22') +
     
-    geom_point(lwd = 1.05, data = subset(    plotacomp[[flt]] , sex == 'Fem' & src == 'PRED'), alpha = 0.5) +
-    geom_point(lwd = 1.05,data = subset(    plotacomp[[flt]] , sex == 'Mal' & src == 'PRED'),
-               aes(y = -freq), alpha = 0.5) +
+    # geom_point(lwd = 1.05, data = subset(    plotacomp[[flt]] , sex == 'Fem' & src == 'PRED'),
+    #            alpha = 0.5) +
+    # geom_point(lwd = 1.05,data = subset(    plotacomp[[flt]] , sex == 'Mal' & src == 'PRED'),
+    #            aes(y = -freq), alpha = 0.5) +
  
     scale_fill_manual(values = c('grey22','white'), labels = c('Observed','Predicted')) +
     scale_color_manual(values = c('red','blue'), labels = c('Fem','Mal')) +
     scale_x_continuous(limits = c(0, xmax)) +
     labs(color = 'Sex', fill = '')+
     facet_wrap(~year)
-  ggsave(last_plot(),
-         file = paste0(dumpfile,"/", Sys.Date(),'-',fltnames_acomp[flt],'-acomps.png'),
-         width = 10, height = 6, unit = 'in',
-         dpi = 420 )
+  # ggsave(last_plot(),
+  #        file = paste0(dumpfile,"/", Sys.Date(),'-',fltnames_acomp[flt],'-acomps.png'),
+  #        width = 10, height = 6, unit = 'in',
+  #        dpi = 420 )
   
   }
 
-
-  
-  
   ## catch pred by fleet ----
   catch_yf_pred_totalt <- data.frame(dat$catch_yf_pred_total)[1:nyear,]
   names(catch_yf_pred_totalt) <- unlist(df$fltnames_fish)

@@ -1,0 +1,40 @@
+$par
+         logR_0k          logR_0k          logR_0k          logR_0k           logq_f           logq_f           logq_f 
+     17.86857480      14.17396585      15.25967412      15.88553235      -9.03190881      -5.64673634     -12.80255946 
+          logq_f           logq_f         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+    -15.15689517     -10.66644687       0.17288225       0.22348138       0.28771744       0.36847443       0.44635694 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      0.51824528       0.57259231       0.58895740       0.57721443       0.54280245       0.51696315       0.53336847 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      0.59585537       0.70386192       0.80486617       0.92975888       1.02608434       0.74675661       0.54613921 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      0.32774204      -0.01418378      -0.28749540       0.14694334      -0.14635508      -0.32551073       0.89615377 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+     -0.16299241      -0.22000411      -0.31519310      -1.03909442      -0.47212806      -0.86048034      -0.31845438 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+     -1.82422249      -1.71569118      -1.09696615       0.62541176       0.19881301       0.08509378      -0.45971796 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+     -0.36453470      -0.94841801      -0.82940584      -0.76291872      -0.74831168      -0.81675086      -0.82802872 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+     -0.60796002       0.17384519       1.65349933       2.18023433       1.22551854       0.80616055       0.57599990 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y log_srv_slx_pars 
+      0.39493610       0.29790755       0.25161451       0.23762839       0.23703821       0.23639855       3.19826811 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      3.91202301       2.62063950       4.17438727       4.70763188       3.91202301       4.70763361       4.17438727 
+
+$objective
+[1] 171.1393
+
+$convergence
+[1] 1
+
+$iterations
+[1] 120
+
+$evaluations
+function gradient 
+     200      120 
+
+$message
+[1] "function evaluation limit reached without convergence (9)"
+

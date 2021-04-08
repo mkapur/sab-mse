@@ -474,10 +474,10 @@ writeOM <- function(justPlots = FALSE,
     scale_x_continuous(limits = c(0, xmax)) +
     labs(color = 'Sex', fill = '')+
     facet_wrap(~year)
-  # ggsave(last_plot(),
-  #        file = paste0(dumpfile,"/", Sys.Date(),'-',fltnames_acomp[flt],'-acomps.png'),
-  #        width = 10, height = 6, unit = 'in',
-  #        dpi = 420 )
+  ggsave(last_plot(),
+         file = paste0(dumpfile,"/", Sys.Date(),'-',fltnames_acomp[flt],'-acomps.png'),
+         width = 10, height = 6, unit = 'in',
+         dpi = 420 )
   
   }
 

@@ -883,25 +883,20 @@ writeOM <- function(justPlots = FALSE,
   } ## end if all fixed
   
   # plot SURV selex ----
-  ## bring estimates out and rearrange
-  nsurvmod = length(df$selType_surv) ## bc we got selex for acomp flts too
-  
-  if(length(grep("log_srv_slx_pars", names(mappy))) >0 ){
-    Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
-    nfixedfleets <- length(Nas)/4
-    nsurvmod <- nsurvmod - nfixedfleets
-  }
-
-
-  
   ## if at least some were est:
   if( length(obj$par[grep('log_srv_slx_pars',names(obj$par))]) != 0 ){
-    
+    ## bring estimates out and rearrange
+    nsurvmod = length(df$selType_surv) ## bc we got selex for acomp flts too
+    if(length(grep("log_srv_slx_pars", names(mappy))) >0 ){
+      Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
+      nfixedfleets <- length(Nas)/4
+      nsurvmod <- nsurvmod - nfixedfleets
+    }
     ## use map to match input pars which were actually used
     inputSel <- array(exp(df$parms$log_srv_slx_pars),
                       dim = dim(df$parms$log_srv_slx_pars),
                       dimnames = dimnames(df$parms$log_srv_slx_pars))
-
+    
     map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
                         dim = c(length(df$selType_surv),2,max(df$srv_blks_size),2),
                         dimnames = dimnames(df$parms$log_srv_slx_pars))
@@ -914,107 +909,11 @@ writeOM <- function(justPlots = FALSE,
       map_srvslx[is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
       selP <- map_srvslx      
     }
-    
- 
-    
-    srv_sel_afsb <- array(NA, dim =  c(df$nage,
-                                   length(df$selType_surv),
-                                      2,
-                                      max(df$srv_blks_size)),
-                         dimnames = list(c(df$age),
-                                         c(dimnames(df$parms$log_srv_slx_pars)[[1]]),
-                                         c('Fem','Mal'),
-                                         c(dimnames(df$parms$log_srv_slx_pars)[[3]])))
-
-    for(surv_flt in 1:length(df$selType_surv)){
-      for(blk in 1:df$srv_blks_size[surv_flt]){
-        for(s in 1:2){
-          if(!is.na(map_srvslx[surv_flt,1,blk,s])){
-            srv_sel_afsb[,surv_flt,s,blk] <- getSelec2(sex = s,
-                                                      selP = selP,
-                                                      blk = blk,
-                                                      flt_idx = surv_flt,
-                                                      selType = df$selType_surv[surv_flt], 
-                                                      selShape = df$selShape_surv[surv_flt],
-                                                      fltType = 'surv')
-          } else if(is.na(map_srvslx[surv_flt,1,blk,s])){
-            srv_sel_afsb[,surv_flt,s,blk] <- getSelec2(sex = s,
-                                                  selP = inputSel,
-                                                  flt_idx = surv_flt,
-                                                  blk= blk,
-                                                  selType = df$selType_surv[surv_flt], 
-                                                  selShape = df$selShape_surv[surv_flt],
-                                                  fltType = 'surv')
-          }
-        }  ## end sex
-      } ## end blk
-    }## end surv fleet
-    
-    for(blk in 1:max(df$srv_blks_size)){
-      png(paste0(dumpfile,'/survey_selex_blk',blk,".png"),
-          height = 8, width = 6, unit = 'in', res = 420)
-      par(mfrow = c(3,2) )
-      for(flt in 1:length(df$selType_surv)){
-        ## if not in this block, skip
-        if(is.na(srv_sel_afsb[1,flt,1,blk])) next()
-        ## if fixed overwrite colors
-        if(is.na(map_srvslx[flt,1,blk,1])){
-          sexPal_temp = c('grey22','grey66')
-        } else{
-          sexPal_temp = sexPal
-        }
-        for(s in 1:2){
-          tmp <- srv_sel_afsb[,flt,s,blk]
-          if(s == 1) {
-            plot(tmp, 
-                          col = sexPal_temp[1], 
-                          type = 'l', 
-                          lwd = 2, 
-                          xlab = ifelse(df$selType_surv[flt] == 0,
-                                        'Age','Length'), 
-                          ylab = 'Selectivity',
-                          lty = 1,
-                          ylim = c(0,1), 
-                          main = paste0(dimnames(df$parms$log_srv_slx_pars)[[1]][flt],
-                                       " ", df$srv_blks[blk,flt]+1960),
-                          xlim = c(0,75),
-                          col.main  = c(survfltPal,rep('black',1))[flt])
-            text(x=10, y = 0.9, cex = 1.1,label = 
-                   paste0(ifelse(df$selType_surv[flt] == 0,
-                                 'Fem A','Fem L'),"50=", 
-                          round(selP[flt,1,blk,s],1),"\n",
-                          paste0(ifelse(df$selType_surv[flt] == 0,
-                                        'Fem A','Fem L'),"95=", 
-                                 round(selP[flt,2,blk,s],2))))
-            }
-          if(s == 2) {
-            text(x=10, y = 0.6, cex = 1.1,label = 
-                   paste0(ifelse(df$selType_surv[flt] == 0,
-                                 'Mal A','Mal L'),"50=", 
-                          round(selP[flt,1,blk,s],1),"\n",
-                          paste0(ifelse(df$selType_surv[flt] == 0,
-                                        'Mal A','Mal L'),"95=", 
-                                 round(selP[flt,2,blk,s],2))))
-            
-            lines(tmp, col = sexPal_temp[2],
-                           type = 'l', lty = 2, lwd = 2)
-          
-          }
-        } ## end sex
-                            # c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
-   
-          box(which = 'plot', lty = 'solid', 
-              col = survfltPal[flt],
-              # col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
-              lwd = 2)
-       
-          # seeddim = nestflts
-          # lines(bounds$lower type = 'v', col = sexPal[2])
-      } ## end flt
-      dev.off()
-    } ## end blks
-
   } else{ ## all were fixed
+    
+    map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
+                        dim = c(length(df$selType_surv),2,max(df$srv_blks_size),2),
+                        dimnames = dimnames(df$parms$log_srv_slx_pars))
     inputSel <- selP <- array(exp(df$parms$log_srv_slx_pars), dim = c(df$nfleets_surv+df$nfleets_acomp-(df$nsurvflts_acomp+df$nfishflts_acomp),2,
                                                                       max(df$srv_blks_size),2),
                               dimnames = dimnames(df$parms$log_srv_slx_pars))
@@ -1022,51 +921,140 @@ writeOM <- function(justPlots = FALSE,
     #                         dim = c(df$nfleets_surv+df$nfleets_acomp-4,2,max(df$srv_blks_size),2),
     #                         dimnames = dimnames(df$parms$log_srv_slx_pars))
     
-    srv_sel_afs <- array(NA, dim =  c(df$nage,length(df$selType_surv),2),
-                         dimnames = list(c(df$age),
-                                         c(dimnames(df$parms$log_srv_slx_pars)[[1]]),
-                                         c('Fem','Mal')))
-    for(s in 1:2){
-      for(surv_flt in 1:length(df$selType_surv)){
-        srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
-                                              selP = selP,
-                                              flt_idx = surv_flt,
-                                              selType = df$selType_surv[surv_flt], 
-                                              selShape = df$selShape_surv[surv_flt],
-                                              fltType = 'surv')
-        
-      } ## end surv fleet
-    } ## end sex
+    # srv_sel_afs <- array(NA, dim =  c(df$nage,length(df$selType_surv),2),
+    #                      dimnames = list(c(df$age),
+    #                                      c(dimnames(df$parms$log_srv_slx_pars)[[1]]),
+    #                                      c('Fem','Mal')))
+    # for(s in 1:2){
+    #   for(surv_flt in 1:length(df$selType_surv)){
+    #     srv_sel_afs[,surv_flt,s] <- getSelec2(sex = s,
+    #                                           selP = selP,
+    #                                           flt_idx = surv_flt,
+    #                                           selType = df$selType_surv[surv_flt], 
+    #                                           selShape = df$selShape_surv[surv_flt],
+    #                                           fltType = 'surv')
+    #     
+    # } ## end surv fleet
+    # } ## end sex
     
-    png(paste0(dumpfile,'/survey_selex.png'),
-        height = 8, width = 6, unit = 'in', res = 420)
-    par(mfrow = c(4,2) )
-    sexPal_temp = c('grey22','grey66')
-    for(flt in 1:length(df$selType_surv)){
-      for(s in 1:2){
-        tmp <- srv_sel_afs[,flt,s]
-        if(s == 1) plot(tmp, 
-                        col = sexPal_temp[1], 
-                        type = 'l', 
-                        lwd = 2, 
-                        xlab = ifelse(df$selType_surv[flt] == 0,
-                                      'Age','Length'), 
-                        ylab = 'Selectivity',
-                        lty = 1,
-                        ylim = c(0,1), 
-                        main = dimnames(df$parms$log_srv_slx_pars)[[1]][flt], xlim = c(0,75),
-                        col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
-        box(which = 'plot', lty = 'solid', 
-            col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
-            lwd = 2)
-        if(s == 2) lines(tmp, col = sexPal_temp[2], type = 'l', lty = 2, lwd = 2)
-      }
-    }
-    dev.off()
+    # png(paste0(dumpfile,'/survey_selex.png'),
+    #     height = 8, width = 6, unit = 'in', res = 420)
+    # par(mfrow = c(4,2) )
+    # sexPal_temp = c('grey22','grey66')
+    # for(flt in 1:length(df$selType_surv)){
+    #   for(s in 1:2){
+    #     tmp <- srv_sel_afs[,flt,s]
+    #     if(s == 1) plot(tmp, 
+    #                     col = sexPal_temp[1], 
+    #                     type = 'l', 
+    #                     lwd = 2, 
+    #                     xlab = ifelse(df$selType_surv[flt] == 0,
+    #                                   'Age','Length'), 
+    #                     ylab = 'Selectivity',
+    #                     lty = 1,
+    #                     ylim = c(0,1), 
+    #                     main = dimnames(df$parms$log_srv_slx_pars)[[1]][flt], xlim = c(0,75),
+    #                     col.main  = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
+    #     box(which = 'plot', lty = 'solid', 
+    #         col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
+    #         lwd = 2)
+    #     if(s == 2) lines(tmp, col = sexPal_temp[2], type = 'l', lty = 2, lwd = 2)
+    #   }
+    # }
+    # dev.off()
     
   } ## end if all fixed
+  srv_sel_afsb <- array(NA, dim =  c(df$nage,
+                                     length(df$selType_surv),
+                                     2,
+                                     max(df$srv_blks_size)),
+                        dimnames = list(c(df$age),
+                                        c(dimnames(df$parms$log_srv_slx_pars)[[1]]),
+                                        c('Fem','Mal'),
+                                        c(dimnames(df$parms$log_srv_slx_pars)[[3]])))
   
-
+  for(surv_flt in 1:length(df$selType_surv)){
+    for(blk in 1:df$srv_blks_size[surv_flt]){
+      for(s in 1:2){
+        if(!is.na(map_srvslx[surv_flt,1,blk,s])){
+          srv_sel_afsb[,surv_flt,s,blk] <- getSelec2(sex = s,
+                                                     selP = selP,
+                                                     blk = blk,
+                                                     flt_idx = surv_flt,
+                                                     selType = df$selType_surv[surv_flt], 
+                                                     selShape = df$selShape_surv[surv_flt],
+                                                     fltType = 'surv')
+        } else if(is.na(map_srvslx[surv_flt,1,blk,s])){
+          srv_sel_afsb[,surv_flt,s,blk] <- getSelec2(sex = s,
+                                                     selP = inputSel,
+                                                     flt_idx = surv_flt,
+                                                     blk= blk,
+                                                     selType = df$selType_surv[surv_flt], 
+                                                     selShape = df$selShape_surv[surv_flt],
+                                                     fltType = 'surv')
+        }
+      }  ## end sex
+    } ## end blk
+  }## end surv fleet
+  
+  for(blk in 1:max(df$srv_blks_size)){
+    png(paste0(dumpfile,'/survey_selex_blk',blk,".png"),
+        height = 8, width = 6, unit = 'in', res = 420)
+    par(mfrow = c(3,2) )
+    for(flt in 1:length(df$selType_surv)){
+      ## if not in this block, skip
+      if(is.na(srv_sel_afsb[1,flt,1,blk])) next()
+      ## if fixed overwrite colors
+      if(is.na(map_srvslx[flt,1,blk,1])){
+        sexPal_temp = c('grey22','grey66')
+      } else{
+        sexPal_temp = sexPal
+      }
+      for(s in 1:2){
+        tmp <- srv_sel_afsb[,flt,s,blk]
+        if(s == 1) {
+          plot(tmp, 
+               col = sexPal_temp[1], 
+               type = 'l', 
+               lwd = 2, 
+               xlab = ifelse(df$selType_surv[flt] == 0,
+                             'Age','Length'), 
+               ylab = 'Selectivity',
+               lty = 1,
+               ylim = c(0,1), 
+               main = paste0(dimnames(df$parms$log_srv_slx_pars)[[1]][flt],
+                             " ", df$srv_blks[blk,flt]+1960),
+               xlim = c(0,75),
+               col.main  = c(survfltPal,rep('black',1))[flt])
+          text(x=10, y = 0.9, cex = 1.1,label = 
+                 paste0(ifelse(df$selType_surv[flt] == 0,
+                               'Fem A','Fem L'),"50=", 
+                        round(selP[flt,1,blk,s],1),"\n",
+                        paste0(ifelse(df$selType_surv[flt] == 0,
+                                      'Fem A','Fem L'),"95=", 
+                               round(selP[flt,2,blk,s],2))))
+        }
+        if(s == 2) {
+          text(x=10, y = 0.6, cex = 1.1,label = 
+                 paste0(ifelse(df$selType_surv[flt] == 0,
+                               'Mal A','Mal L'),"50=", 
+                        round(selP[flt,1,blk,s],1),"\n",
+                        paste0(ifelse(df$selType_surv[flt] == 0,
+                                      'Mal A','Mal L'),"95=", 
+                               round(selP[flt,2,blk,s],2))))
+          
+          lines(tmp, col = sexPal_temp[2],
+                type = 'l', lty = 2, lwd = 2)
+          
+        }
+      } ## end sex
+      box(which = 'plot', lty = 'solid', 
+          col = survfltPal[flt],
+          lwd = 2)
+    } ## end flt
+    dev.off()
+  } ## end blks
+  
   
   
   

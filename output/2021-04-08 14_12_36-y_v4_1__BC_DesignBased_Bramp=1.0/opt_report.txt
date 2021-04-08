@@ -1,0 +1,36 @@
+$par
+      logR_0k       logR_0k       logR_0k       logR_0k        logq_f        logq_f        logq_f        logq_f 
+ 11.791262141  15.787798584  13.917099871  18.043108082  -5.362997329  -5.878029007 -15.000000000 -14.267447857 
+       logq_f      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ -8.782860709  -0.727647442  -0.748900904  -0.756881746  -0.752073681  -0.720929551  -0.675128740  -0.622381030 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ -0.560984793  -0.497083131  -0.440500690  -0.384192576  -0.319896862  -0.227825943  -0.111024033  -0.004616483 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+  0.070539976   0.175699087   0.310093499   0.391145723   1.800386332   0.382102035   0.234829486  -0.048516508 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ -0.350233445  -0.620235953  -0.875169541  -1.158824732  -1.402625358  -1.495247886  -1.394136690  -1.166794076 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ -0.818613256  -0.318690349   0.324150502   1.911431567  -0.092567995  -0.372121499  -0.558291275  -0.658237569 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ -0.694718297  -0.664958621  -0.467259028  -0.191825472  -0.315347163  -0.477748499  -0.367392059  -0.194841102 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ -0.085943622   0.022573081   0.088452329   3.563562325   0.087736795   0.090383620   0.032471250   0.003009159 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ -0.012642620  -0.007108361  -0.003490264  -0.003361017  -0.003506388 
+
+$objective
+[1] 177.3834
+
+$convergence
+[1] 1
+
+$iterations
+[1] 150
+
+$evaluations
+function gradient 
+     178      151 
+
+$message
+[1] "iteration limit reached without convergence (10)"
+

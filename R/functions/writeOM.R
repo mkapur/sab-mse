@@ -967,7 +967,7 @@ writeOM <- function(justPlots = FALSE,
     for(blk in 1:max(df$srv_blks_size)){
       png(paste0(dumpfile,'/survey_selex_blk',blk,".png"),
           height = 8, width = 6, unit = 'in', res = 420)
-      par(mfrow = c(4,2) )
+      par(mfrow = c(3,2) )
       for(flt in 1:length(df$selType_surv)){
         ## if not in this block, skip
         if(is.na(srv_sel_afsb[1,flt,1,blk])) next()
@@ -979,7 +979,8 @@ writeOM <- function(justPlots = FALSE,
         }
         for(s in 1:2){
           tmp <- srv_sel_afsb[,flt,s,blk]
-          if(s == 1) plot(tmp, 
+          if(s == 1) {
+            plot(tmp, 
                           col = sexPal_temp[1], 
                           type = 'l', 
                           lwd = 2, 
@@ -992,24 +993,38 @@ writeOM <- function(justPlots = FALSE,
                                        " ", df$srv_blks[blk,flt]+1960),
                           xlim = c(0,75),
                           col.main  = c(survfltPal,rep('black',1))[flt])
+            text(x=10, y = 0.9, cex = 1.1,label = 
+                   paste0(ifelse(df$selType_surv[flt] == 0,
+                                 'Fem A','Fem L'),"50=", 
+                          round(selP[flt,1,blk,s],1),"\n",
+                          paste0(ifelse(df$selType_surv[flt] == 0,
+                                        'Fem A','Fem L'),"95=", 
+                                 round(selP[flt,2,blk,s],2))))
+            }
+          if(s == 2) {
+            text(x=10, y = 0.6, cex = 1.1,label = 
+                   paste0(ifelse(df$selType_surv[flt] == 0,
+                                 'Mal A','Mal L'),"50=", 
+                          round(selP[flt,1,blk,s],1),"\n",
+                          paste0(ifelse(df$selType_surv[flt] == 0,
+                                        'Mal A','Mal L'),"95=", 
+                                 round(selP[flt,2,blk,s],2))))
+            
+            lines(tmp, col = sexPal_temp[2],
+                           type = 'l', lty = 2, lwd = 2)
+          
+          }
+        } ## end sex
                             # c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt])
-          text(x=60, y = 0.2, cex = 1.1,label = 
-                 paste0(ifelse(df$selType_surv[flt] == 0,
-                               'A','L'),"50=", 
-                        round(selP[flt,1,blk,s],1),"\n",
-                        paste0(ifelse(df$selType_surv[flt] == 0,
-                                      'A','L'),"95=", 
-                               round(selP[flt,2,blk,s],2))))
+   
           box(which = 'plot', lty = 'solid', 
               col = survfltPal[flt],
               # col = c(rep(mgmtPal[1],4), rep(mgmtPal[2],3),rep(mgmtPal[3],2))[flt], 
               lwd = 2)
-          if(s == 2) lines(tmp, col = sexPal_temp[2],
-                           type = 'l', lty = 2, lwd = 2)
+       
           # seeddim = nestflts
           # lines(bounds$lower type = 'v', col = sexPal[2])
-        }
-      }
+      } ## end flt
       dev.off()
     } ## end blks
 

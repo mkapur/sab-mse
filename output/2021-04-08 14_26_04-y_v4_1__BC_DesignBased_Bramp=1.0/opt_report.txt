@@ -1,0 +1,36 @@
+$par
+      logR_0k       logR_0k       logR_0k       logR_0k        logq_f        logq_f        logq_f        logq_f 
+ 1.645357e+01  0.000000e+00  1.636332e+01  1.848853e+01 -6.047509e+00 -6.864790e+00 -1.137144e+01 -1.500000e+01 
+       logq_f      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+-9.532674e+00 -6.081574e-01 -6.153279e-01 -6.056466e-01 -5.816845e-01 -5.367414e-01 -4.806300e-01 -4.180493e-01 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+-3.465738e-01 -2.667795e-01 -1.805387e-01 -9.219147e-02 -1.463677e-02  1.556609e-02  8.053168e-02  1.485227e-01 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ 1.424479e-01  9.035027e-02 -1.475820e-02  9.905515e-02  5.465750e-01  1.574446e+00  3.104992e-01  1.490502e-01 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+-1.727015e-01 -1.734028e-01  8.182910e-01 -2.650948e-01 -3.966300e-01 -5.279469e-01 -1.152470e+00 -4.516378e-01 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+-8.747944e-01 -6.389866e-01 -2.093717e+00 -1.868984e+00 -8.262660e-01  8.584660e-01 -1.707133e-01  2.429808e-01 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+-4.003535e-01 -3.613755e-01 -9.473100e-01 -7.768413e-01 -3.387391e-01  2.271277e-01 -2.577838e-01  8.349975e-02 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+ 3.601766e-01  5.193417e-01  3.724251e-01  2.185876e-01  3.490249e+00  5.448427e-02  1.865375e-02  9.119961e-04 
+     tildeR_y      tildeR_y      tildeR_y      tildeR_y      tildeR_y 
+-3.402531e-03 -1.423049e-03 -3.191757e-05  1.102687e-04  3.576022e-06 
+
+$objective
+[1] 170.3123
+
+$convergence
+[1] 0
+
+$iterations
+[1] 141
+
+$evaluations
+function gradient 
+     154      142 
+
+$message
+[1] "relative convergence (4)"
+

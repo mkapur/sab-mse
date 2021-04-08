@@ -42,11 +42,11 @@ mappy <-
                       "epsilon_tau",
                       "logpi_acomp",
                       "log_fsh_slx_pars",
-                      "log_srv_slx_pars",
+                      # "log_srv_slx_pars",
                       "mort_k"),
            fixFlt = c("all_fsh",
-                      "all_srv"))
-                      # colnames(df$srv_blks)[6] ))
+                      # "all_srv"))
+                      colnames(df$srv_blks)[2:5] ))
 
 # mappy$logh_k <- factor(c(NA,NA,2,3)) ##  fix WC regs
 # mappy$b_y <- factor(c(1,rep(NA,59))) ## enable estimation of year 1 b_y ## consider mirroring for these guys
@@ -80,19 +80,19 @@ system.time(opt <-nlminb(obj$par,
               lower = bounds$lower,
               upper = bounds$upper
               ))
-# 
-system.time(opt <-
-              TMBhelper::fit_tmb(
-                obj,
-                lower = bounds$lower,
-                upper = bounds$upper,
-                dll = dllUSE,
-                getHessian = FALSE,
-                getsd = FALSE,
-                control = list(eval.max = 1e6,
-                               iter.max = 1e6,
-                               rel.tol = 1e-4)
-              )$opt) ## estimate; can repeat for stability)
+
+# system.time(opt <-
+#               TMBhelper::fit_tmb(
+#                 obj,
+#                 lower = bounds$lower,
+#                 upper = bounds$upper,
+#                 dll = dllUSE,
+#                 getHessian = FALSE,
+#                 getsd = FALSE,
+#                 control = list(eval.max = 1e6,
+#                                iter.max = 1e6,
+#                                rel.tol = 1e-4)
+#               )$opt) ## estimate; can repeat for stability)
 
 
 # for (k in 1:2)  opt <- nlminb(obj$env$last.par.best, obj$fn, obj$gr) 

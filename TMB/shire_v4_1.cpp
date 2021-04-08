@@ -972,7 +972,7 @@ Type objective_function<Type>::operator() ()
                   acomp_yaf_temp(y,a,acomp_flt)*
                   fsh_slx_yafs(y,mla_yais(y,a,i,s),phi_ff_acomp(acomp_flt,0),s)*
                   phi_if_acomp(acomp_flt,i)*
-                  mla_yais(y,a,i,s)*
+                  // mla_yais(y,a,i,s)*
                   N_yais_mid(y,a,i,s)/  Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2));
                 break;
               } //end selType switch for comms

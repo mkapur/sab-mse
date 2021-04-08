@@ -452,7 +452,7 @@ writeOM <- function(justPlots = FALSE,
 
   # xmax = max( df$acomp_dims_yfs[,2,flt,][!is.na( df$acomp_dims_yfs[,2,flt,])])
 
-  ggplot(    plotacomp[[flt]] , aes(x = age, y = freq, fill = src, color = sex)) +
+  ggplot(    plotacomp[[flt]] , aes(x = age, y = freq, fill = src, color = sex, shape = src)) +
     theme_sleek() +
     geom_ribbon(data = subset(    plotacomp[[flt]] , sex == 'Fem' & src == 'OBS'), color = 'white',
                   aes(x=age,ymax=freq),ymin=0,alpha=0.3) +
@@ -464,15 +464,17 @@ writeOM <- function(justPlots = FALSE,
     # geom_line(lwd = 1.05,data = subset(plotacomp[[flt]] , sex == 'Mal'),
     #           aes(y = -freq), alpha = 0.5, color = 'grey22') +
     
-    # geom_point(lwd = 1.05, data = subset(    plotacomp[[flt]] , sex == 'Fem' & src == 'PRED'),
-    #            alpha = 0.5) +
-    # geom_point(lwd = 1.05,data = subset(    plotacomp[[flt]] , sex == 'Mal' & src == 'PRED'),
-    #            aes(y = -freq), alpha = 0.5) +
- 
-    scale_fill_manual(values = c('grey22','white'), labels = c('Observed','Predicted')) +
+    geom_point(lwd = 1.05, data = subset(    plotacomp[[flt]] , sex == 'Fem' & src == 'PRED'),
+               alpha = 0.5) +
+    geom_point(lwd = 1.05,data = subset(    plotacomp[[flt]] , sex == 'Mal' & src == 'PRED'),
+               aes(y = -freq), alpha = 0.5) +
+    
+    scale_shape_manual(name = 'Source', values = c(NA,19), labels = c('Observed','Predicted'))+
+    scale_fill_manual(name = 'Source',values = c('grey22',NA), labels = c('Observed','Predicted')) +
+    
     scale_color_manual(values = c('red','blue'), labels = c('Fem','Mal')) +
     scale_x_continuous(limits = c(0, xmax)) +
-    labs(color = 'Sex', fill = '')+
+    labs(color = 'Sex', fill = '', shape = '')+
     facet_wrap(~year)
   ggsave(last_plot(),
          file = paste0(dumpfile,"/", Sys.Date(),'-',fltnames_acomp[flt],'-acomps.png'),

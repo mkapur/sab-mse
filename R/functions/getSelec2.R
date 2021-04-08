@@ -34,7 +34,7 @@ getSelec2 <- function(sex, flt_idx, selP, selShape, selType,blk, fltType = 'fish
      rown <- which(rownames(temp_phi_if_surv) ==  dimnames(df$parms$log_srv_slx_pars)[[1]][flt_idx])
      i = which(temp_phi_if_surv[rown,]==1)[1]
    }
-    len = df$mla_yais[df$yRun,,i,sex]
+    len = df$mla_yais[59,,i,sex]
     if(selShape == -1){
       selec = 1
     } else if(selShape==0){

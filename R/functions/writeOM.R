@@ -899,9 +899,14 @@ writeOM <- function(justPlots = FALSE,
   # plot SURV selex ----
   ## bring estimates out and rearrange
   nsurvmod = length(df$selType_surv) ## bc we got selex for acomp flts too
-  Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
-  nfixedfleets <- length(Nas)/4
-  nsurvmod <- nsurvmod - nfixedfleets
+  
+  if(length(grep("log_srv_slx_pars", names(mappy))) >0 ){
+    Nas <- which(is.na(mappy[[grep("log_srv_slx_pars", names(mappy))]]))
+    nfixedfleets <- length(Nas)/4
+    nsurvmod <- nsurvmod - nfixedfleets
+  }
+
+
   
   ## if at least some were est:
   if( length(obj$par[grep('log_srv_slx_pars',names(obj$par))]) != 0 ){
@@ -914,9 +919,17 @@ writeOM <- function(justPlots = FALSE,
     map_srvslx <- array(as.numeric(mappy$log_srv_slx_pars), 
                         dim = c(length(df$selType_surv),2,max(df$srv_blks_size),2),
                         dimnames = dimnames(df$parms$log_srv_slx_pars))
+    
     ## replace non-fixed values with starting pars
-    map_srvslx[!is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
-    selP <- map_srvslx
+    if(nsurvmod < length(df$selType_surv) ){
+      map_srvslx[!is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
+      selP <- map_srvslx
+    } else{
+      map_srvslx[is.na(map_srvslx)] <-  array(as.numeric(exp(best[grep('log_srv_slx_pars',names(best))])))
+      selP <- map_srvslx      
+    }
+    
+ 
     
     srv_sel_afsb <- array(NA, dim =  c(df$nage,
                                    length(df$selType_surv),

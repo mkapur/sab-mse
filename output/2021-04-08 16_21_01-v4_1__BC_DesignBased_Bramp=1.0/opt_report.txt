@@ -1,0 +1,44 @@
+$par
+         logR_0k          logR_0k          logR_0k          logR_0k           logq_f           logq_f 
+      18.1975372       18.1975372       18.1975372       18.1975372       -0.6931472       -0.6931472 
+          logq_f           logq_f           logq_f         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y         tildeR_y 
+      -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472       -0.6931472 
+        tildeR_y         tildeR_y         tildeR_y log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+      -0.6931472       -0.6931472       -0.6931472        3.6888795        3.9120230        3.9754858 
+log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars log_srv_slx_pars 
+       4.1743873        3.6029509        3.9120230        3.8057065        4.1743873 
+
+$objective
+[1] Inf
+
+$convergence
+[1] 0
+
+$iterations
+[1] 1
+
+$evaluations
+function gradient 
+       2        1 
+
+$message
+[1] "relative convergence (4)"
+

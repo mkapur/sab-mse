@@ -142,10 +142,10 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
       #                       c('block',1:max(df$srv_blks_size)),c('Fem','Mal')))
       
       if(all(!is.na(map_srvslx['AK_VAST_W',,1,]))){
-        lwr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(35); 
+        lwr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(35); ## 40, 36
         upr.temp['AK_VAST_W',"p1",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(55); 
         
-        lwr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(35); 
+        lwr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(35); ## 53.28, 44.96
         upr.temp['AK_VAST_W',"p2",1:df$srv_blks_size[,'AK_VAST_W'],] <- log(55)
       }
       if(all(!is.na(map_srvslx['AK_VAST_E',,1,]))){
@@ -196,6 +196,16 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
         lwr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],'Fem'] <- log(40);
         upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(70)
       }
+      if(all(!is.na(map_srvslx['AK_GOA_SURV',,1,]))){
+        lwr.temp['AK_GOA_SURV',"p1",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(0);
+        upr.temp['AK_GOA_SURV',"p1",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(80)
+        
+        lwr.temp['AK_GOA_SURV',"p2",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(0);  
+        upr.temp['AK_GOA_SURV',"p2",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(80)
+      }
+      
+      
+      
       lower[names(lower) == 'log_srv_slx_pars'] <- lwr.temp[!is.na(lwr.temp)]
       upper[names(upper) == 'log_srv_slx_pars'] <- upr.temp[!is.na(upr.temp)]
       

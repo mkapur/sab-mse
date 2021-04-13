@@ -14,7 +14,7 @@ library(r4ss)
 library(here)
 library(ggsidekick)
 dllUSE = c('shire_v4_1')[1]
-TMB::compile(here("TMB",paste0(dllUSE,".cpp")), flags = "-Wno-ignored-attributes")
+# TMB::compile(here("TMB",paste0(dllUSE,".cpp")), flags = "-Wno-ignored-attributes")
 dyn.load(dynlib(here("TMB",dllUSE)))
 
 source(here("R","functions",'load_files_OM.R'))
@@ -40,7 +40,7 @@ mappy <-
                       # "tildeR_y",
                       "b_y",
                       "epsilon_tau",
-                      "logpi_acomp",
+                      # "logpi_acomp",
                       "log_fsh_slx_pars",
                       "log_srv_slx_pars",
                       "mort_k"),
@@ -61,6 +61,10 @@ system.time(obj <- MakeADFun(df,
                  checkParameterOrder = TRUE)) 
 
 system.time(rep1 <- obj$report());## one off caclulation using start pars
+rep1$srv_slx_yafs[,1,,1]
+rep1$Nsamp_acomp_yf ## these are huge leading to huge
+rep1$comm_acomp_yafs_pred[,20,1,1]
+rep1$surv_acomp_yafs_pred[,,2,1]
 
 # sim <- obj$simulate(par=obj$par, complete=TRUE) ; 
 # sim$comm_acomp_yafs_pred[77,20,1,1]
@@ -77,8 +81,8 @@ bounds <- boundPars(obj,
 system.time(opt <-nlminb(obj$par,
                          obj$fn,
                          obj$gr,
-              # lower = bounds$lower,
-              # upper = bounds$upper
+              lower = bounds$lower,
+              upper = bounds$upper
               ))
 
 # system.time(opt <-

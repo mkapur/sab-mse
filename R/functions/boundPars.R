@@ -35,6 +35,9 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
   
   lower[names(lower) == 'logq_f'] <- -15
   upper[names(upper) == 'logq_f'] <- 15
+  
+  lower[names(lower) == 'logpi_acomp'] <- -20
+  upper[names(upper) == 'logpi_acomp'] <- 7
   ## bounds on fsh slx ----
   
   ## brute force par locations; if mappy mirrors first ak fleets,
@@ -165,10 +168,10 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
         }
       } else{
         if(all(!is.na(map_srvslx['BC_OFFStd',,1,]))){
-          lwr.temp['BC_OFFStd',"p1",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(0); 
+          lwr.temp['BC_OFFStd',"p1",1:df$srv_blks_size[,'BC_OFFStd'],] <- 0; 
           upr.temp['BC_OFFStd',"p1",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(80)
           
-          lwr.temp['BC_OFFStd',"p2",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(0); 
+          lwr.temp['BC_OFFStd',"p2",1:df$srv_blks_size[,'BC_OFFStd'],] <- 0; 
           upr.temp['BC_OFFStd',"p2",1:df$srv_blks_size[,'BC_OFFStd'],] <- log(80)
         }
       }
@@ -197,10 +200,10 @@ boundPars <- function(obj, r0_lower = 10, boundSlx = c('fsh','srv')){
         upr.temp['WC_VAST',"p2",1:df$srv_blks_size[,'WC_VAST'],] <- log(70)
       }
       if(all(!is.na(map_srvslx['AK_GOA_SURV',,1,]))){
-        lwr.temp['AK_GOA_SURV',"p1",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(0);
+        lwr.temp['AK_GOA_SURV',"p1",1:df$srv_blks_size[,'AK_GOA_SURV'],] <-0;
         upr.temp['AK_GOA_SURV',"p1",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(80)
         
-        lwr.temp['AK_GOA_SURV',"p2",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(0);  
+        lwr.temp['AK_GOA_SURV',"p2",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- 0;  
         upr.temp['AK_GOA_SURV',"p2",1:df$srv_blks_size[,'AK_GOA_SURV'],] <- log(80)
       }
       

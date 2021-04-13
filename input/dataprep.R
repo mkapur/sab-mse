@@ -375,7 +375,7 @@ OM_agecomps_yafs[,2:31,'AK_FIX',] <- (akfixw + akfixe)/2
 #Age.pop is the estimate of numbers of fish after running through the age length key. 
 # -9 is a catch all for unassigned fish to round out the estimated abundance in that year. So your age comps
 # Age, Sex, Age.Pop/sum(Age.Pop) for that sex and year combination. 
-## for formatting purposes these are presnetly females only.
+## for formatting purposes these are presently females only.
 actemp <- merge(read.csv(here("input","raw_data","comps","GOA Age Composition Totals.csv")) %>%
                   select(Survey, Year, Sex, Age..years., Age.Pop),read.csv(here("input","raw_data","comps","GOA Age Composition Totals.csv")) %>%
                   select(Survey, Year, Sex, Age..years., Age.Pop) %>%

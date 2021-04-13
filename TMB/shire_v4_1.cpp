@@ -904,7 +904,8 @@ Type objective_function<Type>::operator() ()
     // std::cout << y << "\t" << "end surv_yf_pred" << "\n";
     
     // predicted age comps, given error
-    // KIM that in likelihoods we will use the acomp dims objected to only compare proper bins
+    // KIM that in likelihoods we will use the acomp dims to only use the right bins
+    // typically NSAMP is not really the numbers of individualls but something like the number of tows.
     for(int acomp_flt = 0;acomp_flt<(nfleets_acomp);acomp_flt++){
       // age 0
       acomp_yaf_temp(y,0,acomp_flt) = pnorm(age(0), age_error(phi_fm_acomp2(acomp_flt),0), age_error_SD(phi_fm_acomp2(acomp_flt),0));
@@ -1063,15 +1064,6 @@ Type objective_function<Type>::operator() ()
                 - lgamma(pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                 comm_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,3),s));
-              
-              ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
-                sum1(y)+
-                lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
-                lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
-                pi_acomp(acomp_flt)*
-                Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
-                sum2(y);
-              // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
             } else{
               sum2(y) += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                 acomp_yafs_obs(y,a,acomp_flt,s) +
@@ -1081,6 +1073,17 @@ Type objective_function<Type>::operator() ()
                 lgamma(pi_acomp(acomp_flt)*
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))*
                 surv_acomp_yafs_pred(y,a,phi_ff_acomp(acomp_flt,4),s));
+            } // end switch for comm or surv type
+            
+              ans_catchcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
+                sum1(y)+
+                // lgamma(pi_acomp(acomp_flt)*Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))-
+                // lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+
+                // pi_acomp(acomp_flt)*
+                // Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
+                sum2(y);
+              // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
+     
               
               ans_survcomp += lgamma(Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2))+1)-
                 sum1(y)+
@@ -1090,11 +1093,11 @@ Type objective_function<Type>::operator() ()
                 Nsamp_acomp_yf(y,phi_ff_acomp(acomp_flt,2)))+
                 sum2(y);
               // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
-            } // end switch for comm or surv type
+     
           } // end acomp flag
         } // end ages within dims
       } // end sex
-      std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
+      // std::cout << y << "\t" << acomp_flt << "\t sum1 = " <<  sum1  << "\n";
       // std::cout << y << "\t" << acomp_flt << "\t ans_catchcomp = " <<  ans_catchcomp  << "\n";
       // std::cout << y << "\t" << acomp_flt << "\t ans_survcomp = " <<  ans_survcomp  << "\n";
     } // end y in nyear
@@ -1140,8 +1143,8 @@ Type objective_function<Type>::operator() ()
     ans_SDR+
     ans_catch
     +ans_survey
-    // -ans_survcomp
-    -ans_catchcomp
+    -ans_survcomp
+    // -ans_catchcomp
     +ans_priors;//
     // Type ans = 0.0;
     // Report calculations
